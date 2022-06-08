@@ -26,7 +26,7 @@ from app.core.handler.execres import (
     AuthException,
     ValidException,
     AccessException,
-    ThirdException, RedisException, RegisterException)
+    ThirdException, RedisException, RegisterException, SystemException)
 from app.enums.statuscode import SysFailedCodeEnum
 from config import PikaAppConfig
 
@@ -80,6 +80,8 @@ def sync_db_session():
         raise redis_err
     except RegisterException as register_err:
         raise register_err
+    except SystemException as sys_err:
+        raise sys_err
     except Exception:
         session.rollback()
         raise DbExecuteException(
@@ -114,6 +116,8 @@ async def async_db_session() -> AsyncGenerator:
         raise redis_err
     except RegisterException as register_err:
         raise register_err
+    except SystemException as sys_err:
+        raise sys_err
     except Exception:
         await session.rollback()
         raise DbExecuteException(

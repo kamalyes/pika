@@ -9,12 +9,11 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from typing import Any
+from typing import List
 
 from hutools.core import MockHelper
 from hutools.time import Moment
 
-from app.core.handler.jsonres import PikaResponse
 from app.core.handler.logger import Log
 from app.core.notice.email import EmailHande
 from app.enums.dimkey import RedisKeyEnum
@@ -26,27 +25,56 @@ class Email(object):
     log = Log("Email")
 
     @staticmethod
-    async def send_verify_code(request: Any, addressee, app_name=GlobalVarEnum.APP_NAME):
-        auth_code_ = MockHelper.rand_sample(length=6)
-        redis_now_time = async_redis.time()[0]
-        auth_code_valid_time = ValidTimeEnum.AUTH_CODE_VALID_TIME
-        valid_time = redis_now_time + auth_code_valid_time
-        auth_verify_code = f"{RedisKeyEnum.AUTH_VERIFY_CODE}:{request.emp_no}"
-        async_redis.set(auth_verify_code, auth_code_, auth_code_valid_time)
+    async def register_succeed(emp_no: str, username: str, addressee: List, pwd_valid_time,
+                               app_name=GlobalVarEnum.APP_NAME):
+        """
+
+        Args:
+            emp_no:
+            username:
+            addressee:
+            pwd_valid_time:
+            app_name:
+
+        Returns:
+
+        """
+        redis_now_time = await async_redis.time()
         try:  # 若发送邮件异常则回收对应验证码
-            EmailHande.send_email(
-                content=EmailHande.get_security_code_template(
-                    request.user_desig,
-                    request.emp_no,
-                    auth_code_,
-                    Moment.timestamp_to_date(valid_time),
-                    Moment.timestamp_to_date(redis_now_time),
+            return EmailHande.send_email(
+                content=EmailHande.register_succeed_template(
+                    username,
+                    emp_no,
+                    addressee,
+                    pwd_valid_time,
+                    Moment.timestamp_to_date(list(redis_now_time)[0]),
                 ),
-                subject=f"{app_name}-获取验证码成功通知",
-                addressee=[addressee],
+                subject=f"{app_name}-注册成功通知",
+                addressee=addressee
             )
         except Exception as e:
-            async_redis.delele(auth_verify_code)
             raise e
-        else:
-            return PikaResponse.success(message=f'已成功发送验证码至邮箱，请查收')
+
+    @staticmethod
+    async def forget_password(emp_no: str, username: str, addressee: List, app_name=GlobalVarEnum.APP_NAME):
+        auth_code_ = MockHelper.rand_sample(length=6)
+        redis_now_time = await async_redis.time()
+        auth_code_valid_time = ValidTimeEnum.AUTH_CODE_VALID_TIME
+        valid_time = list(redis_now_time)[0] + auth_code_valid_time
+        auth_verify_code = f"{RedisKeyEnum.AUTH_VERIFY_CODE}:{emp_no}"
+        await async_redis.set(auth_verify_code, auth_code_, int(auth_code_valid_time))
+        try:  # 若发送邮件异常则回收对应验证码
+            return EmailHande.send_email(
+                content=EmailHande.get_security_code_template(
+                    username,
+                    emp_no,
+                    auth_code_,
+                    Moment.timestamp_to_date(valid_time),
+                    Moment.timestamp_to_date(int(valid_time - auth_code_valid_time)),
+                ),
+                subject=f"{app_name}-获取验证码成功通知",
+                addressee=addressee
+            )
+        except Exception as e:
+            await async_redis.delete(auth_verify_code)
+            raise e

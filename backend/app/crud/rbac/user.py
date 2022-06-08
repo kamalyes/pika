@@ -20,12 +20,14 @@ from hutools.time import Moment
 from sqlalchemy import or_, select, func, and_, update
 
 from app.core.handler.execres import AuthException, \
-    SystemException, ThirdException, RedisException, RegisterException
+    SystemException, ThirdException, RedisException, RegisterException, ValidException
 from app.core.handler.jsonres import PikaResponse
 from app.core.handler.logger import Log
 from app.crud.rbac import regex_register_str, client_ip
+from app.crud.rbac.email import Email
 from app.enums.dimkey import RedisKeyEnum
 from app.enums.gebruikersrol import RoleEnum
+from app.enums.operation import VerifyCodeEnum
 from app.enums.statuscode import SysFailedCodeEnum
 from app.enums.sysvar import GlobalVarEnum, ValidTimeEnum
 from app.enums.toast import PromptEnum
@@ -76,11 +78,15 @@ class UserDao(object):
                             email=register_model.email)
                 session.add(user)
             await session.refresh(user)
+            pwd_valid_time = GlobalVarEnum.PWD_VALID_TIME
             user_admin = UserAdmin(uid=user.id, emp_no=user.emp_no, is_activate=is_activate, password=pwd,
-                                   pwd_valid_time=GlobalVarEnum.PWD_VALID_TIME,
+                                   pwd_valid_time=pwd_valid_time,
                                    registration_at=Moment.get_now_time("%Y-%m-%d %H:%M:%S"),
                                    registration_ip=user_ip)
             session.add(user_admin)
+            await Email.register_succeed(emp_no=user.emp_no, username=register_model.username,
+                                         addressee=register_model.email,
+                                         pwd_valid_time=pwd_valid_time)
             return PikaResponse.success(result=user, message=PromptEnum.REGISTER_SUCCEED.value)
 
     @staticmethod
@@ -93,10 +99,10 @@ class UserDao(object):
         if str(kwargs["is_activate"]) == 0:
             raise AuthException(code=SysFailedCodeEnum.ACCOUNT_HAS_NOT_ACTIVATE, detail="账号未激活！")
         try:
-            skew_date = Moment.skew_date(kwargs["pwd_valid_time"], Moment.get_now_time("%Y-%m-%d %H:%M:%S"))
+            compare_time = Moment.compare_time(kwargs["pwd_valid_time"], Moment.get_now_time("%Y-%m-%d %H:%M:%S"))
         except Exception as e:
             raise SystemException(code=SysFailedCodeEnum.FIELD_TYPE_ERROR, detail=f"密码有效期对比失败！具体错误原因：{e}")
-        if skew_date is False:
+        if compare_time is False:
             raise AuthException(code=SysFailedCodeEnum.PASSWORD_HAS_EXPIRED, detail="密码已过期，请修改后进行登录！")
 
     @staticmethod
@@ -227,6 +233,7 @@ class UserDao(object):
             oauth2_login:
         Returns:
         """
+        await UserDao.has_dynamic_code(oauth2_login.dynamic_code)
         user_ip = await client_ip(request)
         async with async_db_session() as session:
             async with session.begin():
@@ -395,7 +402,7 @@ class UserDao(object):
         redis_dynamic_code_ = f"{RedisKeyEnum.DYNAMIC_CODE}:{dynamic_code}"
         has_key = await async_redis.exists(redis_dynamic_code_)
         if dynamic_code in GlobalVarEnum.VERIFY_CODE_WHITE_LIST or has_key:
-            return await async_redis.delele(redis_dynamic_code_)
+            return await async_redis.delete(redis_dynamic_code_)
         else:
             raise AuthException(code=SysFailedCodeEnum.DYNAMIC_ERROR, detail="验证码已过期或不存在")
 
@@ -412,9 +419,17 @@ class UserDao(object):
         redis_verify_code_ = f"{RedisKeyEnum.AUTH_VERIFY_CODE}:{verify_code}"
         has_key = await async_redis.exists(redis_verify_code_)
         if verify_code in GlobalVarEnum.VERIFY_CODE_WHITE_LIST or has_key:
-            return await async_redis.delele(redis_verify_code_)
+            return await async_redis.delete(redis_verify_code_)
         else:
             raise AuthException(code=SysFailedCodeEnum.DYNAMIC_ERROR, detail="验证码已过期或不存在")
+
+    @staticmethod
+    async def get_verifycode(request, user_info):
+        if request.models is VerifyCodeEnum.FORGET_PWD:
+            return await Email.forget_password(emp_no=user_info["emp_no"], username=user_info["username"],
+                                               addressee=user_info["email"])
+        else:
+            raise ValidException(detail="暂不支持该models！")
 
     @staticmethod
     async def verifycode_forget_pwd(request):

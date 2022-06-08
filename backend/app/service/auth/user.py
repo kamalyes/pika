@@ -21,7 +21,7 @@ from app.enums.gebruikersrol import RoleEnum
 from hutools.pagination import LimitOffsetPage, add_pagination
 from app.models import pagination_db
 from app.schema.user import RegisterModel, OAuth2LoginModel, ForgetPwdModel, OAuth2TokenModel, AddUserModel, \
-    ModifyUserInfoModel, QueryUserInModel, QueryUserOutModel
+    ModifyUserInfoModel, QueryUserInModel, QueryUserOutModel, GetVerifyCodeModel
 from app.service import Permission
 
 router = APIRouter()
@@ -77,8 +77,8 @@ async def get_dynamic_code(request: Request):
 
 
 @router.post("/auth/verifycode", name="发送验证码-邮件")
-async def send_verify_code(request: ForgetPwdModel, user_info=Depends(Permission())):
-    return await UserDao.verifycode_forget_pwd(request)
+async def send_verify_code(request: GetVerifyCodeModel, user_info=Depends(Permission())):
+    return await UserDao.get_verifycode(request, user_info)
 
 
 @router.post("/pwd/forget", name="忘记密码？通过（邮箱验证码/密保）重置密码")

@@ -13,7 +13,7 @@ from config import PikaAppConfig
 
 
 class RedisKeyEnum:
-    DYNAMIC_CODE = f"{PikaAppConfig.APP_NAME}:auth:dynamicCode"  # 前端展示的动态码
+    DYNAMIC_CODE = f"{PikaAppConfig.APP_NAME}:auth:dynamic_code"  # 前端展示的动态码
     AUTH_TOKEN = f"{PikaAppConfig.APP_NAME}:auth:token"  # Token
     ONLINE_USER = f"{PikaAppConfig.APP_NAME}:user:online"  # 用户信息
     AUTH_VERIFY_CODE = f"{PikaAppConfig.APP_NAME}:auth:verify_code"  # 鉴权验证码

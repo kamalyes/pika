@@ -146,6 +146,13 @@ class DelSecurityModel:
         self.security_id = security_id
 
 
+class GetVerifyCodeModel(BaseModel):
+    models: Optional[str] = Body(0, title="模式：（1：忘记密码）", max_length=ByteSizeEnum.LENGTH_03)
+
+    class Config:
+        orm_mode = True
+
+
 class ForgetPwdModel(BaseModel):
     alter_type: Optional[str] = Body("verifycode", title="验证方式：（verifycode：邮箱验证码, security：密保）")
     verify_code: Optional[str] = Body(None, title="验证码", max_length=ByteSizeEnum.LENGTH_06)

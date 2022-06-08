@@ -19,6 +19,7 @@ from hutools.time import Moment
 from jinja2 import Environment, FileSystemLoader
 
 from app.core.handler.execres import ThirdException, ValidException
+from app.core.handler.jsonres import PikaResponse
 from app.enums.statuscode import SysFailedCodeEnum
 from app.enums.sysvar import GlobalVarEnum
 from config import PikaAppConfig
@@ -41,12 +42,12 @@ class EmailHande:
 
     @staticmethod
     def register_succeed_template(
-            user_designation, emp_no, email, valid_time, send_time
+            username, emp_no, email, valid_time, send_time=Moment.get_now_time("%Y-%m-%d %H:%M:%S")
     ):
         """
         注册成功邮件模板
         Args:
-            user_designation:
+            username:
             emp_no:
             email:
             valid_time:
@@ -56,7 +57,7 @@ class EmailHande:
 
         """
         target_dict = {
-            "user_designation": user_designation,
+            "username": username,
             "emp_no": emp_no,
             "email": email,
             "valid_time": valid_time,
@@ -68,13 +69,14 @@ class EmailHande:
         return EmailHande.sub_template("register.html", target_dict)
 
     @staticmethod
-    def exc_events_template(user_designation, emp_no, events_key: int):
+    def exc_events_template(username, emp_no, events_key: int, send_time=Moment.get_now_time("%Y-%m-%d %H:%M:%S")):
         """
         异常操作事件邮件模板
         Args:
-            user_designation:
+            username:
             emp_no:
             events_key:  操作事件 0：密码泄露 1：爬虫机制 2：密码快过期需要修改
+            send_time:
 
         Returns:
 
@@ -92,21 +94,22 @@ class EmailHande:
         else:
             raise ValidException(detail="events_key 类型不对")
         target_dict = {
-            "user_designation": user_designation,
+            "username": username,
             "emp_no": emp_no,
             "event_content": event_content,
             "agreement": GlobalVarEnum.AGREE_MENT,
             "form": GlobalVarEnum.APP_NAME,
-            "send_time": Moment.get_now_time("%Y-%m-%d %H:%M:%S"),
+            "send_time": send_time,
         }
         return EmailHande.sub_template("event.html", target_dict)
 
     @staticmethod
-    def get_security_code_template(user_designation, emp_no, auth_code, valid_time, redis_time):
+    def get_security_code_template(username, emp_no, auth_code, valid_time,
+                                   redis_time=Moment.get_now_time("%Y-%m-%d %H:%M:%S")):
         """
         获取验证码模板
         Args:
-            user_designation:
+            username:
             emp_no:
             auth_code:
             valid_time:
@@ -116,7 +119,7 @@ class EmailHande:
 
         """
         target_dict = {
-            "user_designation": user_designation,
+            "username": username,
             "emp_no": emp_no,
             "auth_code": auth_code,
             "agreement": GlobalVarEnum.AGREE_MENT,
@@ -127,23 +130,23 @@ class EmailHande:
         return EmailHande.sub_template("authcode.html", target_dict)
 
     @staticmethod
-    def reset_ewd_template(user_designation, new_password, valid_time, send_time):
+    def reset_ewd_template(username, new_password, valid_time, send_time=Moment.get_now_time("%Y-%m-%d %H:%M:%S")):
         """
         重置密码邮件模板
         Args:
-            user_designation:
+            username:
             new_password:
             valid_time:
             send_time:
 
         Returns:
         Example::
-            >>> print(EmailHande.reset_ewd_template(user_designation="Test001",
+            >>> print(EmailHande.reset_ewd_template(username="Test001",
             ... new_password="1235678", valid_time=5555, send_time=55))
 
         """
         target_dict = {
-            "user_designation": user_designation,
+            "username": username,
             "new_password": new_password,
             "valid_time": valid_time,
             "agreement": GlobalVarEnum.AGREE_MENT,
@@ -155,12 +158,13 @@ class EmailHande:
 
     @staticmethod
     def reset_encrypt_template(
-            user_designation, security_question, encrypted_answers, valid_time, send_time
+            username, security_question, encrypted_answers, valid_time,
+            send_time=Moment.get_now_time("%Y-%m-%d %H:%M:%S")
     ):
         """
         重置密保邮件模板
         Args:
-            user_designation:
+            username:
             security_question:
             encrypted_answers:
             valid_time:
@@ -169,12 +173,12 @@ class EmailHande:
         Returns:
 
         Example::
-            >>> print(EmailHande.reset_encrypt_template(user_designation="Test001",
+            >>> print(EmailHande.reset_encrypt_template(username="Test001",
             ... security_question="密保问题？",encrypted_answers="密保答案？",
             ... valid_time=5555, send_time=55))
         """
         target_dict = {
-            "user_designation": user_designation,
+            "username": username,
             "security_question": security_question,
             "encrypted_answers": encrypted_answers,
             "valid_time": valid_time,
@@ -223,6 +227,8 @@ class EmailHande:
                 # email_cursor.set_debuglevel(1)
             except Exception as e:
                 raise ThirdException(code=SysFailedCodeEnum.SEND_EMAIL_ERROR, detail=f"发送邮件失败，错误原因：{e}")
+            else:
+                return True
             finally:
                 try:
                     email_cursor.quit()

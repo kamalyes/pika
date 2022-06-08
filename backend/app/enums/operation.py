@@ -9,9 +9,10 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
+from enum import IntEnum
 
 
-class OperationTypeEnum:
+class SqlOperationTypeEnum:
     ROOT = 1
     ONLY_INSERT = 2
     ONLY_DELETE = 3
@@ -19,3 +20,7 @@ class OperationTypeEnum:
     ONLY_SELECT = 5
     ONLY_SELECT_AND_INSERT = 6
     ONLY_SELECT_AND_UPDATE = 7
+
+
+class VerifyCodeEnum(IntEnum):
+    FORGET_PWD = 0
