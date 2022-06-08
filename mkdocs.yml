@@ -1,0 +1,29 @@
+site_name: Pika
+site_description: A next-generation ApiTest client for Python.
+site_url: https://www.python-pika.org/
+
+theme:
+    name: 'material'
+
+repo_name: pika
+repo_url: http://github.com/kamalyes/pika
+edit_uri: ""
+
+nav:
+    - index: 'index.md'
+
+markdown_extensions:
+  - admonition
+  - codehilite:
+      css_class: highlight
+
+extra:
+  search:
+    language: 'zh'
+
+extra_css:
+    - css/custom.css
+
+extra_javascript:
+  - 'js/chat.js'
+  - 'js/sidecar-1.5.0.js'

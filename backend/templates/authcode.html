@@ -1,0 +1,39 @@
+<div style="background-color:#ECECEC; padding: 35px;">
+    <table align="center" cellpadding="0"
+           style="width: 600px; margin: 0px auto; text-align: left; position: relative; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; font-size: 14px; font-family:微软雅黑, 黑体; line-height: 1.5; box-shadow: rgb(153, 153, 153) 0px 0px 5px; border-collapse: collapse; background-position: initial initial; background-repeat: initial initial;background:#fff;">
+        <tbody>
+        <tr>
+            <th style="height: 25px; line-height: 25px; padding: 15px 35px; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #42a3d3; background-color: #49bcff; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 0px; border-bottom-left-radius: 0px;"
+                valign="middle">
+            </th>
+        </tr>
+        <tr>
+            <td>
+                <div style="padding:25px 35px 40px; background-color:#fff;">
+                    <h2 style="margin: 5px 0px; ">
+                        <font color="#333333" style="line-height: 20px; ">
+                            <font size="4" style="line-height: 26px; ">
+                                尊敬的 <b><span style="color:#f60;font-size: 18px;">{{ user_desig }}</span></b></font>
+                        </font>
+                    </h2>
+                    <strong style="display:block;margin-bottom:18px;">
+                        您本次验证码：<span style="color:#f60;font-size: 26px">{{ auth_code }}</span>，如非本人操作，<span
+                            style="color:red;font-size: 18px">请忽略！</span>
+                    </strong>
+                    <p style="color:#747474;">
+                        注意：为了保证你的账户安全，此验证码将会在{{ valid_time }}后自动销毁，请尽快使用
+                    </p>
+                    <p align="right">{{ send_time }}</p>
+                    <div style="width:700px;margin:0 auto;">
+                        <div style="padding:10px 10px 0;border-top:1px solid #ccc;color:#747474;margin-bottom:20px;line-height:1.3em;font-size:12px;">
+                            <p>此为系统邮件，请勿回复<br>
+                                请保管好您的邮箱，避免账号被他人盗用，工作人员不会向你索取此验证码，请勿泄漏！</p>
+                            <p>©{{ agreement }} {{ form }}</p>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

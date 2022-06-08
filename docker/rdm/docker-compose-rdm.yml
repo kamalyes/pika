@@ -1,0 +1,65 @@
+version: "3.3"
+services:
+  redis:
+    image: redis:${REDIS_VERSION}
+    container_name: ${IMAGE_PREFIX}-redis
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 6s
+      timeout: 5s
+      retries: 10
+    ports:
+      - ${REDIS_PORT}:6379
+    volumes:
+      - ${BASE}/redis/conf/redis.conf:/etc/redis/redis.conf
+      - ${BASE}/redis/data:/data
+    command: redis-server /etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
+    networks:
+      - rdm
+    restart: always
+
+
+  mysql:
+    image: mysql:${MYSQL_VERSION}
+    container_name: ${IMAGE_PREFIX}-mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_PASSWORD}" ]
+      interval: 6s
+      timeout: 5s
+      retries: 10
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DB}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - 3307:3306
+    volumes:
+      - ${BASE}/mysql/conf/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ${BASE}/mysql/bin/mysql:/docker-entrypoint-initdb.d/
+      - ${BASE}/mysql/data:/var/lib/mysql
+    networks:
+      - rdm
+    restart: always
+
+  nginx:
+    image: nginx:${NGINX_VERSION}
+    container_name: ${IMAGE_PREFIX}-nginx
+    healthcheck:
+      test: [ "CMD", "nginx", "-v" ]
+      interval: 6s
+      timeout: 5s
+      retries: 10
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ${BASE}/nginx/www:/usr/share/nginx/html
+      - ${BASE}/data/nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+      - ${BASE}/data/nginx/logs:/var/log/nginx
+    networks:
+      - rdm
+    restart: always
+
+networks:
+  rdm:
+    external: true
+    driver: bridge

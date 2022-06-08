@@ -1,0 +1,235 @@
+# -*- coding:utf-8 -*-
+# !/usr/bin/env python 3.9.11
+"""
+@File    :  email.py
+@Time    :  2022/5/1 8:21 PM
+@Author  :  YuYanQing
+@Version :  1.0
+@Contact :  mryu168@163.com
+@License :  (C)Copyright 2022-2026
+@Desc    :  Email方式的消息推送
+"""
+
+import smtplib
+from email.header import Header
+from email.mime.text import MIMEText
+
+from hutools.core import RegEx
+from hutools.time import Moment
+from jinja2 import Environment, FileSystemLoader
+
+from app.core.handler.execres import ThirdException, ValidException
+from app.enums.statuscode import SysFailedCodeEnum
+from app.enums.sysvar import GlobalVarEnum
+from config import PikaAppConfig
+
+
+class EmailHande:
+    @staticmethod
+    def sub_template(file_name, target_dict):
+        """
+        替换文本值
+        Args:
+            file_name:
+            target_dict:
+
+        Returns:
+
+        """
+        loader = FileSystemLoader(searchpath=PikaAppConfig.TEMPLATE_PATH)
+        return Environment(loader=loader).get_template(file_name).render(target_dict)
+
+    @staticmethod
+    def register_succeed_template(
+            user_designation, emp_no, email, valid_time, send_time
+    ):
+        """
+        注册成功邮件模板
+        Args:
+            user_designation:
+            emp_no:
+            email:
+            valid_time:
+            send_time:
+
+        Returns:
+
+        """
+        target_dict = {
+            "user_designation": user_designation,
+            "emp_no": emp_no,
+            "email": email,
+            "valid_time": valid_time,
+            "agreement": GlobalVarEnum.AGREE_MENT,
+            "form": GlobalVarEnum.APP_NAME,
+            "send_time": send_time,
+            "root_email": GlobalVarEnum.PL_EMAIL,
+        }
+        return EmailHande.sub_template("register.html", target_dict)
+
+    @staticmethod
+    def exc_events_template(user_designation, emp_no, events_key: int):
+        """
+        异常操作事件邮件模板
+        Args:
+            user_designation:
+            emp_no:
+            events_key:  操作事件 0：密码泄露 1：爬虫机制 2：密码快过期需要修改
+
+        Returns:
+
+        """
+        if events_key == 0:
+            event_content = (
+                '系统检测到你的账号<span style="color:red;font-size: 26px">密码泄露</span>我们建议你尽快修改！'
+            )
+        elif events_key == 1:
+            event_content = '系统检测到你的账号<span style="color:red;font-size: 26px">正在使用爬虫伪造/Mock数据</span>已强制封禁24小时，也可以联系我们！'
+        elif events_key == 2:
+            event_content = (
+                '系统检测到你的账号<span color:#f60;font-size: 26px">密码即将过期</span>我们建议你尽快修改！'
+            )
+        else:
+            raise ValidException(detail="events_key 类型不对")
+        target_dict = {
+            "user_designation": user_designation,
+            "emp_no": emp_no,
+            "event_content": event_content,
+            "agreement": GlobalVarEnum.AGREE_MENT,
+            "form": GlobalVarEnum.APP_NAME,
+            "send_time": Moment.get_now_time("%Y-%m-%d %H:%M:%S"),
+        }
+        return EmailHande.sub_template("event.html", target_dict)
+
+    @staticmethod
+    def get_security_code_template(user_designation, emp_no, auth_code, valid_time, redis_time):
+        """
+        获取验证码模板
+        Args:
+            user_designation:
+            emp_no:
+            auth_code:
+            valid_time:
+            redis_time:
+
+        Returns:
+
+        """
+        target_dict = {
+            "user_designation": user_designation,
+            "emp_no": emp_no,
+            "auth_code": auth_code,
+            "agreement": GlobalVarEnum.AGREE_MENT,
+            "form": GlobalVarEnum.APP_NAME,
+            "valid_time": valid_time,
+            "send_time": redis_time,
+        }
+        return EmailHande.sub_template("authcode.html", target_dict)
+
+    @staticmethod
+    def reset_ewd_template(user_designation, new_password, valid_time, send_time):
+        """
+        重置密码邮件模板
+        Args:
+            user_designation:
+            new_password:
+            valid_time:
+            send_time:
+
+        Returns:
+        Example::
+            >>> print(EmailHande.reset_ewd_template(user_designation="Test001",
+            ... new_password="1235678", valid_time=5555, send_time=55))
+
+        """
+        target_dict = {
+            "user_designation": user_designation,
+            "new_password": new_password,
+            "valid_time": valid_time,
+            "agreement": GlobalVarEnum.AGREE_MENT,
+            "form": GlobalVarEnum.APP_NAME,
+            "send_time": send_time,
+            "root_email": GlobalVarEnum.PL_EMAIL,
+        }
+        return EmailHande.sub_template("reset_pwd.html", target_dict)
+
+    @staticmethod
+    def reset_encrypt_template(
+            user_designation, security_question, encrypted_answers, valid_time, send_time
+    ):
+        """
+        重置密保邮件模板
+        Args:
+            user_designation:
+            security_question:
+            encrypted_answers:
+            valid_time:
+            send_time:
+
+        Returns:
+
+        Example::
+            >>> print(EmailHande.reset_encrypt_template(user_designation="Test001",
+            ... security_question="密保问题？",encrypted_answers="密保答案？",
+            ... valid_time=5555, send_time=55))
+        """
+        target_dict = {
+            "user_designation": user_designation,
+            "security_question": security_question,
+            "encrypted_answers": encrypted_answers,
+            "valid_time": valid_time,
+            "agreement": GlobalVarEnum.AGREE_MENT,
+            "form": GlobalVarEnum.APP_NAME,
+            "send_time": send_time,
+            "root_email": GlobalVarEnum.PL_EMAIL,
+        }
+        return EmailHande.sub_template("reset_encrypted.html", target_dict)
+
+    @staticmethod
+    def send_email(
+            content,
+            subject="",
+            send_type="html",
+            title=GlobalVarEnum.APP_NAME,
+            addressee: list = [],
+    ):
+        """
+        发送邮件
+        Args:
+            content: 邮件主题
+            subject: 内容
+            send_type: 类型
+            title:
+            addressee: 接收方
+
+        Returns:
+
+        """
+        if RegEx.match_email(addressee) is not None:
+            email_smtp_host = PikaAppConfig.EMAIL_CONFIG["host"]
+            email_sender = PikaAppConfig.EMAIL_CONFIG["sender"]
+            email_password = PikaAppConfig.EMAIL_CONFIG["password"]
+            email_cursor = smtplib.SMTP_SSL(email_smtp_host, 465)
+            try:
+                email_data = MIMEText(content, send_type, "UTF-8")
+                email_data["Subject"] = Header(
+                    "developer" if subject == "" else subject, "UTF-8"
+                )
+                email_data["From"] = Header("%s<%s>" % (title, email_sender), "UTF-8")
+                email_data["To"] = Header(";".join(addressee), "UTF-8")
+                email_cursor.login(email_sender, email_password)  # 登录服务器
+                email_cursor.sendmail(email_sender, addressee, email_data.as_string())
+                # 开启 DEBUG
+                # email_cursor.set_debuglevel(1)
+            except Exception as e:
+                raise ThirdException(code=SysFailedCodeEnum.SEND_EMAIL_ERROR, detail=f"发送邮件失败，错误原因：{e}")
+            finally:
+                try:
+                    email_cursor.quit()
+                except Exception as e:
+                    raise ThirdException(
+                        code=SysFailedCodeEnum.EMAIL_CURSOR_ERROR,
+                        detail=f"关闭邮件游标失败，错误原因{e}",
+                    )
+        else:
+            raise ValidException(code=SysFailedCodeEnum.FIELD_TYPE_ERROR, detail="邮箱地址格式不正确")

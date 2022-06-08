@@ -1,0 +1,37 @@
+<div style="background-color:#ECECEC; padding: 35px;">
+    <table align="center" cellpadding="0"
+           style="width: 600px; margin: 0px auto; text-align: left; position: relative; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; font-size: 14px; font-family:微软雅黑, 黑体; line-height: 1.5; box-shadow: rgb(153, 153, 153) 0px 0px 5px; border-collapse: collapse; background-position: initial initial; background-repeat: initial initial;background:#fff;">
+        <tbody>
+        <tr>
+            <th style="height: 25px; line-height: 25px; padding: 15px 35px; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #42a3d3; background-color: #49bcff; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 0px; border-bottom-left-radius: 0px;"
+                valign="middle">
+            </th>
+        </tr>
+        <tr>
+            <td>
+                <div style="padding:25px 35px 40px; background-color:#fff;">
+                    <h2 style="margin: 5px 0px; ">
+                        <font color="#333333" style="line-height: 20px; ">
+                            <font size="4" style="line-height: 22px; ">
+                                尊敬的用户： <b><span style="color:#f60;font-size: 16px;">{{ user_desig }}</span></b></font>
+                        </font>
+                    </h2>
+                    <p>您的密保已重置<br>
+                        您的新密保问题：<b><span style="color:#f60;font-size: 16px;">{{ security_question }}</span></b><br>
+                        您的新密保答案：<b><span style="color:#f60;font-size: 16px;">{{ encrypted_answers }}</span></b><br>
+                        当您在使用本网站时，遵守当地法律法规。<br>
+                        如果您有什么疑问可以联系管理员，Email: {{ root_email }}</p>
+                    <p align="right">{{ send_time }}</p>
+                    <div style="width:700px;margin:0 auto;">
+                        <div style="padding:10px 10px 0;border-top:1px solid #ccc;color:#747474;margin-bottom:20px;line-height:1.3em;font-size:12px;">
+                            <p>此为系统邮件，请勿回复<br>
+                                请保管好您的邮箱，避免账号被他人盗用，工作人员不会向你索取密保问题或密保答案，请勿泄漏！</p>
+                            <p>©{{ agreement }} {{ form }}</p>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
