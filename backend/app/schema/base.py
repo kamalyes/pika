@@ -12,7 +12,7 @@
 from datetime import datetime
 from typing import Optional
 
-from fastapi import Query, Form
+from fastapi import Query, Form, Body
 from hutools.time import Moment
 from pydantic import BaseModel
 
@@ -43,18 +43,44 @@ class PikaBaseModel(object):
         raise NotImplementedError
 
 
-class PikaQueryModel(BaseModel):
-    id: Optional[str] = Form(None, title="id")
+class PikaOnlyIdModel(BaseModel):
+    id: Optional[int] = Body(0, title="id")
+
+
+class PikaOnlyNameModel(BaseModel):
+    name: Optional[str] = Body(..., title="角色名称", min_length=2, max_length=ByteSizeEnum.LENGTH_255),
+
+
+class PikaOnlyIdsModel(BaseModel):
+    ids: Optional[str] = Body(..., title="ids", max_length=ByteSizeEnum.LENGTH_3000)
+
+
+class PikaOnlyDescModel(BaseModel):
+    description: Optional[str] = Body(None, title="备注信息", max_length=ByteSizeEnum.LENGTH_255)
+
+
+class PikaOnlyUsableModel(BaseModel):
+    is_usable: Optional[str] = Query("1", title="是否可用 1：启用，0：禁用", max_length=ByteSizeEnum.LENGTH_20)
+
+
+class PikaOnlyDelModel(BaseModel):
+    is_delete: Optional[str] = Query("0", title="是否被删除 1：已删除，0：未删除", max_length=ByteSizeEnum.LENGTH_20)
+
+
+class PikaLargeEditModel(PikaOnlyIdModel, PikaOnlyDescModel, PikaOnlyUsableModel, PikaOnlyDelModel):
+    pass
+
+
+class PikaQueryModel(PikaOnlyIdModel):
     create_emp_no: Optional[str] = Query(None, title="创建者员工编号", max_length=ByteSizeEnum.LENGTH_20)
     update_emp_no: Optional[str] = Query(None, title="修改者员工编号", max_length=ByteSizeEnum.LENGTH_20)
-    create_time: Optional[datetime] = Query(Moment.skew_date(days=-1), title="创建时间")
-    update_time: Optional[datetime] = Query(Moment.skew_date(hours=1), title="更新时间")
+    create_time: Optional[datetime] = Query(Moment.skew_date(days=-3), title="创建时间")
+    update_time: Optional[datetime] = Query(Moment.skew_date(minutes=15), title="更新时间")
 
 
-class PikaDeleteModel:
-    def __init__(self, ids: Optional[str] = Form(None, title="ids")):
-        self.ids = ids
+class PikaDeleteModel(PikaOnlyIdsModel):
+    pass
 
 
 class PikaQueryTypeModel(BaseModel):
-    query_type: str = Form("0", title="查询方式：0：全部，1：条件查询", max_length=ByteSizeEnum.LENGTH_255)
+    query_type: Optional[str] = Form("0", title="查询方式：0：全部，1：条件查询", max_length=ByteSizeEnum.LENGTH_255)

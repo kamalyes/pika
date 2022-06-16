@@ -11,11 +11,8 @@
 """
 from hutools.core import RegEx
 
-from app.core.handler.execres import ValidException, AuthException
-from app.enums.dimkey import RedisKeyEnum
+from app.core.handler.execres import ValidException
 from app.enums.statuscode import SysFailedCodeEnum
-from app.enums.sysvar import GlobalVarEnum
-from app.models import async_redis
 
 
 async def regex_register_str(email, gender=None, mobile=None):

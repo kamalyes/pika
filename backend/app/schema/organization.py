@@ -15,16 +15,12 @@ from fastapi import Body, Query
 from pydantic import BaseModel
 
 from app.enums.bytesize import ByteSizeEnum
-from app.schema.base import PikaDeleteModel, PikaQueryModel
+from app.schema.base import PikaDeleteModel, PikaQueryModel, PikaLargeEditModel
 
 
-class EditUserGroupModel(BaseModel):
+class EditUserGroupModel(PikaLargeEditModel):
     group_id: int = Body(0, title="用户组id")
-    group_name: str = Body(..., title="用户组名称", min_length=2, max_length=ByteSizeEnum.LENGTH_255)
-    description: str = Body(None, title="备注信息", max_length=ByteSizeEnum.LENGTH_255)
-    is_enabled: int = Body(1, title="禁用/启用 1：启用、0：禁用")
-    create_emp_no: Optional[str] = Body(None, title="创建者员工编号", max_length=ByteSizeEnum.LENGTH_20)
-    update_emp_no: Optional[str] = Body(None, title="修改者员工编号", max_length=ByteSizeEnum.LENGTH_20)
+    group_name: Optional[str] = Body(..., title="用户组名称", min_length=2, max_length=ByteSizeEnum.LENGTH_255)
 
     class Config:
         orm_mode = True
@@ -37,8 +33,8 @@ class DelUserGroupModel(PikaDeleteModel):
 class EditDeptModel(BaseModel):
     dept_id: int = Body(0, title="部门id")
     group_id: int = Body(..., title="用户组id")
-    dept_name: str = Body(..., title="部门名称", min_length=2, max_length=ByteSizeEnum.LENGTH_255)
-    description: str = Body(None, title="备注信息", max_length=ByteSizeEnum.LENGTH_255)
+    dept_name: Optional[str] = Body(..., title="部门名称", min_length=2, max_length=ByteSizeEnum.LENGTH_255)
+    description: Optional[str] = Body(None, title="备注信息", max_length=ByteSizeEnum.LENGTH_255)
     is_enabled: int = Body(1, title="禁用/启用 1：启用、0：禁用")
 
     class Config:
@@ -53,7 +49,7 @@ class EditDeptRelModel(BaseModel):
     rel_id: Optional[int] = Body(0, title="应用id")
     dept_id: int = Body(..., title="部门id")
     emp_no: Optional[str] = Body(..., title="员工编号", max_length=ByteSizeEnum.LENGTH_20)
-    description: str = Body(None, title="备注信息", max_length=ByteSizeEnum.LENGTH_255)
+    description: Optional[str] = Body(None, title="备注信息", max_length=ByteSizeEnum.LENGTH_255)
     create_emp_no: Optional[str] = Body(None, title="创建者员工编号", max_length=ByteSizeEnum.LENGTH_20)
     update_emp_no: Optional[str] = Body(None, title="修改者员工编号", max_length=ByteSizeEnum.LENGTH_20)
 

@@ -7,10 +7,11 @@
 # Desc: 
 # Date： 2022/1/21 13:16 
 """
+import time
+
+import pymysql
 import requests
 from bs4 import BeautifulSoup
-import pymysql
-import time
 
 
 class Administrative(object):

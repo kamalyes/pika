@@ -13,10 +13,10 @@ from sqlalchemy import Column, String
 
 from app.enums.bytesize import ByteSizeEnum
 from app.enums.sysvar import GlobalVarEnum
-from app.models.basic import PikaLargeBase
+from app.models.basic import PikaNormBase
 
 
-class SensitiveWord(PikaLargeBase):
+class SensitiveWord(PikaNormBase):
     __tablename__ = f"{GlobalVarEnum.APP_NAME_LOWER}_sensitive_word"
     __table_args__ = {"comment": "敏感词库"}
     name = Column(String(ByteSizeEnum.LENGTH_64), comment="名词", nullable=False)

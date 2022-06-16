@@ -11,17 +11,16 @@
 """
 
 from fastapi import status
-from hutools.limiter import RateLimitException
 
 from app.enums.statuscode import SysFailedCodeEnum
 
 
 class ValidException(Exception):
     def __init__(
-        self,
-        code: int = 422,
-        status_code: int = status.HTTP_422_UNPROCESSABLE_ENTITY,
-        detail: str = "Parameter effect error",
+            self,
+            code: int = 422,
+            status_code: int = status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail: str = "Parameter effect error",
     ):
         self.code = code
         self.detail = detail
@@ -30,10 +29,10 @@ class ValidException(Exception):
 
 class RegisterException(Exception):
     def __init__(
-        self,
-        code: int = 500,
-        detail: str = "Register failed",
-        status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
+            self,
+            code: int = 500,
+            detail: str = "Register failed",
+            status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
     ):
         self.code = code
         self.detail = detail
@@ -42,10 +41,10 @@ class RegisterException(Exception):
 
 class LoginException(Exception):
     def __init__(
-        self,
-        code: int = 500,
-        detail: str = "Login failed",
-        status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
+            self,
+            code: int = 500,
+            detail: str = "Login failed",
+            status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
     ):
         self.code = code
         self.detail = detail
@@ -54,10 +53,10 @@ class LoginException(Exception):
 
 class AuthException(Exception):
     def __init__(
-        self,
-        code: int = 401,
-        detail: str = "Authentication failed",
-        status_code: int = status.HTTP_401_UNAUTHORIZED,
+            self,
+            code: int = 401,
+            detail: str = "Authentication failed",
+            status_code: int = status.HTTP_401_UNAUTHORIZED,
     ):
         self.code = code
         self.detail = detail
@@ -66,10 +65,10 @@ class AuthException(Exception):
 
 class TokenException(Exception):
     def __init__(
-        self,
-        code: int = 401,
-        detail: str = "Token failed",
-        status_code: int = status.HTTP_401_UNAUTHORIZED,
+            self,
+            code: int = 401,
+            detail: str = "Token failed",
+            status_code: int = status.HTTP_401_UNAUTHORIZED,
     ):
         self.code = code
         self.detail = detail
@@ -78,10 +77,10 @@ class TokenException(Exception):
 
 class AccessException(Exception):
     def __init__(
-        self,
-        code: int = 403,
-        detail: str = "Access failed",
-        status_code: int = status.HTTP_403_FORBIDDEN,
+            self,
+            code: int = 403,
+            detail: str = "Access failed",
+            status_code: int = status.HTTP_403_FORBIDDEN,
     ):
         self.code = code
         self.detail = detail
@@ -90,10 +89,10 @@ class AccessException(Exception):
 
 class OperationException(Exception):
     def __init__(
-        self,
-        code: int = 400,
-        detail: str = "Operation failed",
-        status_code: int = status.HTTP_400_BAD_REQUEST,
+            self,
+            code: int = 400,
+            detail: str = "Operation failed",
+            status_code: int = status.HTTP_400_BAD_REQUEST,
     ):
         self.code = code
         self.detail = detail
@@ -102,10 +101,10 @@ class OperationException(Exception):
 
 class ThirdException(Exception):
     def __init__(
-        self,
-        code: int = 500,
-        detail: str = "Third Service Exception",
-        status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
+            self,
+            code: int = 500,
+            detail: str = "Third Service Exception",
+            status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
     ):
         self.code = code
         self.detail = detail
@@ -114,10 +113,10 @@ class ThirdException(Exception):
 
 class DbExecuteException(Exception):
     def __init__(
-        self,
-        code: int = 500,
-        detail: str = "Database operation failed",
-        status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
+            self,
+            code: int = 500,
+            detail: str = "Database operation failed",
+            status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
     ):
         self.code = code
         self.detail = detail
@@ -126,10 +125,10 @@ class DbExecuteException(Exception):
 
 class RedisException(Exception):
     def __init__(
-        self,
-        code: int = SysFailedCodeEnum.REDIS_ERROR,
-        detail: str = "Redis operation failed",
-        status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
+            self,
+            code: int = SysFailedCodeEnum.REDIS_ERROR,
+            detail: str = "Redis operation failed",
+            status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
     ):
         self.code = code
         self.detail = detail
@@ -138,10 +137,10 @@ class RedisException(Exception):
 
 class SystemException(Exception):
     def __init__(
-        self,
-        code: int = 500,
-        detail: str = "Operation System Exception",
-        status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
+            self,
+            code: int = 500,
+            detail: str = "Operation System Exception",
+            status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
     ):
         self.code = code
         self.detail = detail

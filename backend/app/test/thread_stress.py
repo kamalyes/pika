@@ -9,15 +9,16 @@
 """
 import os
 import re
+import threading
+import time
 import webbrowser
 
 import psutil
-import requests
-import threading, time
 import pyecharts.options as opts
+import requests
 import xlwt
-from pyecharts.charts import Line
 from iutility.DateUtils import Moment
+from pyecharts.charts import Line
 from pyecharts.commons.utils import JsCode
 
 
@@ -131,58 +132,58 @@ class MyThread:
             Line(init_opts=opts.InitOpts(bg_color=JsCode(background_color_js)))
                 .add_xaxis(xaxis_data=x_data)
                 .add_yaxis(
-                    series_name=title,
-                    y_axis=y_data,
-                    is_smooth=True,
-                    is_symbol_show=True,
-                    symbol="circle",
-                    symbol_size=6,
-                    linestyle_opts=opts.LineStyleOpts(color="#fff"),
-                    label_opts=opts.LabelOpts(is_show=True, position="top", color="white"),
-                    itemstyle_opts=opts.ItemStyleOpts(
-                            color="red", border_color="#fff", border_width=3
-                    ),
-                    tooltip_opts=opts.TooltipOpts(is_show=False),
-                    areastyle_opts=opts.AreaStyleOpts(color=JsCode(area_color_js), opacity=1),
+                series_name=title,
+                y_axis=y_data,
+                is_smooth=True,
+                is_symbol_show=True,
+                symbol="circle",
+                symbol_size=6,
+                linestyle_opts=opts.LineStyleOpts(color="#fff"),
+                label_opts=opts.LabelOpts(is_show=True, position="top", color="white"),
+                itemstyle_opts=opts.ItemStyleOpts(
+                    color="red", border_color="#fff", border_width=3
+                ),
+                tooltip_opts=opts.TooltipOpts(is_show=False),
+                areastyle_opts=opts.AreaStyleOpts(color=JsCode(area_color_js), opacity=1),
             )
                 .set_global_opts(
-                    title_opts=opts.TitleOpts(
-                            title=title,
-                            pos_bottom="5%",
-                            pos_left="center",
-                            title_textstyle_opts=opts.TextStyleOpts(color="#fff", font_size=16),
+                title_opts=opts.TitleOpts(
+                    title=title,
+                    pos_bottom="5%",
+                    pos_left="center",
+                    title_textstyle_opts=opts.TextStyleOpts(color="#fff", font_size=16),
+                ),
+                xaxis_opts=opts.AxisOpts(
+                    type_="category",
+                    boundary_gap=False,
+                    axislabel_opts=opts.LabelOpts(margin=30, color="#ffffff63"),
+                    axisline_opts=opts.AxisLineOpts(is_show=False),
+                    axistick_opts=opts.AxisTickOpts(
+                        is_show=True,
+                        length=25,
+                        linestyle_opts=opts.LineStyleOpts(color="#ffffff1f"),
                     ),
-                    xaxis_opts=opts.AxisOpts(
-                            type_="category",
-                            boundary_gap=False,
-                            axislabel_opts=opts.LabelOpts(margin=30, color="#ffffff63"),
-                            axisline_opts=opts.AxisLineOpts(is_show=False),
-                            axistick_opts=opts.AxisTickOpts(
-                                    is_show=True,
-                                    length=25,
-                                    linestyle_opts=opts.LineStyleOpts(color="#ffffff1f"),
-                            ),
-                            splitline_opts=opts.SplitLineOpts(
-                                    is_show=True, linestyle_opts=opts.LineStyleOpts(color="#ffffff1f")
-                            ),
+                    splitline_opts=opts.SplitLineOpts(
+                        is_show=True, linestyle_opts=opts.LineStyleOpts(color="#ffffff1f")
                     ),
-                    yaxis_opts=opts.AxisOpts(
-                            type_="value",
-                            position="right",
-                            axislabel_opts=opts.LabelOpts(margin=20, color="#ffffff63"),
-                            axisline_opts=opts.AxisLineOpts(
-                                    linestyle_opts=opts.LineStyleOpts(width=2, color="#fff")
-                            ),
-                            axistick_opts=opts.AxisTickOpts(
-                                    is_show=True,
-                                    length=15,
-                                    linestyle_opts=opts.LineStyleOpts(color="#ffffff1f"),
-                            ),
-                            splitline_opts=opts.SplitLineOpts(
-                                    is_show=True, linestyle_opts=opts.LineStyleOpts(color="#ffffff1f")
-                            ),
+                ),
+                yaxis_opts=opts.AxisOpts(
+                    type_="value",
+                    position="right",
+                    axislabel_opts=opts.LabelOpts(margin=20, color="#ffffff63"),
+                    axisline_opts=opts.AxisLineOpts(
+                        linestyle_opts=opts.LineStyleOpts(width=2, color="#fff")
                     ),
-                    legend_opts=opts.LegendOpts(is_show=False),
+                    axistick_opts=opts.AxisTickOpts(
+                        is_show=True,
+                        length=15,
+                        linestyle_opts=opts.LineStyleOpts(color="#ffffff1f"),
+                    ),
+                    splitline_opts=opts.SplitLineOpts(
+                        is_show=True, linestyle_opts=opts.LineStyleOpts(color="#ffffff1f")
+                    ),
+                ),
+                legend_opts=opts.LegendOpts(is_show=False),
             )
                 .render(f"{title}.html")
         )
@@ -207,9 +208,9 @@ class MyThread:
         xlwt.add_palette_colour("custom_colour3", 0x25)
         new_workbook.set_colour_RGB(0x23, 149, 179, 215)
         style_title = xlwt.easyxf(
-                'font:bold on,name Arial;align:wrap on;borders:left thin,right thin,top thin,bottom thin;pattern:pattern solid,fore_colour orange')
+            'font:bold on,name Arial;align:wrap on;borders:left thin,right thin,top thin,bottom thin;pattern:pattern solid,fore_colour orange')
         style_item = xlwt.easyxf(
-                'font:name Times New Roman;align:wrap on,vert center;borders:left thin,right thin,top thin,bottom thin')
+            'font:name Times New Roman;align:wrap on,vert center;borders:left thin,right thin,top thin,bottom thin')
         for i in range(0, len(list_names)):
             sheet1.write(0, i, list_names[i], style_title)
         k = 0

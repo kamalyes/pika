@@ -1,10 +1,10 @@
 # 数据库校验- mysql
 database:
-  host: '10.1.1.255'
-  port: 3306
+  host: 'localhost'
+  port: 3307
   user: 'root'
   # 不用''会被解析成int类型数据
-  password: ''
+  password: 'PassWord@MySql123'
   name: 'pika'
   charset: utf8mb4
 
@@ -24,9 +24,9 @@ ssh_server:
 
 # Redis配置
 redis:
-  host: '10.1.1.255'
-  port: 6979
-  auth: ''
+  host: 'localhost'
+  port: 6379
+  auth: 'PassWord@Redis123'
   encoding: "utf-8"
   index: 0
   decode_responses: True  # 获取中文数据可以直接 decode python unicode

@@ -34,10 +34,12 @@ from app.core.handler.execres import (
 from app.core.handler.jsonres import PikaResponse
 from app.enums.sysvar import GlobalVarEnum
 from app.models import async_redis, async_create_table
-from app.service.auth import kerberos_router
-from app.service.auth import menus_router
-from app.service.auth import organization_router
-from app.service.auth import user_router
+from app.service.rbac import access_router
+from app.service.rbac import kerberos_router
+from app.service.rbac import menus_router
+from app.service.rbac import organization_router
+from app.service.rbac import roles_router
+from app.service.rbac import user_router
 from config import InterceptHandler, PikaAppConfig
 
 logger = InterceptHandler.init_logging()
@@ -53,13 +55,13 @@ class PikaFastApi:
         try:
             body = await request.json()
             logger.bind(payload=body, name=None).debug("request_json: ")
-        except:
+        except Exception as e:
             try:
                 body = await request.body()
                 if len(body) != 0:
                     # 有请求体，记录日志
                     logger.bind(payload=body, name=None).debug(body)
-            except:
+            except Exception as e:
                 # 忽略文件上传类型的数据
                 pass
 
@@ -268,7 +270,13 @@ class PikaFastApi:
         pika.include_router(kerberos_router, prefix="/kerberos", tags=["密保问题"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
-        pika.include_router(menus_router, prefix="/access", tags=["权限控制"],
+        pika.include_router(menus_router, prefix="/access", tags=["菜单配置"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+        pika.include_router(roles_router, prefix="/access", tags=["角色配置"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+        pika.include_router(access_router, prefix="/access", tags=["api活动控制"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
         pika.include_router(organization_router, prefix="/org", tags=["组织"],

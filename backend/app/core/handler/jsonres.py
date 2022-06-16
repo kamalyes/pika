@@ -36,11 +36,11 @@ class PikaResponse:
 
     @staticmethod
     def success(
-        *,
-        code: Union[int, str] = status.HTTP_200_OK,
-        status_code: Union[int, str] = status.HTTP_200_OK,
-        result: Union[list, dict, str] = None,
-        message: str = "Success",
+            *,
+            code: Union[int, str] = status.HTTP_200_OK,
+            status_code: Union[int, str] = status.HTTP_200_OK,
+            result: Union[list, dict, str] = None,
+            message: str = "Success",
     ) -> Response:
         """
         响应成功
@@ -66,13 +66,13 @@ class PikaResponse:
 
     @staticmethod
     def success_with_size(
-        *,
-        code: Union[int, str] = status.HTTP_200_OK,
-        status_code: Union[int, str] = status.HTTP_200_OK,
-        result: Union[list, dict, str] = None,
-        total: Union[list, dict, str] = None,
-        message: str = "Success",
-        x_cookies=None,
+            *,
+            code: Union[int, str] = status.HTTP_200_OK,
+            status_code: Union[int, str] = status.HTTP_200_OK,
+            result: Union[list, dict, str] = None,
+            total: Union[list, dict, str] = None,
+            message: str = "Success",
+            x_cookies=None,
     ) -> Response:
         """
         响应成功 应用列表
@@ -101,10 +101,11 @@ class PikaResponse:
 
     @staticmethod
     def failed(
-        *,
-        code: Union[int, str] = status.HTTP_500_INTERNAL_SERVER_ERROR,
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail: str = "Internal Server Error",
+            *,
+            code: Union[int, str] = status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail: str = "Internal Server Error",
+            result: Union[list, dict, str] = None
     ) -> Response:
         """
         失败返回
@@ -112,21 +113,22 @@ class PikaResponse:
             code:
             status_code:
             detail:
+            result:
 
         Returns:
 
         """
         return JSONResponse(
             status_code=status_code,
-            content=jsonable_encoder({"code": code, "detail": detail}),
+            content=jsonable_encoder({"code": code, "detail": detail, "result": result}),
         )
 
     @staticmethod
     def custom(
-        *,
-        code: Union[int, str] = status.HTTP_201_CREATED,
-        status_code: Union[int, str] = status.HTTP_201_CREATED,
-        detail: str = "",
+            *,
+            code: Union[int, str] = status.HTTP_201_CREATED,
+            status_code: Union[int, str] = status.HTTP_201_CREATED,
+            detail: str = "",
     ) -> Response:
         """
         自定义返回值

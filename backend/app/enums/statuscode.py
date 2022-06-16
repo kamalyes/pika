@@ -63,3 +63,4 @@ class SysFailedCodeEnum:
     UNKNOWN_ERROR = 10001  # 未知错误
     JWT_ENCODE_ERROR = 10002  # jwt加密失败
     REDIS_ERROR = 100003  # redis错误
+    MYSQL_ERROR = 100004  # mysql错误

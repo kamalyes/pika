@@ -9,18 +9,18 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from sqlalchemy import Column, INT, String
+from sqlalchemy import Column, INT, String, UniqueConstraint
 from sqlalchemy import ForeignKey
 
 from app.enums.bytesize import ByteSizeEnum
 from app.enums.sysvar import GlobalVarEnum
-from app.models.basic import PikaNormBase, PikaLargeBase
+from app.models.basic import PikaNormBase
 from app.models.user import User
 
 
-class SecurityNominate(PikaLargeBase):
-    __tablename__ = f"{GlobalVarEnum.APP_NAME_LOWER}_security"
-    __table_args__ = {"comment": "密保问题推荐表"}
+class SecurityNominateIssue(PikaNormBase):
+    __tablename__ = f"{GlobalVarEnum.APP_NAME_LOWER}_security_issue"
+    __table_args__ = (UniqueConstraint("question"), {"comment": "密保问题推荐表"})
     question = Column(String(ByteSizeEnum.LENGTH_255), nullable=False, comment="密保问题")
 
 

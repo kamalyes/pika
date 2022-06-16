@@ -18,7 +18,7 @@ from pydantic import BaseModel
 
 from app.enums.bytesize import ByteSizeEnum
 from app.enums.gebruikersrol import RoleEnum
-from app.schema.base import PikaQueryModel, PikaQueryTypeModel
+from app.schema.base import PikaQueryModel, PikaQueryTypeModel, PikaDeleteModel
 
 
 class OAuth2TokenModel:
@@ -26,8 +26,8 @@ class OAuth2TokenModel:
 
     def __init__(
             self,
-            emp_no: str = Header(None, title="用户编码", max_length=ByteSizeEnum.LENGTH_16),
-            x_token: str = Header(None, title="x_token", max_length=ByteSizeEnum.LENGTH_600),
+            emp_no: Optional[str] = Header(None, title="用户编码", max_length=ByteSizeEnum.LENGTH_16),
+            x_token: Optional[str] = Header(None, title="x_token", max_length=ByteSizeEnum.LENGTH_600),
     ):
         self.emp_no = emp_no
         self.x_token = x_token
@@ -39,7 +39,7 @@ class RegisterModel(BaseModel):
         ...,
         title="用户名",
         min_length=ByteSizeEnum.LENGTH_06,
-        max_length=ByteSizeEnum.LENGTH_20,
+        max_length=ByteSizeEnum.LENGTH_16,
     )
     email: Optional[str] = Body(..., title="邮箱地址", max_length=ByteSizeEnum.LENGTH_255)
     password: Optional[str] = Body(
@@ -73,12 +73,12 @@ class OAuth2LoginModel:
     def __init__(
             self,
             dynamic_code: Optional[str] = Form(..., title="动态码", max_length=ByteSizeEnum.LENGTH_06),
-            grant_type: str = Form("localhost", title="授权方式", max_length=ByteSizeEnum.LENGTH_255),
-            username: str = Form(None, title="用户名", max_length=ByteSizeEnum.LENGTH_20),
-            emp_no: str = Form(None, title="用户编码", max_length=ByteSizeEnum.LENGTH_16),
-            email: str = Form(None, title="邮箱", max_length=ByteSizeEnum.LENGTH_255),
-            password: str = Form(None, title="密码", max_length=ByteSizeEnum.LENGTH_255),
-            private_key: str = Form(None, title="私钥", max_length=ByteSizeEnum.LENGTH_255),
+            grant_type: Optional[str] = Form("localhost", title="授权方式", max_length=ByteSizeEnum.LENGTH_255),
+            username: Optional[str] = Form(None, title="用户名", max_length=ByteSizeEnum.LENGTH_16),
+            emp_no: Optional[str] = Form(None, title="用户编码", max_length=ByteSizeEnum.LENGTH_16),
+            email: Optional[str] = Form(..., title="邮箱地址", max_length=ByteSizeEnum.LENGTH_255),
+            password: Optional[str] = Form(None, title="密码", max_length=ByteSizeEnum.LENGTH_255),
+            private_key: Optional[str] = Form(None, title="私钥", max_length=ByteSizeEnum.LENGTH_255),
     ):
         self.grant_type = grant_type
         self.emp_no = emp_no
@@ -94,9 +94,9 @@ class ModifyUserInfoModel(RegisterModel):
 
 
 class QueryUserInModel(PikaQueryModel, PikaQueryTypeModel):
-    username: Optional[str] = Body(None, title="用户名")
     user_alias: Optional[str] = Body(None, title="用户花名")
-    emp_no: str = Form(None, title="用户编码")
+    username: Optional[str] = Body(None, title="用户名", max_length=ByteSizeEnum.LENGTH_16)
+    emp_no: Optional[str] = Form(None, title="用户编码")
     email: Optional[str] = Body(None, title="邮箱地址")
     mobile: Optional[str] = Body(None, title="手机号码")
     identity: Optional[str] = Body(None, title="用户身份")
@@ -106,9 +106,9 @@ class QueryUserInModel(PikaQueryModel, PikaQueryTypeModel):
 
 
 class QueryUserOutModel(PikaQueryModel):
-    username: Optional[str] = Body(None, title="用户名")
+    username: Optional[str] = Body(None, title="用户名", max_length=ByteSizeEnum.LENGTH_16)
     user_alias: Optional[str] = Body(None, title="用户花名")
-    emp_no: str = Form(None, title="用户编码")
+    emp_no: Optional[str] = Form(None, title="用户编码")
     email: Optional[str] = Body(None, title="邮箱地址")
     mobile: Optional[str] = Body(None, title="手机号码")
     identity: Optional[str] = Body(None, title="用户身份")
@@ -123,7 +123,7 @@ class SendAuthCodeModel:
 
 
 class ItemSecurityModel(BaseModel):
-    security_id: Optional[str] = Body(..., title="密保序号", max_length=ByteSizeEnum.LENGTH_255)
+    id: Optional[int] = Body(0, title="密保id")
     question: Optional[str] = Body(None, title="密保问题", max_length=ByteSizeEnum.LENGTH_255)
     answers: Optional[str] = Body(
         ...,
@@ -141,20 +141,33 @@ class EditSecurityModel:
         self.security = security
 
 
-class DelSecurityModel:
-    def __init__(self, security_id: Optional[list] = Form(..., title="密保序号")):
-        self.security_id = security_id
+class DelSecurityModel(PikaDeleteModel):
+    pass
+
+
+class QuerySecurityOutModel(BaseModel):
+    id: Optional[int] = Body(0, title="id")
+    question: Optional[str] = Body(None, title="密保问题", max_length=ByteSizeEnum.LENGTH_255)
+    answers: Optional[str] = Body(
+        ...,
+        title="密保答案",
+        min_length=ByteSizeEnum.LENGTH_06,
+        max_length=ByteSizeEnum.LENGTH_255,
+    )
+
+    class Config:
+        orm_mode = True
 
 
 class GetVerifyCodeModel(BaseModel):
-    models: Optional[str] = Body(0, title="模式：（1：忘记密码）", max_length=ByteSizeEnum.LENGTH_03)
+    models: Optional[int] = Body(1, title="模式：（1：忘记密码）")
 
     class Config:
         orm_mode = True
 
 
 class ForgetPwdModel(BaseModel):
-    alter_type: Optional[str] = Body("verifycode", title="验证方式：（verifycode：邮箱验证码, security：密保）")
+    alter_type: Optional[int] = Body(1, title="验证方式：（1：邮箱验证码, 2：密保）")
     verify_code: Optional[str] = Body(None, title="验证码", max_length=ByteSizeEnum.LENGTH_06)
     security: List[ItemSecurityModel] = Body(None, title="密保信息")
     new_password: Optional[str] = Body(..., title="新密码", max_length=ByteSizeEnum.LENGTH_255)
@@ -163,10 +176,9 @@ class ForgetPwdModel(BaseModel):
         orm_mode = True
 
 
-class ModifyPwdModel(BaseModel):
-    alter_type: Optional[str] = Body("pwd", title="操作类型：（pwd：修改密码, private_key：修改private_key）")
-    old_password: Optional[str] = Body(None, title="旧密码", max_length=ByteSizeEnum.LENGTH_255)
-    new_password: Optional[str] = Body(None, title="新密码", max_length=ByteSizeEnum.LENGTH_255)
+class ModifySecretModel(BaseModel):
+    old_password: Optional[str] = Body(..., title="旧密码", max_length=ByteSizeEnum.LENGTH_255)
+    new_password: Optional[str] = Body(..., title="新密码", max_length=ByteSizeEnum.LENGTH_255)
 
     class Config:
         orm_mode = True

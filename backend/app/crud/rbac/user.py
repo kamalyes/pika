@@ -17,14 +17,16 @@ from hutools.core import MockHelper, Kerberos, DataHand
 from hutools.core.factory import fake
 from hutools.pagination.async_sqlalchemy import paginate
 from hutools.time import Moment
-from sqlalchemy import or_, select, func, and_, update
+from sqlalchemy import or_, select, func, and_, update, delete, distinct
 
+from app.core.handler.asyncsql import AsyncDbSession
 from app.core.handler.execres import AuthException, \
     SystemException, ThirdException, RedisException, RegisterException, ValidException
 from app.core.handler.jsonres import PikaResponse
 from app.core.handler.logger import Log
 from app.crud.rbac import regex_register_str, client_ip
-from app.crud.rbac.email import Email
+from app.crud.system import Email
+from app.enums.bytesize import ByteSizeEnum
 from app.enums.dimkey import RedisKeyEnum
 from app.enums.gebruikersrol import RoleEnum
 from app.enums.operation import VerifyCodeEnum
@@ -33,6 +35,7 @@ from app.enums.sysvar import GlobalVarEnum, ValidTimeEnum
 from app.enums.toast import PromptEnum
 from app.models import async_db_session, async_redis
 from app.models.admin import UserAdmin
+from app.models.kerberos import SecurityRelIssues
 from app.models.user import User
 from config import PikaAppConfig
 
@@ -41,14 +44,33 @@ class UserDao(object):
     log = Log("UserDao")
 
     @staticmethod
-    async def exists_users(users: Any, request):
+    async def assert_user_info(username, exists_username, email, exists_email, mobile=None, exists_mobile=None):
+        """
+        判断用户名或邮箱或手机号是否被注册使用
+        Args:
+            username:
+            exists_username:
+            email:
+            exists_email:
+            mobile:
+            exists_mobile:
+
+        Returns:
+
+        """
+        if username == exists_username:
+            raise RegisterException(code=SysFailedCodeEnum.USER_HAS_USED, detail="该用户名已被使用！")
+        elif email == exists_email:
+            raise RegisterException(code=SysFailedCodeEnum.EMAIL_HAS_USED, detail="该邮箱账号已被使用！")
+        elif mobile == exists_mobile and (mobile is not None and exists_mobile is not None):
+            raise RegisterException(code=SysFailedCodeEnum.EMAIL_HAS_USED, detail="该手机号已被使用！")
+
+    @staticmethod
+    async def create_users_epd(users: Any, request):
         exists_users = users.scalars().first()
-        # 判断用户名或邮箱是否被注册使用
         if exists_users:
-            if request.username == exists_users.username:
-                raise RegisterException(code=SysFailedCodeEnum.USER_HAS_USED, detail="该用户名已被使用！")
-            elif request.email == exists_users.email:
-                raise RegisterException(code=SysFailedCodeEnum.EMAIL_HAS_USED, detail="该邮箱账号已被使用！")
+            await UserDao.assert_user_info(username=request.username, exists_username=exists_users.username,
+                                           email=request.email, exists_email=exists_users.email)
         # 注册的时候给密码加盐
         pwd = Kerberos.md5_encode(decode_msg=request.password)
         emp_no = f"{GlobalVarEnum.EMP_NO_START}{MockHelper.rand_verify_code(6, 1)}".upper()
@@ -73,7 +95,7 @@ class UserDao(object):
                 # 如果用户数量为0 则注册为超管,且激活状态为1
                 identity = RoleEnum.ROOT.value if counts.scalars().first() == 0 else RoleEnum.ORDINARY.value
                 is_activate = 1 if identity == RoleEnum.ROOT else 0
-                emp_no, pwd = await UserDao.exists_users(users=users, request=register_model)
+                emp_no, pwd = await UserDao.create_users_epd(users=users, request=register_model)
                 user = User(emp_no=emp_no, username=register_model.username, identity=identity,
                             email=register_model.email)
                 session.add(user)
@@ -327,10 +349,10 @@ class UserDao(object):
             async with session.begin():
                 users = await session.execute(select(User).where(
                     or_(User.username == request.username, User.email == request.email)))
-            emp_no, pwd = await UserDao.exists_users(users, request)
-            user = User(emp_no=emp_no, username=request.username,
-                        identity=request.identity, email=request.email)
-            session.add(user)
+                emp_no, pwd = await UserDao.create_users_epd(users, request)
+                user = User(emp_no=emp_no, username=request.username,
+                            identity=request.identity, email=request.email)
+                session.add(user)
             await session.refresh(user)
             user_admin = UserAdmin(uid=user.id, emp_no=user.emp_no, is_activate=1, password=pwd,
                                    pwd_valid_time=GlobalVarEnum.PWD_VALID_TIME,
@@ -363,8 +385,18 @@ class UserDao(object):
 
         async with async_db_session() as session:
             async with session.begin():
+                sel_sql = select(User).where(
+                    and_(or_(User.email == modify_user_info.email, User.mobile == modify_user_info.mobile,
+                             User.plane == modify_user_info.plane), User.emp_no != user_info.get("emp_no")))
+                sel_res = await session.execute(sel_sql)
+                exists_users = sel_res.scalars().first()
+                if exists_users:
+                    await UserDao.assert_user_info(username=modify_user_info.username,
+                                                   exists_username=exists_users.username,
+                                                   email=modify_user_info.email, exists_email=exists_users.email)
                 sql = update(User).where(User.id == user_info.get("uid")).values(update_info)
                 await session.execute(sql)
+        return PikaResponse.success()
 
     @staticmethod
     async def query_user_info_list(db, request):
@@ -378,16 +410,18 @@ class UserDao(object):
                 and_(User.create_time >= request.create_time, User.update_time <= request.update_time)
             ))
         else:
-            return PikaResponse.failed(code=SysFailedCodeEnum.VAR_ERROR, detail=f"grant_type值不对，仅可传0：全部数据，1：条件查询")
+            return PikaResponse.failed(code=SysFailedCodeEnum.VAR_ERROR, detail=f"query_type值不对，仅可传0：全部数据，1：条件查询")
 
     @staticmethod
-    async def rand_dynamic_code():
+    async def rand_dynamic_code(request):
         try:
+            user_ip = await client_ip(request)
             dynamic_code = MockHelper.rand_verify_code(6, 1).upper()
-            await async_redis.set(RedisKeyEnum.DYNAMIC_CODE, dynamic_code, ValidTimeEnum.DYNAMIC_CODE_VALID_TIME.value)
+            key_name = f"{RedisKeyEnum.DYNAMIC_CODE}:{dynamic_code}"
+            await async_redis.set(key_name, str(user_ip), ValidTimeEnum.DYNAMIC_CODE_VALID_TIME.value)
             return PikaResponse.success(result=dynamic_code)
         except Exception as redis_err:
-            raise RedisException(detail=str())
+            raise RedisException(detail=str(redis_err))
 
     @staticmethod
     async def has_dynamic_code(dynamic_code):
@@ -401,6 +435,7 @@ class UserDao(object):
         """
         redis_dynamic_code_ = f"{RedisKeyEnum.DYNAMIC_CODE}:{dynamic_code}"
         has_key = await async_redis.exists(redis_dynamic_code_)
+        print(redis_dynamic_code_, has_key)
         if dynamic_code in GlobalVarEnum.VERIFY_CODE_WHITE_LIST or has_key:
             return await async_redis.delete(redis_dynamic_code_)
         else:
@@ -425,16 +460,113 @@ class UserDao(object):
 
     @staticmethod
     async def get_verifycode(request, user_info):
-        if request.models is VerifyCodeEnum.FORGET_PWD:
-            return await Email.forget_password(emp_no=user_info["emp_no"], username=user_info["username"],
-                                               addressee=user_info["email"])
+        if request.models is VerifyCodeEnum.FORGET_PWD.value:
+            await Email.forget_password(emp_no=user_info["emp_no"], username=user_info["username"],
+                                        addressee=user_info["email"])
+            return PikaResponse.success(message=PromptEnum.GET_VERIFY_SUCCEED.value)
         else:
             raise ValidException(detail="暂不支持该models！")
 
     @staticmethod
-    async def verifycode_forget_pwd(request):
-        pass
+    async def update_pwd(**kwargs):
+        emp_no, new_password = kwargs["emp_no"], kwargs["new_password"]
+        pwd = Kerberos.md5_encode(decode_msg=new_password)
+        pwd_valid_time = GlobalVarEnum.PWD_VALID_TIME
+        update_info = {'password': pwd, 'pwd_valid_time': pwd_valid_time}
+        async with async_db_session() as session:
+            async with session.begin():
+                sql = update(UserAdmin).where(UserAdmin.emp_no == emp_no).values(update_info)
+                await session.execute(sql)
 
     @staticmethod
-    async def security_forget_pwd(request):
-        pass
+    async def old_value_update_pwd(**kwargs):
+        emp_no = kwargs["emp_no"]
+        old_password, new_password = kwargs["old_password"], kwargs["new_password"]
+        async with async_db_session() as session:
+            async with session.begin():
+                user_admins = await session.execute(
+                    select(UserAdmin).where(
+                        and_(UserAdmin.password == old_password, UserAdmin.emp_no == emp_no)))
+                user_admin = user_admins.scalars().first()
+                if user_admin:
+                    await UserDao.update_pwd(new_password=new_password, emp_no=emp_no)
+                else:
+                    raise AuthException(code=SysFailedCodeEnum.PASSWORD_ERROR, detail="请检查旧密码是否正确")
+
+    @staticmethod
+    async def add_security(**kwargs):
+        emp_no, uid = kwargs["user_info"]["emp_no"], kwargs["user_info"]["uid"]
+        pending_begin = [{**index, **{"create_emp_no": kwargs["emp_no"]}} for index in
+                         [dict(element) for element in kwargs["security"].security]]
+        min_begin_number, max_begin_number = ByteSizeEnum.LENGTH_03, ByteSizeEnum.LENGTH_06
+        await AsyncDbSession.begin_lock(pending_begin_number=len(pending_begin),
+                                        min_begin_number=min_begin_number,
+                                        max_begin_number=max_begin_number)
+        async with async_db_session() as session:
+            async with session.begin():
+                sql = select(func.count(SecurityRelIssues.id)).where(
+                    SecurityRelIssues.emp_no == emp_no)
+                execute_select = await session.execute(sql)
+                if execute_select.scalars().first() != 0:
+                    return PikaResponse.failed(code=SysFailedCodeEnum.VAR_ERROR, detail="密保问题已设置，无需添加")
+                await session.execute(SecurityRelIssues.__table__.insert(), pending_begin)
+                return PikaResponse.success()
+
+    @staticmethod
+    async def empty_security(**kwargs):
+        ids, emp_no = kwargs["request"].ids.split(","), kwargs["emp_no"]
+        async with async_db_session() as session:
+            sel_res = await session.execute(select(SecurityRelIssues.id).where(
+                and_(SecurityRelIssues.id.in_(ids), SecurityRelIssues.emp_no == emp_no)))
+            sel_res_ids = sel_res.scalars().all()
+            intersection = list(set(ids).difference(set(str(index) for index in sel_res_ids)))
+            if not sel_res_ids:
+                return PikaResponse.failed(detail="删除失败，id验签不通过")
+            elif len(intersection) > 0:
+                return PikaResponse.failed(detail="非管理员仅可删除自身的密保", result={"intersection": intersection})
+            elif len(sel_res_ids) < 3:
+                raise ValidException(detail="需一次传入所有有效密保id才可以清除")
+        del_sql = delete(SecurityRelIssues).where(
+            and_(SecurityRelIssues.id.in_(ids), SecurityRelIssues.emp_no == emp_no))
+        return await AsyncDbSession.delete(ids=ids, do_sql=del_sql)
+
+    @staticmethod
+    async def update_security(**kwargs):
+        emp_no, uid = kwargs["user_info"]["emp_no"], kwargs["user_info"]["uid"]
+        pending_begin = kwargs["request"].security
+        success, failed, not_funded = [], [], []
+        await AsyncDbSession.begin_lock(pending_begin_number=len(pending_begin))
+        async with async_db_session() as session:
+            async with session.begin():
+                sql = select(distinct(SecurityRelIssues.id)).where(
+                    and_(SecurityRelIssues.id.in_([index.id for index in pending_begin]),
+                         SecurityRelIssues.emp_no == emp_no))
+                execute_exists_id = await session.execute(sql)
+                exists_id = [index[0] for index in [id_ for id_ in execute_exists_id.all()]]
+                # 遍历更新
+                for pb in pending_begin:
+                    if pb.id in exists_id:
+                        sql = update(SecurityRelIssues).where(
+                            SecurityRelIssues.id == pb.id).values({"question": pb.question, "answers": pb.answers})
+                        try:
+                            await session.execute(sql)
+                        except Exception as e:
+                            failed.append(e)
+                        else:
+                            success.append(pb)
+                    else:
+                        not_funded.append(pb)
+            if len(failed) <= 0 and 0 >= len(not_funded):
+                return PikaResponse.success(message=f"修改成功！")
+            else:
+                if len(success) <= 0 and (0 <= len(failed) or len(not_funded) >= 0):
+                    msg = "修改失败"
+                else:
+                    msg = "部分修改成功"
+                return PikaResponse.success(code=SysFailedCodeEnum.MYSQL_ERROR,
+                                            message=f'{msg},详情请查阅返回值！',
+                                            result={"success": success, "failed": failed, "not_funded": not_funded})
+
+    @staticmethod
+    async def query_security(db, emp_no):
+        return await paginate(db, select(SecurityRelIssues).where(SecurityRelIssues.emp_no == emp_no))

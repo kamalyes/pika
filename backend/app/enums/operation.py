@@ -23,4 +23,4 @@ class SqlOperationTypeEnum:
 
 
 class VerifyCodeEnum(IntEnum):
-    FORGET_PWD = 0
+    FORGET_PWD = 1

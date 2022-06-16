@@ -19,7 +19,6 @@ from hutools.time import Moment
 from jinja2 import Environment, FileSystemLoader
 
 from app.core.handler.execres import ThirdException, ValidException
-from app.core.handler.jsonres import PikaResponse
 from app.enums.statuscode import SysFailedCodeEnum
 from app.enums.sysvar import GlobalVarEnum
 from config import PikaAppConfig
