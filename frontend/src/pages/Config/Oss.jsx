@@ -40,7 +40,8 @@ const Oss = ({loading, dispatch, gconfig, user}) => {
       title: '文件路径',
       key: 'file_path',
       dataIndex: 'file_path',
-      render: (file_path, record) => <a href={record.view_url} target="_blank">{file_path}</a>
+      render: (file_path, record) => <a href={record.view_url}
+                                        target="_blank">{file_path}</a>
     },
     {
       title: '大小',
@@ -119,7 +120,7 @@ const Oss = ({loading, dispatch, gconfig, user}) => {
 
 
   return (
-    <PageContainer title={false}  breadcrumb={null}>
+    <PageContainer title="OSS文件管理" breadcrumb={null}>
       <Card>
         <Modal width={600} title="上传文件" visible={visible} onCancel={() => setVisible(false)} onOk={onUpload}>
           <Form form={form} {...CONFIG.SQL_LAYOUT}>

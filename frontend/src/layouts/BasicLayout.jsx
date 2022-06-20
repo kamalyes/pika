@@ -3,19 +3,23 @@
  *
  * @see You can view component api by: https://github.com/ant-design/ant-design-pro-layout
  */
-import ProLayout, {DefaultFooter, getMenuData, ProBreadcrumb} from '@ant-design/pro-layout';
-import React, {useEffect, useMemo, useRef, useState} from 'react';
-import {connect, history, Link, useIntl} from 'umi';
-import {GithubOutlined} from '@ant-design/icons';
-import {Button, ConfigProvider, Empty, notification, Result} from 'antd';
-import Authorized from '@/utils/Authorized';
-import RightContent from '@/components/GlobalHeader/RightContent';
-import {getMatchMenu} from '@umijs/route-utils';
-import logo from '../assets/logo.svg';
-import {CONFIG} from "@/consts/config";
 import NoTableData from "@/assets/NoTableData.svg";
+import RightContent from "@/components/GlobalHeader/RightContent";
+import { CONFIG } from "@/consts/config";
+import Authorized from "@/utils/Authorized";
+import { GithubOutlined } from "@ant-design/icons";
+import ProLayout, {
+  DefaultFooter,
+  getMenuData,
+  ProBreadcrumb,
+} from "@ant-design/pro-layout";
+import { getMatchMenu } from "@umijs/route-utils";
+import { Button, ConfigProvider, Empty, notification, Result } from "antd";
 import NProgress from "nprogress";
-import 'nprogress/nprogress.css'
+import "nprogress/nprogress.css";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { connect, history, Link, useIntl } from "umi";
+import logo from "../assets/logo.svg";
 
 // Spin.setDefaultIndicator(<IconFont type="icon-icon-1" spin style={{fontSize: 36}}/>)
 
@@ -44,67 +48,87 @@ const menuDataRender = (menuList) =>
 
 const defaultFooterDom = (
   <DefaultFooter
-    copyright={<span>{new Date().getFullYear()} 个人出品 <a
-      href="https://beian.miit.gov.cn">鄂ICP备20001602号</a></span>}
+    copyright={
+      <span>
+        {new Date().getFullYear()} kamalyes个人出品{" "}
+        <a href="https://beian.miit.gov.cn">鄂ICP备20181602号</a>
+      </span>
+    }
     links={[
       {
-        key: 'pikaWeb',
-        title: 'pikaWeb',
-        href: 'http://114.132.233.15/',
+        key: "pikaWeb",
+        title: "pikaWeb",
+        href: "http://114.132.233.15/",
         blankTarget: true,
       },
       {
-        key: 'github',
-        title: <GithubOutlined/>,
-        href: 'https://github.com/yuyanqing/pika',
+        key: "github",
+        title: <GithubOutlined />,
+        href: "https://github.com/kamalyes/pika_web",
         blankTarget: true,
-      }
+      },
+      {
+        key: "pika",
+        title: "pika",
+        href: "https://github.com/kamalyes/pika",
+        blankTarget: true,
+      },
     ]}
   />
 );
 
-NProgress.configure({showSpinner: true});
+NProgress.configure({ showSpinner: true });
 
 const BasicLayout = (props) => {
   const {
     dispatch,
     children,
+    recorder,
     settings,
     location = {
-      pathname: '/',
+      pathname: "/",
     },
     noticeCount,
   } = props;
-  const {currentUser} = props.user;
+  const { currentUser } = props.user;
   const menuDataRef = useRef([]);
-  const [currentHref, setCurrentHref] = useState('');
+  const [currentHref, setCurrentHref] = useState("");
 
   useEffect(() => {
     if (dispatch) {
       dispatch({
-        type: 'user/fetchCurrent',
+        type: "user/fetchCurrent",
       });
     }
     if (currentUser) {
       const ws = new WebSocket(`${CONFIG.WS_URL}/${currentUser.id}`);
       ws.onmessage = function (event) {
-        event.preventDefault()
+        event.preventDefault();
         const messages = event.data;
-        const msg = JSON.parse(messages)
+        const msg = JSON.parse(messages);
         if (msg.type === 0) {
           dispatch({
-            type: 'global/save',
+            type: "global/save",
             payload: {
               noticeCount: msg.total ? msg.count : msg.count + noticeCount,
-            }
-          })
-        } else {
+            },
+          });
+        } else if (msg.type === 1) {
           notification.info({
             message: msg.title,
-            description: msg.content
-          })
+            description: msg.content,
+          });
+        } else if (msg.type === 2) {
+          // 说明是录制消息
+          dispatch({
+            type: "recorder/readRecord",
+            payload: {
+              data: JSON.parse(msg.record_msg),
+            },
+          });
+        } else if (msg.type === 3) {
+          // 心跳包，忽略
         }
-
       };
     }
   }, []);
@@ -113,28 +137,27 @@ const BasicLayout = (props) => {
   const handleMenuCollapse = (payload) => {
     if (dispatch) {
       dispatch({
-        type: 'global/changeLayoutCollapsed',
+        type: "global/changeLayoutCollapsed",
         payload,
       });
     }
   }; // get children authority
 
-
-  const {route = {routes: [],},} = props;
-  const {routes = []} = route
-  const menu = getMenuData(routes)
+  const { route = { routes: [] } } = props;
+  const { routes = [] } = route;
+  const menu = getMenuData(routes);
 
   const authorized = useMemo(
     () =>
-      getMatchMenu(location.pathname || '/', menu.menuData).pop() || {
+      getMatchMenu(location.pathname || "/", menu.menuData).pop() || {
         authority: undefined,
       },
-    [location.pathname],
+    [location.pathname]
   );
-  const {formatMessage} = useIntl();
+  const { formatMessage } = useIntl();
 
-  const {ld} = props;
-  const {href} = window.location; // 浏览器地址栏中地址
+  const { ld } = props;
+  const { href } = window.location; // 浏览器地址栏中地址
   if (currentHref !== href) {
     NProgress.start();
     if (!ld.global) {
@@ -144,19 +167,25 @@ const BasicLayout = (props) => {
   }
 
   return (
-
-    <ConfigProvider renderEmpty={() => <Empty image={NoTableData} imageStyle={{height: 210}}
-                                              description="暂无数据"/>}>
+    <ConfigProvider
+      renderEmpty={() => (
+        <Empty
+          image={NoTableData}
+          imageStyle={{ height: 150 }}
+          description="暂无数据"
+        />
+      )}
+    >
       <ProLayout
         logo={logo}
-        SiderMenuProps={{mode: 'horizontal'}}
+        SiderMenuProps={{ mode: "horizontal" }}
         // formatMessage={formatMessage}
         {...props}
         {...settings}
         onCollapse={handleMenuCollapse}
-        onMenuHeaderClick={() => history.push('/')}
+        onMenuHeaderClick={() => history.push("/")}
         headerContentRender={() => {
-          return <ProBreadcrumb/>;
+          return <ProBreadcrumb />;
         }}
         menuItemRender={(menuItemProps, defaultDom) => {
           if (
@@ -171,9 +200,9 @@ const BasicLayout = (props) => {
         }}
         breadcrumbRender={(routers = []) => [
           {
-            path: '/',
+            path: "/",
             breadcrumbName: formatMessage({
-              id: 'menu.home',
+              id: "menu.home",
             }),
           },
           ...routers,
@@ -181,20 +210,20 @@ const BasicLayout = (props) => {
         itemRender={(route, params, routes, paths) => {
           const first = routes.indexOf(route) === 0;
           return first ? (
-            <Link to={paths.join('/')}>{route.breadcrumbName}</Link>
+            <Link to={paths.join("/")}>{route.breadcrumbName}</Link>
           ) : (
             <span>{route.breadcrumbName}</span>
           );
         }}
         footerRender={() => {
-          // 脚部内容
-          // if (settings.footerRender || settings.footerRender === undefined) {
-          //   return defaultFooterDom;
-          // }
+          if (settings.footerRender || settings.footerRender === undefined) {
+            return defaultFooterDom;
+          }
+
           return null;
         }}
         menuDataRender={menuDataRender}
-        rightContentRender={() => <RightContent/>}
+        rightContentRender={() => <RightContent />}
         postMenuData={(menuData) => {
           menuDataRef.current = menuData || [];
           return menuData || [];
@@ -210,10 +239,11 @@ const BasicLayout = (props) => {
   );
 };
 
-export default connect(({user, global, settings, loading}) => ({
+export default connect(({ user, global, settings, recorder, loading }) => ({
   collapsed: global.collapsed,
   noticeCount: global.noticeCount,
   settings,
+  recorder,
   user,
   ld: loading,
 }))(BasicLayout);

@@ -227,7 +227,7 @@ const TestPlan = ({testplan, dispatch, loading, gconfig, user, project}) => {
       <PageContainer title={false} breadcrumb={null}>
         <Card>
           <TestPlanForm fetchTestPlan={fetchTestPlan}/>
-          <Form form={form} {...CONFIG.GLOBAL_LAYOUT} onValuesChange={() => {
+          <Form form={form} {...CONFIG.LAYOUT} onValuesChange={() => {
             fetchTestPlan();
           }}>
             <Row gutter={[12, 12]}>

@@ -169,7 +169,9 @@ const RedisOnline = ({dispatch, gconfig}) => {
   }
 
   return (
-    <Card style={{margin: -12}}>
+    <PageContainer title="在线执行Redis" breadcrumb={null}>
+
+      <Card style={{margin: -12}}>
         <Row>
           <Col span={24}>
             <Alert style={{marginBottom: 8}} type="info" showIcon closable
@@ -177,7 +179,7 @@ const RedisOnline = ({dispatch, gconfig}) => {
           </Col>
           <Col span={5}>
             <Menu
-              style={{minHeight: 600, maxHeight: 656, overflow: 'auto', background: 'rgb(33, 33, 33)'}}
+              style={{minHeight: 400, maxHeight: 400, overflow: 'auto', background: 'rgb(33, 33, 33)'}}
               theme="dark"
               onClick={handleClick}
               mode="inline"
@@ -188,9 +190,9 @@ const RedisOnline = ({dispatch, gconfig}) => {
           </Col>
 
           <Col span={19}>
-            <div style={{minHeight: 600, maxHeight: 656, overflow: 'auto', borderLeft: '1px solid rgb(70 68 12)'}}>
+            <div style={{minHeight: 400, maxHeight: 400, overflow: 'auto', borderLeft: '1px solid rgb(70 68 12)'}}>
               <Terminal
-                style={{height: 600, borderRadius: 0}}
+                style={{height: 400, borderRadius: 0}}
                 ignoreCommandCase
                 commands={commands}
                 disabled={label === 'disconnected> '}
@@ -202,6 +204,9 @@ const RedisOnline = ({dispatch, gconfig}) => {
           </Col>
         </Row>
       </Card>
+
+
+    </PageContainer>
   )
 }
 

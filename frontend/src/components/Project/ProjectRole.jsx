@@ -151,14 +151,14 @@ const ProjectRole = ({project, roles, users, fetchData}) => {
                     onCancel={() => setModal(false)} visible={modal}
       />
       <div style={{marginBottom: 16}}>
-        <Button size="middle" type="primary" onClick={() => setModal(true)}><PlusOutlined/>添加成员</Button>
-        <Input.Search onSearch={onSearchRole} size="middle" style={{float: 'right', marginRight: 8, width: 280}}
+        <Button size="small" type="primary" onClick={() => setModal(true)}><PlusOutlined/>添加成员</Button>
+        <Input.Search onSearch={onSearchRole} size="small" style={{float: 'right', marginRight: 8, width: 280}}
                       placeholder="搜索用户邮箱/姓名"/>
       </div>
       <div>
         <List
           itemLayout="horizontal"
-          size="middle"
+          size="small"
           dataSource={data}
           renderItem={item => (
             <List.Item actions={permission(item)}>

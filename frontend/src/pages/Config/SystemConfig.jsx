@@ -65,7 +65,7 @@ const SystemConfig = ({dispatch, gconfig, loading}) => {
   }
 
   return (
-    <PageContainer title={false} breadcrumb={null}>
+    <PageContainer title="系统设置" breadcrumb={null}>
       <Spin spinning={loading.effects['gconfig/updateConfiguration'] || loading.effects['gconfig/fetchSystemConfig']}>
         <Card>
           <Row>

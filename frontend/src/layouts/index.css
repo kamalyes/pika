@@ -5,17 +5,13 @@
   overflow: hidden;
 }
 
-* {
-  font-size: 13px;
-}
-
 .container::before {
   content: " ";
   position: absolute;
   width: 2000px;
   height: 2000px;
   border-radius: 50%;
-  background-image: linear-gradient(-45deg, #6266f5 0%, #04befe 100%);
+  background-image: linear-gradient(-25deg, #6266f5 10%, #04befe 20%, #F239FF 35%);
   transition: 1.8s ease-in-out;
   z-index: 6;
   top: -10%;
@@ -145,7 +141,6 @@
   /*  transition: transform 0.9s ease-in-out;*/
   /*  transition-delay: 0.7s;*/
   /*}*/
-
   .desc-warp {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr 2fr 1fr;

@@ -1,19 +1,16 @@
 import {
-  AlipayCircleOutlined, GithubOutlined,
+  GithubOutlined,
   LockOutlined, MailOutlined,
   MobileOutlined,
-  TaobaoCircleOutlined,
   UserOutlined,
-  WeiboCircleOutlined,
 } from '@ant-design/icons';
-import { Alert, Space, Tabs } from 'antd';
+import { Alert, Space, Tabs, message } from 'antd';
 import React, { useState } from 'react';
-import ProForm, { ProFormCheckbox, ProFormText } from '@ant-design/pro-form';
+import ProForm, { ProFormCheckbox, ProFormText, ProFormCaptcha} from '@ant-design/pro-form';
 import { connect, FormattedMessage, useIntl } from 'umi';
 import styles from './index.less';
 
-const clientId = `0f4fc0a875de30614a6a`;
-// const clientId = `c46c7ae33442d13498cd`;
+const clientId = `b2fe7699d1fdac1088e3`;
 
 const LoginMessage = ({ content }) => (
   <Alert
@@ -39,7 +36,12 @@ const Login = (props) => {
         type: 'login/login',
         payload: { username: values.username, password: values.password },
       });
-    } else {
+    }else if  (type === 'emali'){
+      dispatch({
+        type: 'login/login',
+        payload: { emali: values.emali, verifycode: values.verifycode },
+      });
+    }else if  (type == 'register') {
       dispatch({
         type: 'login/register',
         payload: { ...values, setType } ,
@@ -49,8 +51,14 @@ const Login = (props) => {
   };
 
   const redirectToGithub = () => {
-    const current = window.location.href
+    // const current = window.location.href
     window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}`
+  }
+
+  const handleEnterKey = (e) => {
+    if(e.nativeEvent.keyCode === 13){ //e.nativeEvent获取原生的事件对像
+      handleSubmit()
+    }
   }
 
   return (
@@ -59,6 +67,7 @@ const Login = (props) => {
         initialValues={{
           autoLogin: true,
         }}
+        isKeyPressSubmit
         submitter={{
           render: (_, dom) => dom.pop(),
           submitButtonProps: {
@@ -84,6 +93,13 @@ const Login = (props) => {
             })}
           />
           <Tabs.TabPane
+            key="emali"
+            tab={intl.formatMessage({
+              id: 'pages.login.emailLogin.tab',
+              defaultMessage: '邮箱方式登录',
+            })}
+          />
+          <Tabs.TabPane
             key="register"
             tab="注册"
           />
@@ -103,7 +119,6 @@ const Login = (props) => {
               name="username"
               fieldProps={{
                 size: 'large',
-                style: {borderRadius: "24px"},
                 prefix: <UserOutlined className={styles.prefixIcon} />,
               }}
               placeholder={intl.formatMessage({
@@ -126,7 +141,6 @@ const Login = (props) => {
               name="password"
               fieldProps={{
                 size: 'large',
-                style: {borderRadius: "24px"},
                 prefix: <LockOutlined className={styles.prefixIcon} />,
               }}
               placeholder={intl.formatMessage({
@@ -148,15 +162,63 @@ const Login = (props) => {
           </>
         )}
 
-        {status === 'error' && loginType === 'mobile' && !submitting && (
+        {status === 'error' && loginType === 'emali' && !submitting && (
           <LoginMessage content="验证码错误" />
         )}
+        {type === 'emali' && (
+          <>
+            <ProFormText
+              fieldProps={{
+                size: 'large',
+                prefix: <MobileOutlined className={styles.prefixIcon} />,
+              }}
+              name="emali"
+              placeholder={'邮箱地址'}
+              rules={[
+                {
+                  required: true,
+                  message: '请输入邮箱地址！',
+                },
+                {
+                  pattern: /^[A-Za-z0-9-._]+@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,6})$/,
+                  message: '邮箱地址格式错误！',
+                },
+              ]}
+            />
+            <ProFormCaptcha
+              fieldProps={{
+                size: 'large',
+                prefix: <LockOutlined className={styles.prefixIcon} />,
+              }}
+              captchaProps={{
+                size: 'large',
+              }}
+              placeholder={'请输入验证码'}
+              captchaTextRender={(timing, count) => {
+                if (timing) {
+                  return `${count} ${'获取验证码'}`;
+                }
+                return '获取验证码';
+              }}
+              name="verifycode"
+              rules={[
+                {
+                  required: true,
+                  message: '请输入验证码！',
+                },
+              ]}
+              onGetCaptcha={async () => {
+                message.success('获取验证码成功！');
+              }}
+            />
+          </>
+          )}
+
         {type === 'register' && (
           <>
             <ProFormText
               fieldProps={{
                 size: 'large',
-                style: {borderRadius: "24px"},
                 prefix: <UserOutlined className={styles.prefixIcon} />,
               }}
               name="username"
@@ -171,7 +233,20 @@ const Login = (props) => {
             <ProFormText
               fieldProps={{
                 size: 'large',
-                style: {borderRadius: "24px"},
+                prefix: <MobileOutlined className={styles.prefixIcon} />,
+              }}
+              name="name"
+              placeholder="请输入姓名"
+              rules={[
+                {
+                  required: true,
+                  message: "请输入姓名",
+                }
+              ]}
+            />
+            <ProFormText
+              fieldProps={{
+                size: 'large',
                 prefix: <MailOutlined className={styles.prefixIcon} />,
               }}
               name="email"
@@ -186,7 +261,6 @@ const Login = (props) => {
             <ProFormText.Password
               fieldProps={{
                 size: 'large',
-                style: {borderRadius: "24px"},
                 prefix: <LockOutlined className={styles.prefixIcon} />,
                 type: 'password'
               }}

@@ -4,9 +4,8 @@ import styles from "@/components/Drawer/CaseDetail.less";
 import getComponent from "@/components/PikaForm";
 import fields from "@/consts/fields";
 import React, {useEffect} from "react";
-import {SaveOutlined} from "@ant-design/icons";
+import {PlayCircleOutlined, SaveOutlined} from "@ant-design/icons";
 import TestCaseBottom from "@/components/TestCase/TestCaseBottom";
-import PostmanForm from "@/components/Postman/PostmanForm";
 
 const FormItem = Form.Item;
 

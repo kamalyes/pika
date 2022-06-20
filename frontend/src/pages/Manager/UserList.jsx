@@ -151,10 +151,10 @@ const UserInfo = ({user, dispatch, loading}) => {
 
 
   return (
-    <PageContainer title={false} breadcrumb={null}>
+    <PageContainer breadcrumb={null} title="用户管理页面">
       <Card>
         <Modal title="编辑用户" width={500} visible={modal} onCancel={() => setModal(false)} onOk={onSubmit}>
-          <Form form={form} initialValues={record} {...CONFIG.GLOBAL_LAYOUT}>
+          <Form form={form} initialValues={record} {...CONFIG.LAYOUT}>
             <Form.Item label="姓名" name="name">
               <Input placeholder="输入用户姓名"/>
             </Form.Item>

@@ -9,7 +9,7 @@ export async function fakeAccountLogin(params) {
 }
 
 export async function login(params) {
-  return request(`${CONFIG.URL}/auth/user/login`, {
+  return request(`${CONFIG.URL}/user/login`, {
     method: 'POST',
     data: params,
   });
@@ -17,7 +17,7 @@ export async function login(params) {
 
 // 注册接口
 export async function register(params) {
-  return request(`${CONFIG.URL}/auth/user/register`, {
+  return request(`${CONFIG.URL}/user/register`, {
     method: 'POST',
     data: params,
   });

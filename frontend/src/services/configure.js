@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import { CONFIG } from '@/consts/config';
+import {CONFIG} from '@/consts/config';
 import auth from '@/utils/auth';
 
 export async function listEnvironment(params) {
@@ -28,32 +28,33 @@ export async function updateEnvironment(params) {
 
 export async function deleteEnvironment(params) {
   return request(`${CONFIG.URL}/config/environment/delete`, {
-    method: 'DELETE',
-    params,
-    headers: auth.headers(),
-  });
-}
-
-export async function insertGConfig(params) {
-  return request(`${CONFIG.URL}/config/global/insert`, {
-    method: 'POST',
-    data: params,
-    headers: auth.headers(),
-  });
-}
-
-// 获取global列表
-export async function listGConfig(params) {
-  return request(`${CONFIG.URL}/config/global/list`, {
     method: 'GET',
     params,
     headers: auth.headers(),
   });
 }
 
-// 获取global列表
+
+export async function insertGConfig(params) {
+  return request(`${CONFIG.URL}/config/gconfig/insert`, {
+    method: 'POST',
+    data: params,
+    headers: auth.headers(),
+  });
+}
+
+// 获取gconfig列表
+export async function listGConfig(params) {
+  return request(`${CONFIG.URL}/config/gconfig/list`, {
+    method: 'GET',
+    params,
+    headers: auth.headers(),
+  });
+}
+
+// 获取gconfig列表
 export async function listDbConfig(params) {
-  return request(`${CONFIG.URL}/config/database/list`, {
+  return request(`${CONFIG.URL}/config/dbconfig/list`, {
     method: 'GET',
     params,
     headers: auth.headers(),
@@ -61,7 +62,7 @@ export async function listDbConfig(params) {
 }
 
 export async function insertDbConfig(params) {
-  return request(`${CONFIG.URL}/config/database/insert`, {
+  return request(`${CONFIG.URL}/config/dbconfig/insert`, {
     method: 'POST',
     data: params,
     headers: auth.headers(),
@@ -69,7 +70,7 @@ export async function insertDbConfig(params) {
 }
 
 export async function updateDbConfig(params) {
-  return request(`${CONFIG.URL}/config/database/update`, {
+  return request(`${CONFIG.URL}/config/dbconfig/update`, {
     method: 'POST',
     data: params,
     headers: auth.headers(),
@@ -77,32 +78,33 @@ export async function updateDbConfig(params) {
 }
 
 export async function onTestDbConfig(params) {
-  return request(`${CONFIG.URL}/config/database/connect`, {
-    method: 'PUT',
+  return request(`${CONFIG.URL}/config/dbconfig/connect`, {
+    method: 'GET',
     params,
     headers: auth.headers(),
   });
 }
 
 export async function deleteDbConfig(params) {
-  return request(`${CONFIG.URL}/config/database/delete`, {
-    method: 'DELETE',
+  return request(`${CONFIG.URL}/config/dbconfig/delete`, {
+    method: 'GET',
     params,
     headers: auth.headers(),
   });
 }
 
 export async function updateGConfig(params) {
-  return request(`${CONFIG.URL}/config/global/update`, {
+  return request(`${CONFIG.URL}/config/gconfig/update`, {
     method: 'POST',
     data: params,
     headers: auth.headers(),
   });
 }
 
+
 export async function deleteGConfig(params) {
-  return request(`${CONFIG.URL}/config/global/delete`, {
-    method: 'DELETE',
+  return request(`${CONFIG.URL}/config/gconfig/delete`, {
+    method: 'GET',
     params,
     headers: auth.headers(),
   });
@@ -166,11 +168,12 @@ export async function updateGateway(data) {
 
 export async function deleteGateway(params) {
   return request(`${CONFIG.URL}/config/gateway/delete`, {
-    method: 'DELETE',
+    method: 'GET',
     params,
     headers: auth.headers(),
   });
 }
+
 
 export async function updateRedisConfig(params) {
   return request(`${CONFIG.URL}/config/redis/update`, {
@@ -182,7 +185,7 @@ export async function updateRedisConfig(params) {
 
 export async function deleteRedisConfig(params) {
   return request(`${CONFIG.URL}/config/redis/delete`, {
-    method: 'DELETE',
+    method: 'GET',
     params,
     headers: auth.headers(),
   });
@@ -198,10 +201,10 @@ export async function onlineRedisCommand(params) {
 
 export async function uploadFile(params) {
   const formData = new FormData();
-  formData.append('file', params.files[0].originFileObj);
+  formData.append("file", params.files[0].originFileObj)
   return request(`${CONFIG.URL}/oss/upload`, {
     method: 'POST',
-    params: { filepath: params.filepath },
+    params: {filepath: params.filepath},
     data: formData,
     requestType: 'form',
     headers: auth.headers(false),
@@ -224,7 +227,7 @@ export async function deleteFile(params) {
 }
 
 export async function getSystemConfig() {
-  return request(`${CONFIG.URL}/config/system/list`, {
+  return request(`${CONFIG.URL}/config/system`, {
     method: 'GET',
     headers: auth.headers(),
   });
@@ -237,3 +240,6 @@ export async function updateSystemConfig(data) {
     headers: auth.headers(),
   });
 }
+
+
+

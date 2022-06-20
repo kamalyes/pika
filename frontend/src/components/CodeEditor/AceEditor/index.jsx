@@ -31,7 +31,7 @@ export default class PikaAceEditor extends Component {
         ref="aceEditor"
         mode={language || 'json'}
         theme={theme || 'material-one-dark'}
-        fontSize={18}
+        fontSize={14}
         showGutter
         showPrintMargin={false}
         onChange={onChange}

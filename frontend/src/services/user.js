@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import { CONFIG } from '@/consts/config';
+import {CONFIG} from '@/consts/config';
 import auth from '@/utils/auth';
 
 export async function query() {
@@ -7,10 +7,10 @@ export async function query() {
 }
 
 export async function queryCurrent(params) {
-  return await request(`${CONFIG.URL}/auth/user/query`, {
+  return await request(`${CONFIG.URL}/auth/query`, {
     method: 'GET',
     params,
-  });
+  })
 }
 
 export async function queryNotices(params) {
@@ -41,8 +41,9 @@ export async function deleteNotice(params) {
   });
 }
 
+
 export async function listUsers(params) {
-  const res = await request(`${CONFIG.URL}/auth/user/list`, {
+  const res = await request(`${CONFIG.URL}/auth/listUser`, {
     method: 'GET',
     params,
     headers: auth.headers(),
@@ -54,7 +55,7 @@ export async function listUsers(params) {
 }
 
 export async function updateUsers(data) {
-  return await request(`${CONFIG.URL}/auth/user/update`, {
+  return await request(`${CONFIG.URL}/auth/update`, {
     method: 'POST',
     data,
     headers: auth.headers(),
@@ -63,7 +64,7 @@ export async function updateUsers(data) {
 
 export async function updateAvatar(data) {
   const formData = new FormData();
-  formData.append('file', data.file);
+  formData.append("file", data.file)
   return await request(`${CONFIG.URL}/oss/avatar`, {
     method: 'POST',
     data: formData,
@@ -73,8 +74,8 @@ export async function updateAvatar(data) {
 }
 
 export async function deleteUsers(params) {
-  return await request(`${CONFIG.URL}/auth/user/delete`, {
-    method: 'DELETE',
+  return await request(`${CONFIG.URL}/auth/delete`, {
+    method: 'GET',
     params,
     headers: auth.headers(),
   });
@@ -99,7 +100,7 @@ export async function listUserOperationLog(params) {
 
 export async function loginGithub(params) {
   return await request(`${CONFIG.URL}/auth/github/login`, {
-    method: 'POST',
+    method: 'GET',
     params,
     headers: auth.headers(),
   });
@@ -120,3 +121,4 @@ export async function queryFollowTestPlanData(params) {
     headers: auth.headers(),
   });
 }
+

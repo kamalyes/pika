@@ -154,12 +154,12 @@ const Workspace = ({user, dispatch}) => {
   return <PageContainer content={getContent(currentUser)} breadcrumb={null} extraContent={<ExtraContent/>}>
     <Row gutter={16}>
       <Col span={16}>
-        <Card title={<div><strong>关注中的测试计划</strong> ({followPlan.length}个)</div>} bodyStyle={{minHeight: 645}}>
+        <Card title={<div><strong>关注中的测试计划</strong> ({followPlan.length}个)</div>} bodyStyle={{minHeight: 400}}>
           <Row gutter={8}>
             {
               followPlan.length === 0 ?
                 <Col span={24}>
-                  <Empty imageStyle={{height: 350}} image={noRecord}
+                  <Empty imageStyle={{height: 220}} image={noRecord}
                          description={<span>你还没有关注测试计划, 赶紧去 <a href="/#/apiTest/testplan">关注</a> 一个吧！</span>}/>
                 </Col> :
                 followPlan.map(item =>
@@ -284,7 +284,5 @@ const Workspace = ({user, dispatch}) => {
     </Row>
   </PageContainer>
 }
-
-
 
 export default connect(({user}) => ({user}))(Workspace);

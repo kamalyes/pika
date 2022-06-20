@@ -9,6 +9,7 @@ import {vs2015} from "react-syntax-highlighter/dist/cjs/styles/hljs";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import UserLink from "@/components/Button/UserLink";
 import PikaAceEditor from "@/components/CodeEditor/AceEditor/index";
+import {CONFIG} from "@/consts/config";
 
 const {Option} = Select;
 const GConfig = ({gconfig, user, loading, dispatch}) => {
@@ -44,7 +45,7 @@ const GConfig = ({gconfig, user, loading, dispatch}) => {
       title: '类型',
       dataIndex: 'key_type',
       key: 'key_type',
-      render: key => key_type[key],
+      render: key => <Tag color={CONFIG.CONFIG_TYPE_TAG[key_type[key]]}>{key_type[key]}</Tag>,
     },
     {
       title: 'value',
@@ -110,7 +111,7 @@ const GConfig = ({gconfig, user, loading, dispatch}) => {
       name: 'env',
       label: '环境',
       required: true,
-      component: <Select defaultValue={currentEnv}  placeholder="选择对应环境">
+      component: <Select defaultValue={currentEnv} placeholder="选择对应环境">
         {
           envList.map(v => <Option value={v.id}>{v.name}</Option>)
         }
@@ -182,12 +183,9 @@ const GConfig = ({gconfig, user, loading, dispatch}) => {
     });
   };
 
-  const initial = async () => {
-    if (envList.length === 0) {
-      getEnvList();
-    }
-    await getConfig();
-  };
+  useEffect(() => {
+    getEnvList();
+  }, [])
 
   useEffect(() => {
     fetchUserList()
@@ -221,7 +219,7 @@ const GConfig = ({gconfig, user, loading, dispatch}) => {
   };
 
   return (
-    <PageContainer title={false}  breadcrumb={null}>
+    <PageContainer title='全局变量' breadcrumb={null}>
       <Card>
         <FormForModal fields={fields} visible={modal} left={4} right={20} onFinish={onFinish}
                       onCancel={() => {
@@ -229,24 +227,22 @@ const GConfig = ({gconfig, user, loading, dispatch}) => {
                       }} title='编辑变量' record={record} width={600} offset={-60}/>
         <Row gutter={[8, 8]}>
           <Col span={12}>
-            当前环境:
-            <Select placeholder="选择对应环境" value={currentEnv} style={{width: 180, marginLeft: 16}} onChange={e => {
-              save({currentEnv: e});
-            }}>
-              <Option value={0}>全部</Option>
+            <Button type='primary'
+                    onClick={() => {
+                      save({modal: true});
+                      setRecord({id: 0, key_type: 0, env: currentEnv.toString()})
+                    }}><PlusOutlined/>添加变量</Button>
+          </Col>
+          <Col span={4}/>
+          <Col span={8}>
+            <Input addonBefore={<Select allowClear placeholder="选择对应环境" value={currentEnv} style={{width: 120}}
+                                        onChange={e => {
+                                          save({currentEnv: e});
+                                        }}>
               {
                 envList.map(v => <Option value={v.id.toString()}>{v.name}</Option>)
               }
-            </Select>
-            <Button style={{marginLeft: 16}} type='primary'
-                    onClick={() => {
-                      save({modal: true});
-                      setRecord({id: 0, key_type: 0})
-                    }}><PlusOutlined/>添加变量</Button>
-          </Col>
-          <Col span={6}/>
-          <Col span={6}>
-            <Input placeholder='请输入key' value={name} onChange={e => {
+            </Select>} placeholder='请输入key' value={name} onChange={e => {
               save({name: e.target.value});
             }}/>
           </Col>

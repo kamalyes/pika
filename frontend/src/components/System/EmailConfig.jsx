@@ -6,7 +6,7 @@ export default ({form}) => {
     <Row gutter={8}>
       <Col span={4}/>
       <Col span={16}>
-        <Form form={form} {...CONFIG.GLOBAL_LAYOUT}>
+        <Form form={form} {...CONFIG.LAYOUT}>
           <Form.Item label="发件人" name="sender" rules={[{required: true, message: '请输入发件人邮箱'}]}>
             <Input placeholder="请输入发件人邮箱"/>
           </Form.Item>

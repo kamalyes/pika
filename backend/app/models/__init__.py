@@ -10,6 +10,7 @@
 @Desc    :  None
 """
 import time
+import traceback
 from contextlib import contextmanager, asynccontextmanager
 from datetime import datetime
 from typing import AsyncGenerator, AsyncIterator, List
@@ -22,7 +23,12 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from app.core.handler.execres import (
-    DbExecuteException)
+    DbExecuteException,
+    OperationException,
+    AuthException,
+    ValidException,
+    AccessException,
+    ThirdException, RedisException, RegisterException, SystemException)
 from app.enums.database import DatabaseEnum
 from app.enums.statuscode import SysFailedCodeEnum
 from config import PikaAppConfig
@@ -63,11 +69,27 @@ def sync_db_session():
     try:
         yield session
         session.commit()
-    except Exception as exc:
+    except OperationException as operation_error:
+        raise operation_error
+    except AuthException as auth_err:
+        raise auth_err
+    except ValidException as valid_err:
+        raise valid_err
+    except AccessException as access_err:
+        raise access_err
+    except ThirdException as third_err:
+        raise third_err
+    except RedisException as redis_err:
+        raise redis_err
+    except RegisterException as register_err:
+        raise register_err
+    except SystemException as sys_err:
+        raise sys_err
+    except Exception:
         session.rollback()
         raise DbExecuteException(
             code=SysFailedCodeEnum.SQL_OPERATION_ERROR,
-            detail=f"数据操作失败，错误原因：{exc}",
+            detail=f"数据操作失败，错误原因：{traceback.format_exc()}",
         )
     finally:
         session.close()
@@ -83,11 +105,27 @@ async def async_db_session() -> AsyncGenerator:
     try:
         yield session
         await session.commit()
-    except Exception as exc:
+    except OperationException as operation_error:
+        raise operation_error
+    except AuthException as auth_err:
+        raise auth_err
+    except ValidException as valid_err:
+        raise valid_err
+    except AccessException as access_err:
+        raise access_err
+    except ThirdException as third_err:
+        raise third_err
+    except RedisException as redis_err:
+        raise redis_err
+    except RegisterException as register_err:
+        raise register_err
+    except SystemException as sys_err:
+        raise sys_err
+    except Exception:
         await session.rollback()
         raise DbExecuteException(
             code=SysFailedCodeEnum.SQL_OPERATION_ERROR,
-            detail=f"数据操作失败，错误原因：{exc}",
+            detail=f"数据操作失败，错误原因：{traceback.format_exc()}",
         )
     finally:
         await session.close()

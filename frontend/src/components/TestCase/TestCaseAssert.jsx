@@ -29,7 +29,7 @@ const TestCaseAssert = ({dispatch, testcase, caseId, createMode}) => {
     }
   }
 
-const onDeleteLocalAsserts = record => {
+  const onDeleteLocalAsserts = record => {
     const newData = [...asserts]
     newData.splice(record.index, 1)
     dispatch({
@@ -87,11 +87,12 @@ const onDeleteLocalAsserts = record => {
             okType: 'danger',
             cancelText: '点错了',
             onOk: async () => {
-            if (createMode) {
+              if (createMode) {
                 onDeleteLocalAsserts({...record, index})
               } else {
                 await onDeleteAsserts(record)
-              }},
+              }
+            },
           });
         }}>删除</a>
       </>
@@ -118,6 +119,7 @@ const onDeleteLocalAsserts = record => {
         }
       })
       setAssertModal(false);
+
     } else {
       if (record.id) {
         res = await dispatch({
@@ -153,8 +155,10 @@ const onDeleteLocalAsserts = record => {
         }
       }
     }
+
+
   }
-  
+
   return (
     <Row gutter={8}>
       <Col span={24}>

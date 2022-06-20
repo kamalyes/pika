@@ -6,11 +6,10 @@ export default ({form}) => {
     <Row gutter={8}>
       <Col span={4}/>
       <Col span={16}>
-        <Form form={form} {...CONFIG.GLOBAL_LAYOUT}>
+        <Form form={form} {...CONFIG.LAYOUT}>
           <Form.Item label="类型" name="oss_type" rules={[{required: true, message: '请选择oss类型'}]}>
             <Select placeholder="请选择oss类型">
               <Select.Option value="aliyun">阿里云</Select.Option>
-              <Select.Option value="gitee">gitee</Select.Option>
               <Select.Option value="cos">腾讯云</Select.Option>
               <Select.Option value="qiniu">七牛云</Select.Option>
             </Select>

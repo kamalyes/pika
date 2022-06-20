@@ -1,8 +1,7 @@
-import {Card, Col, Dropdown, Menu, Alert, Row, Spin, Tooltip} from 'antd';
+import {Alert, Card, Col, Dropdown, Menu, Row, Spin, Tooltip} from 'antd';
 import React, {useState} from 'react';
 import ProfessionalTree from '@/components/Tree/ProfessionalTree';
 import {
-  BugTwoTone,
   CheckCircleTwoTone,
   CloseCircleTwoTone,
   FolderOutlined,
@@ -217,7 +216,7 @@ export default ({loading, treeData, fetchData, projectData, userMap}) => {
   return (
     <Spin spinning={loading} tip='努力加载中'>
       <CaseForm data={caseInfo} modal={drawer} setModal={setDrawer} onFinish={onCreateCase}/>
-      <ConstructorModal width={800} modal={constructorModal} setModal={setConstructorModal} caseId={constructorCaseId}
+      <ConstructorModal width={1050} modal={constructorModal} setModal={setConstructorModal} caseId={constructorCaseId}
                         fetchData={fetchData}/>
       <FormForModal visible={assertModal} fields={fields.CaseAsserts} title='新增断言' left={6} right={18}
                     onFinish={onSaveAssert} onCancel={() => setAssertModal(false)}/>

@@ -73,7 +73,7 @@ const Notification = ({global, loading, user, dispatch}) => {
   }
 
   return (
-    <PageContainer breadcrumb={null} title={false} >
+    <PageContainer breadcrumb={null} title="消息中心">
       <Modal title={title} visible={visible} footer={null} onCancel={() => {
         setVisible(false)
       }}>

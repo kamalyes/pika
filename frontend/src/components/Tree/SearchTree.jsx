@@ -1,18 +1,11 @@
 import {Col, Dropdown, Input, Row, Tree} from 'antd';
 import React, {useState} from "react";
 import './SearchTree.less';
-import {
-  FolderFilled,
-  FolderOutlined,
-  FolderTwoTone,
-  MoreOutlined,
-  PlusOutlined,
-  SearchOutlined
-} from "@ant-design/icons";
+import {FolderTwoTone, MoreOutlined, PlusOutlined, SearchOutlined} from "@ant-design/icons";
 
 const dataList = [];
 
-export default ({treeData: gData, blockNode = true, onAddNode, menu, selectedKeys, onSelect}) => {
+export default ({treeData: gData, blockNode = true, onAddNode, menu, selectedKeys, onSelect, addDirectory}) => {
   const generateList = data => {
     for (let i = 0; i < data.length; i++) {
       const node = data[i];
@@ -91,9 +84,13 @@ export default ({treeData: gData, blockNode = true, onAddNode, menu, selectedKey
     });
   return (
     <div>
-      <Row>
-        <Col span={16}>
-          <Input size="small" className="treeSearch" placeholder="输入要查找的目录" onChange={onChange} prefix={<SearchOutlined/>}/>
+      <Row gutter={8}>
+        <Col span={18}>
+          <Input size="small" className="treeSearch" placeholder="输入要查找的目录" onChange={onChange}
+                 prefix={<SearchOutlined/>}/>
+        </Col>
+        <Col span={6}>
+          {addDirectory}
         </Col>
       </Row>
       <Tree
@@ -108,11 +105,12 @@ export default ({treeData: gData, blockNode = true, onAddNode, menu, selectedKey
         titleRender={(node) => {
           return (
             <div onMouseOver={() => setNodeKey(node.key)} onMouseLeave={() => setNodeKey(null)}>
-              <FolderTwoTone className="folder" twoToneColor="rgb(255, 214, 89)"/>
+              <FolderTwoTone className="folder" twoToneColor="rgb(255, 173, 210)"/>
               {node.title}
               {
                 nodeKey === node.key ? <span className="suffixButton">
-                <PlusOutlined onClick={() => {
+                <PlusOutlined onClick={event => {
+                  event.stopPropagation();
                   onAddNode(node)
                 }} className="left"/>
                     <Dropdown overlay={menu(node)} trigger="click">

@@ -28,16 +28,17 @@ import React, {memo, useEffect, useState} from "react";
 import SplitPane from 'react-split-pane';
 import "./TestCaseDirectory.less";
 import {
+  CameraTwoTone,
   DeleteOutlined,
   DownOutlined,
   EditOutlined,
   ExclamationCircleOutlined,
   ExportOutlined,
-  FolderAddTwoTone,
   PlayCircleOutlined,
   PlusOutlined,
   QuestionCircleOutlined,
   ReloadOutlined,
+  RocketOutlined,
   SearchOutlined
 } from "@ant-design/icons";
 import 'react-contexify/dist/ReactContexify.css';
@@ -54,6 +55,7 @@ import SearchTree from "@/components/Tree/SearchTree";
 import ScrollCard from "@/components/Scrollbar/ScrollCard";
 import emptyWork from "@/assets/emptyWork.svg";
 import AddTestCaseComponent from "@/pages/ApiTest/AddTestCaseComponent";
+import RecorderDrawer from "@/components/TestCase/recorder/RecorderDrawer";
 
 const {Option} = Select;
 
@@ -74,6 +76,7 @@ const TestCaseDirectory = ({testcase, gconfig, project, user, loading, dispatch}
   const [resultModal, setResultModal] = useState(false);
   const [name, setName] = useState('');
   const [moveModal, setMoveModal] = useState(false);
+  const [recorderModal, setRecorderModal] = useState(false);
 
   const rowSelection = {
     selectedRowKeys,
@@ -141,14 +144,8 @@ const TestCaseDirectory = ({testcase, gconfig, project, user, loading, dispatch}
   );
 
   const columns = [
-    // {
-    //   title: "#",
-    //   dataIndex: "id",
-    //   key: 'id',
-    //   width: 65,
-    // },
     {
-      title: "用例名称",
+      title: "名称",
       dataIndex: "name",
       key: 'name',
       // 自动省略多余数据
@@ -164,21 +161,21 @@ const TestCaseDirectory = ({testcase, gconfig, project, user, loading, dispatch}
       title: "优先级",
       dataIndex: "priority",
       key: 'priority',
-      width: 130,
+      width: 90,
       render: priority => <Tag color={CONFIG.CASE_TAG[priority]}>{priority}</Tag>
     },
     {
-      title: "用例状态",
+      title: "状态",
       dataIndex: "status",
       key: 'status',
-      width: 130,
+      width: 110,
       render: status => <Badge {...CONFIG.CASE_BADGE[status]} />
     },
     {
       title: "创建人",
       dataIndex: "create_user",
       key: 'create_user',
-      width: 130,
+      width: 100,
       ellipsis: true,
       render: create_user => <UserLink user={userMap[create_user]}/>
     },
@@ -186,7 +183,7 @@ const TestCaseDirectory = ({testcase, gconfig, project, user, loading, dispatch}
       title: "更新时间",
       dataIndex: "updated_at",
       key: 'updated_at',
-      width: 180,
+      width: 160,
     },
     {
       title: '操作',
@@ -201,10 +198,8 @@ const TestCaseDirectory = ({testcase, gconfig, project, user, loading, dispatch}
             e.stopPropagation();
           }}>执行 <DownOutlined/></a>
         </Dropdown>
-
       </>
     }
-
   ]
 
   const listProjects = () => {
@@ -431,8 +426,54 @@ const TestCaseDirectory = ({testcase, gconfig, project, user, loading, dispatch}
     </AMenu.Item>
   </AMenu>
 
+  const AddDirectory = <Tooltip title="点击可新建根目录, 子目录需要在树上新建">
+    <a className="directoryButton" onClick={() => {
+      setRootModal(true)
+      setRecord({name: ''})
+      setModalTitle("新建根目录");
+      setCurrentNode(null);
+    }}>
+      <PlusOutlined/>
+    </a>
+  </Tooltip>
+
+  const onAddTestCase = () => {
+    if (!currentDirectory[0]) {
+      message.info("请先创建或选择用例目录~")
+      return;
+    }
+    setAddCaseVisible(true)
+    dispatch({
+      type: 'testcase/save',
+      payload: {
+        asserts: [],
+        postConstructor: [],
+        preConstructor: [],
+        outParameters: [{key: 0, source: 1}],
+        caseInfo: {},
+        testData: {},
+      }
+    })
+  }
+
+  const AddCaseMenu = <AMenu>
+    <AMenu.Item key="1">
+      <a onClick={() => {
+        onAddTestCase()
+      }}><RocketOutlined/> 普通用例</a>
+    </AMenu.Item>
+    <AMenu.Item key="2">
+      <a onClick={() => setRecorderModal(true)}><CameraTwoTone/> 录制用例<Tag color="red" style={{
+        fontSize: 12,
+        margin: '0 4px',
+        lineHeight: '12px',
+        padding: 2
+      }}>新</Tag></a>
+    </AMenu.Item>
+  </AMenu>
+
   return (
-    <PageContainer title={false} breadcrumb={null}>
+    <PageContainer title={false} breadcrumb={null} style={{margin: -8}}>
       <TestResult width={1000} modal={resultModal} setModal={setResultModal} response={testResult}
                   caseName={name} single={false}/>
       <FormForModal title="移动用例" onCancel={() => setMoveModal(false)}
@@ -440,7 +481,8 @@ const TestCaseDirectory = ({testcase, gconfig, project, user, loading, dispatch}
                     visible={moveModal} left={6} right={18} width={500} formName="move"/>
       {
         projects.length === 0 ? <Result status="404"
-                                        subTitle={<span>你还没有添加任何项目, <a target="_blank" href="/#/apiTest/project">添加项目</a>后才能编写Case</span>}/> :
+                                        subTitle={<span>你还没有添加任何项目, <a target="_blank"
+                                                                       href="/#/apiTest/project">添加项目</a>后才能编写Case</span>}/> :
 
           <Row gutter={16}>
             <FormForModal title={modalTitle} onCancel={() => setRootModal(false)}
@@ -451,52 +493,56 @@ const TestCaseDirectory = ({testcase, gconfig, project, user, loading, dispatch}
               <AddTestCaseComponent listTestcase={listTestcase} directory_id={currentDirectory[0]}
                                     setAddCaseVisible={setAddCaseVisible}/>
             </Drawer>
-            <SplitPane className="pikaSplit" split="vertical" minSize={260} defaultSize={358} maxSize={500}>
+            <RecorderDrawer directory={directory} visible={recorderModal} setVisible={setRecorderModal}/>
+            <SplitPane className="pikaSplit" split="vertical" minSize={260} defaultSize={300} maxSize={800}>
               <ScrollCard className="card" hideOverflowX bodyPadding={12}>
                 <Row gutter={8}>
-                  <Col span={18}>
-                    {
-                      editing ? <Select style={{marginLeft: 32, width: 150}} showSearch
-                                        placeholder="请选择项目" value={project_id} autoFocus={true}
-                                        onBlur={()=>{setEditing(false)}}
-                                        onChange={e => {
-                                          save({project_id: e})
-                                          setEditing(false);
-                                        }}
-                                        filterOption={(input, option) =>
-                                          option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                                        }>
-                        {projects.map(v => <Option value={v.id}>{v.name}</Option>)}
-                      </Select> : <>
-                        <Avatar style={{marginLeft: 8, marginRight: 6}}
-                                src={getProject().avatar || `https://api.prodless.com/avatar.png`}/>
-                        <a onClick={() => setEditing(true)}>{getProject().name}</a>
-                        <IconFont type="icon-qiehuan2" onClick={() => setEditing(true)}
-                                  style={{fontSize: 15, marginLeft: 8}}/>
-                      </>
-                    }
-                  </Col>
-                  <Col span={6}>
-                    <Tooltip title="点击可新建根目录, 子目录需要在树上新建">
-                      <Button type="primary" size="small" className="directoryButton" onClick={() => {
-                        setRootModal(true)
-                        setRecord({name: ''})
-                        setModalTitle("新建根目录");
-                        setCurrentNode(null);
-                      }}>
-                        <FolderAddTwoTone/> 新建目录
-                      </Button>
-
-                    </Tooltip>
+                  <Col span={24}>
+                    <div style={{height: 40, lineHeight: '40px'}}>
+                      {
+                        editing ? <Select style={{marginLeft: 32, width: 150}} showSearch allowClear
+                                          placeholder="请选择项目" value={project_id} autoFocus={true}
+                                          onChange={e => {
+                                            if (e !== undefined) {
+                                              save({project_id: e})
+                                            }
+                                            setEditing(false);
+                                          }}
+                                          filterOption={(input, option) =>
+                                            option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                          }>
+                            {projects.map(v => <Option value={v.id}>{v.name}</Option>)}
+                          </Select> :
+                          <div onClick={() => setEditing(true)}>
+                            <Avatar style={{marginLeft: 8, marginRight: 6}} size="large"
+                                    src={getProject().avatar || `https://api.prodless.com/avatar.png`}/>
+                            <span style={{
+                              display: 'inline-block',
+                              marginLeft: 12,
+                              fontWeight: 400,
+                              fontSize: 14
+                            }}>{getProject().name}</span>
+                            <IconFont type="icon-qiehuan2" style={{
+                              display: 'inline-block',
+                              cursor: 'pointer',
+                              fontSize: 16,
+                              marginLeft: 16,
+                              lineHeight: '40px'
+                            }}/>
+                          </div>
+                      }
+                    </div>
                   </Col>
                 </Row>
                 <div style={{marginTop: 24}}>
                   <Spin spinning={loading.effects['testcase/listTestcaseDirectory']}>
                     {directory.length > 0 ?
                       <>
-                        <SearchTree treeData={directory} menu={content} onSelect={keys => {
-                          saveCase({currentDirectory: keys[0] === currentDirectory[0] ? [] : keys})
-                        }} onAddNode={node => {
+                        <SearchTree treeData={directory} menu={content}
+                                    addDirectory={AddDirectory}
+                                    onSelect={keys => {
+                                      saveCase({currentDirectory: keys[0] === currentDirectory[0] ? [] : keys})
+                                    }} onAddNode={node => {
                           setCurrentNode(node.key)
                           handleItemClick(1, node)
                         }} selectedKeys={currentDirectory}
@@ -544,24 +590,9 @@ const TestCaseDirectory = ({testcase, gconfig, project, user, loading, dispatch}
                     </Form>
                     <Row gutter={8} style={{marginTop: 4}}>
                       <Col span={24}>
-                        <Button type="primary" onClick={() => {
-                          if (!currentDirectory[0]) {
-                            message.info("请先创建或选择用例目录~")
-                            return;
-                          }
-                          setAddCaseVisible(true)
-                          dispatch({
-                            type: 'testcase/save',
-                            payload: {
-                              caseInfo: {},
-                              asserts: [],
-                              postConstructor: [],
-                              preConstructor: [],
-                              testData: {},
-                            }
-                          })
-                          // window.open(`/#/apiTest/testcase/${currentDirectory[0]}/add`)
-                        }}><PlusOutlined/> 添加用例</Button>
+                        <Dropdown overlay={AddCaseMenu} trigger="click">
+                          <Button type="primary"><PlusOutlined/> 添加用例</Button>
+                        </Dropdown>
                         {selectedRowKeys.length > 0 ?
                           <Dropdown overlay={menu()} trigger={['hover']}>
                             <Button style={{marginLeft: 8}} icon={<PlayCircleOutlined/>} onClick={(e) => {

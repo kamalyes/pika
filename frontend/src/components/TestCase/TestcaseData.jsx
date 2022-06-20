@@ -28,8 +28,7 @@ const TestcaseData = ({caseId, testcase, loading, dispatch, currentEnv, createMo
 
   }, [currentEnv, testData])
 
-
-const onRemoveTestData = async (data) => {
+  const onRemoveTestData = async (data) => {
     const newData = {...testData};
     const temp = newData[parseInt(currentEnv, 10)]
     newData[parseInt(currentEnv, 10)] = temp.filter((item) => data.name !== item.name)
@@ -40,7 +39,6 @@ const onRemoveTestData = async (data) => {
       }
     })
   }
-
 
   const onDeleteTestData = async id => {
     const res = await dispatch({
@@ -111,7 +109,7 @@ const onRemoveTestData = async (data) => {
 
   ]
 
-   // 添加用例的模式
+  // 添加用例的模式
   const onCreateModeFinish = async values => {
     const newData = {...testData};
     const data = {
@@ -136,7 +134,6 @@ const onRemoveTestData = async (data) => {
     })
     setModal(false)
   }
-
 
   const onFinish = async values => {
     let result;
@@ -209,7 +206,7 @@ const onRemoveTestData = async (data) => {
             <Col span={24}>
               <Table columns={columns} pagination={pagination} rowKey={record => record.id}
                      loading={loading.effects['testcase/insertTestcaseData'] || loading.effects['testcase/updateTestcaseData'] ||
-                     loading.effects['testcase/deleteTestcaseData']
+                       loading.effects['testcase/deleteTestcaseData']
                      }
                      dataSource={dataSource} locale={{emptyText: <NoRecord height="150"/>}}
                      onChange={pg => setPagination({...pagination, current: pg.current})}/>

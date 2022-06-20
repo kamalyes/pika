@@ -5,7 +5,7 @@ import {connect, history} from 'umi';
 import Avatar from './AvatarDropdown';
 import styles from './index.less';
 import Version from "@/components/Drawer/Version";
-// import wechat from '@/assets/wechat.png';
+import wechat from '@/assets/wechat.png';
 
 const ENVTagColor = {
   dev: 'orange',
@@ -52,7 +52,7 @@ const GlobalHeaderRight = (props) => {
       {/*  // }}*/}
       {/*/>*/}
       <Version visible={visible} setVisible={setVisible}/>
-      {/* <Tooltip title="联系作者">
+      <Tooltip title="联系作者">
         <a
           onClick={() => {
             Modal.info({
@@ -77,7 +77,7 @@ const GlobalHeaderRight = (props) => {
         >
           <WechatOutlined style={{fontSize: 16}}/>
         </a>
-      </Tooltip> */}
+      </Tooltip>
       <Tooltip title="消息中心">
         <a
           onClick={() => {
@@ -99,7 +99,7 @@ const GlobalHeaderRight = (props) => {
             color: 'inherit',
           }}
           target="_blank"
-          href="https://yuyanqing.github.io/pikaDoc"
+          href="https://kamalyes.github.io/pikaDoc"
           rel="noopener noreferrer"
           className={styles.action}
         >

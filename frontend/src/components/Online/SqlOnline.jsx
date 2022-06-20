@@ -32,7 +32,7 @@ const SqlOnline = ({online, dispatch, loading, leftHeight, cardHeight, tableHeig
   const [pagination, setPagination] = useState({
     current: 1,
     total: testResults.length,
-    pageSize: 8,
+    pageSize: 4,
     showTotal: total => `共${total}条数据`
   })
 
@@ -139,8 +139,8 @@ const SqlOnline = ({online, dispatch, loading, leftHeight, cardHeight, tableHeig
     <Spin spinning={loading.effects['online/fetchDatabaseSource']}
           tip="数据加载中, 请耐心等待..." size="large">
       <Row gutter={[12]}>
-        <Col span={6} style={{display: 'table-cell'}}>
-          <Card title="数据库列表" bodyStyle={{height: leftHeight || 800, overflowY: 'auto'}} size="small">
+        <Col span={8} style={{display: 'table-cell'}}>
+          <Card title="数据库列表" bodyStyle={{height: leftHeight || 656, overflowY: 'auto'}} size="small">
             <DirectoryTree treeData={databaseSource} onSelect={(e, data) => {
               if (e.length > 0 && e[0].indexOf('database_') === 0) {
                 const id = parseInt(e[0].split("_")[1], 10)
@@ -155,15 +155,15 @@ const SqlOnline = ({online, dispatch, loading, leftHeight, cardHeight, tableHeig
             }}/>
           </Card>
         </Col>
-        <Col span={18} style={{display: 'table-cell'}}>
+        <Col span={16} style={{display: 'table-cell'}}>
           <Card bodyStyle={{height: cardHeight || 288, overflowY: 'auto', padding: 0}}
-                title={currentDatabase !== null ? <span>{<IconFont style={{fontSize: 16, marginRight: 4}}
+                title={currentDatabase !== null ? <span>{<IconFont style={{fontSize: 14, marginRight: 4}}
                                                                    type={currentDatabaseSqlType === 0 ? 'icon-mysql6' : 'icon-PostgreSQL'}/>}
                     {currentDatabaseTitle}</span> :
                   <IconFont type="icon-sharpicons_database"/>}
                 size="small" extra={actions}>
             {
-              currentDatabase !== null ? <SqlAceEditor height={editorHeight || 350} tables={tables}
+              currentDatabase !== null ? <SqlAceEditor height={editorHeight || 280} tables={tables}
                                                        setEditor={setEditor}
                                                        language={sqlMode} theme={theme} value={sqlValue}
                                                        onChange={data => {
@@ -174,10 +174,10 @@ const SqlOnline = ({online, dispatch, loading, leftHeight, cardHeight, tableHeig
             }
 
           </Card>
-          <Card style={{marginTop: 12}} bodyStyle={{height: tableHeight || 500, overflowY: 'auto', padding: 8}}>
+          <Card style={{marginTop: 12}} bodyStyle={{height: tableHeight || 350, overflowY: 'auto', padding: 8}}>
             {
               testResults.length === 0 ?
-                <Empty image={noResult} imageStyle={{height: imageHeight || 390}} description="没有『查询结果』哦, 快去执行SQL吧~"/> :
+                <Empty image={noResult} imageStyle={{height: imageHeight || 180}} description="没有『查询结果』哦, 快去执行SQL吧~"/> :
                 <Table columns={getColumns(sqlColumns)} dataSource={testResults} size="small"
                        scroll={{x: sqlColumns.length > 8 ? 2000 : 1000}} bordered={true}
                        pagination={pagination} onChange={pg => setPagination({

@@ -6,9 +6,9 @@ import {
   listTestPlan,
   listTestPlanCaseTree,
   unFollowTestPlan,
-  updateTestPlan,
-} from '@/services/testplan';
-import auth from '@/utils/auth';
+  updateTestPlan
+} from "@/services/testplan";
+import auth from "@/utils/auth";
 
 export default {
   namespace: `testplan`,
@@ -29,45 +29,45 @@ export default {
   },
 
   reducers: {
-    save(state, { payload }) {
+    save(state, {payload}) {
       return {
         ...state,
-        ...payload,
-      };
-    },
+        ...payload
+      }
+    }
   },
 
   effects: {
-    *listTestPlan({ payload }, { call, put }) {
+    * listTestPlan({payload}, {call, put}) {
       const res = yield call(listTestPlan, payload);
       if (auth.response(res)) {
         yield put({
           type: 'save',
           payload: {
             planData: res.data,
-          },
-        });
+          }
+        })
       }
     },
 
-    *insertTestPlan({ payload }, { call, put }) {
+    * insertTestPlan({payload}, {call, put}) {
       const res = yield call(insertTestPlan, payload);
       return auth.response(res, true);
     },
 
-    *updateTestPlan({ payload }, { call }) {
+    * updateTestPlan({payload}, {call}) {
       const res = yield call(updateTestPlan, payload);
-      return auth.response(res, true);
+      return auth.response(res, true)
     },
 
-    *deleteTestPlan({ payload }, { call }) {
+    * deleteTestPlan({payload}, {call}) {
       const res = yield call(deleteTestPlan, payload);
-      return auth.response(res, true);
+      return auth.response(res, true)
     },
 
-    *executeTestPlan({ payload }, { call }) {
+    * executeTestPlan({payload}, {call}) {
       const res = yield call(executeTestPlan, payload);
-      return auth.response(res);
+      return auth.response(res)
     },
 
     /**
@@ -76,9 +76,9 @@ export default {
      * @param call
      * @param put
      */
-    *followTestPlan({ payload }, { call }) {
+    * followTestPlan({payload}, {call}) {
       const res = yield call(followTestPlan, payload);
-      return auth.response(res, true);
+      return auth.response(res, true)
     },
 
     /**
@@ -87,12 +87,12 @@ export default {
      * @param call
      * @param put
      */
-    *unFollowTestPlan({ payload }, { call }) {
+    * unFollowTestPlan({payload}, {call}) {
       const res = yield call(unFollowTestPlan, payload);
-      return auth.response(res, true);
+      return auth.response(res, true)
     },
 
-    *listTestCaseTreeWithProjectId({ payload }, { call, put }) {
+    * listTestCaseTreeWithProjectId({payload}, {call, put}) {
       const res = yield call(listTestPlanCaseTree, payload);
       if (auth.response(res)) {
         yield put({
@@ -100,9 +100,9 @@ export default {
           payload: {
             treeData: res.data.tree,
             caseMap: res.data.case_map,
-          },
-        });
+          }
+        })
       }
-    },
-  },
-};
+    }
+  }
+}

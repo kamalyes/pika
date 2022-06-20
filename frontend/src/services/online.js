@@ -1,6 +1,6 @@
-import request from '@/utils/request';
-import { CONFIG } from '@/consts/config';
-import auth from '@/utils/auth';
+import request from "@/utils/request";
+import {CONFIG} from "@/consts/config";
+import auth from "@/utils/auth";
 
 export async function fetchDatabaseSource(params) {
   return request(`${CONFIG.URL}/online/tables`, {
@@ -11,7 +11,7 @@ export async function fetchDatabaseSource(params) {
 }
 
 export async function onlineExecuteSQL(params) {
-  return request(`${CONFIG.URL}/online/execute_sql`, {
+  return request(`${CONFIG.URL}/online/sql`, {
     method: 'POST',
     data: params,
     headers: auth.headers(),

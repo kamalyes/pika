@@ -138,7 +138,7 @@ const ReportList = ({user, report, loading, dispatch}) => {
   }
 
   return (
-    <PageContainer title={false}  breadcrumb={null}>
+    <PageContainer title="构建历史" breadcrumb={null}>
       <Card>
         <Form form={form}>
           <Row gutter={[8, 8]}>

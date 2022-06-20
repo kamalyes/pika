@@ -64,30 +64,35 @@ export default [
                   {
                     path: '/apiTest/testcase',
                     name: '接口用例',
-                    component: './ApiTest/TestCaseDirectory',
+                    component: "./ApiTest/TestCaseDirectory"
+                  },
+                  {
+                    path: '/apiTest/record',
+                    name: '用例录制',
+                    component: "./ApiTest/TestCaseRecorder"
                   },
                   {
                     path: '/apiTest/testcase/:directory/add',
                     name: '添加用例',
                     hideInMenu: true,
-                    component: './ApiTest/TestCaseComponent',
+                    component: "./ApiTest/TestCaseComponent"
                   },
                   {
                     path: '/apiTest/testcase/:directory/:case_id',
                     name: '编辑用例',
                     hideInMenu: true,
-                    component: './ApiTest/TestCaseComponent',
+                    component: "./ApiTest/TestCaseComponent"
                   },
                   {
                     path: '/apiTest/testplan',
                     name: '测试计划',
-                    component: './ApiTest/TestPlan',
+                    component: './ApiTest/TestPlan'
                   },
                   {
                     path: '/apiTest/statistic',
                     name: '数据统计',
                   },
-                ],
+                ]
               },
               {
                 path: '/record',
@@ -110,25 +115,7 @@ export default [
                 path: '/notification',
                 name: '消息中心',
                 hideInMenu: true,
-                component: './Notification',
-              },
-              {
-                path: '/ci',
-                icon: 'icon-CI',
-                name: '持续集成',
-                component: './Building',
-              },
-              {
-                path: '/precise',
-                icon: 'icon-jingzhun',
-                name: '精准测试',
-                component: './Building',
-              },
-              {
-                path: '/factory',
-                icon: 'icon-hebingxingzhuang',
-                name: '数据工厂',
-                component: './Building',
+                component: './Notification'
               },
               {
                 path: '/config',
@@ -166,7 +153,32 @@ export default [
                     name: 'oss文件',
                     component: './Config/Oss',
                   },
+                ]
+              },
+              {
+                path: '/system',
+                icon: 'lock',
+                name: '后台管理',
+                authority: ['superAdmin'],
+                routes: [
+                  {
+                    path: '/system/configure',
+                    name: '系统设置',
+                    component: './Config/SystemConfig',
+                  },
+                  {
+                    path: '/system/user',
+                    name: '用户管理',
+                    component: './Manager/UserList',
+                    authority: ['superAdmin'],
+                  },
                 ],
+              },
+              {
+                path: '/mock',
+                icon: 'icon-mockplus_doc',
+                name: 'Mock配置',
+                component: "./Building"
               },
               {
                 path: '/tool',
@@ -191,32 +203,25 @@ export default [
                     icon: 'redis',
                     component: './Tool/RedisOnline',
                   },
-                ],
+                ]
               },
               {
-                path: '/system',
-                icon: 'lock',
-                name: '后台管理',
-                authority: ['superAdmin'],
-                routes: [
-                  {
-                    path: '/system/configure',
-                    name: '系统设置',
-                    component: './Config/SystemConfig',
-                  },
-                  {
-                    path: '/system/user',
-                    name: '用户管理',
-                    component: './Manager/UserList',
-                    authority: ['superAdmin'],
-                  },
-                  {
-                    path: '/system/router',
-                    name: '路由管理',
-                    component: './Manager/RouteList',
-                    authority: ['superAdmin'],
-                  },
-                ],
+                path: '/ci',
+                icon: 'icon-CI',
+                name: '持续集成',
+                component: "./Building"
+              },
+              {
+                path: '/precise',
+                icon: 'icon-jingzhun',
+                name: '精准测试',
+                component: "./Building"
+              },
+              {
+                path: '/factory',
+                icon: 'icon-hebingxingzhuang',
+                name: '数据工厂',
+                component: "./Building"
               },
               {
                 component: './404',

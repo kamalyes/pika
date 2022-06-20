@@ -2,6 +2,8 @@
 import React, {Component} from 'react';
 import "ace-builds";
 import AceEditor from "react-ace";
+import "ace-builds/webpack-resolver";
+
 import jsonWorkerUrl from "file-loader!ace-builds/src-noconflict/worker-json";
 import "ace-builds/src-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/ext-spellcheck";

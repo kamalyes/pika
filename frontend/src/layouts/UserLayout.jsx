@@ -49,7 +49,7 @@ const UserLayout = (props) => {
         </div>
         {children}
         <DefaultFooter copyright={
-          <span>{new Date().getFullYear()} 个人出品 <a
+          <span>{new Date().getFullYear()} kamalyes个人出品 <a
             href="https://beian.miit.gov.cn">鄂ICP备20001602号</a></span>} links={false} style={{
           background: '#ffffff'
         }}/>

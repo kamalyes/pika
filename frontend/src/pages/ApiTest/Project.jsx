@@ -1,12 +1,17 @@
 import React, {memo, useEffect, useState} from 'react';
 import {PageContainer} from '@ant-design/pro-layout';
-import {Avatar, Button, Card, Col, Dropdown, Empty, Input, Menu, Modal, Pagination, Row, Select, Tooltip,} from 'antd';
-import {AliwangwangOutlined, DeleteTwoTone, ExclamationCircleOutlined, QuestionCircleOutlined} from '@ant-design/icons';
+import {Avatar, Button, Card, Col, Dropdown, Empty, Input, Menu, Modal, Pagination, Row, Tooltip,} from 'antd';
+import {
+  AliwangwangOutlined,
+  DeleteTwoTone,
+  ExclamationCircleOutlined,
+  QuestionCircleOutlined,
+  SearchOutlined
+} from '@ant-design/icons';
 import FormForModal from '@/components/PikaForm/FormForModal';
 import {connect, history} from 'umi';
 import {insertProject, listProject} from '@/services/project';
 import auth from '@/utils/auth';
-import {process} from '@/utils/utils';
 import {listUsers} from '@/services/user';
 import noRecord from '@/assets/no_record.svg'
 import UserLink from "@/components/Button/UserLink";
@@ -16,9 +21,6 @@ import UserSelect from "@/components/User/UserSelect";
 import {IconFont} from "@/components/Icon/IconFont";
 
 
-const {Search} = Input;
-const {Option} = Select;
-
 const Project = ({dispatch, project, loading}) => {
   const [data, setData] = useState([]);
   const [pagination, setPagination] = useState({current: 1, pageSize: 8, total: 0, showTotal: count => `共${count}个项目`});
@@ -26,7 +28,7 @@ const Project = ({dispatch, project, loading}) => {
   const [users, setUsers] = useState([]);
   const [userMap, setUserMap] = useState({});
 
-  const fetchData = async (current = pagination.current, size = pagination.size) => {
+  const fetchData = async (current = pagination.current, size = pagination.pageSize) => {
     const res = await listProject({page: current, size});
     if (auth.response(res)) {
       setData(res.data);
@@ -61,8 +63,9 @@ const Project = ({dispatch, project, loading}) => {
     await fetchData();
   }, []);
 
-  const onSearchProject = async (projectName) => {
-    const res = await listProject({page: 1, size: pagination.size, name: projectName});
+  const onSearchProject = async e => {
+    const projectName = e.target.value;
+    const res = await listProject({page: 1, size: pagination.pageSize, name: projectName});
     if (auth.response(res)) {
       setData(res.data);
       setPagination({...pagination, current: 1, total: res.total});
@@ -124,7 +127,7 @@ const Project = ({dispatch, project, loading}) => {
   const menu = item => <Menu>
     <Menu.Item icon={<AliwangwangOutlined/>}>
       <a>
-        编辑项目
+        申请权限
       </a>
     </Menu.Item>
     <Menu.Item icon={<DeleteTwoTone twoToneColor="red"/>}>
@@ -161,7 +164,7 @@ const Project = ({dispatch, project, loading}) => {
   )
 
   return (
-    <PageContainer breadcrumb={null} title={false} >
+    <PageContainer title={false} breadcrumb={null}>
       <FormForModal
         width={600}
         title="添加项目"
@@ -185,8 +188,10 @@ const Project = ({dispatch, project, loading}) => {
               </Button>
             </Col>
             <Col span={6}>
-              <Search
-                onSearch={onSearchProject}
+              <Input
+                className="borderSearch"
+                prefix={<SearchOutlined/>}
+                onPressEnter={onSearchProject}
                 style={{float: 'right'}}
                 placeholder="请输入项目名称"
               />

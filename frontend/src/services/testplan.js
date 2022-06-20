@@ -1,7 +1,7 @@
 // 编辑测试数据
-import request from '@/utils/request';
-import { CONFIG } from '@/consts/config';
-import auth from '@/utils/auth';
+import request from "@/utils/request";
+import {CONFIG} from "@/consts/config";
+import auth from "@/utils/auth";
 
 export async function listTestPlan(params) {
   return request(`${CONFIG.URL}/testcase/plan/list`, {
@@ -10,6 +10,7 @@ export async function listTestPlan(params) {
     headers: auth.headers(),
   });
 }
+
 
 export async function listTestPlanCaseTree(params) {
   return request(`${CONFIG.URL}/testcase/tree`, {
@@ -37,15 +38,16 @@ export async function updateTestPlan(params) {
 
 export async function deleteTestPlan(params) {
   return request(`${CONFIG.URL}/testcase/plan/delete`, {
-    method: 'DELETE',
+    method: 'GET',
     params,
     headers: auth.headers(),
   });
 }
 
+
 export async function executeTestPlan(params) {
   return request(`${CONFIG.URL}/testcase/plan/execute`, {
-    method: 'PUT',
+    method: 'GET',
     params,
     headers: auth.headers(),
   });
@@ -58,7 +60,7 @@ export async function executeTestPlan(params) {
  */
 export async function followTestPlan(params) {
   return request(`${CONFIG.URL}/testcase/plan/follow`, {
-    method: 'POST',
+    method: 'GET',
     params,
     headers: auth.headers(),
   });
@@ -71,7 +73,7 @@ export async function followTestPlan(params) {
  */
 export async function unFollowTestPlan(params) {
   return request(`${CONFIG.URL}/testcase/plan/unfollow`, {
-    method: 'DELETE',
+    method: 'GET',
     params,
     headers: auth.headers(),
   });

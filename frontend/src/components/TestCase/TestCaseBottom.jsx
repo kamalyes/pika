@@ -6,7 +6,8 @@ import {
   EditTwoTone,
   ExclamationCircleOutlined,
   PlusOutlined,
-  QuestionCircleOutlined
+  QuestionCircleOutlined,
+  SaveOutlined
 } from "@ant-design/icons";
 import TestcaseData from "@/components/TestCase/TestcaseData";
 import NoRecord2 from "@/components/NotFound/NoRecord2";
@@ -17,21 +18,19 @@ import TestCaseAssert from "@/components/TestCase/TestCaseAssert";
 import React from "react";
 import {CONFIG} from "@/consts/config";
 import {connect} from 'umi';
+import TestCaseOutParameters from "@/components/TestCase/TestCaseOutParameters";
+import common from "@/utils/common";
 
 const {TabPane} = Tabs
 
 const TestCaseBottom = ({
                           dispatch, testcase, case_id, setSuffix, body, setBody,
-                          formData, setFormData, gconfig, onSubmit, form,
+                          formData, setFormData, gconfig, onSubmit, form, createMode = false,
                           headers, setHeaders, bodyType, setBodyType, loading,
                         }) => {
 
   const {preConstructor, postConstructor, activeKey, constructors_case, envActiveKey, asserts, caseInfo} = testcase;
   const {envList} = gconfig;
-
-  const getConstructor = sfx => {
-    return constructors.filter(item => item.suffix === sfx)
-  }
 
   const onCreateConstructor = () => {
     dispatch({
@@ -41,7 +40,8 @@ const TestCaseBottom = ({
           public: true,
           enable: true,
         },
-        currentStep: 0
+        currentStep: 0,
+        constructRecord: {}
       }
     })
     dispatch({
@@ -58,7 +58,7 @@ const TestCaseBottom = ({
     })
     if (res) {
       let newData;
-      if (!suffix) {
+      if (suffix) {
         newData = postConstructor.filter(v => v.id !== record.id)
       } else {
         newData = preConstructor.filter(v => v.id !== record.id)
@@ -80,12 +80,31 @@ const TestCaseBottom = ({
     })
   }
 
+  const getJson = (record, json_data) => {
+    if (record.type === 4) {
+      return {
+        body: json_data.body,
+        headers: common.parseHeaders(json_data.headers),
+        base_path: json_data.base_path,
+        url: json_data.url,
+        request_method: json_data.request_method,
+        body_type: json_data.body_type,
+      }
+    }
+    console.log(json_data)
+    return json_data
+  }
+
   // 编辑数据构造器
   const onEditConstructor = record => {
     const dt = JSON.parse(record.constructor_json);
     dispatch({
       type: 'construct/save',
-      payload: {currentStep: 1, testCaseConstructorData: {...record, ...dt}, constructorType: record.type}
+      payload: {
+        currentStep: 1,
+        testCaseConstructorData: {...record, ...getJson(record, dt)},
+        constructorType: record.type
+      }
     })
     dispatch({
       type: 'testcase/save',
@@ -93,7 +112,7 @@ const TestCaseBottom = ({
     })
   }
 
- const onSwitchConstructor = async (record, value, suffix = false) => {
+  const onSwitchConstructor = async (record, value, suffix = false) => {
     let res;
     const newData = [...(!suffix ? preConstructor : postConstructor)]
     if (createMode) {
@@ -126,6 +145,8 @@ const TestCaseBottom = ({
         payload: {[!suffix ? "preConstructor" : "postConstructor"]: newData}
       })
     }
+
+  }
 
   const getDesc = item => {
     const data = JSON.parse(item.constructor_json)
@@ -227,6 +248,7 @@ const TestCaseBottom = ({
                 await onDeleteConstructorLocal(record)
               } else {
                 await onDeleteConstructor(record)
+
               }
             },
           });
@@ -243,12 +265,8 @@ const TestCaseBottom = ({
             type: 'testcase/save',
             payload: {activeKey: key}
           })
-          if (key === '4') {
-            setSuffix(true);
-          } else {
-            setSuffix(false);
-          }
-          if (key === '5' && envList.length > 0) {
+          setSuffix(key === '6')
+          if (key === '1' && envList.length > 0) {
             dispatch({
               type: 'testcase/save',
               payload: {
@@ -256,9 +274,11 @@ const TestCaseBottom = ({
               }
             })
           }
-        }}>
-
-          <TabPane key="5" tab={<span><IconFont type="icon-shujuqudong1"/>数据管理 <TooltipIcon
+        }} tabBarExtraContent={createMode ? null :
+          <Button style={{marginRight: 8}} onClick={() => {
+            onSubmit(false)
+          }}><SaveOutlined/>保存</Button>}>
+          <TabPane key="1" tab={<span><IconFont type="icon-shujuqudong1"/>数据管理 <TooltipIcon
             onClick={() => {
               window.open(`${CONFIG.DOCUMENT_URL}/%E4%BD%BF%E7%94%A8%E6%96%87%E6%A1%A3/%E6%A6%82%E5%BF%B5/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86`)
             }}
@@ -279,7 +299,7 @@ const TestCaseBottom = ({
                                                                target="_blank">去添加</a>}</span>}/>
             }
           </TabPane>
-          <TabPane key="1"
+          <TabPane key="2"
                    tab={
                      <div>
                        <IconFont
@@ -339,7 +359,7 @@ const TestCaseBottom = ({
 
             }
           </TabPane>
-          <TabPane key="2" tab={<span><IconFont type="icon-qingqiu"/>接口请求</span>}>
+          <TabPane key="3" tab={<span><IconFont type="icon-qingqiu"/>接口请求</span>}>
             <Row gutter={[8, 8]}>
               <Col span={24}>
                 <PostmanForm form={form} body={body} setBody={setBody} headers={headers}
@@ -349,14 +369,18 @@ const TestCaseBottom = ({
               </Col>
             </Row>
           </TabPane>
-          <TabPane key="3"
+          <TabPane key="4" tab={<span><IconFont type="icon-canshu2"/>出参提取  <TooltipIcon
+            icon={<QuestionCircleOutlined/>} title="通过管理请求产生的参数，帮助我们更好地改善【断言】"/></span>}>
+            <TestCaseOutParameters caseId={case_id} createMode={createMode} dispatch={dispatch} testcase={testcase}/>
+          </TabPane>
+          <TabPane key="5"
                    tab={<div>
                      <IconFont type="icon-duanyan"/>断言 <BadgeButton number={asserts.length} bgColor="rgb(233, 249, 245)"
                                                                     color="rgb(40, 195, 151)"/>
                    </div>}>
             <TestCaseAssert asserts={asserts} caseId={case_id} createMode={createMode}/>
           </TabPane>
-          <TabPane key="4"
+          <TabPane key="6"
                    tab={
                      <div>
                        <IconFont
@@ -383,11 +407,14 @@ const TestCaseBottom = ({
                                    data => {
                                      dispatch({
                                        type: 'testcase/save',
-                                       payload: {constructors: data}
+                                       payload: {postConstructor: data}
                                      })
                                    }}
                                  loading={loading.effects['construct/delete'] || loading.effects['construct/update']}
                                  dragCallback={async newData => {
+                                   if (createMode) {
+                                     return true;
+                                   }
                                    return await dispatch({
                                      type: 'construct/orderConstructor',
                                      payload: newData.map((v, index) => ({id: v.id, index}))
@@ -416,6 +443,7 @@ const TestCaseBottom = ({
         </Tabs>
       </Col>
     </Row>
-  )}
+  )
 }
+
 export default connect(({testcase, gconfig, loading}) => ({testcase, gconfig, loading}))(TestCaseBottom);

@@ -26,10 +26,9 @@ const AddTestCaseComponent = ({
     asserts,
     testData,
     preConstructor,
+    outParameters,
     postConstructor
   } = testcase;
-  const {envList} = gconfig;
-  const {userMap} = user;
   const [resultModal, setResultModal] = useState(false);
   const [testResult, setTestResult] = useState({});
   const [form] = Form.useForm();
@@ -68,6 +67,19 @@ const AddTestCaseComponent = ({
     setBodyType(caseInfo.body_type)
   }, [caseInfo, editing])
 
+  const filterOutParameters = () => {
+    return outParameters.filter(v => {
+      if (v.id) {
+        return true;
+      }
+      if (v.source === 4) {
+        return v.name;
+      }
+      return !(!v.match_index || !v.name || !v.expression);
+    })
+
+  }
+
 
   const onSubmit = async (isCreate = false) => {
     const values = await form.validateFields()
@@ -97,7 +109,8 @@ const AddTestCaseComponent = ({
       "case": params,
       "asserts": asserts,
       "data": tempData,
-      "constructor": [...preConstructor, ...postConstructor]
+      "constructor": [...preConstructor, ...postConstructor],
+      "out_parameters": filterOutParameters(),
     }
     const res = await dispatch({
       type: 'testcase/createTestCase',
@@ -115,7 +128,7 @@ const AddTestCaseComponent = ({
                   caseName={caseInfo.name} single={false}/>
       <Row>
         <Col span={24}>
-          <ConstructorModal width={1100} modal={constructorModal} setModal={e => {
+          <ConstructorModal width={1050} modal={constructorModal} setModal={e => {
             dispatch({type: 'testcase/save', payload: {constructorModal: e}})
           }} form={constructorForm} record={constructRecord} createMode
                             suffix={suffix}/>

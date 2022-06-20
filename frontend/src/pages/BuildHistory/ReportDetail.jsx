@@ -116,14 +116,13 @@ const ReportDetail = ({dispatch, loading, user, gconfig}) => {
     }
   }
 
-
   const onSearchCase = e => {
     const {value} = e.target;
     const temp = caseList.filter(item => item.data_name.indexOf(value) > -1 || item.case_name.indexOf(value) > -1);
     setCurrentCaseList(temp)
   }
 
-   const load = !!(loading.effects['testcase/retryCase']
+  const load = !!(loading.effects['testcase/retryCase']
     || loading.effects['gconfig/fetchEnvList'])
 
   useEffect(async () => {

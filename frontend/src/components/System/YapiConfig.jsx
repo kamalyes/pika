@@ -6,7 +6,7 @@ export default ({form}) => {
     <Row gutter={8}>
       <Col span={4}/>
       <Col span={16}>
-        <Form form={form} {...CONFIG.GLOBAL_LAYOUT}>
+        <Form form={form} {...CONFIG.LAYOUT}>
           <Form.Item label="token" name="token">
             <Input placeholder="请输入yapi token"/>
           </Form.Item>

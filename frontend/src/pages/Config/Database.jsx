@@ -264,7 +264,7 @@ const Database = ({dispatch, gconfig, loading}) => {
   }
 
   return (
-    <PageContainer title={false}  breadcrumb={null}>
+    <PageContainer title="数据库配置列表" breadcrumb={null}>
       <Card>
         <FormForModal Footer={Footer} onTest={onTest}
                       record={databaseRecord} fields={fields} title="数据库配置" onFinish={onFinish}
@@ -295,11 +295,7 @@ const Database = ({dispatch, gconfig, loading}) => {
             </Col>
             <Col span={6}>
               <div style={{float: 'right'}}>
-                <Button type="primary" onClick={() => {
-                  save({databaseModal: true, databaseRecord: {sql_type: 0}});
-                  setConnection(null)
-                }}><PlusOutlined/> 添加配置</Button>
-                <Button type="primary" style={{marginLeft: 8}} onClick={fetchDbConfig}><SearchOutlined/>查询</Button>
+                <Button type="primary" onClick={fetchDbConfig}><SearchOutlined/>查询</Button>
                 <Button style={{marginLeft: 8}} onClick={async () => {
                   form.resetFields();
                   await fetchDbConfig()
@@ -310,6 +306,12 @@ const Database = ({dispatch, gconfig, loading}) => {
         </Form>
         <Row style={{marginTop: 12}}>
           <Col span={24}>
+            <Row style={{marginBottom: 16}}>
+              <Button type="primary" onClick={() => {
+                save({databaseModal: true, databaseRecord: {sql_type: 0}});
+                setConnection(null)
+              }}><PlusOutlined/> 添加配置</Button>
+            </Row>
             <Table columns={columns} dataSource={dbConfigData} rowKey={record => record.id}
                    loading={effects['gconfig/fetchDbConfig']}/>
           </Col>

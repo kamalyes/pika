@@ -9,6 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  总程序
 """
+import traceback
 
 import uvicorn
 from fastapi import FastAPI, Request, status, Depends
@@ -233,7 +234,7 @@ class PikaFastApi:
 
             """
             error_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-            return PikaResponse.custom(code=error_code, status_code=error_code, detail=f"{exc}")
+            return PikaResponse.custom(code=error_code, status_code=error_code, detail=exc.detail)
 
     @staticmethod
     def create_app(app_name=None, origins=None, title=f"{GlobalVarEnum.APP_NAME}测试平台", requirements=None):

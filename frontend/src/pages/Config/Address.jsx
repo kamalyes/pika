@@ -150,12 +150,20 @@ const Address = ({loading, gconfig, dispatch}) => {
 
 
   return (
-    <PageContainer title={false} breadcrumb={null}>
+    <PageContainer breadcrumb={null} title="请求地址管理">
       <Card>
-        <FormForModal visible={modal} fields={fields} title='添加地址' left={6} right={18} record={item}
+        <FormForModal visible={modal} fields={fields} title={item.id ? "修改地址": "添加地址"} left={6} right={18} record={item}
                       onFinish={onSubmit} onCancel={() => setModal(false)}/>
-        <Form form={form} {...CONFIG.GLOBAL_LAYOUT} onValuesChange={fetchAddress}>
-          <Row gutter={16}>
+        <Form form={form} {...CONFIG.LAYOUT} onValuesChange={fetchAddress}>
+          <Row gutter={12}>
+            <Col span={3}>
+              <Form.Item>
+                <Button type="primary" onClick={() => {
+                  setModal(true)
+                  setItem({})
+                }}><PlusOutlined/>添加地址</Button>
+              </Form.Item>
+            </Col>
             <Col span={7}>
               <Form.Item label="环境" name="env">
                 <Select allowClear showSearch placeholder="选择对应的环境">
@@ -171,11 +179,6 @@ const Address = ({loading, gconfig, dispatch}) => {
             <Col span={7}>
               <Form.Item label="地址" name="gateway">
                 <Input placeholder="输入对应的地址"/>
-              </Form.Item>
-            </Col>
-            <Col span={3}>
-              <Form.Item>
-                <Button type="primary" onClick={() => setModal(true)}><PlusOutlined/>添加地址</Button>
               </Form.Item>
             </Col>
           </Row>

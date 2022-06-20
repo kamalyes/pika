@@ -132,30 +132,30 @@ const Redis = ({gconfig, loading, dispatch}) => {
   }
 
   return (
-    <PageContainer title={false}  breadcrumb={null}>
+    <PageContainer title="Redis配置" breadcrumb={null}>
       <Card>
-        <Form form={form} {...CONFIG.REDIS_LAYOUT} onValuesChange={() => {
+        <Form form={form} {...CONFIG.LAYOUT} onValuesChange={() => {
           fetchRedisConfig();
         }}>
-          <Row gutter={40}  style={{marginBottom: 8}}>
-            <Col flex={2}>
+          <Row gutter={[8, 8]}>
+            <Col span={6}>
               <Form.Item label="环境" name="env">
                 <Select placeholder="选择环境" allowClear>
                   {envList.map(item => <Option key={item.id} value={item.id}>{item.name}</Option>)}
                 </Select>
               </Form.Item>
             </Col>
-            <Col flex={2}>
+            <Col span={6}>
               <Form.Item label="名称" name="name">
                 <Input placeholder="输入redis名称"/>
               </Form.Item>
             </Col>
-            <Col flex={2}>
+            <Col span={6}>
               <Form.Item label="地址" name="addr">
                 <Input placeholder="输入redis地址"/>
               </Form.Item>
             </Col>
-            <Col flex={2}>
+            <Col span={6}>
               <Form.Item label="类型" name="cluster">
                 <Select placeholder="选择redis类型" allowClear>
                   <Option value={true}>集群</Option>
@@ -163,16 +163,14 @@ const Redis = ({gconfig, loading, dispatch}) => {
                 </Select>
               </Form.Item>
             </Col>
-            <Col flex={1}>
-              <Button type="primary" onClick={() => {
-                setVisible(true);
-                setRecord({});
-              }}><PlusOutlined/>添加配置</Button>
-            </Col>
           </Row>
         </Form>
+        <Button type="primary" style={{marginBottom: 8}} onClick={() => {
+          setVisible(true);
+          setRecord({});
+        }}><PlusOutlined/>添加配置</Button>
         <Modal title="Redis配置" width={500} visible={visible} onCancel={() => setVisible(false)} onOk={onFinish}>
-          <Form form={modalForm} initialValues={record} {...CONFIG.REDIS_LAYOUT}>
+          <Form form={modalForm} initialValues={record} {...CONFIG.LAYOUT}>
             <Form.Item label="环境" name="env" rules={[
               {
                 required: true,
