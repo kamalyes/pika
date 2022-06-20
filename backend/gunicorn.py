@@ -15,6 +15,9 @@ import multiprocessing
 # debug = True
 loglevel = "debug"
 bind = "0.0.0.0:7777"
+pidfile = "logs/gunicorn.pid"
+accesslog = "logs/access.log"
+errorlog = "logs/debug.log"
 daemon = True
 timeout = 60
 

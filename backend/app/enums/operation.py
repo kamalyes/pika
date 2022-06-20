@@ -12,7 +12,7 @@
 from enum import IntEnum
 
 
-class SqlOperationTypeEnum:
+class SqlOperationTypeEnum(IntEnum):
     ROOT = 1
     ONLY_INSERT = 2
     ONLY_DELETE = 3

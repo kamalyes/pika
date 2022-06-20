@@ -9,7 +9,6 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  总程序
 """
-import traceback
 
 import uvicorn
 from fastapi import FastAPI, Request, status, Depends
@@ -34,12 +33,28 @@ from app.core.handler.execres import (
 from app.core.handler.jsonres import PikaResponse
 from app.enums.sysvar import GlobalVarEnum
 from app.models import async_redis, async_create_table
+from app.service.itst import aiptest_router
+from app.service.itst import functest_router
+from app.service.itstem import dbconfig_router
+from app.service.itstem import environment_router
+from app.service.itstem import gateway_router
+from app.service.itstem import gconfig_router
+from app.service.itstem import redis_config_router
+from app.service.online import redis_router
+from app.service.online import script_router
+from app.service.online import sql_router
+from app.service.proxy import mock_router
 from app.service.rbac import access_router
 from app.service.rbac import kerberos_router
 from app.service.rbac import menus_router
 from app.service.rbac import organization_router
 from app.service.rbac import roles_router
 from app.service.rbac import user_router
+from app.service.system import history_router
+from app.service.system import lexicon_router
+from app.service.system import mini_oss_router
+from app.service.system import notice_router
+from app.service.system import operation_log_router
 from config import InterceptHandler, PikaAppConfig
 
 logger = InterceptHandler.init_logging()
@@ -218,7 +233,7 @@ class PikaFastApi:
 
             """
             error_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-            return PikaResponse.custom(code=error_code, status_code=error_code, detail=f"{traceback.format_exc()}")
+            return PikaResponse.custom(code=error_code, status_code=error_code, detail=f"{exc}")
 
     @staticmethod
     def create_app(app_name=None, origins=None, title=f"{GlobalVarEnum.APP_NAME}测试平台", requirements=None):
@@ -264,6 +279,7 @@ class PikaFastApi:
         # 注册捕获全局异常
         PikaFastApi.register_exc(pika)
         # 注册路由
+        # rbac
         pika.include_router(user_router, prefix="/user", tags=["用户中心"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
@@ -282,6 +298,63 @@ class PikaFastApi:
         pika.include_router(organization_router, prefix="/org", tags=["组织"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
+        # lexicon
+        pika.include_router(lexicon_router, prefix="/lexicon", tags=["词库"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+
+        # system
+        pika.include_router(history_router, prefix="/system", tags=["访问记录"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+        pika.include_router(notice_router, prefix="/system", tags=["消息通知"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+        pika.include_router(operation_log_router, prefix="/system", tags=["操作"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+        pika.include_router(mini_oss_router, prefix="/oss", tags=["Oss"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+        # itst
+        pika.include_router(functest_router, prefix="/test", tags=["功能测试"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+        pika.include_router(aiptest_router, prefix="/test", tags=["接口测试"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+        pika.include_router(mock_router, prefix="/ask", tags=["ask服务"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+
+        # itstem
+        pika.include_router(environment_router, prefix="/itstem", tags=["环境配置"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+        pika.include_router(gconfig_router, prefix="/itstem", tags=["全局配置"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+        pika.include_router(dbconfig_router, prefix="/itstem", tags=["数据库配置"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+        pika.include_router(redis_config_router, prefix="/itstem", tags=["redis配置"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+        pika.include_router(gateway_router, prefix="/itstem", tags=["请求网关配置"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+
+        # online
+        pika.include_router(sql_router, prefix="/online", tags=["在线工具"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+
+        pika.include_router(script_router, prefix="/online", tags=["在线工具"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+        pika.include_router(redis_router, prefix="/online", tags=["在线工具"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
         return pika
 
 
@@ -296,16 +369,26 @@ async def init_database():
 
     """
     await async_create_table()
+    logger.bind(name=None).success("database created success.        ✔")
+
+
+@pika.on_event('startup')
+async def init_redis():
+    """
+    初始化redis，失败则服务起不来
+    :return:
+    """
+    try:
+        await Limiter.init(async_redis)
+        logger.bind(name=None).success("redis connected success.        ✔")
+    except Exception as e:
+        logger.bind(name=None).error(f"Redis connect failed, Please check config.py for redis config.        ❌")
+        raise e
 
 
 @pika.on_event("shutdown")
 def stop_test():
     pass
-
-
-@pika.on_event("startup")
-async def startup():
-    await Limiter.init(async_redis)
 
 
 if __name__ == "__main__":

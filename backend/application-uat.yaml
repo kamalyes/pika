@@ -25,6 +25,7 @@ ssh_server:
 # Redis配置
 redis:
   host: localhost
+  enable: Ture
   port: 6380
   auth: 'PassWord@Redis123'
   encoding: "utf-8"
@@ -50,9 +51,10 @@ jwt:
 
 minio_oss:
   type: ""
-  access_key: "W1Phi9Ysh7Wn3"
-  secret_key: "Isw76Fc9Ix71X0Azb5Pc1Wcd1Pf1F39Gxs5Kjt5Bt"
+  access_key_id: "W1Phi9Ysh7Wn3"
+  access_key_secret: "Isw76Fc9Ix71X0Azb5Pc1Wcd1Pf1F39Gxs5Kjt5Bt"
   bucket_name: ""
+  endpoint: ""
 
 other:
   # 日志开关
@@ -63,7 +65,8 @@ yapi:
   secret_key: ""
 
 github:
-  user: "https://api.github.com/user"
+  user_info_url: "https://api.github.com/user"
+  access_token_url: "https://github.com/login/oauth/access_token"
   client_id: ""
   access_key: ""
   secret_key: ""

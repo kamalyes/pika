@@ -21,7 +21,7 @@ from app.enums.sysvar import GlobalVarEnum
 from config import PikaAppConfig
 
 
-class Log(object):
+class PikaLogger(object):
     business = None
 
     def __init__(self, name=GlobalVarEnum.APP_NAME):  # Logger标识默认为app

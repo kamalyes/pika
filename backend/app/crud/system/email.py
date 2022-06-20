@@ -14,7 +14,7 @@ from typing import List
 from hutools.core import MockHelper
 from hutools.time import Moment
 
-from app.core.handler.logger import Log
+from app.core.handler.logger import PikaLogger
 from app.core.notice.email import EmailHande
 from app.enums.dimkey import RedisKeyEnum
 from app.enums.sysvar import ValidTimeEnum, GlobalVarEnum
@@ -22,7 +22,7 @@ from app.models import async_redis
 
 
 class Email(object):
-    log = Log("Email")
+    log = PikaLogger("Email")
 
     @staticmethod
     async def register_succeed(emp_no: str, username: str, addressee: List, pwd_valid_time,

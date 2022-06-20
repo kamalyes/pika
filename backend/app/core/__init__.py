@@ -18,6 +18,7 @@ def __class_to_list__(class_):
         class_:
 
     Returns:
+
     Examples:
         >>> class TestClass2Dict:
         ...    def __init__(self):

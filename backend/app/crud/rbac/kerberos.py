@@ -15,7 +15,7 @@ from sqlalchemy import select, distinct, delete, update, or_, and_
 
 from app.core.handler.asyncsql import AsyncDbSession
 from app.core.handler.jsonres import PikaResponse
-from app.core.handler.logger import Log
+from app.core.handler.logger import PikaLogger
 from app.enums.bytesize import ByteSizeEnum
 from app.enums.statuscode import SysFailedCodeEnum
 from app.models import async_db_session
@@ -23,7 +23,7 @@ from app.models.kerberos import SecurityNominateIssue
 
 
 class KerberosDao(object):
-    log = Log("KerberosDao")
+    log = PikaLogger("KerberosDao")
 
     @staticmethod
     async def add_encrypt_issue(**kwargs):
@@ -111,7 +111,7 @@ class KerberosDao(object):
             or_(SecurityNominateIssue.id == request.id, SecurityNominateIssue.question == request.question,
                 SecurityNominateIssue.create_emp_no.like(f"%{request.create_emp_no}%"),
                 SecurityNominateIssue.update_emp_no.like(f"%{request.update_emp_no}%"),
-                and_(SecurityNominateIssue.create_time >= request.create_time,
-                     SecurityNominateIssue.update_time <= request.update_time)
+                and_(SecurityNominateIssue.create_date >= request.create_date,
+                     SecurityNominateIssue.update_date <= request.update_date)
                 ))
         return await AsyncDbSession.query(db, str(request.query_type), all_do_sql, dim_do_sql)

@@ -1,17 +1,36 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python 3.9.11
 """
-# FileName： jsonres.py
-# Author : YuYanQing
-# Desc:
-# Date： 2022/5/9 13:33
+@File    :  jsonres.py
+@Time    :  2022/5/1 8:21 PM
+@Author  :  YuYanQing
+@Version :  1.0
+@Contact :  mryu168@163.com
+@License :  (C)Copyright 2022-2026
+@Desc    :  None
 """
 from datetime import datetime
-from typing import Union
+from decimal import Decimal
+from json import JSONEncoder
+from typing import Union, Any
 
 from fastapi import status, Response
 from fastapi.encoders import jsonable_encoder
 from starlette.responses import JSONResponse
+
+
+class PikaJsonEncoder(JSONEncoder):
+
+    def default(self, o: Any) -> Any:
+        if isinstance(o, set):
+            return list(o)
+        if isinstance(o, datetime):
+            return o.strftime("%Y-%m-%d %H:%M:%S")
+        if isinstance(o, Decimal):
+            return str(o)
+        if isinstance(o, bytes):
+            return o.decode(encoding='utf-8')
+        return self.default(o)
 
 
 class PikaResponse:
@@ -33,6 +52,43 @@ class PikaResponse:
             else:
                 result[c.name] = val
         return result
+
+    @staticmethod
+    def json_serialize(obj):
+        ans = dict()
+        for k, o in dict(obj).items():
+            if isinstance(o, set):
+                ans[k] = list(o)
+            elif isinstance(o, datetime):
+                ans[k] = o.strftime("%Y-%m-%d %H:%M:%S")
+            elif isinstance(o, Decimal):
+                ans[k] = str(o)
+            elif isinstance(o, bytes):
+                ans[k] = o.decode(encoding='utf-8')
+            else:
+                ans[k] = o
+        return ans
+
+    @staticmethod
+    def parse_sql_result(data: list):
+        columns = []
+        if len(data) > 0:
+            columns = list(data[0].keys())
+        return columns, [PikaResponse.json_serialize(obj) for obj in data]
+
+    @staticmethod
+    def model_to_list(data: list, *ignore: str):
+        return [PikaResponse.model_to_dict(x, *ignore) for x in data]
+
+    @staticmethod
+    def encode_json(data: Any, *exclude: str):
+        return jsonable_encoder(data, exclude=exclude, custom_encoder={
+            datetime: lambda x: x.strftime("%Y-%m-%d %H:%M:%S")
+        })
+
+    @staticmethod
+    def records(data: list, code=status.HTTP_200_OK, message="操作成功"):
+        return dict(code=code, message=message, data=PikaResponse.model_to_list(data))
 
     @staticmethod
     def success(

@@ -1,0 +1,45 @@
+# -*- coding:utf-8 -*-
+# !/usr/bin/env python 3.9.11
+"""
+@File    :  redis_config.py
+@Time    :  2021/10/18 2:28 AM
+@Author  :  YuYanQing
+@Version :  1.0
+@Contact :  mryu168@163.com
+@License :  (C)Copyright 2022-2026
+@Desc    :  redis配置
+"""
+from sqlalchemy import Column, INT, String, Boolean, UniqueConstraint
+
+from app.enums.bytesize import ByteSizeEnum
+from app.enums.sysvar import GlobalVarEnum
+from app.models.basic import PikaLargeBase
+
+
+class PikaRedis(PikaLargeBase):
+    __tablename__ = f"{GlobalVarEnum.APP_NAME_LOWER}_redis_info"
+    __table_args__ = (
+        UniqueConstraint('env', 'name'),
+    )
+    env = Column(INT, nullable=False)  # 对应环境id
+    name = Column(String(ByteSizeEnum.LENGTH_24), nullable=False)  # redis描述名称
+    addr = Column(String(ByteSizeEnum.LENGTH_128), nullable=False)
+    username = Column(String(ByteSizeEnum.LENGTH_50), nullable=False)
+    password = Column(String(ByteSizeEnum.LENGTH_200), nullable=False)
+    db = Column(INT, nullable=False)
+    # 是否是集群，默认为false，集群可不输入用户密码
+    cluster = Column(Boolean, default=False, nullable=False)
+    __tag__ = "Redis配置"
+    __fields__ = (name, env, addr, username, password, db, cluster)
+    __alias__ = dict(name="连接名称", env="环境", addr="连接地址", username="用户名",
+                     password="用户密码", db="库号", cluster="集群")
+
+    def __init__(self, env, name, addr, cluster, operator, username='', password='', db=0, id=None):
+        super().__init__(operator, id=id)
+        self.env = env
+        self.name = name
+        self.addr = addr
+        self.password = password
+        self.username = username
+        self.db = db
+        self.cluster = cluster

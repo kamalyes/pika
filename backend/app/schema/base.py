@@ -44,7 +44,7 @@ class PikaBaseModel(object):
 
 
 class PikaOnlyIdModel(BaseModel):
-    id: Optional[int] = Body(0, title="id")
+    id: Optional[str] = Body("0", title="id")
 
 
 class PikaOnlyNameModel(BaseModel):
@@ -67,15 +67,15 @@ class PikaOnlyDelModel(BaseModel):
     is_delete: Optional[str] = Query("0", title="是否被删除 1：已删除，0：未删除", max_length=ByteSizeEnum.LENGTH_20)
 
 
-class PikaLargeEditModel(PikaOnlyIdModel, PikaOnlyDescModel, PikaOnlyUsableModel, PikaOnlyDelModel):
+class PikaLargeEditModel(PikaOnlyIdModel, PikaOnlyDescModel, PikaOnlyUsableModel):
     pass
 
 
 class PikaQueryModel(PikaOnlyIdModel):
     create_emp_no: Optional[str] = Query(None, title="创建者员工编号", max_length=ByteSizeEnum.LENGTH_20)
     update_emp_no: Optional[str] = Query(None, title="修改者员工编号", max_length=ByteSizeEnum.LENGTH_20)
-    create_time: Optional[datetime] = Query(Moment.skew_date(days=-3), title="创建时间")
-    update_time: Optional[datetime] = Query(Moment.skew_date(minutes=15), title="更新时间")
+    create_date: Optional[datetime] = Query(Moment.skew_date(days=-3), title="创建时间")
+    update_date: Optional[datetime] = Query(Moment.skew_date(minutes=15), title="更新时间")
 
 
 class PikaDeleteModel(PikaOnlyIdsModel):

@@ -19,7 +19,7 @@ from app.schema.base import PikaDeleteModel, PikaQueryModel, PikaQueryTypeModel
 
 
 class KerberosGlobalModel(BaseModel):
-    id: int = Body(0, title="id")
+    id: Optional[int] = Body(0, title="id")
     question: Optional[str] = Body(None, title="密保问题", max_length=ByteSizeEnum.LENGTH_255)
     description: Optional[str] = Body(None, title="备注信息", max_length=ByteSizeEnum.LENGTH_255)
 
@@ -28,7 +28,7 @@ class EditKerberosItemModel(BaseModel):
     security: List[KerberosGlobalModel] = Body(..., title="密保信息")
 
 
-class DelKerberosItemModel(PikaDeleteModel):
+class DelKerberosModel(PikaDeleteModel):
     pass
 
 

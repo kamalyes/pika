@@ -18,7 +18,7 @@ from app.models.basic import PikaNormBase
 
 class User(PikaNormBase):
     __tablename__ = f"{GlobalVarEnum.APP_NAME_LOWER}_user_info"
-    __table_args__ = (UniqueConstraint("email", "mobile"), {"comment": "用户表"})
+    __table_args__ = (UniqueConstraint("emp_no", "email", "mobile"), {"comment": "用户表"})
     emp_no = Column(String(ByteSizeEnum.LENGTH_16), comment="员工编号")
     username = Column(String(ByteSizeEnum.LENGTH_16), comment="正式名称（登录使用）")
     user_alias = Column(String(ByteSizeEnum.LENGTH_16), comment="花名")

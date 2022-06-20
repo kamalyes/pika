@@ -20,16 +20,15 @@ FORBIDDEN = "对不起, 你没有足够的权限"
 
 
 class Permission:
-    def __init__(self, identity: int = None):
+    def __init__(self, identity: int = None, return_emp_no=False):
         self.identity = identity
+        self.return_emp_no = return_emp_no
 
     async def __call__(self, request: OAuth2TokenModel = Depends()):
         try:
             user_info = await UserDao.verify_token(request)
-            if self.identity is None:
-                return user_info
-            elif int(user_info.get('identity', 0)) >= self.identity:
-                return user_info
+            if self.identity is None or int(user_info.get('identity', 0)) >= self.identity:
+                return user_info["emp_no"] if self.return_emp_no else user_info
             else:
                 raise AuthException(detail=FORBIDDEN)
         except PermissionException as e:

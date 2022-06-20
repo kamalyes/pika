@@ -23,7 +23,7 @@ from app.core.handler.asyncsql import AsyncDbSession
 from app.core.handler.execres import AuthException, \
     SystemException, ThirdException, RedisException, RegisterException, ValidException
 from app.core.handler.jsonres import PikaResponse
-from app.core.handler.logger import Log
+from app.core.handler.logger import PikaLogger
 from app.crud.rbac import regex_register_str, client_ip
 from app.crud.system import Email
 from app.enums.bytesize import ByteSizeEnum
@@ -41,7 +41,7 @@ from config import PikaAppConfig
 
 
 class UserDao(object):
-    log = Log("UserDao")
+    log = PikaLogger("UserDao")
 
     @staticmethod
     async def assert_user_info(username, exists_username, email, exists_email, mobile=None, exists_mobile=None):
@@ -222,6 +222,13 @@ class UserDao(object):
                     or_(UserAdmin.id == uid, UserAdmin.emp_no == emp_no)).values(
                     {"last_logout_ip": last_logout_ip,
                      "last_logout_at": Moment.get_now_time("%Y-%m-%d %H:%M:%S")})
+                await session.execute(sql)
+
+    @staticmethod
+    async def update_avatar(emp_no, avatar):
+        async with async_db_session() as session:
+            async with session.begin():
+                sql = update(User).where(User.emp_no == emp_no).values({"avatar": avatar})
                 await session.execute(sql)
 
     @staticmethod
@@ -407,7 +414,7 @@ class UserDao(object):
                 or_(User.id == request.id, User.emp_no == request.emp_no, User.email == request.email,
                     User.username.like(f"%{request.username}%"), User.user_alias.like(f"%{request.user_alias}%"),
                     User.identity == User.identity, User.mobile.like(f"%{request.mobile}%")),
-                and_(User.create_time >= request.create_time, User.update_time <= request.update_time)
+                and_(User.create_date >= request.create_date, User.update_date <= request.update_date)
             ))
         else:
             return PikaResponse.failed(code=SysFailedCodeEnum.VAR_ERROR, detail=f"query_type值不对，仅可传0：全部数据，1：条件查询")
@@ -427,15 +434,17 @@ class UserDao(object):
     async def has_dynamic_code(dynamic_code):
         """
         检查动态验证码是否存在
-        :param dynamic_code:
-        :return:
+        Args:
+            dynamic_code:
+
+        Returns:
+
         Example::
             >>> UserDao.has_dynamic_code(8888)
             >>> UserDao.has_dynamic_code(888888)
         """
         redis_dynamic_code_ = f"{RedisKeyEnum.DYNAMIC_CODE}:{dynamic_code}"
         has_key = await async_redis.exists(redis_dynamic_code_)
-        print(redis_dynamic_code_, has_key)
         if dynamic_code in GlobalVarEnum.VERIFY_CODE_WHITE_LIST or has_key:
             return await async_redis.delete(redis_dynamic_code_)
         else:
@@ -445,8 +454,8 @@ class UserDao(object):
     async def has_mail_verify_code(verify_code):
         """
         检查邮箱验证码是否存在
-        :param verify_code:
-        :return:
+            verify_code:
+        Returns:
         Example::
             >>> UserDao.has_mail_verify_code(8888)
             >>> UserDao.has_mail_verify_code(888888)

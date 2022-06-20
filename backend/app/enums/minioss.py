@@ -15,3 +15,4 @@ class MiniOssTypeEnum:
     ALIYUN = "aliyun"
     GITEE = "gitee"
     QINIU = "qiniu"
+    TENCENT = "tencent"

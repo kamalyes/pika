@@ -13,7 +13,7 @@
 from typing import Optional, List
 
 from fastapi import Body, Header
-from fastapi.params import Form
+from fastapi.params import Form, Query
 from pydantic import BaseModel
 
 from app.enums.bytesize import ByteSizeEnum
@@ -76,7 +76,7 @@ class OAuth2LoginModel:
             grant_type: Optional[str] = Form("localhost", title="授权方式", max_length=ByteSizeEnum.LENGTH_255),
             username: Optional[str] = Form(None, title="用户名", max_length=ByteSizeEnum.LENGTH_16),
             emp_no: Optional[str] = Form(None, title="用户编码", max_length=ByteSizeEnum.LENGTH_16),
-            email: Optional[str] = Form(..., title="邮箱地址", max_length=ByteSizeEnum.LENGTH_255),
+            email: Optional[str] = Form(None, title="邮箱地址", max_length=ByteSizeEnum.LENGTH_255),
             password: Optional[str] = Form(None, title="密码", max_length=ByteSizeEnum.LENGTH_255),
             private_key: Optional[str] = Form(None, title="私钥", max_length=ByteSizeEnum.LENGTH_255),
     ):
@@ -94,24 +94,24 @@ class ModifyUserInfoModel(RegisterModel):
 
 
 class QueryUserInModel(PikaQueryModel, PikaQueryTypeModel):
-    user_alias: Optional[str] = Body(None, title="用户花名")
-    username: Optional[str] = Body(None, title="用户名", max_length=ByteSizeEnum.LENGTH_16)
-    emp_no: Optional[str] = Form(None, title="用户编码")
-    email: Optional[str] = Body(None, title="邮箱地址")
-    mobile: Optional[str] = Body(None, title="手机号码")
-    identity: Optional[str] = Body(None, title="用户身份")
+    user_alias: Optional[str] = Query(None, title="用户花名")
+    username: Optional[str] = Query(None, title="用户名", max_length=ByteSizeEnum.LENGTH_16)
+    emp_no: Optional[str] = Query(None, title="用户编码")
+    email: Optional[str] = Query(None, title="邮箱地址")
+    mobile: Optional[str] = Query(None, title="手机号码")
+    identity: Optional[str] = Query(None, title="用户身份")
 
     class Config:
         orm_mode = True
 
 
 class QueryUserOutModel(PikaQueryModel):
-    username: Optional[str] = Body(None, title="用户名", max_length=ByteSizeEnum.LENGTH_16)
-    user_alias: Optional[str] = Body(None, title="用户花名")
-    emp_no: Optional[str] = Form(None, title="用户编码")
-    email: Optional[str] = Body(None, title="邮箱地址")
-    mobile: Optional[str] = Body(None, title="手机号码")
-    identity: Optional[str] = Body(None, title="用户身份")
+    username: Optional[str] = Query(None, title="用户名", max_length=ByteSizeEnum.LENGTH_16)
+    user_alias: Optional[str] = Query(None, title="用户花名")
+    emp_no: Optional[str] = Query(None, title="用户编码")
+    email: Optional[str] = Query(None, title="邮箱地址")
+    mobile: Optional[str] = Query(None, title="手机号码")
+    identity: Optional[str] = Query(None, title="用户身份")
 
     class Config:
         orm_mode = True

@@ -1,0 +1,34 @@
+from app.enums.minioss import MiniOssTypeEnum
+from app.middleware.oss.aliyun import AliyunOss
+from app.middleware.oss.files import OssFile
+from app.middleware.oss.qiniu import QiniuOss
+from app.middleware.oss.tencent import TencentCos
+from config import PikaAppConfig
+
+
+class OssClient(object):
+    _client = None
+
+    @classmethod
+    def get_oss_client(cls) -> OssFile:
+        """
+        通过oss配置拿到oss客户端
+        :return:
+        """
+        if OssClient._client is None:
+            oss_config = PikaAppConfig.OSS_CONFIG
+            oss_type = PikaAppConfig.OSS_TYPE.lower()
+            access_key_id = PikaAppConfig.OSS_ACCESS_KEY_ID
+            access_key_secret = PikaAppConfig.OSS_ACCESS_KEY_SECRET
+            bucket_name = PikaAppConfig.OSS_BUCKET_NAME
+            endpoint = PikaAppConfig.OSS_ENDPOINT
+            if oss_config is None:
+                raise Exception(f"服务器未配置oss信息, 请在application-{PikaAppConfig.ENVIRONMENT}.yaml中添加")
+            if oss_type == MiniOssTypeEnum.ALIYUN.value:
+                return AliyunOss(access_key_id, access_key_secret, endpoint, bucket_name)
+            if oss_type == MiniOssTypeEnum.QINIU.value:
+                return QiniuOss(access_key_id, access_key_secret, bucket_name)
+            if oss_type == MiniOssTypeEnum.TENCENT.value:
+                return TencentCos(access_key_id, access_key_secret, endpoint, bucket_name)
+            raise Exception("不支持的oss类型")
+        return OssClient._client

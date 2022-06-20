@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python 3.9.11
 """
-@File    :  asyncsql
+@File    :  asyncsql.py
 @Time    :  2022/6/10 6:53 PM
 @Author  :  YuYanQing
 @Version :  1.0

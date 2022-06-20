@@ -40,6 +40,7 @@ class ByteSizeEnum(IntEnum):
     LENGTH_500 = 500
     LENGTH_600 = 600
     LENGTH_800 = 800
+    LENGTH_900 = 900
     LENGTH_1000 = 1000
     LENGTH_1500 = 1500
     LENGTH_2000 = 2000

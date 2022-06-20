@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.rbac.kerberos import KerberosDao
 from app.models import pagination_db
-from app.schema.kerberos import EditKerberosItemModel, DelKerberosItemModel, \
+from app.schema.kerberos import EditKerberosItemModel, DelKerberosModel, \
     QueryKerberosOutModel, QueryKerberosInModel
 from app.service import Permission
 
@@ -30,7 +30,7 @@ async def add_encrypt_issue(security: EditKerberosItemModel = Depends(), user_in
 
 
 @router.delete("/issue/delete", name="删除推荐的密保问题（非软删，谨慎操作）")
-async def delete_encrypt_issue(request: DelKerberosItemModel = Depends(), user_info=Depends(Permission())):
+async def delete_encrypt_issue(request: DelKerberosModel = Depends(), user_info=Depends(Permission())):
     return await KerberosDao.delete_encrypt_issue(request=request)
 
 

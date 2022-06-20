@@ -9,3 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
+
+from fastapi import APIRouter
+
+router = APIRouter()

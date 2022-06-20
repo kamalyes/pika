@@ -18,14 +18,14 @@ from app.schema.base import PikaDeleteModel, PikaQueryModel, PikaQueryTypeModel,
 
 
 class EditMenuModel(PikaOnlyDescModel, PikaOnlyDelModel):
-    son_id: int = Body(None, title="子菜单id")
+    son_id: Optional[int] = Body(None, title="子菜单id")
     title: Optional[str] = Body(..., title="菜单名称", max_length=ByteSizeEnum.LENGTH_70)
     icon: Optional[str] = Body(..., title="菜单图标", max_length=ByteSizeEnum.LENGTH_70)
     path: Optional[str] = Body(..., title="路由地址", max_length=ByteSizeEnum.LENGTH_255)
     type: Optional[str] = Body(..., title="菜单类型：用于区分模块、目录、菜单、按钮", max_length=ByteSizeEnum.LENGTH_20)
     component: Optional[str] = Body(..., title="菜单对应的组件路径", max_length=ByteSizeEnum.LENGTH_255)
-    hidden: int = Body(..., title="是否隐藏此菜单")
-    parent_id: int = Body(None, title="父菜单id")
+    hidden: Optional[int] = Body(..., title="是否隐藏此菜单")
+    parent_id: Optional[int] = Body(None, title="父菜单id")
 
 
 class DelMenuModel(PikaDeleteModel):
