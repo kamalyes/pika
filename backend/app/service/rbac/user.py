@@ -22,7 +22,7 @@ from app.enums.gebruikersrol import RoleEnum
 from app.models import pagination_db
 from app.schema.user import RegisterModel, OAuth2LoginModel, ForgetPwdModel, OAuth2TokenModel, AddUserModel, \
     ModifyUserInfoModel, QueryUserInModel, QueryUserOutModel, GetVerifyCodeModel, ModifySecretModel, EditSecurityModel, \
-    DelSecurityModel, QuerySecurityOutModel
+    DelSecurityModel, QuerySecurityOutModel, EmailVerifyCodeLogin
 from app.service import Permission
 
 router = APIRouter()
@@ -33,9 +33,14 @@ async def register(request: Request, register_model: RegisterModel):
     return await UserDao.register_user(request, register_model)
 
 
-@router.post("/login", name="登录", include_in_schema=True)
+@router.post("/login/", name="（编号、用户名）及密码登录", include_in_schema=True)
 async def login(request: Request, oauth2_login: OAuth2LoginModel = Depends()):
-    return await UserDao.account_login(request, oauth2_login)
+    if oauth2_login.grant_type == "account":
+        return await UserDao.account_login(request, oauth2_login)
+    elif oauth2_login.grant_type == "email":
+        return await UserDao.email_login(request, oauth2_login)
+    else:
+        raise ValidException(detail="暂不支持该model！")
 
 
 @router.post("/verifytoken", name="验证Token（用于刷新时使用）")
@@ -77,6 +82,11 @@ async def get_dynamic_code(request: Request):
     return await UserDao.rand_dynamic_code(request)
 
 
+@router.post("/auth/elcode", name="获取邮箱登录验证码")
+async def send_email_login_verify_code(request: EmailVerifyCodeLogin):
+    return await UserDao.send_email_login_verify_code(request)
+
+
 @router.post("/auth/verifycode", name="发送验证码-邮件")
 async def send_verify_code(request: GetVerifyCodeModel, user_info=Depends(Permission())):
     return await UserDao.get_verifycode(request, user_info)
@@ -86,7 +96,7 @@ async def send_verify_code(request: GetVerifyCodeModel, user_info=Depends(Permis
 async def forget_pwd(request: ForgetPwdModel = Depends(), user_info=Depends(Permission())):
     alter_type_list = [1, 2]
     if request.alter_type == alter_type_list[0]:
-        await UserDao.has_mail_verify_code(request.verify_code)
+        await UserDao.has_mail_verify_code(verify_code=request.verify_code)
         await UserDao.update_pwd(new_password=request.new_password, emp_no=user_info["emp_no"])
     elif request.alter_type == alter_type_list[1]:
         await UserDao.update_pwd(new_password=request.new_password, emp_no=user_info["emp_no"])

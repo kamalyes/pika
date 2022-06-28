@@ -14,12 +14,12 @@ from datetime import datetime
 from sqlalchemy import Column, String, Text, DateTime, SMALLINT, INT
 
 from app.enums.operation import SqlOperationTypeEnum
-from app.enums.sysvar import GlobalVarEnum
+from app.enums.sysvar import PikaGlobalVarEnum
 from app.models.basic import PikaNormBase, PikaMinBase
 
 
-class PikaRequestHistory(PikaNormBase):
-    __tablename__ = f"{GlobalVarEnum.APP_NAME_LOWER}_ask_history"
+class PikaSysRecord(PikaNormBase):
+    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_sys_record"
     remote_addr = Column(String(255), nullable=False, comment='用户名称')
     real_ip = Column(String(255), nullable=False, comment='request_ip')
     request = Column(Text, nullable=False, comment='request')
@@ -36,14 +36,14 @@ class PikaRequestHistory(PikaNormBase):
 
 
 class PikaOperationLog(PikaMinBase):
-    __tablename__ = f'{GlobalVarEnum.APP_NAME_LOWER}_operation_log'
+    __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_operation_log'
     title = Column(String(128), nullable=False, comment="操作title")
     tag = Column(String(24), comment="操作tag")
     mode = Column(SMALLINT, comment="操作类型")
     key = Column(INT, nullable=True, comment="关键id，可能是目录id，case_id或者其他id")
 
-    def __init__(self, operator, operator_date, mode: SqlOperationTypeEnum, title, tag, description, key=None):
-        super.__init__(operator, operator_date, description)
+    def __init__(self, operator, mode: SqlOperationTypeEnum, title, tag, description, key=None):
+        super.__init__(operator, description)
         self.title = title
         self.tag = tag
         self.mode = mode.value

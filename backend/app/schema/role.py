@@ -9,24 +9,42 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import Body
 
-from app.schema.base import PikaDeleteModel, PikaOnlyIdModel, PikaOnlyDescModel
+from app.enums.bytesize import ByteSizeEnum
+from app.schema.base import PikaDeleteModel, PikaOnlyIdModel, PikaOnlyDescModel, PikaQueryModel, PikaQueryTypeModel, \
+    PikaOnlyEmpNoModel
 
 
-class EditRoleModel(PikaOnlyIdModel, PikaOnlyDescModel):
-    pass
+class RoleGlobalModel(PikaOnlyIdModel, PikaOnlyDescModel):
+    name: Optional[str] = Body(None, title="角色名称", max_length=ByteSizeEnum.LENGTH_255)
+    role_type: Optional[int] = Body(None, title="角色权限类型，10菜单权限，20用户组权限")
+    menus_id: Optional[str] = Body(None, title="菜单id", max_length=ByteSizeEnum.LENGTH_64)
+
+
+class EditRoleModel:
+    def __init__(self, role: List[RoleGlobalModel] = Body(..., title="角色信息")):
+        self.role = role
 
 
 class DelRoleModel(PikaDeleteModel):
     pass
 
 
-class EditRoleRelModel(PikaOnlyDescModel):
+class QueryRoleInModel(PikaQueryModel, PikaQueryTypeModel, RoleGlobalModel):
+    pass
+
+
+class QueryRoleOutModel(PikaQueryModel, RoleGlobalModel):
+    class Config:
+        orm_mode = True
+
+
+class BindRoleModel(PikaOnlyEmpNoModel):
+    id: Optional[int] = Body(0, title="id")
     role_id: Optional[int] = Body(0, title="角色id")
-    role_rel_id: Optional[int] = Body(0, title="角色应用id")
 
 
 class DelRoleRelModel(PikaDeleteModel):

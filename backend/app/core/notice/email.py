@@ -20,7 +20,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from app.core.handler.execres import ThirdException, ValidException
 from app.enums.statuscode import SysFailedCodeEnum
-from app.enums.sysvar import GlobalVarEnum
+from app.enums.sysvar import PikaGlobalVarEnum
 from config import PikaAppConfig
 
 
@@ -60,10 +60,10 @@ class EmailHande:
             "emp_no": emp_no,
             "email": email,
             "valid_time": valid_time,
-            "agreement": GlobalVarEnum.AGREE_MENT,
-            "form": GlobalVarEnum.APP_NAME,
+            "agreement": PikaGlobalVarEnum.AGREE_MENT,
+            "form": PikaGlobalVarEnum.APP_NAME,
             "send_time": send_time,
-            "root_email": GlobalVarEnum.PL_EMAIL,
+            "root_email": PikaGlobalVarEnum.PL_EMAIL,
         }
         return EmailHande.sub_template("register.html", target_dict)
 
@@ -96,8 +96,8 @@ class EmailHande:
             "username": username,
             "emp_no": emp_no,
             "event_content": event_content,
-            "agreement": GlobalVarEnum.AGREE_MENT,
-            "form": GlobalVarEnum.APP_NAME,
+            "agreement": PikaGlobalVarEnum.AGREE_MENT,
+            "form": PikaGlobalVarEnum.APP_NAME,
             "send_time": send_time,
         }
         return EmailHande.sub_template("event.html", target_dict)
@@ -121,8 +121,8 @@ class EmailHande:
             "username": username,
             "emp_no": emp_no,
             "auth_code": auth_code,
-            "agreement": GlobalVarEnum.AGREE_MENT,
-            "form": GlobalVarEnum.APP_NAME,
+            "agreement": PikaGlobalVarEnum.AGREE_MENT,
+            "form": PikaGlobalVarEnum.APP_NAME,
             "valid_time": valid_time,
             "send_time": redis_time,
         }
@@ -148,10 +148,10 @@ class EmailHande:
             "username": username,
             "new_password": new_password,
             "valid_time": valid_time,
-            "agreement": GlobalVarEnum.AGREE_MENT,
-            "form": GlobalVarEnum.APP_NAME,
+            "agreement": PikaGlobalVarEnum.AGREE_MENT,
+            "form": PikaGlobalVarEnum.APP_NAME,
             "send_time": send_time,
-            "root_email": GlobalVarEnum.PL_EMAIL,
+            "root_email": PikaGlobalVarEnum.PL_EMAIL,
         }
         return EmailHande.sub_template("reset_pwd.html", target_dict)
 
@@ -181,10 +181,10 @@ class EmailHande:
             "security_question": security_question,
             "encrypted_answers": encrypted_answers,
             "valid_time": valid_time,
-            "agreement": GlobalVarEnum.AGREE_MENT,
-            "form": GlobalVarEnum.APP_NAME,
+            "agreement": PikaGlobalVarEnum.AGREE_MENT,
+            "form": PikaGlobalVarEnum.APP_NAME,
             "send_time": send_time,
-            "root_email": GlobalVarEnum.PL_EMAIL,
+            "root_email": PikaGlobalVarEnum.PL_EMAIL,
         }
         return EmailHande.sub_template("reset_encrypted.html", target_dict)
 
@@ -193,7 +193,7 @@ class EmailHande:
             content,
             subject="",
             send_type="html",
-            title=GlobalVarEnum.APP_NAME,
+            title=PikaGlobalVarEnum.APP_NAME,
             addressee: list = [],
     ):
         """

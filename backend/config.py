@@ -20,7 +20,7 @@ from hutools.core import DataHand, System
 from loguru import logger
 from loguru._defaults import LOGURU_FORMAT
 
-from app.enums.sysvar import GlobalVarEnum
+from app.enums.sysvar import PikaGlobalVarEnum
 
 
 class PikaAppConfig(object):
@@ -57,7 +57,7 @@ class PikaAppConfig(object):
         f"mysql+aiomysql://{MYSQL_USER}:{MYSQL_PWD}@{MYSQL_HOST}:{MYSQL_PORT}/{DBNAME}"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    RELATION = f"{GlobalVarEnum.APP_NAME_LOWER}_relation"
+    RELATION = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_relation"
     ALIAS = "__alias__"
     TABLE_TAG = "__table_args__"
     # 数据库表展示的变更字段
@@ -141,7 +141,7 @@ class PikaAppConfig(object):
     # 日志相关
     LOGS_DIR_NAME = time.strftime("%Y-%m-%d-logs", time.localtime(time.time()))
     LOG_GENERAL_DIR = os.path.join(OUTPUT_PATH, LOGS_DIR_NAME)
-    APP_NAME = GlobalVarEnum.APP_NAME.lower()
+    APP_NAME = PikaGlobalVarEnum.APP_NAME.lower()
     INFO_LOG_FILE = os.path.join(LOG_GENERAL_DIR, f"{APP_NAME}-info.log")
     ERROR_LOG_FILE = os.path.join(LOG_GENERAL_DIR, f"{APP_NAME}-error.log")
     # 配置日志格式

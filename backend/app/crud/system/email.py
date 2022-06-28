@@ -14,10 +14,11 @@ from typing import List
 from hutools.core import MockHelper
 from hutools.time import Moment
 
+from app.core.handler.execres import ValidException
 from app.core.handler.logger import PikaLogger
 from app.core.notice.email import EmailHande
 from app.enums.dimkey import RedisKeyEnum
-from app.enums.sysvar import ValidTimeEnum, GlobalVarEnum
+from app.enums.sysvar import ValidTimeEnum, PikaGlobalVarEnum
 from app.models import async_redis
 
 
@@ -26,7 +27,7 @@ class Email(object):
 
     @staticmethod
     async def register_succeed(emp_no: str, username: str, addressee: List, pwd_valid_time,
-                               app_name=GlobalVarEnum.APP_NAME):
+                               app_name=PikaGlobalVarEnum.APP_NAME):
         """
 
         Args:
@@ -56,12 +57,17 @@ class Email(object):
             raise e
 
     @staticmethod
-    async def forget_password(emp_no: str, username: str, addressee: List, app_name=GlobalVarEnum.APP_NAME):
+    async def rand_mail_code(emp_no: str, username: str, addressee: List, app_name=PikaGlobalVarEnum.APP_NAME, model=1):
         auth_code_ = MockHelper.rand_sample(length=6)
         redis_now_time = await async_redis.time()
         auth_code_valid_time = ValidTimeEnum.AUTH_CODE_VALID_TIME
         valid_time = list(redis_now_time)[0] + auth_code_valid_time
-        auth_verify_code = f"{RedisKeyEnum.AUTH_VERIFY_CODE}:{emp_no}"
+        if model == 1:
+            auth_verify_code = f"{RedisKeyEnum.FORGET_PWD_VERIFYCODE}:{emp_no}"
+        elif model == 2:
+            auth_verify_code = f"{RedisKeyEnum.LOGIN_VERIFYCODE}:{emp_no}"
+        else:
+            raise ValidException(detail="暂不支持该model！")
         await async_redis.set(auth_verify_code, auth_code_, int(auth_code_valid_time))
         try:  # 若发送邮件异常则回收对应验证码
             return EmailHande.send_email(

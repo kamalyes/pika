@@ -24,3 +24,4 @@ class SqlOperationTypeEnum(IntEnum):
 
 class VerifyCodeEnum(IntEnum):
     FORGET_PWD = 1
+    EMAIL_LOGIN = 2

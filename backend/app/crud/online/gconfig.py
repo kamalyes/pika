@@ -16,12 +16,12 @@ from app.core.handler.logger import PikaLogger
 from app.crud import PikaMapper
 from app.middleware.xredis import RedisHelper
 from app.models import async_session
-from app.models.gconfig import GConfig
+from app.models.gconfig import PikaGConfig
 from app.schema.gconfig import GConfigForm
 from app.utils.decorator import dao
 
 
-@dao(GConfig, PikaLogger("GConfigDao"))
+@dao(PikaGConfig, PikaLogger("GConfigDao"))
 class GConfigDao(PikaMapper):
 
     @classmethod
@@ -31,12 +31,12 @@ class GConfigDao(PikaMapper):
             async with async_session() as session:
                 async with session.begin():
                     query = await session.execute(
-                        select(GConfig).where(GConfig.env == form.env, GConfig.key == form.key,
-                                              GConfig.is_delete == 0))
+                        select(PikaGConfig).where(PikaGConfig.env == form.env, PikaGConfig.key == form.key,
+                                                  PikaGConfig.is_delete == 0))
                     data = query.scalars().first()
                     if data is not None:
                         raise Exception(f"变量: {data.key}已存在")
-                    config = GConfig(**form.dict(), emp_no=emp_no)
+                    config = PikaGConfig(**form.dict(), emp_no=emp_no)
                     session.add(config)
         except Exception as e:
             cls.log.error(f"新增变量: {data.key}失败, {e}")
@@ -44,11 +44,12 @@ class GConfigDao(PikaMapper):
 
     @staticmethod
     @RedisHelper.cache("dao", 1800, True)
-    async def async_get_gconfig_by_key(key: str, env: int) -> GConfig:
+    async def async_get_gconfig_by_key(key: str, env: int) -> PikaGConfig:
         try:
-            filters = [GConfig.key == key, GConfig.is_delete == 0, GConfig.is_usable is True, GConfig.env == env]
+            filters = [PikaGConfig.key == key, PikaGConfig.is_delete == 0, PikaGConfig.is_usable is True,
+                       PikaGConfig.env == env]
             async with async_session() as session:
-                sql = select(GConfig).where(*filters)
+                sql = select(PikaGConfig).where(*filters)
                 result = await session.execute(sql)
                 return result.scalars().first()
         except Exception as e:

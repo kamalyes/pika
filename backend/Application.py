@@ -32,7 +32,7 @@ from app.core.handler.execres import (
     SystemException,
     RegisterException)
 from app.core.handler.jsonres import PikaResponse
-from app.enums.sysvar import GlobalVarEnum
+from app.enums.sysvar import PikaGlobalVarEnum
 from app.models import async_redis, async_create_table
 from app.service.itst import aiptest_router
 from app.service.itst import functest_router
@@ -234,10 +234,10 @@ class PikaFastApi:
 
             """
             error_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-            return PikaResponse.custom(code=error_code, status_code=error_code, detail=exc.detail)
+            return PikaResponse.custom(code=error_code, status_code=error_code, detail=traceback.format_exc())
 
     @staticmethod
-    def create_app(app_name=None, origins=None, title=f"{GlobalVarEnum.APP_NAME}测试平台", requirements=None):
+    def create_app(app_name=None, origins=None, title=f"{PikaGlobalVarEnum.APP_NAME}测试平台", requirements=None):
         """
         初始化app、配置路由及swagger
         Args:
@@ -369,8 +369,12 @@ async def init_database():
     Returns:
 
     """
-    await async_create_table()
-    logger.bind(name=None).success("database created success.        ✔")
+    try:
+        await async_create_table()
+        logger.bind(name=None).success("table created success.        ✔")
+    except Exception as e:
+        logger.bind(name=None).error(f"table created failed, Please check config.py for database config.        ❌")
+        raise e
 
 
 @pika.on_event('startup')

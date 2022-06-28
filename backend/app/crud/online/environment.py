@@ -12,15 +12,16 @@
 
 from sqlalchemy import select
 
+from app.core.handler.execres import ValidException
 from app.core.handler.logger import PikaLogger
 from app.crud import PikaMapper
 from app.models import async_session
-from app.models.environment import Environment
+from app.models.environment import PikaEnvironment
 from app.schema.environment import EnvironmentForm
 from app.utils.decorator import dao
 
 
-@dao(Environment, PikaLogger("EnvironmentDao"))
+@dao(PikaEnvironment, PikaLogger("EnvironmentDao"))
 class EnvironmentDao(PikaMapper):
 
     @staticmethod
@@ -34,35 +35,32 @@ class EnvironmentDao(PikaMapper):
 
         """
         async with async_session() as session:
-            ans = await session.execute(select(Environment).where(Environment.id == id, Environment.is_delete == 0))
+            ans = await session.execute(
+                select(PikaEnvironment).where(PikaEnvironment.id == id, PikaEnvironment.is_delete == 0))
             if ans is None:
-                raise Exception(f"环境: {id}不存在")
+                raise ValidException(detail=f"环境: {id}不存在")
             return ans.scalars().first()
 
     @classmethod
     async def insert_env(cls, data: EnvironmentForm, emp_no):
-        try:
-            async with async_session() as session:
-                async with session.begin():
-                    query = await session.execute(
-                        select(Environment).where(Environment.name == data.name, Environment.is_delete == 0))
-                    if query.scalars().first() is not None:
-                        raise Exception(f"环境已存在")
-                    env = Environment(**data.dict(), operator=emp_no)
-                    session.add(env)
-        except Exception as e:
-            err = f"新增环境失败, 失败原因：{e}"
-            EnvironmentDao.log.error(err)
-            raise Exception(err)
+        async with async_session() as session:
+            async with session.begin():
+                query = await session.execute(
+                    select(PikaEnvironment).where(PikaEnvironment.name == data.name,
+                                                  PikaEnvironment.is_delete == 0))
+                if query.scalars().first() is not None:
+                    raise ValidException(detail=f"添加失败，环境名称：{data.name}已存在")
+                env = PikaEnvironment(**data.dict(), operator=emp_no)
+                session.add(env)
 
     @classmethod
     async def list_env(cls, page, size, name=None, exactly=False):
         try:
-            search = [Environment.is_delete == 0]
+            search = [PikaEnvironment.is_delete == 0]
             async with async_session() as session:
                 if name:
-                    search.append(Environment.name.like("%{}%".format(name)))
-                sql = select(Environment).where(*search)
+                    search.append(PikaEnvironment.name.like("%{}%".format(name)))
+                sql = select(PikaEnvironment).where(*search)
                 query = await session.execute(sql)
                 if exactly:
                     data = query.scalars().all()

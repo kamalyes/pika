@@ -17,14 +17,14 @@ import time
 
 from loguru import logger
 
-from app.enums.sysvar import GlobalVarEnum
+from app.enums.sysvar import PikaGlobalVarEnum
 from config import PikaAppConfig
 
 
 class PikaLogger(object):
     business = None
 
-    def __init__(self, name=GlobalVarEnum.APP_NAME):  # Logger标识默认为app
+    def __init__(self, name=PikaGlobalVarEnum.APP_NAME):  # Logger标识默认为app
         """
         业务名称
         Args:

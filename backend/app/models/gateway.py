@@ -13,12 +13,12 @@
 from sqlalchemy import Column, INT, String, UniqueConstraint
 
 from app.enums.bytesize import ByteSizeEnum
-from app.enums.sysvar import GlobalVarEnum
+from app.enums.sysvar import PikaGlobalVarEnum
 from app.models.basic import PikaLargeBase
 
 
 class PikaGateway(PikaLargeBase):
-    __tablename__ = f'{GlobalVarEnum.APP_NAME_LOWER}_gateway'
+    __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_gateway'
     __table_args__ = (
         UniqueConstraint('env_id', 'name'),
     )

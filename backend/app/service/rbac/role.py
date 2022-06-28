@@ -9,41 +9,44 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
+from typing import Any, List
 
-from fastapi import APIRouter
-from hutools.pagination import add_pagination
+from fastapi import APIRouter, Depends
+from hutools.pagination import LimitOffsetPage, add_pagination
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.crud.rbac.role import RoleDao
+from app.models import pagination_db
+from app.schema.role import EditRoleModel, DelRoleModel, QueryRoleInModel, QueryRoleOutModel, BindRoleModel
+from app.service import Permission
 
 router = APIRouter()
 
 
 @router.post("/role/add", name="添加角色配置")
-async def add_role():
-    pass
+async def add_role(request: EditRoleModel = Depends(), user_info=Depends(Permission())):
+    return await RoleDao.add_role(request=request, emp_no=user_info["emp_no"])
 
 
 @router.put("/role/update", name="更新角色配置信息")
-async def update_role():
-    pass
+async def update_role(request: EditRoleModel = Depends(), user_info=Depends(Permission())):
+    return await RoleDao.update_role(request=request, emp_no=user_info["emp_no"])
 
 
 @router.delete("/role/delete", name="删除角色配置")
-async def delete_role():
-    pass
+async def delete_role(request: DelRoleModel = Depends(), user_info=Depends(Permission())):
+    return await RoleDao.delete_role(request=request)
 
 
-@router.get("/role/query", name="查询角色配置")
-async def query_role():
-    pass
+@router.get("/role/query", name="查询角色配置", response_model=LimitOffsetPage[QueryRoleOutModel])
+async def query_role(request: QueryRoleInModel = Depends(), user_info=Depends(Permission()),
+                     db: AsyncSession = Depends(pagination_db)) -> Any:
+    return await RoleDao.query_role(db=db, request=request)
 
 
 @router.post("/role/bind", name="给成员绑定角色")
-async def bind_role():
-    pass
-
-
-@router.delete("/role/unbind", name="给成员解绑角色")
-async def unbind_role():
-    pass
+async def bind_role(request: List[BindRoleModel], user_info=Depends(Permission())):
+    return await RoleDao.bind_role(request=request, emp_no=user_info["emp_no"])
 
 
 add_pagination(router)

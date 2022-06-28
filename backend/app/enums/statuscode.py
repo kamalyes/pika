@@ -51,6 +51,7 @@ class SysFailedCodeEnum:
     MALFEASONCE_ERROR = 3011  # 越权操作错误
     ACCOUNT_NOT_EXISTS = 3012
     USER_HAS_USED = 3013  # 用户名已被使用
+    EMAIL_NOT_REGISTER = 3015  # email暂未注册使用
 
     # Other_Code 5001~6000
     SEND_EMAIL_ERROR = 5001  # 发送邮件失败

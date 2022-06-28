@@ -85,7 +85,7 @@ def sync_db_session():
         raise register_err
     except SystemException as sys_err:
         raise sys_err
-    except Exception:
+    except Exception as e:
         session.rollback()
         raise DbExecuteException(
             code=SysFailedCodeEnum.SQL_OPERATION_ERROR,
@@ -93,6 +93,15 @@ def sync_db_session():
         )
     finally:
         session.close()
+
+
+async def get_async_session():
+    """
+    获取异步session
+    :return:
+    """
+    async with async_session() as session:
+        yield session
 
 
 @asynccontextmanager
@@ -121,7 +130,7 @@ async def async_db_session() -> AsyncGenerator:
         raise register_err
     except SystemException as sys_err:
         raise sys_err
-    except Exception:
+    except Exception as e:
         await session.rollback()
         raise DbExecuteException(
             code=SysFailedCodeEnum.SQL_OPERATION_ERROR,
@@ -224,10 +233,10 @@ class DatabaseHelper(object):
         Returns:
 
         """
-        if str(dist.__class__.deleted_at.property.columns[0].type) == "DATETIME":
-            dist.deleted_at = datetime.now()
+        if str(dist.__class__.delete_date.property.columns[0].type) == "DATETIME":
+            dist.delete_date = datetime.now()
         else:
-            dist.deleted_at = int(time.time() * 1000)
+            dist.delete_date = int(time.time() * 1000)
         dist.update_date = datetime.now()
         dist.update_emp_no = operator
 

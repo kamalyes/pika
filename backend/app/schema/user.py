@@ -72,8 +72,9 @@ class OAuth2LoginModel:
 
     def __init__(
             self,
-            dynamic_code: Optional[str] = Form(..., title="动态码", max_length=ByteSizeEnum.LENGTH_06),
-            grant_type: Optional[str] = Form("localhost", title="授权方式", max_length=ByteSizeEnum.LENGTH_255),
+            dynamic_code: Optional[str] = Form(None, title="动态码", max_length=ByteSizeEnum.LENGTH_06),
+            grant_type: Optional[str] = Form(..., title="授权方式, account：用户名/员工编号、email：邮箱验证码",
+                                             max_length=ByteSizeEnum.LENGTH_255),
             username: Optional[str] = Form(None, title="用户名", max_length=ByteSizeEnum.LENGTH_16),
             emp_no: Optional[str] = Form(None, title="用户编码", max_length=ByteSizeEnum.LENGTH_16),
             email: Optional[str] = Form(None, title="邮箱地址", max_length=ByteSizeEnum.LENGTH_255),
@@ -161,6 +162,13 @@ class QuerySecurityOutModel(BaseModel):
 
 class GetVerifyCodeModel(BaseModel):
     models: Optional[int] = Body(1, title="模式：（1：忘记密码）")
+
+    class Config:
+        orm_mode = True
+
+
+class EmailVerifyCodeLogin(BaseModel):
+    email: Optional[str] = Body(None, title="邮箱地址")
 
     class Config:
         orm_mode = True

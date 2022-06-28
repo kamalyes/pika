@@ -11,12 +11,12 @@
 """
 from sqlalchemy import INT, Column, String, TEXT, UniqueConstraint
 
-from app.enums.sysvar import GlobalVarEnum
+from app.enums.sysvar import PikaGlobalVarEnum
 from app.models.basic import PikaLargeBase
 
 
-class GConfig(PikaLargeBase):
-    __tablename__ = f'{GlobalVarEnum.APP_NAME_LOWER}_gconfig'
+class PikaGConfig(PikaLargeBase):
+    __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_gconfig'
     env = Column(INT)
     key = Column(String(16))
     value = Column(TEXT)

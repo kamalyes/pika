@@ -12,12 +12,12 @@
 from sqlalchemy import Column, String, Integer, Text
 
 from app.enums.bytesize import ByteSizeEnum
-from app.enums.sysvar import GlobalVarEnum
+from app.enums.sysvar import PikaGlobalVarEnum
 from app.models.basic import PikaLargeBase
 
 
-class Mock(PikaLargeBase):
-    __tablename__ = f"{GlobalVarEnum.APP_NAME_LOWER}_mock_config"
+class PikaMock(PikaLargeBase):
+    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_mock_config"
     __table_args__ = {"comment": "mock配置表"}
     project_id = Column(Integer, nullable=False, comment='项目id')
     url = Column(String(ByteSizeEnum.LENGTH_600), index=True, nullable=False, comment='url地址')

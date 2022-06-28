@@ -83,8 +83,9 @@ class AsyncDbSession:
 
         """
         if query_type == '0':
-            return await paginate(db, all_do_sql)
+            data = await paginate(db, all_do_sql)
         elif query_type == '1':
-            return await paginate(db, dim_do_sql)
+            data = await paginate(db, dim_do_sql)
         else:
             return PikaResponse.failed(code=SysFailedCodeEnum.VAR_ERROR, detail=f"query_type值不对，仅可传0：全部数据，1：条件查询")
+        return data

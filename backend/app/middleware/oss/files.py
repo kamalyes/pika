@@ -1,11 +1,11 @@
 import random
 import time
 
-from app.enums.sysvar import GlobalVarEnum
+from app.enums.sysvar import PikaGlobalVarEnum
 
 
 class OssFile(object):
-    _base_path = f'{GlobalVarEnum.APP_NAME_LOWER}'
+    _base_path = f'{PikaGlobalVarEnum.APP_NAME_LOWER}'
 
     async def create_file(self, filepath: str, content, base_path: str = None) -> (str, int):
         raise NotImplementedError
@@ -30,6 +30,6 @@ class OssFile(object):
 
     @staticmethod
     def get_random_filename(filename):
-        random_str = list(f"{GlobalVarEnum.APP_NAME_LOWER}")
+        random_str = list(f"{PikaGlobalVarEnum.APP_NAME_LOWER}")
         random.shuffle(random_str)
         return f"{time.time_ns()}_{''.join(random_str)}_{filename}"

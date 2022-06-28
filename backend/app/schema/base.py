@@ -44,7 +44,7 @@ class PikaBaseModel(object):
 
 
 class PikaOnlyIdModel(BaseModel):
-    id: Optional[str] = Body("0", title="id")
+    id: Optional[int] = Body(0, title="id")
 
 
 class PikaOnlyNameModel(BaseModel):
@@ -65,6 +65,10 @@ class PikaOnlyUsableModel(BaseModel):
 
 class PikaOnlyDelModel(BaseModel):
     is_delete: Optional[str] = Query("0", title="是否被删除 1：已删除，0：未删除", max_length=ByteSizeEnum.LENGTH_20)
+
+
+class PikaOnlyEmpNoModel(BaseModel):
+    emp_no: Optional[str] = Body(None, title="用户编码", max_length=ByteSizeEnum.LENGTH_16)
 
 
 class PikaLargeEditModel(PikaOnlyIdModel, PikaOnlyDescModel, PikaOnlyUsableModel):

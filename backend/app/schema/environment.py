@@ -9,16 +9,13 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from pydantic import BaseModel, validator
+from typing import Optional
 
-from app.schema.base import PikaBaseModel
+from fastapi import Body
+
+from app.enums.bytesize import ByteSizeEnum
+from app.schema.base import PikaOnlyDescModel, PikaOnlyIdModel
 
 
-class EnvironmentForm(BaseModel):
-    id: int = None
-    name: str
-    description: str = None
-
-    @validator("name")
-    def name_not_empty(cls, v):
-        return PikaBaseModel.not_empty(v)
+class EnvironmentForm(PikaOnlyIdModel, PikaOnlyDescModel):
+    name: Optional[str] = Body(..., max_length=ByteSizeEnum.LENGTH_50)

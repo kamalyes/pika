@@ -12,12 +12,12 @@
 from sqlalchemy import Column, String, INT, UniqueConstraint
 
 from app.enums.bytesize import ByteSizeEnum
-from app.enums.sysvar import GlobalVarEnum
+from app.enums.sysvar import PikaGlobalVarEnum
 from app.models.basic import PikaNormBase
 
 
-class User(PikaNormBase):
-    __tablename__ = f"{GlobalVarEnum.APP_NAME_LOWER}_user_info"
+class PikaUser(PikaNormBase):
+    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_sys_user"
     __table_args__ = (UniqueConstraint("emp_no", "email", "mobile"), {"comment": "用户表"})
     emp_no = Column(String(ByteSizeEnum.LENGTH_16), comment="员工编号")
     username = Column(String(ByteSizeEnum.LENGTH_16), comment="正式名称（登录使用）")

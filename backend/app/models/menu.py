@@ -12,12 +12,12 @@
 
 from sqlalchemy import Column, Integer, String
 
-from app.enums.sysvar import GlobalVarEnum
+from app.enums.sysvar import PikaGlobalVarEnum
 from app.models.basic import PikaLargeBase
 
 
-class Menu(PikaLargeBase):
-    __tablename__ = f"{GlobalVarEnum.APP_NAME_LOWER}_user_menu"
+class PikaMenu(PikaLargeBase):
+    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_sys_menu"
     __table_args__ = {"comment": "菜单配置表"}
     path = Column(String(255), nullable=True, comment='菜单路径')
     name = Column(String(255), nullable=True, comment='菜单名称', index=True)

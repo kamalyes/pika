@@ -9,34 +9,36 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  角色配置表
 """
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, BOOLEAN
 from sqlalchemy import ForeignKey
 
 from app.enums.bytesize import ByteSizeEnum
-from app.enums.sysvar import GlobalVarEnum
-from app.models.basic import PikaLargeBase, PikaNormBase
-from app.models.user import User
+from app.enums.sysvar import PikaGlobalVarEnum
+from app.models.basic import PikaNormBase
+from app.models.user import PikaUser
 
 
-class Role(PikaLargeBase):
-    __tablename__ = f"{GlobalVarEnum.APP_NAME_LOWER}_user_role"
+class PikaRole(PikaNormBase):
+    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_sys_role"
+    # __table_args__ = (UniqueConstraint("name"), {"comment": "角色配置表"})
     __table_args__ = {"comment": "角色配置表"}
+    is_usable = Column(BOOLEAN, server_default="1", comment="是否可用 1：启用，0：禁用")
     name = Column(String(ByteSizeEnum.LENGTH_255), nullable=False, comment="角色名称")
     role_type = Column(Integer, nullable=False, comment='角色权限类型，10菜单权限，20用户组权限', index=True, default=10)
     menus_id = Column(String(64), nullable=True, comment='菜单id', index=True)
 
 
-class RoleRel(PikaNormBase):
-    __tablename__ = f"{GlobalVarEnum.APP_NAME_LOWER}_user_role_relation"
+class PikaRoleRel(PikaNormBase):
+    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_sys_role_relation"
     __table_args__ = {"comment": "角色应用表"}
     role_id = Column(
         Integer,
-        ForeignKey(Role.id, ondelete="cascade", onupdate="cascade"),
+        ForeignKey(PikaRole.id, ondelete="cascade", onupdate="cascade"),
         nullable=False,
         comment="角色id",
     )
     emp_no = Column(
         String(ByteSizeEnum.LENGTH_20),
-        ForeignKey(User.emp_no, ondelete="cascade", onupdate="cascade"),
+        ForeignKey(PikaUser.emp_no, ondelete="cascade", onupdate="cascade"),
         comment="员工编号",
     )

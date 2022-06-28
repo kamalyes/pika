@@ -12,12 +12,12 @@
 from sqlalchemy import Column, INT, String, BOOLEAN, UniqueConstraint, TEXT, select, desc
 
 from app.enums.bytesize import ByteSizeEnum
-from app.enums.sysvar import GlobalVarEnum
+from app.enums.sysvar import PikaGlobalVarEnum
 from app.models.basic import PikaLargeBase
 
 
-class Constructor(PikaLargeBase):
-    __tablename__ = f'{GlobalVarEnum.APP_NAME_LOWER}_constructor'
+class PikaConstructor(PikaLargeBase):
+    __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_constructor'
     __table_args__ = (UniqueConstraint('case_id', 'suffix', 'name'))
     type = Column(INT, default=0, comment="0: testcase 1: sql 2: redis 3: py脚本 4: 其它")
     name = Column(String(ByteSizeEnum.LENGTH_64), comment="数据初始化描述")
@@ -44,10 +44,10 @@ class Constructor(PikaLargeBase):
 
     @staticmethod
     async def get_index(session, case_id, suffix=False):
-        sql = select(Constructor).where(
-            Constructor.is_delete == 0, Constructor.case_id == case_id,
-            Constructor.suffix == suffix,
-        ).order_by(desc(Constructor.index))
+        sql = select(PikaConstructor).where(
+            PikaConstructor.is_delete == 0, PikaConstructor.case_id == case_id,
+            PikaConstructor.suffix == suffix,
+        ).order_by(desc(PikaConstructor.index))
         data = await session.execute(sql)
         query = data.scalars().first()
         # 如果没有查出来前/后置条件，那么给他0

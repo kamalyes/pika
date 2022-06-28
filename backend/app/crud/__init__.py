@@ -17,6 +17,7 @@ from typing import List, Tuple
 
 from sqlalchemy import select, update
 
+from app.core.handler.execres import ValidException
 from app.enums.operation import SqlOperationTypeEnum
 from app.middleware.xredis import RedisHelper
 from app.models import async_session, DatabaseHelper
@@ -186,7 +187,7 @@ class PikaMapper(object):
         original = result.scalars().first()
         if original is None:
             if exists:
-                raise Exception("记录不存在")
+                raise ValidException(detail="记录不存在")
             return None
         DatabaseHelper.delete_model(original, operator)
         await session.flush()
@@ -222,7 +223,7 @@ class PikaMapper(object):
                 return await cls._inner_delete(session, operator, value, log, key, exists)
         except Exception as e:
             cls.log.exception(f"删除{cls.model.__name__}记录失败: \n{e}")
-            raise Exception(f"删除失败")
+            raise ValidException(detail=f"删除失败,\n{e}")
 
     @classmethod
     @RedisHelper.up_cache("dao")

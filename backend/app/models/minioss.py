@@ -11,7 +11,7 @@
 """
 from sqlalchemy import String, Column, UniqueConstraint
 
-from app.enums.sysvar import GlobalVarEnum
+from app.enums.sysvar import PikaGlobalVarEnum
 from app.models.basic import PikaLargeBase
 
 units = (
@@ -25,7 +25,7 @@ class PikaOssFile(PikaLargeBase):
     view_url = Column(String(256), nullable=False, comment="文件预览url")
     file_size = Column(String(16), comment="文件大小")
 
-    __tablename__ = f"{GlobalVarEnum.APP_NAME_LOWER}_oss_file"
+    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_oss_file"
     __fields__ = (file_path, view_url, file_size)
     __tag__ = "oss"
     __alias__ = dict(file_path="文件路径", view_url="地址", file_size="文件大小")

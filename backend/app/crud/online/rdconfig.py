@@ -16,7 +16,7 @@ from app.models.redis_config import PikaRedis
 from app.utils.decorator import dao
 
 
-@dao(PikaRedis, PikaLogger("PikaRedisConfigDao"))
+@dao(PikaRedis, PikaLogger("RedisConfigConfigDao"))
 class PikaRedisConfigDao(PikaMapper):
 
     @staticmethod

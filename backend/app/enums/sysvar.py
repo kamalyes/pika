@@ -14,7 +14,7 @@ from enum import IntEnum
 from hutools.time import Moment
 
 
-class GlobalVarEnum:
+class PikaGlobalVarEnum:
     BANNER = r"""
          ____        __                  
         /\  _`\   __/\ \                 

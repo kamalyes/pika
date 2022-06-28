@@ -14,23 +14,23 @@ from sqlalchemy import INT, Column, DATETIME, String
 from sqlalchemy.orm import relationship, backref
 
 from app.enums.bytesize import ByteSizeEnum
-from app.enums.sysvar import GlobalVarEnum
+from app.enums.sysvar import PikaGlobalVarEnum
 from app.models.basic import PikaLargeBase
-from app.models.user import User
+from app.models.user import PikaUser
 
 
-class UserAdmin(PikaLargeBase):
-    __tablename__ = f"{GlobalVarEnum.APP_NAME_LOWER}_user_admin"
+class PikaUserAdmin(PikaLargeBase):
+    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_sys_admin"
     __table_args__ = {"comment": "账号管理表"}
     uid = Column(
         INT,
-        ForeignKey(User.id, ondelete="cascade", onupdate="cascade"),
+        ForeignKey(PikaUser.id, ondelete="cascade", onupdate="cascade"),
         nullable=False,
         comment="员工编号",
     )
     emp_no = Column(
         String(ByteSizeEnum.LENGTH_16),
-        ForeignKey(User.emp_no, ondelete="cascade", onupdate="cascade"),
+        ForeignKey(PikaUser.emp_no, ondelete="cascade", onupdate="cascade"),
         comment="员工编号",
         nullable=False,
     )
@@ -47,10 +47,10 @@ class UserAdmin(PikaLargeBase):
     last_login_city = Column(String(ByteSizeEnum.LENGTH_30), comment="最后一次登录所在城市")
     last_login_at = Column(DATETIME, server_default=None, comment="最后一次登录时间")
     last_logout_at = Column(DATETIME, server_default=None, comment="最后一次退出登录时间")
-    relationship(User, backref=backref("children", cascade="all, delete"))
+    relationship(PikaUser, backref=backref("children", cascade="all, delete"))
 
     def __init__(self, uid, emp_no, password, is_activate=0, create_emp_no=None,
-                 registration_ip=None, registration_at=None, pwd_valid_time=GlobalVarEnum.PWD_VALID_TIME):
+                 registration_ip=None, registration_at=None, pwd_valid_time=PikaGlobalVarEnum.PWD_VALID_TIME):
         self.uid = uid
         self.emp_no = emp_no
         self.password = password
