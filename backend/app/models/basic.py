@@ -126,7 +126,7 @@ class PikaMinBase(Base):
     __abstract__ = True
     __fields__: Tuple[Column] = [id]
     __tag__ = "未定义"
-    __alias__ = dict(name="名称")
+    __alias__ = {}
     __show__ = 1
 
     def __init__(self, description=None, id=0, operator=None, operator_date=None):

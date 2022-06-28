@@ -265,7 +265,8 @@ class PikaMapper(object):
         diff, title = await cls.get_diff(session, mode, now, old, changed)
         tag = getattr(now, PikaAppConfig.TABLE_TAG, '未设置')
         diff_data = json.dumps(diff, ensure_ascii=False)
-        model = PikaOperationLog(operator, mode, "&".join(title), tag, diff_data, key)
+        model = PikaOperationLog(operator=operator, mode=mode, title="&".join(title),
+                                 tag=tag, description=diff_data, key=key)
         session.add(model)
 
     @classmethod

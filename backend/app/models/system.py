@@ -13,6 +13,7 @@ from datetime import datetime
 
 from sqlalchemy import Column, String, Text, DateTime, SMALLINT, INT
 
+from app.enums.bytesize import ByteSizeEnum
 from app.enums.operation import SqlOperationTypeEnum
 from app.enums.sysvar import PikaGlobalVarEnum
 from app.models.basic import PikaNormBase, PikaMinBase
@@ -37,13 +38,13 @@ class PikaSysRecord(PikaNormBase):
 
 class PikaOperationLog(PikaMinBase):
     __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_operation_log'
-    title = Column(String(128), nullable=False, comment="操作title")
-    tag = Column(String(24), comment="操作tag")
+    title = Column(String(ByteSizeEnum.LENGTH_128), nullable=False, comment="操作title")
+    tag = Column(String(ByteSizeEnum.LENGTH_56), comment="操作tag")
     mode = Column(SMALLINT, comment="操作类型")
     key = Column(INT, nullable=True, comment="关键id，可能是目录id，case_id或者其他id")
 
-    def __init__(self, operator, mode: SqlOperationTypeEnum, title, tag, description, key=None):
-        super.__init__(operator, description)
+    def __init__(self, operator, mode: SqlOperationTypeEnum, title, tag, description=None, key=None, id=0):
+        super().__init__(operator, description, id)
         self.title = title
         self.tag = tag
         self.mode = mode.value
@@ -51,3 +52,4 @@ class PikaOperationLog(PikaMinBase):
         self.operator = operator
         self.operator_date = datetime.now()
         self.description = description
+        self.id = id

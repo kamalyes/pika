@@ -35,7 +35,7 @@ class PikaRedisManager(object):
 
     @property
     def client(self):
-        pool = ConnectionPool(host=f'redis://{PikaAppConfig.REDIS_HOST}',
+        pool = ConnectionPool(host=PikaAppConfig.REDIS_HOST,
                               port=PikaAppConfig.REDIS_PORT,
                               db=PikaAppConfig.REDIS_DB,
                               max_connections=100,
