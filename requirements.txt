@@ -8,7 +8,7 @@ mysql-connector-python==8.0.28
 loguru==0.6.0
 requests==2.27.0
 sqlalchemy==1.4.36
-jsonschema==4.5.1
+jsonschema==4.0.0
 fastapi==0.76.0
 aiosqlite==0.17.0
 aioredis==2.0.1

@@ -1,4 +1,4 @@
-name: 发布pika
+name: deploy
 on:
   push:
     branches:
@@ -10,7 +10,6 @@ on:
 jobs:
 
   build:
-    name: deploy
     runs-on: ubuntu-latest
     steps:
       - name: 拉取代码
@@ -19,17 +18,20 @@ jobs:
       - name: copy file via ssh password
         uses: appleboy/scp-action@master
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_TESTER_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
           source: "*"
           target: "/home/tester/pika/"
 
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
+          script_stop: true
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_TESTER_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
           script: |
             cd /home/tester/pika && pip3 install -r requirements.txt --user && pkill gunicorn
