@@ -1,0 +1,50 @@
+version: "3"
+services:
+
+  mysql:
+    image: mysql:${MYSQL_VERSION}
+    container_name: ${BASE_NAME}_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB}
+      TZ: ${TZ}
+    networks:
+      pika_net:
+        aliases:
+          - pika_mysql
+
+  redis:
+    image: redis:${REDIS_VERSION}
+    container_name: ${BASE_NAME}_redis
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    restart: always
+    environment:
+      - TZ=${TZ}
+    networks:
+      pika_net:
+        aliases:
+          - pika_redis
+
+  pika:
+    build:
+      context: ../
+      dockerfile: devops/Dockerfile
+      args:
+        buildno: 1
+    container_name: ${SERVER_NAME}
+    ports:
+      - "7777:7777"
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      pika_net:
+        aliases:
+        - pika_server
+    volumes:
+      - output:/${SERVER_NAME}/output
+    command: bash -c '/${SERVER_NAME}/devops/wait-for-it.sh ${BASE_NAME}_mysql:3306 -- /${SERVER_NAME}/devops/wait-for-it.sh pika_redis:6379 -- /${SERVER_NAME}/venv/bin/supervisord -c /${SERVER_NAME}/devops/supervisor.conf'
+
+networks:
+  pika_net:

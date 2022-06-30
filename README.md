@@ -1,62 +1,120 @@
+[English](./README_EN.md)
+
 ![png](https://img.shields.io/badge/Python-3.9.11+-green)
 ![png](https://img.shields.io/badge/React-16.7+-blue)
 ![png](https://img.shields.io/badge/FastApi-green)
 ![png](https://img.shields.io/badge/contributors-3-green)
 
-### 关于平台
+### ☕ 关于平台
 
 Pika是一款专注于自动化建设的平台，采用`Python`+`FastApi`+`React`开发，目前还不能作为生产级别的工具，作者正在努力之中。
 
-一个从0开始写的自动化测试平台(基于FastApi)，旨在总结自己最近几年的工作经验，也顺便帮助大家进步。目前还在火热更新中，希望大家能够喜欢！~
+一个从0开始写的测试平台(基于FastApi)，旨在总结自己最近几年的工作经验，
+也顺便帮助大家进步。目前还在火热更新中，希望大家能够喜欢！ 
+话不多说，赶快开始体验吧！靓仔靓女们~
 
-### 项目结构
+### ⚽ 前端地址
 
+  [🎁 前端项目地址](https://github.com/kamalyes/pikaWeb)
+  [🍍 在线体验](https://114.132.233.15/)
+
+### 👏 Docker部署
+
+1. 安装Docker Desktop
+2. 打开终端并进入项目根目录
+3. 执行以下命令，安静等待启动即可
+```bash
+docker-compose -f ./devops/docker-compose.yaml up
 ```
-启动类Application.py推荐放在根目录下
-数据实体类： schema
-数据模型：models
-数据传输对象： crud 用于封装多个实体类之间的关系，不破坏原有的实体类结构
-数据服务接口实现层Service Implements：service.impl
-工具类库：iutility
-配置类config：config
-docs:项目文档维护
-requirements/libs:维护项目的第三方安装包
-scripts:对项目代码质量做检测的脚本
-tests:测试案例
-static: 静态资源
-```
 
-### 😊 需实现功能
+### 🎉 技术栈
 
-- [x] 🚀 结合FastApi，利用asyncio让Python代码也可以起飞
-- [x] 🔥 完善的用户登录/注册机制
-- [x] 🀄 完善的项目/菜单管理机制
-- [ ] 💎 完整的接口测试流程
-- [ ] 📝 强大的数据构造器, 解决接口数据依赖问题
-- [ ] 🎨 在线调试http请求，堪比网页版本postman
-- [ ] 🍷 完善的全局变量机制，拒绝case中的死数据
-- [ ] 🐍 在线redis请求
-- [ ] 🐎 测试计划/集合
-- [ ] 🙈 在线数据库ide，数据库管理功能
-- [ ] 📰 漂亮的邮件通知
-- [ ] 😹 定时构建测试用例
-- [ ] 🐧 精美的测试报告展示页面
+- [x] 🎨 FastApi
+- [x] 🎶 SQLAlchemy(你可以看到很多sqlalchemy的用法) 
+- [x] 🎉 Apscheduler(定时任务框架) 
+- [x] 🎃 mitmproxy(用例录制生成) 
+- [x] 🌙 mockjs(mock服务)
+- [x] 🔒 Redis
+- [x] 🏐 Gunicorn(内含uvicorn，部署服务)
+- [x] 🎲 Nginx(反向代理，https配置等)
+- [x] 💎 七牛云oss(用于文件上传时接口测试文件存储)
+- [x] 👟 asyncio(几乎全异步写法，值得参考)
+- [ ] ⛏ Grpc(支持Grpc请求，即将支持)
+- [x] ⚡ [hutools](https://github.com/kamalyes/hutools) 万能百宝箱(必须依赖)
+
+### 😊 已有功能
+
++ [x] 🔥 完善的用户登录/注册机制，提供第三方(github)登录
+- [x] 🀄 完善的项目管理机制
+* [x] 🚴 结合FastApi，利用asyncio让Python代码也可以起飞
+- [x] 💎 完整的接口测试流程
+- [x] 📝 强大的数据构造器, 解决接口数据依赖问题
+- [x] 🎨 在线调试http请求，堪比网页版本postman
+- [x] 🍷 完善的全局变量机制，拒绝case中的死数据
+- [x] 🚀 速度还挺快的
+- [x] 🐍 在线redis请求
+- [x] 🐎 测试计划/集合
+- [x] 🙈 在线数据库ide，数据库管理功能
+- [x] 📰 漂亮的邮件通知
+- [x] 😹 定时构建测试用例
+- [x] 🐧 精美的测试报告展示页面
+
+## 🙋 待开发的功能
+
 - [ ] 💀 app管理功能，支持app的导入和导出
+* [ ] 😼 代码覆盖率增量/全量统计功能
 - [ ] 🐘 微服务化
-- [x] 🐄 数据工厂，强大的造数功能
+- [ ] 🐄 数据工厂，强大的造数功能
 - [ ] 🐸 用例支持har，jmx等格式导入
 - [ ] 👍 CI/CD，类pipeline功能
 - [ ] 🌼 推送功能，支持钉钉/企信推送
 - [ ] 🌛 支持dubbo/grpc
-- [ ] 🐛 打通yapi/swagger
-- [ ] 😼 ~~代码覆盖率增量/全量统计功能~~
+- [ ] 🐛 打通yapi
 - [ ] 🌽 等等等等
 
-## ❓ 想法
+
+<details>
+<summary>平台预览(点击可展开)</summary>
+
+#### 🍦 工作台
+
+
+#### 测试计划
+
+
+#### 测试报告
+
+
+#### 测试用例
+
+
+#### SQL客户端
+
+
+#### 项目管理
+
+
+</details>
+
+
+### 🎉 二次开发
+
+
+### ✉ 使用文档
+
+
+### 💪 落地效果
+
+
+### 赞助
+
+如果您觉得这个项目对你`有所帮助`，帮忙点个star，让创作更有动力，谢谢！
+
+### ❓ 想法
 
 希望大家点个star⭐，感激不尽~也欢迎大家提出各种各样的问题。可以加我个人微信: `yyq501893067`，若有想法的也欢迎进行提交
 
-## Git提交规范
+### Git提交规范
 
 ```
 feat 适用场景：全是新增功能，在旧功能基础上做改动（包含新增，删除）
