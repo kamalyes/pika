@@ -167,7 +167,8 @@ class GetVerifyCodeModel(BaseModel):
         orm_mode = True
 
 
-class EmailVerifyCodeLogin(BaseModel):
+class EmailVerifyCode(BaseModel):
+    model: Optional[int] = Body(3, title="模型：2：邮箱登录使用，3：用户注册时使用")
     email: Optional[str] = Body(None, title="邮箱地址")
 
     class Config:

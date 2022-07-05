@@ -34,4 +34,4 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd /home/tester/pika && pip3 install -r requirements.txt --user && pkill gunicorn
+            cd /home/tester/pika && pip3 install -r requirements.txt && pkill gunicorn

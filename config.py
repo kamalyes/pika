@@ -34,6 +34,7 @@ class PikaAppConfig(object):
     TEMPLATE_PATH = f"{WORKSPACES_PATH}/templates"
     MARKDOWN_PATH = f"{WORKSPACES_PATH}/templates/markdown/test_report.md"
     OUTPUT_PATH = f"{WORKSPACES_PATH}/output"
+    LOGS_PATH = f"{WORKSPACES_PATH}/logs"
     DAO_PATH = f"{WORKSPACES_PATH}/app/crud"
     REQUIREMENTS = System.get_depend_libs(
         file_path=f"{WORKSPACES_PATH}/requirements.txt"
@@ -140,8 +141,8 @@ class PikaAppConfig(object):
     )
     LOCAL_DATE = time.strftime("%Y-%m-%d", time.localtime(time.time()))
     # 日志相关
-    LOGS_DIR_NAME = time.strftime("%Y-%m-%d-logs", time.localtime(time.time()))
-    LOG_GENERAL_DIR = os.path.join(OUTPUT_PATH, LOGS_DIR_NAME)
+    LOGS_DIR_NAME = time.strftime("%Y-%m-%d", time.localtime(time.time()))
+    LOG_GENERAL_DIR = os.path.join(LOGS_PATH, LOGS_DIR_NAME)
     APP_NAME = PikaGlobalVarEnum.APP_NAME.lower()
     INFO_LOG_FILE = os.path.join(LOG_GENERAL_DIR, f"{APP_NAME}-info.log")
     ERROR_LOG_FILE = os.path.join(LOG_GENERAL_DIR, f"{APP_NAME}-error.log")

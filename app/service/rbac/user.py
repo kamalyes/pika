@@ -22,7 +22,7 @@ from app.enums.gebruikersrol import RoleEnum
 from app.models import pagination_db
 from app.schema.user import RegisterModel, OAuth2LoginModel, ForgetPwdModel, OAuth2TokenModel, AddUserModel, \
     ModifyUserInfoModel, QueryUserInModel, QueryUserOutModel, GetVerifyCodeModel, ModifySecretModel, EditSecurityModel, \
-    DelSecurityModel, QuerySecurityOutModel, EmailVerifyCodeLogin
+    DelSecurityModel, QuerySecurityOutModel, EmailVerifyCode
 from app.service import Permission
 
 router = APIRouter()
@@ -82,9 +82,9 @@ async def get_dynamic_code(request: Request):
     return await UserDao.rand_dynamic_code(request)
 
 
-@router.post("/auth/elcode", name="获取邮箱登录验证码")
-async def send_email_login_verify_code(request: EmailVerifyCodeLogin):
-    return await UserDao.send_email_login_verify_code(request)
+@router.post("/auth/elcode", name="获取邮箱验证码")
+async def send_email_verify_code(request: EmailVerifyCode):
+    return await UserDao.send_email_verify_code(request)
 
 
 @router.post("/auth/verifycode", name="发送验证码-邮件")

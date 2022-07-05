@@ -57,7 +57,8 @@ class Email(object):
             raise e
 
     @staticmethod
-    async def rand_mail_code(emp_no: str, username: str, addressee: List, app_name=PikaGlobalVarEnum.APP_NAME, model=1):
+    async def rand_mail_code(emp_no: str = None, username: str = None, addressee: List = None,
+                             app_name=PikaGlobalVarEnum.APP_NAME, model=1):
         auth_code_ = MockHelper.rand_sample(length=6)
         redis_now_time = await async_redis.time()
         auth_code_valid_time = ValidTimeEnum.AUTH_CODE_VALID_TIME
@@ -66,21 +67,35 @@ class Email(object):
             auth_verify_code = f"{RedisKeyEnum.FORGET_PWD_VERIFYCODE}:{emp_no}"
         elif model == 2:
             auth_verify_code = f"{RedisKeyEnum.LOGIN_VERIFYCODE}:{emp_no}"
+        elif model == 3:
+            auth_verify_code = f"{RedisKeyEnum.REGISTER_VERIFYCODE}:{addressee}"
         else:
             raise ValidException(detail="暂不支持该model！")
         await async_redis.set(auth_verify_code, auth_code_, int(auth_code_valid_time))
         try:  # 若发送邮件异常则回收对应验证码
-            return EmailHande.send_email(
-                content=EmailHande.get_security_code_template(
-                    username,
-                    emp_no,
-                    auth_code_,
-                    Moment.timestamp_to_date(valid_time),
-                    Moment.timestamp_to_date(int(valid_time - auth_code_valid_time)),
-                ),
-                subject=f"{app_name}-获取验证码成功通知",
-                addressee=addressee
-            )
+            if model in (1, 2):
+                return EmailHande.send_email(
+                    content=EmailHande.get_security_code_template(
+                        username,
+                        emp_no,
+                        auth_code_,
+                        Moment.timestamp_to_date(valid_time),
+                        Moment.timestamp_to_date(int(valid_time - auth_code_valid_time)),
+                    ),
+                    subject=f"{app_name}-获取验证码成功通知",
+                    addressee=addressee
+                )
+            elif model == 3:
+                return EmailHande.send_email(
+                    content=EmailHande.get_reg_code_template(
+                        addressee,
+                        auth_code_,
+                        Moment.timestamp_to_date(valid_time),
+                        Moment.timestamp_to_date(int(valid_time - auth_code_valid_time)),
+                    ),
+                    subject=f"{app_name}-注册验证码通知",
+                    addressee=addressee
+                )
         except Exception as e:
             await async_redis.delete(auth_verify_code)
             raise e

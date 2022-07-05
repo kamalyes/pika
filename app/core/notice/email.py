@@ -65,7 +65,7 @@ class EmailHande:
             "send_time": send_time,
             "root_email": PikaGlobalVarEnum.PL_EMAIL,
         }
-        return EmailHande.sub_template("register.html", target_dict)
+        return EmailHande.sub_template("register_succeed.html", target_dict)
 
     @staticmethod
     def exc_events_template(username, emp_no, events_key: int, send_time=Moment.get_now_time("%Y-%m-%d %H:%M:%S")):
@@ -101,6 +101,30 @@ class EmailHande:
             "send_time": send_time,
         }
         return EmailHande.sub_template("event.html", target_dict)
+
+    @staticmethod
+    def get_reg_code_template(email, auth_code, valid_time,
+                              redis_time=Moment.get_now_time("%Y-%m-%d %H:%M:%S")):
+        """
+        获取验证码模板
+        Args:
+            email:
+            auth_code:
+            valid_time:
+            redis_time:
+
+        Returns:
+
+        """
+        target_dict = {
+            "email": email,
+            "auth_code": auth_code,
+            "agreement": PikaGlobalVarEnum.AGREE_MENT,
+            "form": PikaGlobalVarEnum.APP_NAME,
+            "valid_time": valid_time,
+            "send_time": redis_time,
+        }
+        return EmailHande.sub_template("get_reg_code.html", target_dict)
 
     @staticmethod
     def get_security_code_template(username, emp_no, auth_code, valid_time,

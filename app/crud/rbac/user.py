@@ -546,16 +546,22 @@ class UserDao(object):
         return PikaResponse.success(message=PromptEnum.GET_VERIFY_SUCCEED.value)
 
     @staticmethod
-    async def send_email_login_verify_code(request):
-        async with async_db_session() as session:
-            async with session.begin():
-                sel_sql = select(PikaUser).where(PikaUser.email == request.email)
-                sel_res = await session.execute(sel_sql)
-                exists_users = sel_res.scalars().first()
-                if not exists_users:
-                    raise AuthException(detail="该邮箱暂未注册使用！")
-                await Email.rand_mail_code(emp_no=exists_users.emp_no, username=exists_users.username,
-                                           addressee=exists_users.email, model=2)
+    async def send_email_verify_code(request):
+        if request.model == 2:
+            async with async_db_session() as session:
+                async with session.begin():
+                    sel_sql = select(PikaUser).where(PikaUser.email == request.email)
+                    sel_res = await session.execute(sel_sql)
+                    exists_users = sel_res.scalars().first()
+                    if not exists_users:
+                        raise AuthException(detail="该邮箱暂未注册使用！")
+            await Email.rand_mail_code(emp_no=exists_users.emp_no, username=exists_users.username,
+                                       addressee=exists_users.email, model=2)
+        elif request.model == 3:
+            await regex_register_str(email=request.email)
+            await Email.rand_mail_code(addressee=request.email, model=3)
+        else:
+            raise ValidException(detail="暂不支持该model！")
         return PikaResponse.success(message=PromptEnum.GET_VERIFY_SUCCEED.value)
 
     @staticmethod

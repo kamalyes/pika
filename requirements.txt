@@ -1,7 +1,6 @@
 --index-url https://pypi.tuna.tsinghua.edu.cn/simple
---extra-index-url https://pypi.org/simple
 
-cos-python-sdk-v5>=1.9.19
+cos-python-sdk-v5>=1.9.20
 pyjwt>=2.4.0
 faker==13.12.0
 mysql-connector-python~=8.0.28
@@ -12,19 +11,20 @@ jsonschema~=4.0.0
 fastapi==0.76.0
 aiosqlite~=0.17.0
 aioredis~=2.0.1
-mitmproxy~=8.0.1
+mitmproxy~=8.1.1
 uvicorn[standard] >=0.17.0,<0.18.0
+supervisor~=4.2.4
 orjson >=3.2.1,<4.0.0
-ujson >=4.0.1,!=4.0.2,!=4.1.0,!=4.2.0,!=4.3.0,!=5.0.0,!=5.1.0,<6.0.0
+ujson >=5.2.0
 anyio>=3.5.0
 idna>=3.3
 pydantic>=1.9.0
 sniffio>=1.2.0
 starlette>=0.18.0
-typing-extensions>=4.1.1
+typing-extensions>=4.2.0
 PyYAML~=6.0
 aiohttp~=3.8.1
-aiomysql
+aiomysql==0.1.1
 Jinja2~=3.0.3
 aiofiles~=0.8.0
 psycopg2-binary~=2.9.3
@@ -37,13 +37,13 @@ oss2~=2.15.0
 python-multipart~=0.0.5
 awaits~=0.0.1
 aioify~=0.4.1
-grpc-requests
+grpc-requests==0.1.1
 qiniu~=7.6.0
 bs4~=0.0.1
 # mkdocs
 mkdocs~=1.3.0
 mkdocs-material~=7.3.6
-pymdown-extensions~=8.2
+pymdown-extensions==9.5
 mkdocs-material-extensions~=1.0.3
 pymongo~=3.11.1
 mkdocs-markdownextradata-plugin~=0.2.5

@@ -47,5 +47,13 @@ class BindRoleModel(PikaOnlyEmpNoModel):
     role_id: Optional[int] = Body(0, title="角色id")
 
 
+class ApplyRoleModel(PikaOnlyDescModel):
+    role_id: Optional[int] = Body(..., title="角色id")
+
+
+class AuditRoleModel(PikaOnlyIdModel, PikaOnlyDescModel):
+    pass
+
+
 class DelRoleRelModel(PikaDeleteModel):
     pass

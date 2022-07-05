@@ -20,7 +20,7 @@ class OnlineSQLForm(BaseModel):
     id: Optional[int] = None
     sql: Optional[str]
 
-    @validator("sqlscript", 'id')
+    @validator("sql", 'id')
     def name_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)
 

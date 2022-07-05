@@ -42,3 +42,5 @@ class PikaRoleRel(PikaNormBase):
         ForeignKey(PikaUser.emp_no, ondelete="cascade", onupdate="cascade"),
         comment="员工编号",
     )
+    rel_type = Column(Integer, server_default="0", comment="应用类型 1：上级关联绑定，2：下级用户申请")
+    is_verify = Column(Integer, server_default="0", comment="审核状态 0：未审核， 1：初审通过，3：终审通过，4：驳回审核(不通过)")

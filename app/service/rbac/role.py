@@ -17,7 +17,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.rbac.role import RoleDao
 from app.models import pagination_db
-from app.schema.role import EditRoleModel, DelRoleModel, QueryRoleInModel, QueryRoleOutModel, BindRoleModel
+from app.schema.role import EditRoleModel, DelRoleModel, QueryRoleInModel, QueryRoleOutModel, BindRoleModel, \
+    ApplyRoleModel, AuditRoleModel
 from app.service import Permission
 
 router = APIRouter()
@@ -47,6 +48,16 @@ async def query_role(request: QueryRoleInModel = Depends(), user_info=Depends(Pe
 @router.post("/role/bind", name="给成员绑定角色")
 async def bind_role(request: List[BindRoleModel], user_info=Depends(Permission())):
     return await RoleDao.bind_role(request=request, emp_no=user_info["emp_no"])
+
+
+@router.post("/role/apply", name="角色关系申请")
+async def apply_role(request: List[ApplyRoleModel], user_info=Depends(Permission())):
+    return await RoleDao.apply_role(request=request, emp_no=user_info["emp_no"])
+
+
+@router.post("/role/audit", name="角色关系审核")
+async def audit_role(request: List[AuditRoleModel], user_info=Depends(Permission())):
+    return await RoleDao.audit_role(request=request, userinfo=user_info)
 
 
 add_pagination(router)
