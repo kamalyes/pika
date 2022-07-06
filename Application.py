@@ -9,10 +9,11 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  总程序
 """
+import asyncio
 import traceback
 
 import uvicorn
-from fastapi import FastAPI, Request, status, Depends
+from fastapi import FastAPI, Request, status, Depends, WebSocket, WebSocketDisconnect
 from hutools.core import System
 from hutools.limiter import Limiter, RateLimitException
 from hutools.limiter.depends import RateLimiter
@@ -32,6 +33,9 @@ from app.core.handler.execres import (
     SystemException,
     RegisterException)
 from app.core.handler.jsonres import PikaResponse
+from app.core.notice.wss_msg import WebSocketMessage
+from app.crud.system.notification import PikaNotificationDao
+from app.enums.MessageEnum import MessageTypeEnum, MessageStateEnum
 from app.enums.sysvar import PikaGlobalVarEnum
 from app.models import async_redis, async_create_table
 from app.service.itst import aiptest_router
@@ -56,6 +60,7 @@ from app.service.system import lexicon_router
 from app.service.system import mini_oss_router
 from app.service.system import notice_router
 from app.service.system import operation_log_router
+from app.utils.ws_manager import ws_manage
 from config import InterceptHandler, PikaAppConfig
 
 logger = InterceptHandler.init_logging()
@@ -308,7 +313,7 @@ class PikaFastApi:
         pika.include_router(history_router, prefix="/system", tags=["访问记录"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
-        pika.include_router(notice_router, prefix="/system", tags=["消息通知"],
+        pika.include_router(notice_router, prefix="/notification", tags=["消息通知"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
         pika.include_router(operation_log_router, prefix="/system", tags=["操作"],
@@ -396,11 +401,48 @@ def stop_test():
     pass
 
 
+@pika.websocket("/ws/{user_id}")
+async def websocket_endpoint(websocket: WebSocket, user_id: int):
+    async def send_heartbeat():
+        while True:
+            logger.debug("sending heartbeat")
+            await websocket.send_json({
+                'type': 3
+            })
+            await asyncio.sleep(50)
+    await ws_manage.connect(websocket, user_id)
+    try:
+        # 定义特殊值的回复，配合前端实现确定连接，心跳检测等逻辑
+        questions_and_answers_map: dict = {
+            "HELLO SERVER": F"hello {user_id}",
+            "HEARTBEAT": F"{user_id}",
+        }
+
+        # 存储连接后获取消息
+        msg_records = await PikaNotificationDao.list_messages(msg_type=MessageTypeEnum.all.value, receiver=user_id,
+                                                              msg_status=MessageStateEnum.unread.value)
+        # 如果有未读消息, 则推送给前端对应的count
+        if len(msg_records) > 0:
+            await websocket.send_json(WebSocketMessage.msg_count(len(msg_records), True))
+        # 发送心跳包
+        # asyncio.create_task(send_heartbeat())
+        while True:
+            data: str = await websocket.receive_text()
+            du = data.upper()
+            if du in questions_and_answers_map:
+                await ws_manage.send_personal_message(message=questions_and_answers_map.get(du), websocket=websocket)
+    except WebSocketDisconnect:
+        if user_id in ws_manage.active_connections:
+            ws_manage.disconnect(user_id)
+    except Exception as e:
+        logger.bind(name=None).debug(f"websocket: 用户: {user_id} 异常退出: {e}")
+
+
 if __name__ == "__main__":
     uvicorn.run(
         app="Application:pika",
         host="localhost",
-        port=7777,
+        port=7780,
         reload=True,
         debug=True,
         log_config="uvicorn_config.json",

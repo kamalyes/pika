@@ -93,8 +93,8 @@ class UserDao(object):
                     or_(PikaUser.username == register_model.username, PikaUser.email == register_model.email)))
                 counts = await session.execute(select(func.count(PikaUser.id)))
                 # 如果用户数量为0 则注册为超管,且激活状态为1
-                identity = RoleEnum.ROOT.value if counts.scalars().first() == 0 else RoleEnum.ORDINARY.value
-                is_activate = 1 if identity == RoleEnum.ROOT else 0
+                identity = RoleEnum.ADMIN.value if counts.scalars().first() == 0 else RoleEnum.ORDINARY.value
+                is_activate = 1 if identity == RoleEnum.ADMIN else 0
                 emp_no, pwd = await UserDao.create_users_epd(users=users, request=register_model)
                 user = PikaUser(emp_no=emp_no, username=register_model.username, identity=identity,
                                 email=register_model.email)
@@ -266,9 +266,9 @@ class UserDao(object):
         Returns:
         """
         user_ip = await client_ip(request)
-        if oauth2_login.dynamic_code is None:
-            raise ValidException(detail="dynamic_code不能为空")
-        await UserDao.has_dynamic_code(oauth2_login.dynamic_code)
+        # if oauth2_login.dynamic_code is None:
+        #     raise ValidException(detail="dynamic_code不能为空")
+        # await UserDao.has_dynamic_code(oauth2_login.dynamic_code)
         async with async_db_session() as session:
             async with session.begin():
                 sql = select(PikaUser).where(or_(PikaUser.username == oauth2_login.username,
@@ -307,7 +307,7 @@ class UserDao(object):
         await UserDao.update_last_login_field(uid=user.id, last_login_ip=user_ip)
         user_infos = await UserDao.query_user_info(uid=user.id)
         return PikaResponse.success(
-            result=DataHand.chain_all([user_infos, {"x_token": uuid_jwt}]),
+            result=DataHand.chain_all([user_infos, {"token": uuid_jwt}]),
             message=PromptEnum.LOGIN_SUCCEED.value)
 
     @staticmethod
@@ -364,7 +364,7 @@ class UserDao(object):
                 session.execute()
         user_infos = await UserDao.query_user_info(uid=user.id)
         return PikaResponse.success(
-            result=DataHand.chain_all([user_infos, {"x_token": uuid_jwt}]),
+            result=DataHand.chain_all([user_infos, {"token": uuid_jwt}]),
             message=PromptEnum.LOGIN_SUCCEED.value)
 
     @staticmethod
@@ -386,7 +386,7 @@ class UserDao(object):
         """
         key_t = f'{RedisKeyEnum.AUTH_TOKEN}:{request.emp_no}'
         exists_token = await async_redis.get(key_t)
-        if exists_token == request.x_token:
+        if exists_token == request.token:
             user_infos = await UserDao.query_user_info(emp_no=request.emp_no)
             try:
                 await UserDao.account_status_verify(uid=user_infos["uid"],

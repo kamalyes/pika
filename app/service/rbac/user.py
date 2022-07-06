@@ -46,7 +46,7 @@ async def login(request: Request, oauth2_login: OAuth2LoginModel = Depends()):
 @router.post("/verifytoken", name="验证Token（用于刷新时使用）")
 async def login(request: OAuth2TokenModel = Depends()):
     user_info = await UserDao.verify_token(request)
-    return PikaResponse.success(message="Authentication success", result=[user_info, {"x_token": request.x_token}])
+    return PikaResponse.success(message="Authentication success", result={**user_info, **{"token": request.token}})
 
 
 @router.delete("/logout", name="注销/退出登录")

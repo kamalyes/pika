@@ -27,10 +27,10 @@ class OAuth2TokenModel:
     def __init__(
             self,
             emp_no: Optional[str] = Header(None, title="用户编码", max_length=ByteSizeEnum.LENGTH_16),
-            x_token: Optional[str] = Header(None, title="x_token", max_length=ByteSizeEnum.LENGTH_600),
+            token: Optional[str] = Header(None, title="token", max_length=ByteSizeEnum.LENGTH_600),
     ):
         self.emp_no = emp_no
-        self.x_token = x_token
+        self.token = token
 
 
 class RegisterModel(BaseModel):

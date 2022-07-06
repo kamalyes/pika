@@ -13,7 +13,6 @@ from enum import IntEnum
 
 
 class RoleEnum(IntEnum):
-    ROOT = 999
-    ADMIN = 888
-    MANAGER = 777
-    ORDINARY = 666
+    ADMIN = 2
+    MANAGER = 1
+    ORDINARY = 0
