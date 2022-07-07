@@ -2,7 +2,7 @@
 # !/usr/bin/env python 3.9.11
 """
 @File    :  jsonres.py
-@Time    :  2022/5/1 8:21 PM
+@Time    :  2022/7/7 15:21 PM
 @Author  :  YuYanQing
 @Version :  1.0
 @Contact :  mryu168@163.com
@@ -70,6 +70,17 @@ class PikaResponse:
         return ans
 
     @staticmethod
+    def dict_model_to_dict(obj):
+        for k, v in obj.items():
+            if isinstance(v, dict):
+                PikaResponse.dict_model_to_dict(v)
+            elif isinstance(v, list):
+                obj[k] = PikaResponse.model_to_list(v)
+            else:
+                obj[k] = PikaResponse.model_to_dict(v)
+        return obj
+
+    @staticmethod
     def parse_sql_result(data: list):
         columns = []
         if len(data) > 0:
@@ -95,7 +106,7 @@ class PikaResponse:
             *,
             code: Union[int, str] = status.HTTP_200_OK,
             status_code: Union[int, str] = status.HTTP_200_OK,
-            result: Union[list, dict, str] = None,
+            data: Union[list, dict, str] = None,
             message: str = "Success",
     ) -> Response:
         """
@@ -103,7 +114,7 @@ class PikaResponse:
         Args:
             code:
             status_code:
-            result:
+            data:
             message:
 
         Returns:
@@ -115,7 +126,7 @@ class PikaResponse:
                 {
                     "code": code,
                     "message": message,
-                    "result": result,
+                    "data": data,
                 }
             ),
         )
@@ -125,7 +136,7 @@ class PikaResponse:
             *,
             code: Union[int, str] = status.HTTP_200_OK,
             status_code: Union[int, str] = status.HTTP_200_OK,
-            result: Union[list, dict, str] = None,
+            data: Union[list, dict, str] = None,
             total: Union[list, dict, str] = None,
             message: str = "Success",
             x_cookies=None,
@@ -135,7 +146,7 @@ class PikaResponse:
         Args:
             code:
             status_code:
-            result:
+            data:
             total:
             message:
             x_cookies:
@@ -149,7 +160,7 @@ class PikaResponse:
                 {
                     "code": code,
                     "message": message,
-                    "result": result,
+                    "data": data,
                     "total": total,
                 }
             ),
@@ -161,7 +172,7 @@ class PikaResponse:
             code: Union[int, str] = status.HTTP_500_INTERNAL_SERVER_ERROR,
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail: str = "Internal Server Error",
-            result: Union[list, dict, str] = None
+            data: Union[list, dict, str] = None
     ) -> Response:
         """
         失败返回
@@ -169,14 +180,14 @@ class PikaResponse:
             code:
             status_code:
             detail:
-            result:
+            data:
 
         Returns:
 
         """
         return JSONResponse(
             status_code=status_code,
-            content=jsonable_encoder({"code": code, "detail": detail, "result": result}),
+            content=jsonable_encoder({"code": code, "detail": detail, "data": data}),
         )
 
     @staticmethod
@@ -205,3 +216,7 @@ class PikaResponse:
                 }
             ),
         )
+
+    @staticmethod
+    def forbidden():
+        return dict(code=403, msg="对不起, 你没有权限")

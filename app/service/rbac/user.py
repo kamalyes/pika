@@ -2,7 +2,7 @@
 # !/usr/bin/env python 3.9.11
 """
 @File    :  user.py
-@Time    :  2022/5/1 8:21 PM
+@Time    :  2022/7/7 15:21 PM
 @Author  :  YuYanQing
 @Version :  1.0
 @Contact :  mryu168@163.com
@@ -46,7 +46,7 @@ async def login(request: Request, oauth2_login: OAuth2LoginModel = Depends()):
 @router.post("/verifytoken", name="验证Token（用于刷新时使用）")
 async def login(request: OAuth2TokenModel = Depends()):
     user_info = await UserDao.verify_token(request)
-    return PikaResponse.success(message="Authentication success", result={**user_info, **{"token": request.token}})
+    return PikaResponse.success(message="Authentication success", data={**user_info, **{"token": request.token}})
 
 
 @router.delete("/logout", name="注销/退出登录")

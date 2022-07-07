@@ -31,4 +31,4 @@ async def update_gconfig(data: GConfigForm, user_info=Depends(Permission(RoleEnu
 @router.get("/gconfig/list", name="查询全局配置列表")
 async def list_gconfig(page: int = 1, size: int = 8, env=None, key: str = "", user_info=Depends(Permission())):
     data, total = await GConfigDao.list_record_with_pagination(page, size, env=env, key=key)
-    return PikaResponse.success_with_size(result=data, total=total)
+    return PikaResponse.success_with_size(data=data, total=total)

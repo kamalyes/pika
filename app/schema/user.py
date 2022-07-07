@@ -2,7 +2,7 @@
 # !/usr/bin/env python 3.9.11
 """
 @File    :  user.py
-@Time    :  2022/5/1 8:21 PM
+@Time    :  2022/7/7 15:21 PM
 @Author  :  YuYanQing
 @Version :  1.0
 @Contact :  mryu168@163.com
@@ -58,7 +58,7 @@ class RegisterModel(BaseModel):
     plane: Optional[str] = Body(None, title="座机", max_length=ByteSizeEnum.LENGTH_20)
     avatar: Optional[str] = Body(None, title="头像", max_length=ByteSizeEnum.LENGTH_255)
     gender: Optional[int] = Body(None, title="性别")
-    city_name: Optional[str] = Body(None, title="所在城市", max_length=ByteSizeEnum.LENGTH_255)
+    location: Optional[str] = Body(None, title="所在城市", max_length=ByteSizeEnum.LENGTH_255)
     identity: Optional[str] = Body(RoleEnum.ORDINARY.value, title="用户身份", max_length=ByteSizeEnum.LENGTH_255)
 
 

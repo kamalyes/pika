@@ -38,8 +38,9 @@ from app.crud.system.notification import PikaNotificationDao
 from app.enums.MessageEnum import MessageTypeEnum, MessageStateEnum
 from app.enums.sysvar import PikaGlobalVarEnum
 from app.models import async_redis, async_create_table
-from app.service.itst import aiptest_router
 from app.service.itst import functest_router
+from app.service.itst import testcase_router
+from app.service.itst import testplan_router
 from app.service.itstem import dbconfig_router
 from app.service.itstem import environment_router
 from app.service.itstem import gateway_router
@@ -48,6 +49,7 @@ from app.service.itstem import redis_config_router
 from app.service.online import redis_router
 from app.service.online import script_router
 from app.service.online import sql_router
+from app.service.project import project_router
 from app.service.proxy import mock_router
 from app.service.rbac import access_router
 from app.service.rbac import kerberos_router
@@ -60,6 +62,7 @@ from app.service.system import lexicon_router
 from app.service.system import mini_oss_router
 from app.service.system import notice_router
 from app.service.system import operation_log_router
+from app.service.workspace import workspace_router
 from app.utils.ws_manager import ws_manage
 from config import InterceptHandler, PikaAppConfig
 
@@ -322,11 +325,22 @@ class PikaFastApi:
         pika.include_router(mini_oss_router, prefix="/oss", tags=["Oss"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
-        # itst
-        pika.include_router(functest_router, prefix="/test", tags=["功能测试"],
+        # workspace
+        pika.include_router(workspace_router, prefix="/workspace", tags=["工作台"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
-        pika.include_router(aiptest_router, prefix="/test", tags=["接口测试"],
+
+        # itst
+        pika.include_router(project_router, prefix="/project", tags=["项目"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+        pika.include_router(testplan_router, prefix="/testplan", tags=["测试计划"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+        pika.include_router(testcase_router, prefix="/testcase", tags=["接口测试"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+        pika.include_router(functest_router, prefix="/test", tags=["功能测试"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
         pika.include_router(mock_router, prefix="/ask", tags=["ask服务"],
@@ -401,8 +415,8 @@ def stop_test():
     pass
 
 
-@pika.websocket("/ws/{user_id}")
-async def websocket_endpoint(websocket: WebSocket, user_id: int):
+@pika.websocket("/ws/{emp_no}")
+async def websocket_endpoint(websocket: WebSocket, emp_no: int):
     async def send_heartbeat():
         while True:
             logger.debug("sending heartbeat")
@@ -410,16 +424,17 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int):
                 'type': 3
             })
             await asyncio.sleep(50)
-    await ws_manage.connect(websocket, user_id)
+
+    await ws_manage.connect(websocket, emp_no)
     try:
         # 定义特殊值的回复，配合前端实现确定连接，心跳检测等逻辑
         questions_and_answers_map: dict = {
-            "HELLO SERVER": F"hello {user_id}",
-            "HEARTBEAT": F"{user_id}",
+            "HELLO SERVER": F"hello {emp_no}",
+            "HEARTBEAT": F"{emp_no}",
         }
 
         # 存储连接后获取消息
-        msg_records = await PikaNotificationDao.list_messages(msg_type=MessageTypeEnum.all.value, receiver=user_id,
+        msg_records = await PikaNotificationDao.list_messages(msg_type=MessageTypeEnum.all.value, receiver=emp_no,
                                                               msg_status=MessageStateEnum.unread.value)
         # 如果有未读消息, 则推送给前端对应的count
         if len(msg_records) > 0:
@@ -432,10 +447,10 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int):
             if du in questions_and_answers_map:
                 await ws_manage.send_personal_message(message=questions_and_answers_map.get(du), websocket=websocket)
     except WebSocketDisconnect:
-        if user_id in ws_manage.active_connections:
-            ws_manage.disconnect(user_id)
+        if emp_no in ws_manage.active_connections:
+            ws_manage.disconnect(emp_no)
     except Exception as e:
-        logger.bind(name=None).debug(f"websocket: 用户: {user_id} 异常退出: {e}")
+        logger.bind(name=None).debug(f"websocket: 用户: {emp_no} 异常退出: {e}")
 
 
 if __name__ == "__main__":

@@ -42,7 +42,7 @@ async def list_dbconfig(name: str = '', database: str = '', env_id: int = None,
                         user_info=Depends(Permission(RoleEnum.MANAGER))):
     try:
         data = await DbConfigDao.list_database(name, database, env_id)
-        return PikaResponse.success(result=data)
+        return PikaResponse.success(data=data)
     except Exception as err:
         return PikaResponse.failed(detail=str(err))
 
@@ -55,6 +55,6 @@ async def connect_test(sql_type: int, host: str, port: int, username: str, passw
         if data is None:
             raise Exception("测试连接失败")
         await DatabaseHelper.test_connection(data.get("session"))
-        return PikaResponse.success(msg="连接成功")
+        return PikaResponse.success(message="连接成功")
     except Exception as e:
-        return PikaResponse.failed(str(e))
+        return PikaResponse.failed(detail=str(e))

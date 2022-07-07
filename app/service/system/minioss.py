@@ -21,13 +21,13 @@ async def create_oss_file(filepath: str, file: UploadFile = File(...),
         # oss上传 WARNING: 可能存在数据不同步的问题，oss成功本地失败
         file_url, file_size = await client.create_file(filepath, file_content)
         # 本地数据也要备份一份
-        model = PikaOssFile(user_info['id'], filepath, file_url, PikaOssFile.get_size(file_size))
+        model = PikaOssFile(user_info['emp_no'], filepath, file_url, PikaOssFile.get_size(file_size))
         record = await PikaOssDao.query_record(file_path=filepath, is_delete=0)
         if record is not None:
             record.file_path = filepath
             record.view_url = file_url
             record.file_size = file_size
-            await PikaOssDao.update_record_by_id(user_info['id'], record)
+            await PikaOssDao.update_record_by_id(user_info['emp_no'], record)
         else:
             await PikaOssDao.insert_record(model, True)
         return PikaResponse.success()
@@ -40,11 +40,11 @@ async def upload_avatar(file: UploadFile = File(...), user_info=Depends(Permissi
     try:
         file_content = await file.read()
         suffix = file.filename.split(".")[-1]
-        filepath = f"user_{user_info['id']}.{suffix}"
+        filepath = f"user_{user_info['emp_no']}.{suffix}"
         client = OssClient.get_oss_client()
         file_url, _ = await client.create_file(filepath, file_content, base_path="avatar")
         await UserDao.update_avatar(emp_no=user_info['emp_no'], avatar=file_url)
-        return PikaResponse.success(result=file_url)
+        return PikaResponse.success(data=file_url)
     except Exception as e:
         return PikaResponse.failed(detail=f"上传头像失败: {e}")
 
@@ -82,4 +82,4 @@ async def download_oss_file(filepath: str):
         path, filename = await client.download_file(filepath)
         return PikaResponse.file(path, filename)
     except Exception as e:
-        return PikaResponse.failed(f"下载失败: {e}")
+        return PikaResponse.failed(detail=f"下载失败: {e}")

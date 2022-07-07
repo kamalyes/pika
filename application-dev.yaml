@@ -70,3 +70,10 @@ github:
   client_id: ""
   access_key: ""
   secret_key: ""
+
+mitmproxy:
+  port: 7781
+  open: True
+
+case:
+  retry_times: 1

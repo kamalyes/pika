@@ -19,7 +19,7 @@ async def list_user_operation(request: PikaOperationFrom = Depends(),
                                                      _sort=[desc(PikaOperationLog.operator_date)])
         return PikaResponse.records(records)
     except Exception as e:
-        return PikaResponse.failed(e)
+        return PikaResponse.failed(detail=str(e))
 
 
 @router.get("/count", name="获取用户操作记录热力图以及参与的项目数量")
@@ -31,6 +31,6 @@ async def list_user_activities(request: PikaOperationFrom = Depends()):
             # 解包日期和数量
             date, count = r
             ans.append(dict(date=date.strftime("%Y-%m-%d"), count=count))
-        return PikaResponse.success(ans)
+        return PikaResponse.success(data=ans)
     except Exception as e:
         return PikaResponse.failed(detail=e)

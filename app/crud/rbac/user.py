@@ -2,7 +2,7 @@
 # !/usr/bin/env python 3.9.11
 """
 @File    :  user.py
-@Time    :  2022/5/1 8:21 PM
+@Time    :  2022/7/7 15:21 PM
 @Author  :  YuYanQing
 @Version :  1.0
 @Contact :  mryu168@163.com
@@ -33,7 +33,8 @@ from app.enums.operation import VerifyCodeEnum
 from app.enums.statuscode import SysFailedCodeEnum
 from app.enums.sysvar import PikaGlobalVarEnum, ValidTimeEnum
 from app.enums.toast import PromptEnum
-from app.models import async_db_session, async_redis
+from app.middleware.xredis import RedisHelper
+from app.models import async_db_session, async_redis, async_session
 from app.models.admin import PikaUserAdmin
 from app.models.kerberos import PikaSecurityRelIssues
 from app.models.user import PikaUser
@@ -112,7 +113,7 @@ class UserDao(object):
                                          pwd_valid_date=pwd_valid_date)
         except Exception as e:
             pass
-        return PikaResponse.success(result=user, message=PromptEnum.REGISTER_SUCCEED.value)
+        return PikaResponse.success(data=user, message=PromptEnum.REGISTER_SUCCEED.value)
 
     @staticmethod
     async def account_status_verify(**kwargs):
@@ -307,7 +308,7 @@ class UserDao(object):
         await UserDao.update_last_login_field(uid=user.id, last_login_ip=user_ip)
         user_infos = await UserDao.query_user_info(uid=user.id)
         return PikaResponse.success(
-            result=DataHand.chain_all([user_infos, {"token": uuid_jwt}]),
+            data=DataHand.chain_all([user_infos, {"token": uuid_jwt}]),
             message=PromptEnum.LOGIN_SUCCEED.value)
 
     @staticmethod
@@ -364,7 +365,7 @@ class UserDao(object):
                 session.execute()
         user_infos = await UserDao.query_user_info(uid=user.id)
         return PikaResponse.success(
-            result=DataHand.chain_all([user_infos, {"token": uuid_jwt}]),
+            data=DataHand.chain_all([user_infos, {"token": uuid_jwt}]),
             message=PromptEnum.LOGIN_SUCCEED.value)
 
     @staticmethod
@@ -427,7 +428,7 @@ class UserDao(object):
                                        create_emp_no=user_info.get("emp_no", None),
                                        registration_date=Moment.get_now_time("%Y-%m-%d %H:%M:%S"))
             session.add(user_admin)
-            return PikaResponse.success(result=user, message=PromptEnum.REGISTER_SUCCEED.value)
+            return PikaResponse.success(data=user, message=PromptEnum.REGISTER_SUCCEED.value)
 
     @staticmethod
     async def update_user_info(modify_user_info, user_info):
@@ -442,7 +443,7 @@ class UserDao(object):
                                  mobile=modify_user_info.mobile,
                                  gender=modify_user_info.gender)
         update_info = {'avatar': modify_user_info.avatar,
-                       'city_name': modify_user_info.city_name,
+                       'location': modify_user_info.location,
                        'email': modify_user_info.email,
                        'gender': modify_user_info.gender,
                        'identity': modify_user_info.identity,
@@ -488,7 +489,7 @@ class UserDao(object):
             dynamic_code = MockHelper.rand_verify_code(6, 1).upper()
             key_name = f"{RedisKeyEnum.DYNAMIC_CODE}:{dynamic_code}"
             await async_redis.set(key_name, str(user_ip), ValidTimeEnum.DYNAMIC_CODE_VALID_TIME.value)
-            return PikaResponse.success(result=dynamic_code)
+            return PikaResponse.success(data=dynamic_code)
         except Exception as redis_err:
             raise RedisException(detail=str(redis_err))
 
@@ -662,8 +663,39 @@ class UserDao(object):
                     msg = "部分修改成功"
                 return PikaResponse.success(code=SysFailedCodeEnum.MYSQL_ERROR,
                                             message=f'{msg},详情请查阅返回值！',
-                                            result={"success": success, "failed": failed, "not_funded": not_funded})
+                                            data={"success": success, "failed": failed, "not_funded": not_funded})
 
     @staticmethod
     async def query_security(db, emp_no):
         return await paginate(db, select(PikaSecurityRelIssues).where(PikaSecurityRelIssues.emp_no == emp_no))
+
+    @staticmethod
+    @RedisHelper.cache("user_list", 3 * 3600)
+    async def list_users():
+        try:
+            async with async_session() as session:
+                query = await session.execute(select(PikaUser))
+                return query.scalars().all()
+        except Exception as e:
+            UserDao.log.error(f"获取用户列表失败: {str(e)}")
+            raise Exception("获取用户列表失败")
+
+    @staticmethod
+    @RedisHelper.cache("user_detail", 3600)
+    async def query_user(id: int):
+        async with async_session() as session:
+            query = await session.execute(select(PikaUser).where(PikaUser.id == id))
+            return query.scalars().first()
+
+    @staticmethod
+    @RedisHelper.cache("user_touch")
+    async def list_user_touch(*user):
+        try:
+            if not user:
+                return []
+            async with async_session() as session:
+                query_user = await session.execute(select(PikaUser).where(PikaUser.id.in_(user)))
+                return [{"email": quser.email, "phone": quser.phone} for quser in query_user.scalars().all()]
+        except Exception as e:
+            UserDao.log.error(f"获取用户联系方式失败: {str(e)}")
+            raise Exception(f"获取用户联系方式失败: {e}")

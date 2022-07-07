@@ -66,7 +66,7 @@ class DbConfigDao(object):
                     query = result.scalars().first()
                     if query is not None:
                         raise Exception("数据库配置已存在")
-                    session.add(PikaDatabase(**data.dict(), create_emp_no=operator))
+                    session.add(PikaDatabase(**data.dict(), operator=operator))
         except Exception as e:
             DbConfigDao.log.error(f"新增数据库配置: {data.name}失败, {e}")
             raise Exception("新增数据库配置失败")

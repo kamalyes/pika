@@ -2,16 +2,14 @@
 # !/usr/bin/env python 3.9.11
 """
 @File    :  dingtalk.py
-@Time    :  2022/5/1 8:21 PM
+@Time    :  2022/7/7 15:21 PM
 @Author  :  YuYanQing
 @Version :  1.0
 @Contact :  mryu168@163.com
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-
-from app.middleware.network.asynchttp import AsyncRequest
-
+from app.middleware.async_ask import AsyncRequest
 from config import PikaAppConfig
 
 

@@ -31,6 +31,10 @@ class PikaAppConfig(object):
     GLOBAL_POOL_CONFIG = System.get_pool_config(
         work_spaces_path=WORKSPACES_PATH, environment=ENVIRONMENT
     )
+    MITMPROXY = GLOBAL_POOL_CONFIG["mitmproxy"]
+    CASE = GLOBAL_POOL_CONFIG["case"]
+    RETRY_TIMES = CASE["retry_times"]
+    PROXY_PORT, MOCK_OPEN = MITMPROXY["port"], MITMPROXY["open"]
     SERVER_REPORT = "http://localhost:8000/#/record/report/"
     TEMPLATE_PATH = f"{WORKSPACES_PATH}/templates"
     MARKDOWN_PATH = f"{WORKSPACES_PATH}/templates/markdown/test_report.md"

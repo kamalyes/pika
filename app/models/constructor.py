@@ -2,7 +2,7 @@
 # !/usr/bin/env python 3.9.11
 """
 @File    :  __init__.py
-@Time    :  2022/5/1 8:21 PM
+@Time    :  2022/7/7 15:21 PM
 @Author  :  YuYanQing
 @Version :  1.0
 @Contact :  mryu168@163.com
@@ -18,7 +18,7 @@ from app.models.basic import PikaLargeBase
 
 class PikaConstructor(PikaLargeBase):
     __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_constructor'
-    __table_args__ = (UniqueConstraint('case_id', 'suffix', 'name'))
+    __table_args__ = (UniqueConstraint('case_id', 'suffix', 'name'), {"comment": "数据构造器表"})
     type = Column(INT, default=0, comment="0: testcase 1: sqlscript 2: redis 3: py脚本 4: 其它")
     name = Column(String(ByteSizeEnum.LENGTH_64), comment="数据初始化描述")
     enable = Column(BOOLEAN, default=True, nullable=False)
@@ -30,8 +30,8 @@ class PikaConstructor(PikaLargeBase):
     suffix = Column(BOOLEAN, default=False, comment="是否是后置条件，默认为否")
 
     def __init__(self, type, name, enable, constructor_json, case_id, public,
-                 emp_no, value="", suffix=False, id=None, index=0):
-        super().__init__(emp_no, id)
+                 operator, value="", suffix=False, id=None, index=0):
+        super().__init__(operator, id)
         self.type = type
         self.name = name
         self.enable = enable

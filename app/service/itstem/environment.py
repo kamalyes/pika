@@ -26,11 +26,11 @@ async def delete_environment(id: int, user_info=Depends(Permission(RoleEnum.ADMI
 @router.post("/environment/update", name="更新环境配置")
 async def update_environment(data: EnvironmentForm, user_info=Depends(Permission(RoleEnum.ADMIN))):
     ans = await EnvironmentDao.update_record_by_id(user_info['emp_no'], data, True, True)
-    return PikaResponse.success(result=ans)
+    return PikaResponse.success(data=ans)
 
 
 @router.get("/environment/list", name="查询环境配置列表")
 async def list_environment(page: int = 1, size: int = 8, name: str = "", exactly=False,
                            user_info=Depends(Permission())):
     data, total = await EnvironmentDao.list_env(page, size, name, exactly)
-    return PikaResponse.success_with_size(result=data, total=total)
+    return PikaResponse.success_with_size(data=data, total=total)

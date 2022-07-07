@@ -102,7 +102,7 @@ class KerberosDao(object):
                         msg = "部分修改成功"
                     return PikaResponse.success(code=SysFailedCodeEnum.MYSQL_ERROR,
                                                 message=f'{msg},详情请查阅返回值！',
-                                                result={"success": success, "failed": failed, "not_funded": not_funded})
+                                                data={"success": success, "failed": failed, "not_funded": not_funded})
 
     @staticmethod
     async def query_encrypt_issue(db, request):

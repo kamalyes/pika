@@ -22,7 +22,7 @@ async def insert_redis_config(form: RedisConfigForm,
             raise Exception("数据已存在, 请勿重复添加")
         data = PikaRedis(**form.dict(), operator=user_info['emp_no'])
         result = await PikaRedisConfigDao.insert_record(data, log=True)
-        return PikaResponse.success(result=result)
+        return PikaResponse.success(data=result)
     except Exception as err:
         return PikaResponse.failed(detail=str(err))
 
@@ -50,7 +50,7 @@ async def update_redis_config(form: RedisConfigForm,
         else:
             background_tasks.add_task(PikaRedisManager.refresh_redis_client,
                                       *(result.id, result.addr, result.password, result.db))
-        return PikaResponse.success(result=result)
+        return PikaResponse.success(data=result)
     except Exception as err:
         return PikaResponse.failed(detail=str(err))
 
@@ -64,6 +64,6 @@ async def list_redis_config(name: str = '', addr: str = '', env: int = None,
             name=DatabaseHelper.like(name), addr=DatabaseHelper.like(addr),
             env=env, cluster=cluster
         )
-        return PikaResponse.success(result=data)
+        return PikaResponse.success(data=data)
     except Exception as err:
         return PikaResponse.failed(detail=str(err))

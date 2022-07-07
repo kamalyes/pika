@@ -15,7 +15,9 @@ import time
 import aiohttp
 from aiohttp import FormData
 
+from app.enums.testcase import ReqBodyTypeEnum
 from app.middleware.oss import OssClient
+from config import PikaAppConfig
 
 
 class AsyncRequest(object):
@@ -24,7 +26,7 @@ class AsyncRequest(object):
         self.url = url
         self.kwargs = kwargs
         self.timeout = aiohttp.ClientTimeout(total=timeout)
-        self.proxy = f"http://127.0.0.1:{Config.PROXY_PORT}" if Config.MOCK_ON else None
+        self.proxy = f"http://127.0.0.1:{PikaAppConfig.PROXY_PORT}" if PikaAppConfig.MOCK_OPEN else None
 
     def get_cookie(self, session):
         cookies = session.cookie_jar.filter_cookies(self.url)
@@ -59,11 +61,11 @@ class AsyncRequest(object):
                 return resp.content
 
     @staticmethod
-    async def client(url: str, body_type: BodyType = BodyType.json, timeout=15, **kwargs):
+    async def client(url: str, body_type: ReqBodyTypeEnum = ReqBodyTypeEnum.json, timeout=15, **kwargs):
         if not url.startswith(("http://", "https://")):
             raise Exception("请输入正确的url, 记得带上http哦")
         headers = kwargs.get("headers", {})
-        if body_type == BodyType.json:
+        if body_type == ReqBodyTypeEnum.json:
             if "Content-Type" not in headers:
                 headers['Content-Type'] = "application/json; charset=UTF-8"
             # 新增json校验，修复史诗级bug: json被额外序列化
@@ -75,7 +77,7 @@ class AsyncRequest(object):
                 raise Exception(f"json格式不正确: {e}")
             r = AsyncRequest(url, headers=headers, timeout=timeout,
                              json=body)
-        elif body_type == BodyType.form:
+        elif body_type == ReqBodyTypeEnum.form:
             try:
                 body = kwargs.get("body")
                 form_data = None
@@ -94,7 +96,7 @@ class AsyncRequest(object):
                 r = AsyncRequest(url, headers=headers, data=form_data, timeout=timeout)
             except Exception as e:
                 raise Exception(f"解析form-data失败: {str(e)}")
-        elif body_type == BodyType.x_form:
+        elif body_type == ReqBodyTypeEnum.x_form:
             body = kwargs.get("body", "{}")
             body = json.loads(body)
             r = AsyncRequest(url, headers=headers, data=body, timeout=timeout)

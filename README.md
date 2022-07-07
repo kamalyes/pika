@@ -147,8 +147,33 @@ timeout = 120
 
 
 ### 🎉 二次开发
+1. 安装python3.9.11环境
+```bash
+vi setup_py391.sh
 
+将以下内容复制粘贴
+wget https://www.python.org/ftp/python/3.9.2/Python-3.9.2.tar.xz
+tar -xvJf  Python-3.9.2.tar.xz
+cd Python-3.9.2
+./configure prefix=/usr/local/python3
+make && make install
+ln -s /usr/local/python3/bin/python3 /usr/bin/python3
+ln -s /usr/local/python3/bin/pip3 /usr/bin/pip3
 
+赋权限并执行
+[root@VM-8-3-centos ~]# chmod 777 setup_py391.sh
+[root@VM-8-3-centos ~]# ./setup_py391.sh
+```
+2. clone项目
+```bash
+后端：git clone git@github.com:kamalyes/pika.git
+前端：git clone git@github.com:kamalyes/pikaWeb.git
+```
+3. 修改配置文件
+```bash
+后端：修改config.py中ENVIRONMENT变量、以及applicationxxx.yaml
+前端：修改config.js
+```
 ### ✉ 使用文档
 
 

@@ -96,7 +96,7 @@ class RoleDao(object):
                         msg = "部分修改成功"
                     return PikaResponse.success(code=SysFailedCodeEnum.MYSQL_ERROR,
                                                 message=f'{msg},详情请查阅返回值！',
-                                                result={"success": success, "failed": failed, "not_funded": not_funded})
+                                                data={"success": success, "failed": failed, "not_funded": not_funded})
 
     @staticmethod
     async def query_role(db, request):
@@ -164,7 +164,7 @@ class RoleDao(object):
                               "emp_no_not_exists": set(emp_no_not_exists)}
                     return PikaResponse.success(code=SysFailedCodeEnum.MYSQL_ERROR,
                                                 message=f'{msg},详情请查阅返回值！',
-                                                result={"success": success,
+                                                data={"success": success,
                                                         "failed": failed})
 
     @staticmethod
@@ -205,7 +205,7 @@ class RoleDao(object):
                               "role_relo_id_is_exists": set(role_relo_id_is_exists)}
                     return PikaResponse.success(code=SysFailedCodeEnum.MYSQL_ERROR,
                                                 message=f'{msg},详情请查阅返回值！',
-                                                result={"success": success,
+                                                data={"success": success,
                                                         "failed": failed})
 
     @staticmethod
@@ -250,5 +250,5 @@ class RoleDao(object):
                               "id_is_not_exists": set(id_is_not_exists)}
                     return PikaResponse.success(code=SysFailedCodeEnum.MYSQL_ERROR,
                                                 message=f'{msg},详情请查阅返回值！',
-                                                result={"success": success,
+                                                data={"success": success,
                                                         "failed": failed})

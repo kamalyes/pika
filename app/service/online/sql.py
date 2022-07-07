@@ -12,7 +12,7 @@ async def execute_sql(data: OnlineSQLForm):
     try:
         result = await DbConfigDao.online_sql(data.id, data.sql)
         columns, result = PikaResponse.parse_sql_result(result)
-        return PikaResponse.success(result=dict(result=result, columns=columns))
+        return PikaResponse.success(data=dict(result=result, columns=columns))
     except Exception as err:
         return PikaResponse.failed(detail=str(err))
 
@@ -21,6 +21,6 @@ async def execute_sql(data: OnlineSQLForm):
 async def list_tables():
     try:
         result, table_map = await DbConfigDao.query_database_and_tables()
-        return PikaResponse.success(result=dict(database=result, tables=table_map))
+        return PikaResponse.success(data=dict(database=result, tables=table_map))
     except Exception as err:
         return PikaResponse.failed(detail=str(err))

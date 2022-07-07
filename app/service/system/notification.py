@@ -16,6 +16,7 @@ from fastapi import APIRouter, Depends
 from app.core.handler.jsonres import PikaResponse
 from app.crud.system.broadcast import BroadcastReadDao
 from app.crud.system.notification import PikaNotificationDao
+from app.enums.MessageEnum import MessageStateEnum
 from app.models import get_async_session
 from app.models.broadcast import PikaBroadcastReadUser
 from app.models.notification import PikaNotification
@@ -24,15 +25,13 @@ from app.service import Permission
 
 router = APIRouter()
 
-from app.enums.MessageEnum import MessageStateEnum
-
 
 @router.get("/list", description="获取用户消息列表")
 async def list_msg(msg_status: int, msg_type: int, user_info=Depends(Permission())):
     try:
         data = await PikaNotificationDao.list_messages(msg_type=msg_type, msg_status=msg_status,
-                                                       receiver=user_info['id'])
-        return PikaResponse.success(result=data)
+                                                       receiver=user_info['emp_no'])
+        return PikaResponse.success(data=data)
     except Exception as e:
         return PikaResponse.failed(detail=str(e))
 
@@ -41,14 +40,14 @@ async def list_msg(msg_status: int, msg_type: int, user_info=Depends(Permission(
 async def read_msg(form: NotificationForm, user_info=Depends(Permission())):
     try:
         if form.personal:
-            await PikaNotificationDao.update_by_map(user_info['id'],
+            await PikaNotificationDao.update_by_map(user_info['emp_no'],
                                                     PikaNotification.id.in_(form.personal),
-                                                    PikaNotification.receiver == user_info['id'],
+                                                    PikaNotification.receiver == user_info['emp_no'],
                                                     msg_status=MessageStateEnum.read.value)
         if form.broadcast:
-            user_id = user_info['id']
+            operator = user_info['emp_no']
             for f in form.broadcast:
-                model = PikaBroadcastReadUser(f, user_id)
+                model = PikaBroadcastReadUser(f, operator)
                 await BroadcastReadDao.insert_record(model)
         return PikaResponse.success()
     except Exception as e:
@@ -58,7 +57,7 @@ async def read_msg(form: NotificationForm, user_info=Depends(Permission())):
 @router.post("/delete", description="用户删除消息")
 async def read_msg(msg_id: List[int], user_info=Depends(Permission()), session=Depends(get_async_session)):
     try:
-        await PikaNotificationDao.delete_message(session, msg_id, user_info['id'])
+        await PikaNotificationDao.delete_message(session, msg_id, user_info['emp_no'])
         return PikaResponse.success()
     except Exception as e:
         return PikaResponse.failed(detail=str(e))

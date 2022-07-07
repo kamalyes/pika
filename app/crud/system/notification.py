@@ -39,12 +39,12 @@ class PikaNotificationDao(PikaMapper):
         # 1. 当消息类型不为广播类型时，正常查询
         if msg_type == MessageTypeEnum.others:
             ans = await cls.list_record(msg_status=msg_status, receiver=receiver, msg_type=msg_type,
-                                        condition=[PikaNotification.create_data > ninety_days])
+                                        condition=[PikaNotification.create_date > ninety_days])
         else:
             # 否则需要根据是否已读进行查询 只支持90天内数据
             async with async_session() as session:
                 # 找到3个月内的消息
-                default_condition = [PikaNotification.deleted_date == 0, PikaNotification.create_data >= ninety_days]
+                default_condition = [PikaNotification.is_delete == 0, PikaNotification.create_date >= ninety_days]
                 if msg_type == MessageTypeEnum.broadcast:
                     conditions = [*default_condition, PikaNotification.msg_type == msg_type]
                 else:
@@ -57,7 +57,7 @@ class PikaNotificationDao(PikaMapper):
                     .outerjoin(PikaBroadcastReadUser,
                                and_(PikaNotification.id == PikaBroadcastReadUser.notification_id,
                                     PikaBroadcastReadUser.read_user == receiver)).where(*conditions).order_by(
-                    PikaNotification.create_data.desc())
+                    PikaNotification.create_date.desc())
                 query = await session.execute(sql)
                 result = query.all()
                 ans = []

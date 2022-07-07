@@ -13,6 +13,6 @@ def execute_py_script(data: PyScriptForm, user_info=Depends(Permission())):
         loc = dict()
         exec(data.command, loc)
         value = loc.get(data.value)
-        return PikaResponse.success(result=value)
+        return PikaResponse.success(data=value)
     except Exception as err:
         return PikaResponse.failed(detail=str(err))

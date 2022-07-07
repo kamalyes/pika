@@ -48,11 +48,11 @@ class ConnectionManager:
         else:
             raise TypeError(F"websocket不能发送{type(message)}的内容！")
 
-    async def send_personal_message(self, user_id: int, message: MsgType) -> None:
+    async def send_personal_message(self, operator: int, message: MsgType) -> None:
         """
         发送个人信息
         """
-        conn = self.active_connections.get(user_id)
+        conn = self.active_connections.get(operator)
         if conn:
             await self.pusher(sender=conn, message=message)
 
@@ -63,16 +63,16 @@ class ConnectionManager:
         for connection in self.active_connections.values():
             await self.pusher(sender=connection, message=message)
 
-    async def send_data(self, user_id, msg_type, record_msg):
+    async def send_data(self, emp_no, msg_type, record_msg):
         msg = dict(type=msg_type, record_msg=record_msg)
-        await self.send_personal_message(user_id, msg)
+        await self.send_personal_message(emp_no, msg)
 
-    async def notify(self, user_id, title=None, content=None, notice: PikaNotification = None):
+    async def notify(self, emp_no, title=None, content=None, notice: PikaNotification = None):
         """
         根据user_id推送对应的
         :param content:
         :param title:
-        :param user_id: 当user_id为-1的时候代表是广播消息
+        :param emp_no: 当user_id为-1的时候代表是广播消息
         :param notice:
         :return:
         """
@@ -80,16 +80,16 @@ class ConnectionManager:
             # 判断是否为桌面通知
             if title is not None:
                 msg = WebSocketMessage.desktop_msg(title, content)
-                if user_id == ConnectionManager.BROADCAST:
+                if emp_no == ConnectionManager.BROADCAST:
                     await self.broadcast(msg)
                 else:
-                    await self.send_personal_message(user_id, msg)
+                    await self.send_personal_message(emp_no, msg)
             else:
                 # 说明不是桌面消息，直接给出消息数量即可
-                if user_id == ConnectionManager.broadcast:
+                if emp_no == ConnectionManager.broadcast:
                     await self.broadcast(WebSocketMessage.msg_count())
                 else:
-                    await self.send_personal_message(user_id, WebSocketMessage.msg_count())
+                    await self.send_personal_message(emp_no, WebSocketMessage.msg_count())
             # 判断是否要落入推送表
             if notice is not None:
                 await PikaNotificationDao.insert_record(notice)

@@ -11,3 +11,5 @@
 """
 from app.service.itst.apitest import router as aiptest_router
 from app.service.itst.functest import router as functest_router
+from app.service.itst.testcase import router as testcase_router
+from app.service.itst.testplan import router as testplan_router

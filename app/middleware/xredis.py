@@ -196,11 +196,11 @@ class RedisHelper(object):
 
     @staticmethod
     @awaitable
-    def set_address_record(user_id: int, address: str, regex: str):
+    def set_address_record(operator: int, address: str, regex: str):
         """
         设置录制状态
         Args:
-            user_id:
+            operator:
             address:
             regex: 录制的url正则
 
@@ -208,10 +208,23 @@ class RedisHelper(object):
 
         """
         # 默认录制1小时
-        value = json.dumps({"user_id": user_id, "regex": regex}, ensure_ascii=False)
+        value = json.dumps({"operator": operator, "regex": regex}, ensure_ascii=False)
         RedisHelper.pika_redis_client.set(RedisHelper.get_key(f"record:ip:{address}"), value, ex=3600)
         # 清楚上次录制数据
         RedisHelper.pika_redis_client.delete(RedisHelper.get_key(f"record:{address}:requests"))
+
+    @staticmethod
+    @awaitable
+    def remove_record_data(address: str, index: int):
+        """
+        停止录制任务
+        :param address:
+        :param index:
+        :return:
+        """
+        key = RedisHelper.get_key(f"record:{address}:requests")
+        RedisHelper.pika_redis_client.lset(key, index, "DELETED")
+        RedisHelper.pika_redis_client.lrem(key, 1, "DELETED")
 
     @staticmethod
     @awaitable

@@ -16,7 +16,7 @@ from hutools.time import Moment
 
 from app.core.handler.execres import ValidException
 from app.core.handler.logger import PikaLogger
-from app.core.notice.email import EmailHande
+from app.core.notice.email import EmailHander
 from app.enums.dimkey import RedisKeyEnum
 from app.enums.sysvar import ValidTimeEnum, PikaGlobalVarEnum
 from app.models import async_redis
@@ -42,8 +42,8 @@ class Email(object):
         """
         redis_now_time = await async_redis.time()
         try:  # 若发送邮件异常则回收对应验证码
-            return EmailHande.send_email(
-                content=EmailHande.register_succeed_template(
+            return EmailHander.send_email(
+                content=EmailHander.register_succeed_template(
                     username,
                     emp_no,
                     addressee,
@@ -74,8 +74,8 @@ class Email(object):
         await async_redis.set(auth_verify_code, auth_code_, int(auth_code_valid_time))
         try:  # 若发送邮件异常则回收对应验证码
             if model in (1, 2):
-                return EmailHande.send_email(
-                    content=EmailHande.get_security_code_template(
+                return EmailHander.send_email(
+                    content=EmailHander.get_security_code_template(
                         username,
                         emp_no,
                         auth_code_,
@@ -86,8 +86,8 @@ class Email(object):
                     addressee=addressee
                 )
             elif model == 3:
-                return EmailHande.send_email(
-                    content=EmailHande.get_reg_code_template(
+                return EmailHander.send_email(
+                    content=EmailHander.get_reg_code_template(
                         addressee,
                         auth_code_,
                         Moment.timestamp_to_date(valid_time),

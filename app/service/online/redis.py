@@ -22,6 +22,6 @@ router = APIRouter()
 async def test_redis_command(form: OnlineRedisForm):
     try:
         res = await PikaRedisConfigDao.execute_command(form.command, id=form.id)
-        return PikaResponse.success(result=res)
+        return PikaResponse.success(data=res)
     except Exception as err:
         return PikaResponse.failed(detail=str(err))

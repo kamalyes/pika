@@ -2,7 +2,7 @@
 # !/usr/bin/env python 3.9.11
 """
 @File    :  email.py
-@Time    :  2022/5/1 8:21 PM
+@Time    :  2022/7/7 15:21 PM
 @Author  :  YuYanQing
 @Version :  1.0
 @Contact :  mryu168@163.com
@@ -24,7 +24,7 @@ from app.enums.sysvar import PikaGlobalVarEnum
 from config import PikaAppConfig
 
 
-class EmailHande:
+class EmailHander:
     @staticmethod
     def sub_template(file_name, target_dict):
         """
@@ -65,7 +65,7 @@ class EmailHande:
             "send_time": send_time,
             "root_email": PikaGlobalVarEnum.PL_EMAIL,
         }
-        return EmailHande.sub_template("register_succeed.html", target_dict)
+        return EmailHander.sub_template("register_succeed.html", target_dict)
 
     @staticmethod
     def exc_events_template(username, emp_no, events_key: int, send_time=Moment.get_now_time("%Y-%m-%d %H:%M:%S")):
@@ -100,7 +100,7 @@ class EmailHande:
             "form": PikaGlobalVarEnum.APP_NAME,
             "send_time": send_time,
         }
-        return EmailHande.sub_template("event.html", target_dict)
+        return EmailHander.sub_template("event.html", target_dict)
 
     @staticmethod
     def get_reg_code_template(email, auth_code, valid_time,
@@ -124,7 +124,7 @@ class EmailHande:
             "valid_time": valid_time,
             "send_time": redis_time,
         }
-        return EmailHande.sub_template("get_reg_code.html", target_dict)
+        return EmailHander.sub_template("get_reg_code.html", target_dict)
 
     @staticmethod
     def get_security_code_template(username, emp_no, auth_code, valid_time,
@@ -150,7 +150,7 @@ class EmailHande:
             "valid_time": valid_time,
             "send_time": redis_time,
         }
-        return EmailHande.sub_template("authcode.html", target_dict)
+        return EmailHander.sub_template("authcode.html", target_dict)
 
     @staticmethod
     def reset_ewd_template(username, new_password, valid_time, send_time=Moment.get_now_time("%Y-%m-%d %H:%M:%S")):
@@ -164,7 +164,7 @@ class EmailHande:
 
         Returns:
         Example::
-            >>> print(EmailHande.reset_ewd_template(username="Test001",
+            >>> print(EmailHander.reset_ewd_template(username="Test001",
             ... new_password="1235678", valid_time=5555, send_time=55))
 
         """
@@ -177,7 +177,7 @@ class EmailHande:
             "send_time": send_time,
             "root_email": PikaGlobalVarEnum.PL_EMAIL,
         }
-        return EmailHande.sub_template("reset_pwd.html", target_dict)
+        return EmailHander.sub_template("reset_pwd.html", target_dict)
 
     @staticmethod
     def reset_encrypt_template(
@@ -196,7 +196,7 @@ class EmailHande:
         Returns:
 
         Example::
-            >>> print(EmailHande.reset_encrypt_template(username="Test001",
+            >>> print(EmailHander.reset_encrypt_template(username="Test001",
             ... security_question="密保问题？",encrypted_answers="密保答案？",
             ... valid_time=5555, send_time=55))
         """
@@ -210,7 +210,17 @@ class EmailHande:
             "send_time": send_time,
             "root_email": PikaGlobalVarEnum.PL_EMAIL,
         }
-        return EmailHande.sub_template("reset_encrypted.html", target_dict)
+        return EmailHander.sub_template("reset_encrypted.html", target_dict)
+
+    @staticmethod
+    def test_report_template(**kwargs):
+        """
+        测试报告邮件模板
+        Args:
+        Returns:
+
+        """
+        return EmailHander.sub_template("report.html", **kwargs)
 
     @staticmethod
     def send_email(

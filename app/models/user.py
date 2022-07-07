@@ -32,7 +32,7 @@ class PikaUser(PikaNormBase):
     plane = Column(String(ByteSizeEnum.LENGTH_16), comment="座机")
     mobile = Column(String(ByteSizeEnum.LENGTH_16), comment="手机号码")
     email = Column(String(ByteSizeEnum.LENGTH_255), comment="邮箱地址")
-    city_name = Column(String(ByteSizeEnum.LENGTH_255), server_default=None, comment="所在城市名称")
+    location = Column(String(ByteSizeEnum.LENGTH_255), server_default=None, comment="所在城市名称")
 
     def __init__(
             self,
@@ -45,7 +45,7 @@ class PikaUser(PikaNormBase):
             gender=None,
             plane=None,
             mobile=None,
-            city_name=None,
+            location=None,
     ):
         self.emp_no = emp_no
         self.username = username
@@ -56,4 +56,4 @@ class PikaUser(PikaNormBase):
         self.gender = gender
         self.plane = plane
         self.mobile = mobile
-        self.city_name = city_name
+        self.location = location
