@@ -31,7 +31,7 @@ class PikaGlobalVarEnum:
     PL_EMAIL = "mryu168@163.com"
     AGREE_MENT = "2022~2026"
     VERIFY_CODE_WHITE_LIST = ("888888", "Sweet")
-    PWD_VALID_TIME = Moment.skew_date(180)  # 用户密码有效期
+    PWD_VALID_DATE = Moment.skew_date(180)  # 用户密码有效期
     SYS_NOW_TIME = Moment.get_now_time("%Y-%m-%d %H:%M:%S")  # 系统当前时间
 
 

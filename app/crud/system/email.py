@@ -26,7 +26,7 @@ class Email(object):
     log = PikaLogger("Email")
 
     @staticmethod
-    async def register_succeed(emp_no: str, username: str, addressee: List, pwd_valid_time,
+    async def register_succeed(emp_no: str, username: str, addressee: List, pwd_valid_date,
                                app_name=PikaGlobalVarEnum.APP_NAME):
         """
 
@@ -34,7 +34,7 @@ class Email(object):
             emp_no:
             username:
             addressee:
-            pwd_valid_time:
+            pwd_valid_date:
             app_name:
 
         Returns:
@@ -47,7 +47,7 @@ class Email(object):
                     username,
                     emp_no,
                     addressee,
-                    pwd_valid_time,
+                    pwd_valid_date,
                     Moment.timestamp_to_date(list(redis_now_time)[0]),
                 ),
                 subject=f"{app_name}-注册成功通知",

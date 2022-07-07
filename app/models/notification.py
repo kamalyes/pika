@@ -1,9 +1,9 @@
 from sqlalchemy import SMALLINT, Column, VARCHAR, INT
 from app.enums.sysvar import PikaGlobalVarEnum
-from app.models.basic import PikaNormBase
+from app.models.basic import PikaLargeBase
 
 
-class PikaNotification(PikaNormBase):
+class PikaNotification(PikaLargeBase):
     __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_notification'
     msg_type = Column(SMALLINT, comment="消息类型 1: 系统消息 2: 其他消息")
     msg_title = Column(VARCHAR(32), comment="消息标题", nullable=False)
@@ -13,8 +13,8 @@ class PikaNotification(PikaNormBase):
     sender = Column(INT, comment="消息发送人, 0则是CPU 非0则是其他用户")
     receiver = Column(INT, comment="消息接收人, 系统消息则该字段为空")
 
-    def __init__(self, msg_type, msg_title, msg_content, sender, receiver, user, msg_link=None, msg_status=0):
-        super().__init__(user)
+    def __init__(self, msg_type, msg_title, msg_content, sender, receiver, update_emp_no, msg_link=None, msg_status=0):
+        super().__init__(update_emp_no)
         self.msg_type = msg_type
         self.msg_title = msg_title
         self.receiver = receiver

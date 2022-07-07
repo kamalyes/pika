@@ -44,7 +44,7 @@ class PikaNotificationDao(PikaMapper):
             # 否则需要根据是否已读进行查询 只支持90天内数据
             async with async_session() as session:
                 # 找到3个月内的消息
-                default_condition = [PikaNotification.deleted_at == 0, PikaNotification.create_data >= ninety_days]
+                default_condition = [PikaNotification.deleted_date == 0, PikaNotification.create_data >= ninety_days]
                 if msg_type == MessageTypeEnum.broadcast:
                     conditions = [*default_condition, PikaNotification.msg_type == msg_type]
                 else:
@@ -70,7 +70,7 @@ class PikaNotificationDao(PikaMapper):
                             continue
                     else:
                         if msg_status == MessageStateEnum.read:
-                            if read is not None or notify.updated_at < last_month:
+                            if read is not None or notify.updated_date < last_month:
                                 ans.append(notify)
                         else:
                             if not read:
@@ -84,8 +84,8 @@ class PikaNotificationDao(PikaMapper):
                 update(PikaNotification).where(
                     PikaNotification.id.in_(msg_id),
                     PikaNotification.receiver == receiver,
-                    PikaNotification.deleted_at == 0)) \
+                    PikaNotification.deleted_date == 0)) \
                 .values(
-                deleted_at=0,
-                updated_at=datetime.now(),
-                update_user=receiver)
+                delete_date=0,
+                update_date=datetime.now(),
+                update_emp_no=receiver)

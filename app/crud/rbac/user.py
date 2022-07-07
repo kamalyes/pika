@@ -100,16 +100,16 @@ class UserDao(object):
                                 email=register_model.email)
                 session.add(user)
             await session.refresh(user)
-            pwd_valid_time = PikaGlobalVarEnum.PWD_VALID_TIME
+            pwd_valid_date = PikaGlobalVarEnum.PWD_VALID_DATE
             user_admin = PikaUserAdmin(uid=user.id, emp_no=user.emp_no, is_activate=is_activate, password=pwd,
-                                       pwd_valid_time=pwd_valid_time,
-                                       registration_at=Moment.get_now_time("%Y-%m-%d %H:%M:%S"),
+                                       pwd_valid_date=pwd_valid_date,
+                                       registration_date=Moment.get_now_time("%Y-%m-%d %H:%M:%S"),
                                        registration_ip=user_ip)
             session.add(user_admin)
         try:
             await Email.register_succeed(emp_no=user.emp_no, username=register_model.username,
                                          addressee=register_model.email,
-                                         pwd_valid_time=pwd_valid_time)
+                                         pwd_valid_date=pwd_valid_date)
         except Exception as e:
             pass
         return PikaResponse.success(result=user, message=PromptEnum.REGISTER_SUCCEED.value)
@@ -124,7 +124,7 @@ class UserDao(object):
         if kwargs["is_activate"] == 0:
             raise AuthException(code=SysFailedCodeEnum.ACCOUNT_HAS_NOT_ACTIVATE, detail="账号未激活！")
         try:
-            compare_time = Moment.compare_time(kwargs["pwd_valid_time"], Moment.get_now_time("%Y-%m-%d %H:%M:%S"))
+            compare_time = Moment.compare_time(kwargs["pwd_valid_date"], Moment.get_now_time("%Y-%m-%d %H:%M:%S"))
         except Exception as e:
             raise SystemException(code=SysFailedCodeEnum.FIELD_TYPE_ERROR, detail=f"密码有效期对比失败！具体错误原因：{e}")
         if compare_time is False:
@@ -213,7 +213,7 @@ class UserDao(object):
                 sql = update(PikaUserAdmin).where(
                     or_(PikaUserAdmin.id == uid, PikaUserAdmin.emp_no == emp_no)).values(
                     {"last_login_ip": kwargs["last_login_ip"],
-                     "last_login_at": Moment.get_now_time("%Y-%m-%d %H:%M:%S")})
+                     "last_login_date": Moment.get_now_time("%Y-%m-%d %H:%M:%S")})
                 await session.execute(sql)
 
     @staticmethod
@@ -224,7 +224,7 @@ class UserDao(object):
                 sql = update(PikaUserAdmin).where(
                     or_(PikaUserAdmin.id == uid, PikaUserAdmin.emp_no == emp_no)).values(
                     {"last_logout_ip": last_logout_ip,
-                     "last_logout_at": Moment.get_now_time("%Y-%m-%d %H:%M:%S")})
+                     "last_logout_date": Moment.get_now_time("%Y-%m-%d %H:%M:%S")})
                 await session.execute(sql)
 
     @staticmethod
@@ -285,7 +285,7 @@ class UserDao(object):
                                                             is_activate=user_admin.is_activate,
                                                             is_delete=user_admin.is_delete,
                                                             is_usable=user_admin.is_usable,
-                                                            pwd_valid_time=str(user_admin.pwd_valid_time),
+                                                            pwd_valid_date=str(user_admin.pwd_valid_date),
                                                             err_pwd_count=int(user_admin.err_pwd_count))
                     else:
                         await UserDao.pwd_mistake_limit(uid=user.id)
@@ -337,7 +337,7 @@ class UserDao(object):
                                                             is_activate=user_admin.is_activate,
                                                             is_delete=user_admin.is_delete,
                                                             is_usable=user_admin.is_usable,
-                                                            pwd_valid_time=str(user_admin.pwd_valid_time))
+                                                            pwd_valid_date=str(user_admin.pwd_valid_date))
                     else:
                         await UserDao.pwd_mistake_limit(uid=user.id)
                     old_token = await async_redis.get(f'{RedisKeyEnum.AUTH_TOKEN}:{user_admin.emp_no}')
@@ -393,7 +393,7 @@ class UserDao(object):
                                                     is_activate=user_infos["is_activate"],
                                                     is_delete=user_infos["is_delete"],
                                                     is_usable=user_infos["is_usable"],
-                                                    pwd_valid_time=str(user_infos["pwd_valid_time"]),
+                                                    pwd_valid_date=str(user_infos["pwd_valid_date"]),
                                                     err_pwd_count=int(user_infos["err_pwd_count"]))
             except Exception as account_err:
                 await UserDao.delete_redis_token(key=key_t)
@@ -423,9 +423,9 @@ class UserDao(object):
                 session.add(user)
             await session.refresh(user)
             user_admin = PikaUserAdmin(uid=user.id, emp_no=user.emp_no, is_activate=1, password=pwd,
-                                       pwd_valid_time=PikaGlobalVarEnum.PWD_VALID_TIME,
+                                       pwd_valid_date=PikaGlobalVarEnum.PWD_VALID_DATE,
                                        create_emp_no=user_info.get("emp_no", None),
-                                       registration_at=Moment.get_now_time("%Y-%m-%d %H:%M:%S"))
+                                       registration_date=Moment.get_now_time("%Y-%m-%d %H:%M:%S"))
             session.add(user_admin)
             return PikaResponse.success(result=user, message=PromptEnum.REGISTER_SUCCEED.value)
 
@@ -568,8 +568,8 @@ class UserDao(object):
     async def update_pwd(**kwargs):
         emp_no, new_password = kwargs["emp_no"], kwargs["new_password"]
         pwd = Kerberos.md5_encode(decode_msg=new_password)
-        pwd_valid_time = PikaGlobalVarEnum.PWD_VALID_TIME
-        update_info = {'password': pwd, 'pwd_valid_time': pwd_valid_time}
+        pwd_valid_date = PikaGlobalVarEnum.PWD_VALID_DATE
+        update_info = {'password': pwd, 'pwd_valid_date': pwd_valid_date}
         async with async_db_session() as session:
             async with session.begin():
                 sql = update(PikaUserAdmin).where(PikaUserAdmin.emp_no == emp_no).values(update_info)
