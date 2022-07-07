@@ -100,7 +100,7 @@ class QueryUserInModel(PikaQueryModel, PikaQueryTypeModel):
     emp_no: Optional[str] = Query(None, title="用户编码")
     email: Optional[str] = Query(None, title="邮箱地址")
     mobile: Optional[str] = Query(None, title="手机号码")
-    identity: Optional[str] = Query(None, title="用户身份")
+    # identity: Optional[str] = Query(None, title="用户身份")
 
     class Config:
         orm_mode = True

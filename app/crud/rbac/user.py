@@ -446,7 +446,7 @@ class UserDao(object):
                        'location': modify_user_info.location,
                        'email': modify_user_info.email,
                        'gender': modify_user_info.gender,
-                       'identity': modify_user_info.identity,
+                       # 'identity': modify_user_info.identity,
                        'mobile': modify_user_info.mobile,
                        'plane': modify_user_info.plane,
                        'user_alias': modify_user_info.user_alias,

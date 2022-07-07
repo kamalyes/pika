@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import INT, Column, TIMESTAMP, String, BIGINT
+from sqlalchemy import INT, Column, DATETIME, String, BIGINT
 from sqlalchemy.dialects.mysql import SMALLINT
 
 from app.enums.sysvar import PikaGlobalVarEnum
@@ -15,8 +15,8 @@ class PikaTestReport(Base):
     env = Column(INT, nullable=False, comment="环境")
     cost = Column(String(8), comment="花费时间")
     plan_id = Column(INT, index=True, nullable=True, comment="测试集合id，预留字段")
-    start_at = Column(TIMESTAMP, nullable=False, comment="开始时间")
-    finished_at = Column(TIMESTAMP, comment="结束时间")
+    start_at = Column(DATETIME, nullable=False, comment="开始时间")
+    finished_at = Column(DATETIME, comment="结束时间")
     success_count = Column(INT, nullable=False, default=0, comment="成功数量")
     error_count = Column(INT, nullable=False, default=0, comment="错误数量")
     failed_count = Column(INT, nullable=False, default=0, comment="失败数量")

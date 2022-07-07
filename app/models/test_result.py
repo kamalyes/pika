@@ -11,7 +11,7 @@
 """
 from datetime import datetime
 
-from sqlalchemy import INT, Column, TIMESTAMP, String, BIGINT
+from sqlalchemy import INT, Column, DATETIME, String, BIGINT
 from sqlalchemy import SMALLINT
 from sqlalchemy import TEXT
 
@@ -28,8 +28,8 @@ class PikaTestResult(Base):
     case_id = Column(INT, index=True, comment="用例id")
     case_name = Column(String(32), comment="用例名称")
     status = Column(SMALLINT, comment="对应状态 0: 成功 1: 失败 2: 出错 3: 跳过")
-    start_at = Column(TIMESTAMP, nullable=False, comment="开始时间")
-    finished_at = Column(TIMESTAMP, nullable=False, comment="结束时间")
+    start_at = Column(DATETIME, nullable=False, default=None, comment="开始时间")
+    finished_at = Column(DATETIME, nullable=False, default=None, comment="结束时间")
     case_log = Column(TEXT, comment="测试日志")
     retry = Column(INT, default=0, comment="重试次数，预留字段")
     status_code = Column(INT, comment="http状态码")
