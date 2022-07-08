@@ -92,7 +92,7 @@ class ProjectDao(PikaMapper):
         return query.scalars().first() == operator
 
     @classmethod
-    async def add_project(cls, name, app, owner, operator, private, description, avatar, dingtalk_url='', qy_wx_url=''):
+    async def add_project(cls, name, app, owner, operator, private, description, dingtalk_url='', qy_wx_url=''):
         async with async_session() as session:
             async with session.begin():
                 data = await session.execute(
@@ -101,7 +101,7 @@ class ProjectDao(PikaMapper):
                     err = f"新增项目: {name}失败, 失败原因：项目已存在"
                     cls.log.error(err)
                     raise OperationException(detail=err)
-                pr = PikaProject(name, app, owner, operator, description, private, avatar, dingtalk_url, qy_wx_url)
+                pr = PikaProject(name, app, owner, operator, description, private, dingtalk_url, qy_wx_url)
                 session.add(pr)
 
     @classmethod

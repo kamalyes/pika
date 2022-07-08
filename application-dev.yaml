@@ -7,6 +7,7 @@ database:
   password: 'PassWord@MySql123'
   name: 'pika'
   charset: utf8mb4
+  time_zone: 'Asia/Shanghai'
 
 # 数据库所在的服务器配置
 ssh_server:

@@ -9,26 +9,27 @@
 
 Pika是一款专注于自动化建设的平台，采用`Python`+`FastApi`+`React`开发，目前还不能作为生产级别的工具，作者正在努力之中。
 
-一个从0开始写的测试平台(基于FastApi)，旨在总结自己最近几年的工作经验，
-也顺便帮助大家进步。目前还在火热更新中，希望大家能够喜欢！ 
-话不多说，赶快开始体验吧！靓仔靓女们~
+一个从0开始写的测试平台(基于FastApi)，旨在总结自己最近几年的工作经验， 也顺便帮助大家进步。目前还在火热更新中，希望大家能够喜欢！ 话不多说，赶快开始体验吧！靓仔靓女们~
 
 ### ⚽ 前端地址
 
-  [🎁 前端项目地址](https://github.com/kamalyes/pikaWeb)
-  [🍍 在线体验](https://114.132.233.15/)
+[🎁 前端项目地址](https://github.com/kamalyes/pikaWeb)
+[🍍 在线体验](https://114.132.233.15/)
 
 ### 👏 Docker部署
 
 1. 安装Docker Desktop
 2. 打开终端并进入项目根目录
 3. 执行以下命令，安静等待启动即可
+
 ```bash
 docker-compose -f ./devops/docker-compose.yaml up
 ```
+
 ### Ubuntu 配置 pip.conf 添加国内源
 
 1. 新建文件夹和pip配置文件
+
 ```bash
 cd ~
 mkdir .pip
@@ -36,7 +37,9 @@ touch pip.conf
 sudo chmod 755 pip.conf
 gedit pip.conf
 ```
+
 其他的配置位置
+
 ```bash
 Linux/Unix:
 /etc/pip.conf
@@ -56,6 +59,7 @@ C:\ProgramData\PyPA\pip\pip.conf (Windows 7及以后)
 ```
 
 2. pip.conf 配置内容
+
 ```bash
 [global]
 index-url = http://pypi.douban.com/simple #豆瓣源，可以换成其他的源
@@ -67,6 +71,7 @@ timeout = 120
 ```
 
 3. 其他多个源
+
 ```bash
 清华：https://pypi.tuna.tsinghua.edu.cn/simple
 阿里云：http://mirrors.aliyun.com/pypi/simple/
@@ -79,9 +84,9 @@ timeout = 120
 ### 🎉 技术栈
 
 - [x] 🎨 FastApi
-- [x] 🎶 SQLAlchemy(你可以看到很多sqlalchemy的用法) 
-- [x] 🎉 Apscheduler(定时任务框架) 
-- [x] 🎃 mitmproxy(用例录制生成) 
+- [x] 🎶 SQLAlchemy(你可以看到很多sqlalchemy的用法)
+- [x] 🎉 Apscheduler(定时任务框架)
+- [x] 🎃 mitmproxy(用例录制生成)
 - [x] 🌙 mockjs(mock服务)
 - [x] 🔒 Redis
 - [x] 🏐 Gunicorn(内含uvicorn，部署服务)
@@ -94,8 +99,11 @@ timeout = 120
 ### 😊 已有功能
 
 + [x] 🔥 完善的用户登录/注册机制，提供第三方(github)登录
+
 - [x] 🀄 完善的项目管理机制
+
 * [x] 🚴 结合FastApi，利用asyncio让Python代码也可以起飞
+
 - [x] 💎 完整的接口测试流程
 - [x] 📝 强大的数据构造器, 解决接口数据依赖问题
 - [x] 🎨 在线调试http请求，堪比网页版本postman
@@ -111,7 +119,9 @@ timeout = 120
 ## 🙋 待开发的功能
 
 - [ ] 💀 app管理功能，支持app的导入和导出
+
 * [ ] 😼 代码覆盖率增量/全量统计功能
+
 - [ ] 🐘 微服务化
 - [ ] 🐄 数据工厂，强大的造数功能
 - [ ] 🐸 用例支持har，jmx等格式导入
@@ -121,33 +131,27 @@ timeout = 120
 - [ ] 🐛 打通yapi
 - [ ] 🌽 等等等等
 
-
 <details>
 <summary>平台预览(点击可展开)</summary>
 
 #### 🍦 工作台
 
-
 #### 测试计划
-
 
 #### 测试报告
 
-
 #### 测试用例
-
 
 #### SQL客户端
 
-
 #### 项目管理
-
 
 </details>
 
-
 ### 🎉 二次开发
+
 1. 安装python3.9.11环境
+
 ```bash
 vi setup_py391.sh
 
@@ -164,21 +168,41 @@ ln -s /usr/local/python3/bin/pip3 /usr/bin/pip3
 [root@VM-8-3-centos ~]# chmod 777 setup_py391.sh
 [root@VM-8-3-centos ~]# ./setup_py391.sh
 ```
+
 2. clone项目
+
 ```bash
 后端：git clone git@github.com:kamalyes/pika.git
 前端：git clone git@github.com:kamalyes/pikaWeb.git
 ```
+
 3. 修改配置文件
+
 ```bash
 后端：修改config.py中ENVIRONMENT变量、以及applicationxxx.yaml
 前端：修改config.js
 ```
+
+4. 数据库时区不对
+
+```bash
+方案一
+直接在jdbc的url中加入&serverTimezone=Asia/Shanghai,指定时区
+
+方案二
+连接数据库可以先查看当前时区 show variables like '%time_zone%';
+确认时区为CST后再进行修改 set time_zone='+8:00';
+
+方案三
+
+修改my.cnf文件,再mysqld设置项下添加default-zone-time='+8:00'
+
+我选择的是方案一,并且以后连接mysql的jdbc最好带上这个时区的参数
+```
+
 ### ✉ 使用文档
 
-
 ### 💪 落地效果
-
 
 ### 赞助
 

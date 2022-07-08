@@ -13,12 +13,11 @@ import logging
 import os
 import sys
 import time
-from pprint import pformat
-from urllib import parse
-
 from hutools.core import DataHand, System
 from loguru import logger
 from loguru._defaults import LOGURU_FORMAT
+from pprint import pformat
+from urllib import parse
 
 from app.enums.sysvar import PikaGlobalVarEnum
 
@@ -26,8 +25,8 @@ from app.enums.sysvar import PikaGlobalVarEnum
 class PikaAppConfig(object):
     # system
     WORKSPACES_PATH = os.path.dirname(os.path.abspath(__file__))
-    ENVIRONMENT = "ignore"
-    # ENVIRONMENT = "dev"
+    # ENVIRONMENT = "ignore"
+    ENVIRONMENT = "dev"
     GLOBAL_POOL_CONFIG = System.get_pool_config(
         work_spaces_path=WORKSPACES_PATH, environment=ENVIRONMENT
     )
@@ -48,20 +47,21 @@ class PikaAppConfig(object):
 
     # 数据库配置
     DB_CONFIG = GLOBAL_POOL_CONFIG["database"]
-    MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT, DBNAME = (
+    MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT, DBNAME, MYSQL_TIME_ZONE = (
         DB_CONFIG["user"],
         parse.quote_plus(DB_CONFIG["password"]),
         DB_CONFIG["host"],
         DB_CONFIG["port"],
         DB_CONFIG["name"],
+        DB_CONFIG['time_zone']
     )
     # sqlalchemy
-    SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{}:{}@{}:{}/{}".format(
-        MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT, DBNAME
+    SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{}:{}@{}:{}/{}?{}".format(
+        MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT, DBNAME, MYSQL_TIME_ZONE
     )
     # 异步sqlalchemy
     ASYNC_SQLALCHEMY_URI = (
-        f"mysql+aiomysql://{MYSQL_USER}:{MYSQL_PWD}@{MYSQL_HOST}:{MYSQL_PORT}/{DBNAME}"
+        f"mysql+aiomysql://{MYSQL_USER}:{MYSQL_PWD}@{MYSQL_HOST}:{MYSQL_PORT}/{DBNAME}?{MYSQL_TIME_ZONE}"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     RELATION = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_relation"
