@@ -20,19 +20,14 @@ from app.models.basic import PikaLargeBase
 class PikaGateway(PikaLargeBase):
     __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_gateway'
     __table_args__ = (
-        UniqueConstraint('env_id', 'name'),
+        UniqueConstraint('env', 'name'),
     )
-    env_id = Column(INT, comment='对应环境id')
+    env = Column(INT, comment='对应环境id')
     name = Column(String(ByteSizeEnum.LENGTH_50), comment="网关名称")
-    address = Column(String(ByteSizeEnum.LENGTH_128), comment="网关地址")
+    gateway = Column(String(ByteSizeEnum.LENGTH_128), comment="网关地址")
 
-    __fields__ = (name, env_id, address)
-    __tag__ = "网关"
-    __alias__ = dict(name="网关名称", env="环境", address="网关地址")
-    __show__ = 2
-
-    def __init__(self, env_id, name, address, operator, id=None):
+    def __init__(self, env, name, gateway, operator, id=None):
         super().__init__(operator, id)
         self.name = name
-        self.env = env_id
-        self.address = address
+        self.env = env
+        self.gateway = gateway

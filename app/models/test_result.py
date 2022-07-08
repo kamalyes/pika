@@ -45,7 +45,7 @@ class PikaTestResult(Base):
     asserts = Column(TEXT, comment="断言")
     response_headers = Column(TEXT, comment="响应头部")
     response = Column(TEXT, comment="返回参数")
-    deleted_at = Column(BIGINT, nullable=False, default=0, comment="删除时间")
+    is_delete = Column(BIGINT, nullable=False, default=0, comment="删除时间")
 
     def __init__(self, report_id: int, case_id: int, case_name: str, status: int,
                  case_log: str, start_at: datetime, finished_at: datetime,
@@ -76,4 +76,4 @@ class PikaTestResult(Base):
         self.request_params = request_params
         self.data_name = data_name
         self.data_id = data_id
-        self.deleted_at = 0
+        self.is_delete = 0

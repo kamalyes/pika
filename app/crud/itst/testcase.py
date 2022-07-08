@@ -44,10 +44,10 @@ class TestCaseDao(PikaMapper):
     @classmethod
     async def list_test_case(cls, directory_id: int = None, name: str = "", operator: str = None):
         try:
-            filters = [PikaTestCase.delete_date == 0]
+            filters = [PikaTestCase.is_delete == 0]
             if directory_id:
                 parents = await PikaTestCaseDirectoryDao.get_directory_son(directory_id)
-                filters = [PikaTestCase.delete_date == 0, PikaTestCase.directory_id.in_(parents)]
+                filters = [PikaTestCase.is_delete == 0, PikaTestCase.directory_id.in_(parents)]
                 if name:
                     filters.append(PikaTestCase.name.like(f"%{name}%"))
                 if operator:
@@ -64,7 +64,7 @@ class TestCaseDao(PikaMapper):
     async def get_test_case_by_directory_id(directory_id: int):
         try:
             async with async_session() as session:
-                sql = select(PikaTestCase).where(PikaTestCase.delete_date == 0,
+                sql = select(PikaTestCase).where(PikaTestCase.is_delete == 0,
                                                  PikaTestCase.directory_id == directory_id).order_by(
                     PikaTestCase.name.asc())
                 result = await session.execute(sql)
@@ -116,7 +116,7 @@ class TestCaseDao(PikaMapper):
         query = await session.execute(
             select(PikaTestCase).where(PikaTestCase.directory_id == data.case.directory_id,
                                        PikaTestCase.name == data.case.name,
-                                       PikaTestCase.delete_date == 0))
+                                       PikaTestCase.is_delete == 0))
         if query.scalars().first() is not None:
             raise Exception("用例名称已存在")
         cs = PikaTestCase(**data.case.dict(), operator=operator)
@@ -145,7 +145,7 @@ class TestCaseDao(PikaMapper):
             async with async_session() as session:
                 async with session.begin():
                     query = await session.execute(
-                        select(PikaTestCase).where(PikaTestCase.id == test_case.id, PikaTestCase.delete_date == 0))
+                        select(PikaTestCase).where(PikaTestCase.id == test_case.id, PikaTestCase.is_delete == 0))
                     data = query.scalars().first()
                     if data is None:
                         raise Exception("用例不存在")
@@ -170,7 +170,7 @@ class TestCaseDao(PikaMapper):
         """
         try:
             async with async_session() as session:
-                sql = select(PikaTestCase).where(PikaTestCase.id == case_id, PikaTestCase.delete_date == 0)
+                sql = select(PikaTestCase).where(PikaTestCase.id == case_id, PikaTestCase.is_delete == 0)
                 result = await session.execute(sql)
                 data = result.scalars().first()
                 if data is None:
@@ -203,7 +203,7 @@ class TestCaseDao(PikaMapper):
             # 找到所有用例名称为
             constructors = [json.loads(x.constructor_json).get("case_id") for x in constructors if x.type == 0]
             async with async_session() as session:
-                sql = select(PikaTestCase).where(PikaTestCase.id.in_(constructors), PikaTestCase.delete_date == 0)
+                sql = select(PikaTestCase).where(PikaTestCase.id.in_(constructors), PikaTestCase.is_delete == 0)
                 result = await session.execute(sql)
                 data = result.scalars().all()
                 return {x.id: x for x in data}
@@ -224,7 +224,7 @@ class TestCaseDao(PikaMapper):
         try:
             async with async_session() as session:
                 result = await session.execute(
-                    select(PikaTestCase).where(PikaTestCase.id == case_id, PikaTestCase.delete_date == 0))
+                    select(PikaTestCase).where(PikaTestCase.id == case_id, PikaTestCase.is_delete == 0))
                 data = result.scalars().first()
                 if data is None:
                     return None, "用例不存在"
@@ -259,7 +259,7 @@ class TestCaseDao(PikaMapper):
             async with async_session() as session:
                 query = await session.execute(select(PikaTestCase).where(
                     PikaTestCase.project_id.in_(project_map.keys()),
-                    PikaTestCase.delete_date == 0
+                    PikaTestCase.is_delete == 0
                 ))
                 data = query.scalars().all()
                 for d in data:
@@ -286,7 +286,7 @@ class TestCaseDao(PikaMapper):
         try:
             async with async_session() as session:
                 query = await session.execute(select(PikaConstructor).where(PikaConstructor.case_id == case_id,
-                                                                            PikaConstructor.delete_date == 0
+                                                                            PikaConstructor.is_delete == 0
                                                                             )).order_by(
                     desc(PikaConstructor.create_date))
                 return query.scalars().all()
@@ -306,7 +306,7 @@ class TestCaseDao(PikaMapper):
         try:
             async with async_session() as session:
                 sql = select(PikaConstructor).where(PikaConstructor.case_id == case_id,
-                                                    PikaConstructor.delete_date == 0).order_by(
+                                                    PikaConstructor.is_delete == 0).order_by(
                     PikaConstructor.create_date)
                 data = await session.execute(sql)
                 return data.scalars().all()
@@ -418,7 +418,7 @@ class TestCaseDao(PikaMapper):
                     .outerjoin(PikaUserAdmin,
                                and_(PikaUserAdmin.is_delete == 0,
                                     PikaTestCase.create_emp_no == PikaUserAdmin.emp_no)).where(
-                    PikaTestCase.delete_date == 0).group_by(PikaTestCase.create_emp_no).order_by(
+                    PikaTestCase.is_delete == 0).group_by(PikaTestCase.create_emp_no).order_by(
                     desc(func.count(PikaTestCase.id)))
                 query = await session.execute(sql)
                 for i, q in enumerate(query.all()):
@@ -434,7 +434,7 @@ class TestCaseDao(PikaMapper):
                 # date_ = func.date_format(PikaTestCase.create_date, "%Y-%m-%d")
                 sql = select(PikaTestCase.create_date, func.count(PikaTestCase.id)).where(
                     PikaTestCase.create_emp_no == operator,
-                    PikaTestCase.delete_date == 0, PikaTestCase.create_date.between(start_time, end_time)).group_by(
+                    PikaTestCase.is_delete == 0, PikaTestCase.create_date.between(start_time, end_time)).group_by(
                     PikaTestCase.create_date).order_by(asc(PikaTestCase.create_date))
                 query = await session.execute(sql)
                 for i, q in enumerate(query.all()):

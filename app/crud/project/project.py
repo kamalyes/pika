@@ -17,7 +17,7 @@ from typing import List
 from sqlalchemy import or_, select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.handler.execres import AuthException
+from app.core.handler.execres import AuthException, OperationException
 from app.core.handler.logger import PikaLogger
 from app.crud import PikaMapper
 from app.enums.gebruikersrol import RoleEnum
@@ -32,11 +32,11 @@ from app.utils.decorator import dao
 class ProjectDao(PikaMapper):
 
     @classmethod
-    async def list_project(cls, member_no: int, role: int, page: int,
+    async def list_project(cls, emp_no: int, role: int, page: int,
                            size: int, name: str = None) -> (List[PikaProject], int):
         """
         查询/获取项目列表
-        :param member_no: 当前用户
+        :param emp_no: 当前用户
         :param role: 当前用户角色
         :param page: 当前页码
         :param size: 当前size
@@ -44,14 +44,14 @@ class ProjectDao(PikaMapper):
         :return: 项目列表和总数
         """
         try:
-            search = [PikaProject.delete_date == 0]
+            search = [PikaProject.is_delete == 0]
             async with async_session() as session:
                 if role != RoleEnum.ADMIN:
-                    project_list = await ProjectRoleDao.list_project_by_user(member_no)
+                    project_list = await ProjectRoleDao.list_project_by_user(emp_no)
                     # 找出用户能看到的公开项目
                     search.append(
-                        or_(PikaProject.id.in_(project_list), PikaProject.owner == member_no,
-                            PikaProject.private == False))
+                        or_(PikaProject.id.in_(project_list), PikaProject.owner == emp_no,
+                            PikaProject.private is False))
                 if name:
                     search.append(PikaProject.name.like("%{}%".format(name)))
                 sql = select(PikaProject).where(*search).order_by(desc(PikaProject.update_date))
@@ -61,11 +61,11 @@ class ProjectDao(PikaMapper):
                 data = await session.execute(sql)
                 return data.scalars().all(), total
         except Exception as e:
-            cls.log.error(f"获取用户: {member_no}项目列表失败, {e}")
-            raise Exception(f"获取用户: {member_no}项目列表失败")
+            cls.log.error(f"获取用户: {emp_no}项目列表失败, {e}")
+            raise Exception(f"获取用户: {emp_no}项目列表失败")
 
     @classmethod
-    async def list_project_id_by_user(cls, session, member_no, role):
+    async def list_project_id_by_user(cls, session, emp_no, role):
         """
         获取用户可见的项目
         :return:
@@ -74,12 +74,12 @@ class ProjectDao(PikaMapper):
             return []
         ans = set()
         # 找到包含用户的角色
-        sel_role2user = select(ProjectRole.project_id).where(ProjectRole.member_no == member_no)
+        sel_role2user = select(ProjectRole.project_id).where(ProjectRole.emp_no == emp_no)
         roles = await session.execute(sel_role2user)
         for r in roles.all():
             ans.add(r[0])
         # 找到未删除的项目
-        sel_not_del_dt = select(PikaProject.id).where(or_(PikaProject.private is False, PikaProject.owner == member_no),
+        sel_not_del_dt = select(PikaProject.id).where(or_(PikaProject.private is False, PikaProject.owner == emp_no),
                                                       PikaProject.is_delete == 0)
         roles = await session.execute(sel_not_del_dt)
         for r in roles.all():
@@ -92,19 +92,17 @@ class ProjectDao(PikaMapper):
         return query.scalars().first() == operator
 
     @classmethod
-    async def add_project(cls, name, app, owner, operator, private, description, dingtalk_url='', qy_wx_url=''):
-        try:
-            async with async_session() as session:
-                async with session.begin():
-                    data = await session.execute(
-                        select(PikaProject).where(PikaProject.name == name, PikaProject.delete_date == 0))
-                    if data.scalars().first() is not None:
-                        raise Exception("项目已存在")
-                    pr = PikaProject(name, app, owner, operator, description, private, dingtalk_url, qy_wx_url)
-                    session.add(pr)
-        except Exception as e:
-            cls.log.error(f"新增项目: {name}失败, {e}")
-            raise Exception(f"新增项目: {name}失败, {e}")
+    async def add_project(cls, name, app, owner, operator, private, description, avatar, dingtalk_url='', qy_wx_url=''):
+        async with async_session() as session:
+            async with session.begin():
+                data = await session.execute(
+                    select(PikaProject).where(PikaProject.name == name, PikaProject.is_delete == 0))
+                if data.scalars().first() is not None:
+                    err = f"新增项目: {name}失败, 失败原因：项目已存在"
+                    cls.log.error(err)
+                    raise OperationException(detail=err)
+                pr = PikaProject(name, app, owner, operator, description, private, avatar, dingtalk_url, qy_wx_url)
+                session.add(pr)
 
     @classmethod
     async def update_avatar(cls, project_id: int, operator: int, user_role: int, file_url: str):
@@ -112,7 +110,7 @@ class ProjectDao(PikaMapper):
             async with async_session() as session:
                 async with session.begin():
                     query = await session.execute(
-                        select(PikaProject).where(PikaProject.id == project_id, PikaProject.delete_date == 0))
+                        select(PikaProject).where(PikaProject.id == project_id, PikaProject.is_delete == 0))
                     data = query.scalars().first()
                     if data is None:
                         raise Exception("项目不存在")
@@ -127,13 +125,13 @@ class ProjectDao(PikaMapper):
             raise Exception(e)
 
     @classmethod
-    async def update_project(cls, project_id: int, update_emp_no, identity: int, name: str, app: str, owner: int,
-                             private: bool,
-                             description: str, dingtalk_url: str = '', qy_wx_url: str = '') -> None:
+    async def update_project(cls, id: int, update_emp_no, identity: int, name: str, app: str, owner: int,
+                             private: bool, description: str,
+                             dingtalk_url: str = '', qy_wx_url: str = '') -> None:
         """
         修改项目
         Args:
-            project_id:
+            id:
             update_emp_no:
             identity:
             name:
@@ -151,7 +149,7 @@ class ProjectDao(PikaMapper):
             async with async_session() as session:
                 async with session.begin():
                     query = await session.execute(
-                        select(PikaProject).where(PikaProject.id == project_id, PikaProject.delete_date == 0))
+                        select(PikaProject).where(PikaProject.id == id, PikaProject.is_delete == 0))
                     data = query.scalars().first()
                     if data is None:
                         raise Exception("项目不存在")
@@ -176,7 +174,7 @@ class ProjectDao(PikaMapper):
         try:
             async with async_session() as session:
                 query = await session.execute(
-                    select(PikaProject).where(PikaProject.id == project_id, PikaProject.delete_date == 0))
+                    select(PikaProject).where(PikaProject.id == project_id, PikaProject.is_delete == 0))
                 data = query.scalars().first()
                 if data is None:
                     raise Exception("项目不存在")
@@ -187,28 +185,28 @@ class ProjectDao(PikaMapper):
             raise Exception(f"查询项目: {project_id}失败, {e}")
 
     @staticmethod
-    async def query_user_project(member_no: int) -> int:
+    async def query_user_project(emp_no: int) -> int:
         """
         查询用户有多少项目
-        :param member_no: 用户id
+        :param emp_no: 用户id
         :return: 返回项目数量
         """
         ans = set()
         async with async_session() as session:
             async with session.begin():
                 # 先选出未被删除的用户
-                project_sql = select(PikaProject).where(PikaProject.delete_date == 0)
+                project_sql = select(PikaProject).where(PikaProject.is_delete == 0)
                 projects = await session.execute(project_sql)
                 project_list = []
                 # 将数据放入列表，把owner等于该用户的放入列表
                 for r in projects.scalars().all():
                     project_list.append(r.id)
-                    if r.owner == member_no:
+                    if r.owner == emp_no:
                         ans.add(r.id)
                 # 接着查询项目角色表有该用户的角色，把角色的项目id放入列表
                 # 由于是set，所以不会重复
                 query = await session.execute(
-                    select(ProjectRole).where(ProjectRole.delete_date == 0, ProjectRole.member_no == member_no))
+                    select(ProjectRole).where(ProjectRole.is_delete == 0, ProjectRole.emp_no == emp_no))
                 for q in query.scalars().all():
                     ans.add(q.project_id)
         return len(ans)
@@ -218,20 +216,20 @@ class ProjectDao(PikaMapper):
 class ProjectRoleDao(PikaMapper):
 
     @classmethod
-    async def list_project_by_user(cls, member_no: int) -> List[int]:
+    async def list_project_by_user(cls, emp_no: int) -> List[int]:
         """
-        通过user_id获取项目列表
-        :param member_no:
+        通过emp_no获取项目列表
+        :param emp_no:
         :return:
         """
         try:
             async with async_session() as session:
                 data = await session.execute(
-                    select(ProjectRole.project_id).where(ProjectRole.member_no == member_no,
-                                                         ProjectRole.delete_date == 0))
+                    select(ProjectRole.project_id).where(ProjectRole.emp_no == emp_no,
+                                                         ProjectRole.is_delete == 0))
                 return data.scalars().all()
         except Exception as e:
-            cls.log.error(f"查询用户: {member_no}项目失败, {e}")
+            cls.log.error(f"查询用户: {emp_no}项目失败, {e}")
             raise Exception("获取项目失败")
 
     @staticmethod
@@ -239,20 +237,20 @@ class ProjectRoleDao(PikaMapper):
         try:
             async with async_session() as session:
                 query = await session.execute(
-                    select(ProjectRole).where(ProjectRole.project_id == project_id, ProjectRole.delete_date == 0))
+                    select(ProjectRole).where(ProjectRole.project_id == project_id, ProjectRole.is_delete == 0))
                 return query.scalars().all()
         except Exception as e:
             ProjectRoleDao.log.error(f"查询项目: {project_id}角色列表失败, {e}")
             raise Exception(f"获取项目角色列表失败")
 
     @staticmethod
-    async def judge_permission(session: AsyncSession, project_id: int, member_no: int, project_role: int,
+    async def judge_permission(session: AsyncSession, project_id: int, emp_no: int, project_role: int,
                                project_admin: bool) -> None:
         """
         判断用户是否有某个项目的权限
         :param session:
         :param project_id:
-        :param member_no:
+        :param emp_no:
         :param project_role:
         :param project_admin: 是否是项目管理员
         :return:
@@ -261,13 +259,13 @@ class ProjectRoleDao(PikaMapper):
         project = query.scalars().first()
         if project is None:
             raise Exception("该项目不存在")
-        if project.owner != member_no:
+        if project.owner != emp_no:
             if project_admin and project_role == RoleEnum.MANAGER:
                 raise Exception("不能修改组长的权限")
             query = await session.execute(select(ProjectRole)
-                                          .where(ProjectRole.member_no == member_no,
+                                          .where(ProjectRole.emp_no == emp_no,
                                                  ProjectRole.project_id == project_id,
-                                                 ProjectRole.delete_date == 0))
+                                                 ProjectRole.is_delete == 0))
             updater_role = query.scalars().first()
             if updater_role is None or updater_role.project_role == RoleEnum.MANAGER:
                 raise Exception("对不起，你没有权限")
@@ -280,12 +278,12 @@ class ProjectRoleDao(PikaMapper):
             raise AuthException(detail="没有权限访问项目")
 
     @staticmethod
-    async def read_permission(project_id: int, member_no: int, user_role: int):
+    async def read_permission(project_id: int, emp_no: int, user_role: int):
         """
         判断用户是否有读取项目的权限
         :param user_role:
         :param project_id:
-        :param member_no:
+        :param emp_no:
         :return:
         """
         if user_role == RoleEnum.ADMIN:
@@ -293,26 +291,26 @@ class ProjectRoleDao(PikaMapper):
             return
         async with async_session() as session:
             query = await session.execute(
-                select(PikaProject).where(PikaProject.id == project_id, PikaProject.delete_date == 0))
+                select(PikaProject).where(PikaProject.id == project_id, PikaProject.is_delete == 0))
             project = query.scalars().first()
             if project is None:
                 raise Exception("项目不存在")
-            if project.private and project.owner != member_no:
-                query = await session.execute(select(ProjectRole).where(ProjectRole.member_no == member_no,
+            if project.private and project.owner != emp_no:
+                query = await session.execute(select(ProjectRole).where(ProjectRole.emp_no == emp_no,
                                                                         ProjectRole.project_id == project_id,
-                                                                        ProjectRole.delete_date == 0))
+                                                                        ProjectRole.is_delete == 0))
                 role = query.scalars().first()
                 if role is None:
                     raise AuthException(detail="没有权限访问项目")
 
     @staticmethod
-    async def has_permission(project_id: int, project_role: int, member_no: int, user_role: int,
+    async def has_permission(project_id: int, project_role: int, emp_no: int, user_role: int,
                              project_admin: bool = False, session: AsyncSession = None):
         """
         判断用户是否有该项目的权限
         :param project_id:
         :param project_role:
-        :param member_no:
+        :param emp_no:
         :param user_role:
         :param project_admin:
         :param session:
@@ -320,34 +318,34 @@ class ProjectRoleDao(PikaMapper):
         """
         if user_role != RoleEnum.ADMIN:
             if session is not None:
-                await ProjectRoleDao.judge_permission(session, project_id, member_no, project_role, project_admin)
+                await ProjectRoleDao.judge_permission(session, project_id, emp_no, project_role, project_admin)
             async with async_session() as session:
-                await ProjectRoleDao.judge_permission(session, project_id, member_no, project_role, project_admin)
+                await ProjectRoleDao.judge_permission(session, project_id, emp_no, project_role, project_admin)
 
     @classmethod
-    async def update_project_role(cls, role: ProjectRoleEditForm, member_no: int, user_role: int):
+    async def update_project_role(cls, role: ProjectRoleEditForm, emp_no: int, user_role: int):
         """
         更改用户角色
         :param role:
-        :param member_no:
+        :param emp_no:
         :param user_role:
         :return:
         """
         try:
             async with async_session() as session:
                 async with session.begin():
-                    original = await ProjectRoleDao.query_record(session=session, id=role.id, deleted_at=0)
+                    original = await ProjectRoleDao.query_record(session=session, id=role.id, is_delete=0)
                     if original is None:
                         raise Exception("该用户角色不存在")
-                    await ProjectRoleDao.has_permission(original.project_id, original.project_role, member_no,
+                    await ProjectRoleDao.has_permission(original.project_id, original.project_role, emp_no,
                                                         user_role, True, session=session)
                     old = deepcopy(original)
-                    changed = DatabaseHelper.update_model(original, role, member_no)
+                    changed = DatabaseHelper.update_model(original, role, emp_no)
                     await session.flush()
                     session.expunge(original)
                 async with session.begin():
                     await asyncio.create_task(
-                        ProjectRoleDao.insert_log(session, member_no, SqlOperationTypeEnum.ONLY_UPDATE, original, old,
+                        ProjectRoleDao.insert_log(session, emp_no, SqlOperationTypeEnum.ONLY_UPDATE, original, old,
                                                   role.id,
                                                   changed=changed))
         except Exception as e:
@@ -366,7 +364,7 @@ class ProjectRoleDao(PikaMapper):
         try:
             async with async_session() as session:
                 async with session.begin():
-                    role = await ProjectRoleDao.query_record(session=session, id=role_id, deleted_at=0)
+                    role = await ProjectRoleDao.query_record(session=session, id=role_id, is_delete=0)
                     if role is None:
                         raise Exception("用户角色不存在")
                     await ProjectRoleDao.has_permission(role.project_id, role.project_role, operator, user_role, True)

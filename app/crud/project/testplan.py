@@ -36,7 +36,7 @@ class PikaTestPlanDao(PikaMapper):
                              emp_no: int = None, follow: bool = None):
         try:
             async with async_session() as session:
-                conditions = [PikaTestPlan.delete_date == 0]
+                conditions = [PikaTestPlan.is_delete == 0]
                 if project_id:
                     DatabaseHelper.where(project_id, PikaTestPlan.project_id == project_id, conditions)
                 else:
@@ -55,7 +55,7 @@ class PikaTestPlanDao(PikaMapper):
                         .outerjoin(PikaTestPlanFollowUserRel,
                                    and_(
                                        PikaTestPlanFollowUserRel.operator == operator,
-                                       PikaTestPlanFollowUserRel.delete_date == 0,
+                                       PikaTestPlanFollowUserRel.is_delete == 0,
                                        PikaTestPlanFollowUserRel.plan_id == PikaTestPlan.id)) \
                         .where(*conditions)
                 elif follow:
@@ -64,7 +64,7 @@ class PikaTestPlanDao(PikaMapper):
                                    PikaTestPlanFollowUserRel.plan_id == PikaTestPlan.id,
                                    ).where(
                         *conditions, PikaTestPlanFollowUserRel.operator == operator,
-                                     PikaTestPlanFollowUserRel.delete_date == 0)
+                                     PikaTestPlanFollowUserRel.is_delete == 0)
                 else:
                     sql = select(PikaTestPlan, null().label('null_bar')) \
                         .outerjoin(PikaTestPlanFollowUserRel,
@@ -84,7 +84,7 @@ class PikaTestPlanDao(PikaMapper):
                 async with session.begin():
                     query = await session.execute(select(PikaTestPlan).where(PikaTestPlan.project_id == plan.project_id,
                                                                              PikaTestPlan.name == plan.name,
-                                                                             PikaTestPlan.delete_date == 0))
+                                                                             PikaTestPlan.is_delete == 0))
                     if query.scalars().first() is not None:
                         raise Exception("测试计划已存在")
                     test_plan = PikaTestPlan(**plan.dict(), user=user)
@@ -103,7 +103,7 @@ class PikaTestPlanDao(PikaMapper):
             async with async_session() as session:
                 async with session.begin():
                     query = await session.execute(
-                        select(PikaTestPlan).where(PikaTestPlan.id == plan.id, PikaTestPlan.delete_date == 0))
+                        select(PikaTestPlan).where(PikaTestPlan.id == plan.id, PikaTestPlan.is_delete == 0))
                     data = query.scalars().first()
                     if data is None:
                         raise Exception("测试计划不存在")
@@ -131,7 +131,7 @@ class PikaTestPlanDao(PikaMapper):
             async with async_session() as session:
                 async with session.begin():
                     query = await session.execute(
-                        select(PikaTestPlan).where(PikaTestPlan.id == id, PikaTestPlan.delete_date == 0))
+                        select(PikaTestPlan).where(PikaTestPlan.id == id, PikaTestPlan.is_delete == 0))
                     data = query.scalars().first()
                     if data is None:
                         raise Exception("测试计划不存在")
@@ -147,7 +147,7 @@ class PikaTestPlanDao(PikaMapper):
     async def query_test_plan(id: int) -> PikaTestPlan:
         try:
             async with async_session() as session:
-                sql = select(PikaTestPlan).where(PikaTestPlan.delete_date == 0, PikaTestPlan.id == id)
+                sql = select(PikaTestPlan).where(PikaTestPlan.is_delete == 0, PikaTestPlan.id == id)
                 data = await session.execute(sql)
                 return data.scalars().first()
         except Exception as e:
@@ -160,7 +160,7 @@ class PikaTestPlanDao(PikaMapper):
     #         async with async_session() as session:
     #             async with session.begin():
     #                 query = await session.execute(
-    #                     select(PikaTestPlan).where(PikaTestPlan.id == id, PikaTestPlan.delete_date == 0))
+    #                     select(PikaTestPlan).where(PikaTestPlan.id == id, PikaTestPlan.is_delete == 0))
     #                 data = query.scalars().first()
     #                 if data is None:
     #                     raise Exception("测试计划不存在")
@@ -179,7 +179,7 @@ class PikaTestPlanDao(PikaMapper):
         """
         async with async_session() as session:
             async with session.begin():
-                sql = select(PikaTestPlanFollowUserRel).where(PikaTestPlanFollowUserRel.delete_date == 0,
+                sql = select(PikaTestPlanFollowUserRel).where(PikaTestPlanFollowUserRel.is_delete == 0,
                                                               PikaTestPlanFollowUserRel.plan_id == plan_id,
                                                               PikaTestPlanFollowUserRel.operator == operator)
                 data = await session.execute(sql)
@@ -199,7 +199,7 @@ class PikaTestPlanDao(PikaMapper):
         """
         async with async_session() as session:
             async with session.begin():
-                sql = select(PikaTestPlanFollowUserRel).where(PikaTestPlanFollowUserRel.delete_date == 0,
+                sql = select(PikaTestPlanFollowUserRel).where(PikaTestPlanFollowUserRel.is_delete == 0,
                                                               PikaTestPlanFollowUserRel.plan_id == plan_id,
                                                               PikaTestPlanFollowUserRel.operator == operator)
                 data = await session.execute(sql)
@@ -223,8 +223,8 @@ class PikaTestPlanDao(PikaMapper):
                            PikaTestPlanFollowUserRel.plan_id == PikaTestPlan.id,
                            ).where(
                 PikaTestPlanFollowUserRel.emp_no == operator,
-                PikaTestPlanFollowUserRel.delete_date == 0,
-                PikaTestPlan.delete_date == 0)
+                PikaTestPlanFollowUserRel.is_delete == 0,
+                PikaTestPlan.is_delete == 0)
             data = await session.execute(sql)
             for d in data.scalars().all():
                 reports = list()

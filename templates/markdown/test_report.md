@@ -2,7 +2,7 @@
 
 > 测试计划 <font color=#1890ff>{plan_name}</font> 执行完毕
 >
-> 测试环境 **{env_id}** 执行人 **{executor}**
+> 测试环境 **{env}** 执行人 **{executor}**
 >
 > 测试结果 <font color={result_color} face="黑体">{plan_result}</font>
 

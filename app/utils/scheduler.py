@@ -3,7 +3,7 @@ from typing import List
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-
+from app.core.handler.executor import Executor
 from app.core.handler.jsonres import PikaResponse
 
 

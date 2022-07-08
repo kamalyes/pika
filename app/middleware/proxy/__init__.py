@@ -1,0 +1,32 @@
+from app.middleware.proxy.record import PikaRecorder
+from app.models.mock import PikaMock
+from config import PikaAppConfig
+
+
+async def start_proxy(log):
+    """
+    start mitmproxy server
+    :return:
+    """
+    try:
+        from mitmproxy import options
+        from mitmproxy.tools.dump import DumpMaster
+    except ImportError:
+        log.bind(name=None).warning(
+            "mitmproxy not installed, Please see: https://docs.mitmproxy.org/stable/overview-installation/")
+        return
+
+    addons = [PikaRecorder()]
+    try:
+        if PikaAppConfig.MOCK_OPEN:
+            addons.append(PikaMock())
+        opts = options.Options(listen_host='0.0.0.0', listen_port=PikaAppConfig.PROXY_PORT)
+        m = DumpMaster(opts, False, False)
+        # remove global block
+        block_addon = m.addons.get("block")
+        m.addons.remove(block_addon)
+        m.addons.add(*addons)
+        log.bind(name=None).debug(f"mock server is running at http://0.0.0.0:{PikaAppConfig.PROXY_PORT}")
+        await m.run()
+    except Exception as e:
+        log.bind(name=None).debug(f"mock server running failed, if all nodes run failed, please check: {e}")

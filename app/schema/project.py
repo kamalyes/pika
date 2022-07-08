@@ -6,7 +6,7 @@ from app.excpetions.ParamsException import ParamsError
 class ProjectForm(BaseModel):
     name: str
     app: str
-    owner: int
+    owner: str
     private: bool = False
     description: str = ''
     dingtalk_url: str = None
@@ -23,9 +23,10 @@ class ProjectEditForm(BaseModel):
     id: int
     name: str
     app: str
-    owner: int
+    owner: str
     private: bool = False
     description: str = ''
+    dingtalk_url: str = None
     qy_wx_url: str = None
 
     @validator('id', 'name', 'app', 'owner')
@@ -36,11 +37,11 @@ class ProjectEditForm(BaseModel):
 
 
 class ProjectRoleForm(BaseModel):
-    member_no: int
+    emp_no: str
     project_role: int
     project_id: int
 
-    @validator('member_no', 'project_role', 'project_id')
+    @validator('emp_no', 'project_role', 'project_id')
     def name_not_empty(cls, v):
         if isinstance(v, str) and len(v.strip()) == 0:
             raise ParamsError("不能为空")
@@ -49,11 +50,11 @@ class ProjectRoleForm(BaseModel):
 
 class ProjectRoleEditForm(BaseModel):
     id: int
-    member_no: int
+    emp_no: str
     project_role: int
     project_id: int
 
-    @validator('id', 'member_no', 'project_role', 'project_id')
+    @validator('id', 'emp_no', 'project_role', 'project_id')
     def name_not_empty(cls, v):
         if isinstance(v, str) and len(v.strip()) == 0:
             raise ParamsError("不能为空")

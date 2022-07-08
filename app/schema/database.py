@@ -25,8 +25,8 @@ class DatabaseForm(BaseModel):
     password: Optional[str]
     database: Optional[str]
     sql_type: int
-    env_id: int
+    env: int
 
-    @validator("name", "host", "port", "username", "password", "database", "sql_type", "env_id")
+    @validator("name", "host", "port", "username", "password", "database", "sql_type", "env")
     def data_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)

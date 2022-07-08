@@ -17,15 +17,15 @@ from app.schema.base import PikaBaseModel
 
 class PikaGatewayForm(BaseModel):
     id: int = 0
-    env_id: int = None
+    env: int = None
     name: str = ''
-    address: str = ''
+    gateway: str = ''
 
-    @validator("env_id", 'name')
+    @validator("env", 'name')
     def name_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)
 
-    @validator('address', whole=True)
+    @validator('gateway', whole=True)
     def prefix_match(cls, v):
         if not v.startswith(("http://", "https://", "ws://", "wss://")):
             raise ParamsError("前缀不为http或ws")

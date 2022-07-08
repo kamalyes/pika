@@ -35,7 +35,7 @@ class ConstructorDao(PikaMapper):
         """
         try:
             async with async_session() as session:
-                sql = select(PikaConstructor).where(PikaConstructor.case_id == case_id, PikaConstructor.deleted_at == 0) \
+                sql = select(PikaConstructor).where(PikaConstructor.case_id == case_id, PikaConstructor.is_delete == 0) \
                     .order_by(PikaConstructor.index, PikaConstructor.update_date)
                 result = await session.execute(sql)
                 return result.scalars().all()
@@ -49,7 +49,7 @@ class ConstructorDao(PikaMapper):
             async with async_session() as session:
                 async with session.begin():
                     sql = select(PikaConstructor).where(PikaConstructor.case_id == data.case_id, PikaConstructor.name == data.name,
-                                                    PikaConstructor.deleted_at == 0)
+                                                    PikaConstructor.is_delete == 0)
                     result = await session.execute(sql)
                     if result.scalars().first() is not None:
                         raise Exception(f"{data.name}已存在")
@@ -124,7 +124,7 @@ class ConstructorDao(PikaMapper):
         try:
             async with async_session() as session:
                 # 获取所有构造参数
-                search = [PikaConstructor.public == True, PikaConstructor.suffix == suffix, PikaConstructor.deleted_at == 0]
+                search = [PikaConstructor.public == True, PikaConstructor.suffix == suffix, PikaConstructor.is_delete == 0]
                 if name:
                     search.append(PikaConstructor.name.like("%{}%".format(name)))
                 query = await session.execute(select(PikaConstructor).where(*search))
@@ -161,7 +161,7 @@ class ConstructorDao(PikaMapper):
         :return:
         """
         async with async_session() as session:
-            query = await session.execute(select(PikaConstructor).where(PikaConstructor.id == id_, PikaConstructor.deleted_at == 0))
+            query = await session.execute(select(PikaConstructor).where(PikaConstructor.id == id_, PikaConstructor.is_delete == 0))
             data = query.scalars().first()
             if data is None:
                 raise Exception("前后置条件不存在")
@@ -185,7 +185,7 @@ class ConstructorDao(PikaMapper):
                     PikaConstructor.suffix == suffix,
                     PikaConstructor.type == constructor_type,
                     PikaConstructor.public == True,
-                    PikaConstructor.deleted_at == 0))
+                    PikaConstructor.is_delete == 0))
             # 并把这些前置条件放到constructors里面
             for q in query.scalars().all():
                 constructors[q.case_id].append({
@@ -199,7 +199,7 @@ class ConstructorDao(PikaMapper):
                 return []
             # 二次查询，查出有前置条件的case
             query = await session.execute(
-                select(PikaTestCase).where(PikaTestCase.id.in_(constructors.keys()), PikaTestCase.deleted_at == 0))
+                select(PikaTestCase).where(PikaTestCase.id.in_(constructors.keys()), PikaTestCase.is_delete == 0))
             # 构造树，要知道children已经构建好了，就在constructors里面
             for q in query.scalars().all():
                 # 把用例id放入cs_list，这里就不用原生join了

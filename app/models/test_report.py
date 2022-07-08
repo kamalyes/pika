@@ -24,7 +24,7 @@ class PikaTestReport(Base):
     status = Column(SMALLINT, nullable=False, comment="执行状态 0: pending, 1: running, 2: stopped, 3: finished", index=True)
     mode = Column(SMALLINT, default=0, comment="case执行模式 0: 普通, 1: 测试集, 2: pipeline, 3: 其他")
 
-    deleted_at = Column(BIGINT, nullable=False, default=0, comment="删除时间")
+    is_delete = Column(BIGINT, nullable=False, default=0, comment="删除时间")
 
     def __init__(self, executor: int, env: int, success_count: int = 0, failed_count: int = 0,
                  error_count: int = 0, skipped_count: int = 0, status: int = 0, mode: int = 0,
@@ -42,4 +42,4 @@ class PikaTestReport(Base):
         self.status = status
         self.plan_id = plan_id
         self.finished_at = finished_at
-        self.deleted_at = 0
+        self.is_delete = 0

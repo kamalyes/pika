@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, File, UploadFile
 from app.core.handler.execres import AuthException
 from app.core.handler.jsonres import PikaResponse
 from app.crud.project.project import ProjectDao, ProjectRoleDao
+from app.crud.project.testplan import PikaTestPlanDao
 from app.enums.gebruikersrol import RoleEnum
 from app.middleware.oss import OssClient
 from app.models import get_async_session
@@ -23,8 +24,8 @@ async def list_project(page: int = 1, size: int = 8, name: str = "", user_info=D
     :param user_info:
     :return:
     """
-    user_role, member_no = user_info["identity"], user_info["emp_no"]
-    result, total = await ProjectDao.list_project(member_no, user_role, page, size, name)
+    user_role, emp_no = user_info["identity"], user_info["emp_no"]
+    result, total = await ProjectDao.list_project(emp_no, user_role, page, size, name)
     return PikaResponse.success_with_size(data=result, total=total)
 
 
@@ -66,8 +67,6 @@ async def query_project(project_id: int, user_info=Depends(Permission())):
         await ProjectRoleDao.access(operator, identity, roles, data)
         result.update({"project": data, "roles": roles})
         return PikaResponse.success(data=result)
-    except AuthException:
-        return PikaResponse.forbidden()
     except Exception as e:
         return PikaResponse.failed(detail=str(e))
 
@@ -94,7 +93,7 @@ async def query_project(project_id: int, user_info=Depends(Permission(RoleEnum.M
 async def insert_project_role(role: ProjectRoleForm, user_info=Depends(Permission())):
     try:
         operator, identity = user_info["emp_no"], user_info["identity"]
-        query = await ProjectRoleDao.query_record(member_no=role.member_no, project_id=role.project_id)
+        query = await ProjectRoleDao.query_record(emp_no=role.emp_no, project_id=role.project_id)
         if query is not None:
             raise Exception("该用户已存在")
         await ProjectRoleDao.has_permission(role.project_id, role.project_role, operator, user_info)

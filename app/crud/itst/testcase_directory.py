@@ -13,6 +13,7 @@ import time
 from collections import defaultdict
 from datetime import datetime
 
+from hutools.time import Moment
 from sqlalchemy import select, asc, or_
 
 from app.core.handler.logger import PikaLogger
@@ -29,7 +30,7 @@ class PikaTestCaseDirectoryDao(object):
         try:
             async with async_session() as session:
                 sql = select(PikaTestCaseDirectory).where(PikaTestCaseDirectory.id == directory_id,
-                                                          PikaTestCaseDirectory.deleted_at == 0)
+                                                          PikaTestCaseDirectory.is_delete == 0)
                 result = await session.execute(sql)
                 return result.scalars().first()
         except Exception as e:
@@ -41,7 +42,7 @@ class PikaTestCaseDirectoryDao(object):
         try:
             async with async_session() as session:
                 sql = select(PikaTestCaseDirectory) \
-                    .where(PikaTestCaseDirectory.deleted_at == 0,
+                    .where(PikaTestCaseDirectory.is_delete == 0,
                            PikaTestCaseDirectory.project_id == project_id) \
                     .order_by(asc(PikaTestCaseDirectory.name))
                 result = await session.execute(sql)
@@ -55,7 +56,7 @@ class PikaTestCaseDirectoryDao(object):
         try:
             async with async_session() as session:
                 async with session.begin():
-                    sql = select(PikaTestCaseDirectory).where(PikaTestCaseDirectory.deleted_at == 0,
+                    sql = select(PikaTestCaseDirectory).where(PikaTestCaseDirectory.is_delete == 0,
                                                               PikaTestCaseDirectory.name == form.name,
                                                               PikaTestCaseDirectory.parent == form.parent,
                                                               PikaTestCaseDirectory.project_id == form.project_id)
@@ -73,7 +74,7 @@ class PikaTestCaseDirectoryDao(object):
             async with async_session() as session:
                 async with session.begin():
                     sql = select(PikaTestCaseDirectory).where(PikaTestCaseDirectory.id == form.id,
-                                                              PikaTestCaseDirectory.deleted_at == 0)
+                                                              PikaTestCaseDirectory.is_delete == 0)
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
@@ -86,18 +87,19 @@ class PikaTestCaseDirectoryDao(object):
             raise Exception(f"更新目录失败: {e}")
 
     @staticmethod
-    async def delete_directory(id: int, user: int):
+    async def delete_directory(id: int, update_emp_no: int):
         try:
             async with async_session() as session:
                 async with session.begin():
                     sql = select(PikaTestCaseDirectory).where(PikaTestCaseDirectory.id == id,
-                                                              PikaTestCaseDirectory.deleted_at == 0)
+                                                              PikaTestCaseDirectory.is_delete == 0)
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
                         raise Exception("目录不存在")
-                    query.deleted_at = int(time.time() * 1000)
-                    query.update_user = user
+                    query.delete_date = Moment.get_now_time()
+                    query.is_delete = 1
+                    query.update_emp_no = update_emp_no
         except Exception as e:
             PikaTestCaseDirectoryDao.log.error(f"删除目录失败, error: {e}")
             raise Exception(f"删除目录失败: {e}")
@@ -166,7 +168,7 @@ class PikaTestCaseDirectoryDao(object):
             ans = [directory_id]
             # 找出父类为directory_id或者非根的目录
             sql = select(PikaTestCaseDirectory) \
-                .where(PikaTestCaseDirectory.deleted_at == 0,
+                .where(PikaTestCaseDirectory.is_delete == 0,
                        or_(PikaTestCaseDirectory.parent == directory_id, PikaTestCaseDirectory.parent != None)) \
                 .order_by(asc(PikaTestCaseDirectory.name))
             result = await session.execute(sql)

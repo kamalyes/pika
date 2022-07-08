@@ -38,6 +38,8 @@ from app.crud.system.notification import PikaNotificationDao
 from app.enums.MessageEnum import MessageTypeEnum, MessageStateEnum
 from app.enums.sysvar import PikaGlobalVarEnum
 from app.models import async_redis, async_create_table
+from app.service.ask import http_router
+from app.service.ask import mock_router
 from app.service.itst import functest_router
 from app.service.itst import testcase_router
 from app.service.itst import testplan_router
@@ -50,7 +52,6 @@ from app.service.online import redis_router
 from app.service.online import script_router
 from app.service.online import sql_router
 from app.service.project import project_router
-from app.service.proxy import mock_router
 from app.service.rbac import access_router
 from app.service.rbac import kerberos_router
 from app.service.rbac import menus_router
@@ -346,6 +347,9 @@ class PikaFastApi:
         pika.include_router(mock_router, prefix="/ask", tags=["ask服务"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
+        pika.include_router(http_router, prefix="/ask", tags=["ask服务"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
 
         # itstem
         pika.include_router(environment_router, prefix="/itstem", tags=["环境配置"],
@@ -368,7 +372,6 @@ class PikaFastApi:
         pika.include_router(sql_router, prefix="/online", tags=["在线工具"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
-
         pika.include_router(script_router, prefix="/online", tags=["在线工具"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
@@ -416,7 +419,7 @@ def stop_test():
 
 
 @pika.websocket("/ws/{emp_no}")
-async def websocket_endpoint(websocket: WebSocket, emp_no: int):
+async def websocket_endpoint(websocket: WebSocket, emp_no: str):
     async def send_heartbeat():
         while True:
             logger.debug("sending heartbeat")

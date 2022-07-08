@@ -49,7 +49,6 @@ class PikaOperationLog(PikaMinBase):
         self.tag = tag
         self.mode = mode.value
         self.key = key
-        self.operator = operator
         self.operator_date = datetime.now()
         self.description = description
         self.id = id

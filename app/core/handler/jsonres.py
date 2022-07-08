@@ -9,6 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
+import os
 from datetime import datetime
 from decimal import Decimal
 from json import JSONEncoder
@@ -16,7 +17,8 @@ from typing import Union, Any
 
 from fastapi import status, Response
 from fastapi.encoders import jsonable_encoder
-from starlette.responses import JSONResponse
+from starlette.background import BackgroundTask
+from starlette.responses import JSONResponse, FileResponse
 
 
 class PikaJsonEncoder(JSONEncoder):
@@ -102,34 +104,8 @@ class PikaResponse:
         return dict(code=code, message=message, data=PikaResponse.model_to_list(data))
 
     @staticmethod
-    def success(
-            *,
-            code: Union[int, str] = status.HTTP_200_OK,
-            status_code: Union[int, str] = status.HTTP_200_OK,
-            data: Union[list, dict, str] = None,
-            message: str = "Success",
-    ) -> Response:
-        """
-        响应成功
-        Args:
-            code:
-            status_code:
-            data:
-            message:
-
-        Returns:
-
-        """
-        return JSONResponse(
-            status_code=status_code,
-            content=jsonable_encoder(
-                {
-                    "code": code,
-                    "message": message,
-                    "data": data,
-                }
-            ),
-        )
+    def success(data=None, code=status.HTTP_200_OK, message="操作成功", exclude=()):
+        return PikaResponse.encode_json(dict(code=code, message=message, data=data), *exclude)
 
     @staticmethod
     def success_with_size(
@@ -216,6 +192,10 @@ class PikaResponse:
                 }
             ),
         )
+
+    @staticmethod
+    def file(filepath, filename):
+        return FileResponse(filepath, filename=filename, background=BackgroundTask(lambda: os.remove(filepath)))
 
     @staticmethod
     def forbidden():

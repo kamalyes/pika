@@ -53,7 +53,7 @@ class TestResultDao(object):
                 sql = select(PikaTestResult, PikaTestCase.directory_id).join(PikaTestCase,
                                                                              PikaTestCase.id == PikaTestResult.case_id). \
                     where(PikaTestResult.report_id == report_id,
-                          PikaTestResult.deleted_at == 0).order_by(
+                          PikaTestResult.is_delete == 0).order_by(
                     asc(PikaTestResult.case_id), asc(PikaTestResult.start_at))
                 data = await session.execute(sql)
                 ans = []

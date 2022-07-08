@@ -30,25 +30,25 @@ class DbConfigDao(object):
     log = PikaLogger("DbConfigDao")
 
     @staticmethod
-    async def list_database(name: str = '', database: str = '', env_id: int = None):
+    async def list_database(name: str = '', database: str = '', env: int = None):
         """
         通过name, database, env获取数据库配置列表
         Args:
             name: 数据库名称
             database: 数据库名
-            env_id: 环境
+            env: 环境
 
         Returns:
         """
         try:
             async with async_session() as session:
-                query = [PikaDatabase.is_deleted == 1]
+                query = [PikaDatabase.is_delete == 0]
                 if name:
                     query.append(PikaDatabase.name.like(f'%{name}%'))
                 if database:
                     query.append(PikaDatabase.database.like(f"%{database}%"))
-                if env_id is not None:
-                    query.append(PikaDatabase.env_id == env_id)
+                if env is not None:
+                    query.append(PikaDatabase.env == env)
                 result = await session.execute(select(PikaDatabase).where(*query))
                 return result.scalars().all()
         except Exception as e:
@@ -62,7 +62,7 @@ class DbConfigDao(object):
                 async with session.begin():
                     result = await session.execute(
                         select(PikaDatabase).where(PikaDatabase.name == data.name, PikaDatabase.is_delete == 0,
-                                                   PikaDatabase.env_id == data.env_id))
+                                                   PikaDatabase.env == data.env))
                     query = result.scalars().first()
                     if query is not None:
                         raise Exception("数据库配置已存在")
@@ -114,11 +114,11 @@ class DbConfigDao(object):
             raise Exception("获取数据库配置失败")
 
     @staticmethod
-    async def query_database_by_env_and_name(env_id: int, name: str):
+    async def query_database_by_env_and_name(env: int, name: str):
         try:
             async with async_session() as session:
                 result = await session.execute(
-                    select(PikaDatabase).where(PikaDatabase.env_id == env_id, PikaDatabase.name == name,
+                    select(PikaDatabase).where(PikaDatabase.env == env, PikaDatabase.name == name,
                                                PikaDatabase.is_delete == 0))
                 return result.scalars().first()
         except Exception as e:

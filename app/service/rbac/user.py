@@ -65,6 +65,15 @@ async def update_user_info(modify_user_info: ModifyUserInfoModel,
     return await UserDao.update_user_info(modify_user_info, user_info)
 
 
+@router.get("/alluser", name="查询所有用户信息")
+async def query_all_users(user_info=Depends(Permission())):
+    try:
+        user = await UserDao.query_all_users()
+        return PikaResponse.success(data=user, exclude=("password",))
+    except Exception as e:
+        return PikaResponse.failed(detail=str(e))
+
+
 @router.get("/list/query", name="查询用户列表", response_model=LimitOffsetPage[QueryUserOutModel])
 async def query_user_list(request: QueryUserInModel = Depends(),
                           user_info=Depends(Permission(RoleEnum.ADMIN.value)),

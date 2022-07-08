@@ -53,7 +53,7 @@ class PikaTestCaseOutParametersDao(PikaMapper):
                 async with session.begin():
                     source = await session.execute(select(PikaTestCaseOutParameters).where(
                         PikaTestCaseOutParameters.case_id == case_id,
-                        PikaTestCaseOutParameters.deleted_at == 0,
+                        PikaTestCaseOutParameters.is_delete == 0,
                     ))
                     before = source.scalars().all()
                     should_remove = await cls.should_remove(before, data)
@@ -86,7 +86,7 @@ class PikaTestCaseOutParametersDao(PikaMapper):
                         await session.execute(
                             update(PikaTestCaseOutParameters).where(
                                 PikaTestCaseOutParameters.id.in_(should_remove)).values(
-                                deleted_at=int(time.time() * 1000)))
+                                is_delete=int(time.time() * 1000)))
             return result
         except Exception as e:
             cls.log.error(f"批量更新出参数据失败: {e}")

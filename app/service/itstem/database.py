@@ -38,10 +38,10 @@ async def update_dbconfig(form: DatabaseForm, user_info=Depends(Permission(RoleE
 
 
 @router.get("/dbconfig/list", name="查询数据库配置")
-async def list_dbconfig(name: str = '', database: str = '', env_id: int = None,
+async def list_dbconfig(name: str = '', database: str = '', env: int = None,
                         user_info=Depends(Permission(RoleEnum.MANAGER))):
     try:
-        data = await DbConfigDao.list_database(name, database, env_id)
+        data = await DbConfigDao.list_database(name, database, env)
         return PikaResponse.success(data=data)
     except Exception as err:
         return PikaResponse.failed(detail=str(err))

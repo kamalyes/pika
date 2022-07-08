@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.post("/gateway/insert", name="添加请求地址")
-async def insert_gateway(form: PikaGatewayForm = Depends(), user_info=Depends(Permission(RoleEnum.MANAGER))):
+async def insert_gateway(form: PikaGatewayForm, user_info=Depends(Permission(RoleEnum.MANAGER))):
     model = PikaGateway(**form.dict(), operator=user_info['emp_no'])
     model = await PikaGatewayDao.insert_record(model, True)
     return PikaResponse.success(data=model)
@@ -33,5 +33,5 @@ async def insert_gateway(form: PikaGatewayForm, user_info=Depends(Permission(Rol
 @router.get("/gateway/list", name="查询请求地址列表")
 async def list_gateway(form: PikaGatewayForm = Depends(),
                        user_info=Depends(Permission(RoleEnum.MANAGER))):
-    data = await PikaGatewayDao.list_record(env_id=form.env_id, name=f"%{form.name}%", address=f"%{form.address}%")
+    data = await PikaGatewayDao.list_record(env=form.env, name=f"%{form.name}%", address=f"%{form.address}%")
     return PikaResponse.success(data=data)

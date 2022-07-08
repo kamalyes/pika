@@ -33,7 +33,7 @@ class TestCaseDataDao(PikaMapper):
                     sql = select(PikaTestCaseData).where(PikaTestCaseData.case_id == form.case_id,
                                                          PikaTestCaseData.env == form.env,
                                                          PikaTestCaseData.name == form.name,
-                                                         PikaTestCaseData.deleted_at == 0)
+                                                         PikaTestCaseData.is_delete == 0)
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is not None:
@@ -54,7 +54,7 @@ class TestCaseDataDao(PikaMapper):
             async with async_session() as session:
                 async with session.begin():
                     sql = select(PikaTestCaseData).where(PikaTestCaseData.id == form.id,
-                                                         PikaTestCaseData.deleted_at == 0)
+                                                         PikaTestCaseData.is_delete == 0)
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
@@ -73,7 +73,7 @@ class TestCaseDataDao(PikaMapper):
             async with async_session() as session:
                 async with session.begin():
                     sql = select(PikaTestCaseData).where(PikaTestCaseData.id == id,
-                                                         PikaTestCaseData.deleted_at == 0)
+                                                         PikaTestCaseData.is_delete == 0)
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
@@ -89,7 +89,7 @@ class TestCaseDataDao(PikaMapper):
         try:
             async with async_session() as session:
                 sql = select(PikaTestCaseData).where(PikaTestCaseData.case_id == case_id,
-                                                     PikaTestCaseData.deleted_at == 0)
+                                                     PikaTestCaseData.is_delete == 0)
                 result = await session.execute(sql)
                 query = result.scalars().all()
                 for q in query:
@@ -105,7 +105,7 @@ class TestCaseDataDao(PikaMapper):
             async with async_session() as session:
                 sql = select(PikaTestCaseData).where(PikaTestCaseData.case_id == case_id,
                                                      PikaTestCaseData.env == env,
-                                                     PikaTestCaseData.deleted_at == 0)
+                                                     PikaTestCaseData.is_delete == 0)
                 result = await session.execute(sql)
                 return result.scalars().all()
         except Exception as e:

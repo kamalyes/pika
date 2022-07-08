@@ -671,7 +671,7 @@ class UserDao(object):
 
     @staticmethod
     @RedisHelper.cache("user_list", 3 * 3600)
-    async def list_users():
+    async def query_all_users():
         try:
             async with async_session() as session:
                 query = await session.execute(select(PikaUser))
