@@ -15,18 +15,19 @@ from sqlalchemy import select
 from app.core.handler.logger import PikaLogger
 from app.crud import PikaMapper
 from app.models import async_session
-from app.models.gateway import PikaGateway
+from app.models.gateway import GatewayModel
 from app.utils.decorator import dao
 
 
-@dao(PikaGateway, PikaLogger("PikaRedisConfigDao"))
-class PikaGatewayDao(PikaMapper):
+@dao(GatewayModel, PikaLogger("PikaRedisConfigDao"))
+class GatewayDao(PikaMapper):
 
     @staticmethod
     async def query_gateway(env, name):
         async with async_session() as session:
-            query_sql = select(PikaGateway).where(PikaGateway.is_delete == 0, PikaGateway.env == env,
-                                                  PikaGateway.name == name)
+            query_sql = select(GatewayModel).where(GatewayModel.is_delete == 0,
+                                                   GatewayModel.env == env,
+                                                   GatewayModel.name == name)
             query_result = await session.execute(query_sql)
             data = query_result.scalars().first()
             if data is None:

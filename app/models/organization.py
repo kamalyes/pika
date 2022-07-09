@@ -12,26 +12,26 @@
 
 from sqlalchemy import Column, Integer, String
 
-from app.enums.bytesize import ByteSizeEnum
-from app.enums.sysvar import PikaGlobalVarEnum
-from app.models.basic import PikaLargeBase, PikaNormBase
+from app.enums.ByteSizeEnum import ByteSizeEnum
+from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.models.basic import LargeBaseModel, NormBaseModel
 
 
-class PikaUserGroup(PikaLargeBase):
+class UserGroupModel(LargeBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_user_group"
     __table_args__ = {"comment": "用户组表"}
     name = Column(String(ByteSizeEnum.LENGTH_255), nullable=False, comment="用户组名称")
     parent_id = Column(Integer, server_default="0", comment="父序号")
 
 
-class PikaDept(PikaLargeBase):
+class PikaDept(LargeBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_department"
     __table_args__ = {"comment": "部门表"}
     name = Column(String(ByteSizeEnum.LENGTH_255), nullable=False, comment="部门名称")
     group_id = Column(Integer, nullable=False, comment="用户组id")
 
 
-class PikaDeptRel(PikaNormBase):
+class PikaDeptRel(NormBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_department_relation"
     __table_args__ = {"comment": "部门应用表"}
     dept_id = Column(Integer, nullable=False, comment="部门id")

@@ -29,8 +29,8 @@ from app.core.handler.execres import (
     ValidException,
     AccessException,
     ThirdException, RedisException, RegisterException, SystemException)
-from app.enums.database import DatabaseEnum
-from app.enums.statuscode import SysFailedCodeEnum
+from app.enums.DatabaseEnum import DatabaseTypeEnum
+from app.enums.SysCodeEnum import SysCodeEnum
 from config import PikaAppConfig
 
 # 同步engine
@@ -88,7 +88,7 @@ def sync_db_session():
     except Exception as e:
         session.rollback()
         raise DbExecuteException(
-            code=SysFailedCodeEnum.SQL_OPERATION_ERROR,
+            code=SysCodeEnum.SQL_OPERATION_ERROR,
             detail=f"数据操作失败，错误原因：{traceback.format_exc()}",
         )
     finally:
@@ -133,7 +133,7 @@ async def async_db_session() -> AsyncGenerator:
     except Exception as e:
         await session.rollback()
         raise DbExecuteException(
-            code=SysFailedCodeEnum.SQL_OPERATION_ERROR,
+            code=SysCodeEnum.SQL_OPERATION_ERROR,
             detail=f"数据操作失败，错误原因：{traceback.format_exc()}",
         )
     finally:
@@ -151,7 +151,8 @@ class DatabaseHelper(object):
         # cache
         self.connections = dict()
 
-    async def get_connection(self, sql_type: int, host: str, port: int, username: str, password: str, database: str):
+    async def get_connection(self, sql_type: int, host: str, port: int, username: str,
+                             password: str, database: str):
         # 拼接key
         key = f"{host}:{port}:{database}:{username}:{password}:{database}"
         connection = self.connections.get(key)
@@ -176,11 +177,12 @@ class DatabaseHelper(object):
             await session.execute("select 1")
 
     @staticmethod
-    def get_jdbc_url(sql_type: int, host: str, port: int, username: str, password: str, database: str):
-        if sql_type == DatabaseEnum.MYSQL:
+    def get_jdbc_url(sql_type: int, host: str, port: int, username: str, password: str,
+                     database: str):
+        if sql_type == DatabaseTypeEnum.MYSQL:
             # mysql模式
             return f'mysql+aiomysql://{username}:{password}@{host}:{port}/{database}'
-        if sql_type == DatabaseEnum.POSTGRESQL:
+        if sql_type == DatabaseTypeEnum.POSTGRESQL:
             return f'postgresql+asyncpg://{username}:{password}@{host}:{port}/{database}'
         raise Exception("未知的数据库类型")
 

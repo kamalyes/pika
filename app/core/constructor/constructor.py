@@ -1,12 +1,13 @@
 from abc import ABC
 
-from app.models.constructor import PikaConstructor
+from app.models.constructor import ConstructorModel
 
 
 class ConstructorAbstract(ABC):
 
     @staticmethod
-    def run(executor, env, index, path, params, req_params, constructor: PikaConstructor, **kwargs):
+    def run(executor, env, index, path, params, req_params, constructor: ConstructorModel,
+            **kwargs):
         pass
 
     @staticmethod

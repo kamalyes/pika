@@ -16,10 +16,10 @@ from sqlalchemy import select, distinct, delete, update, or_, and_
 from app.core.handler.asyncsql import AsyncDbSession
 from app.core.handler.jsonres import PikaResponse
 from app.core.handler.logger import PikaLogger
-from app.enums.bytesize import ByteSizeEnum
-from app.enums.statuscode import SysFailedCodeEnum
+from app.enums.ByteSizeEnum import ByteSizeEnum
+from app.enums.SysCodeEnum import SysCodeEnum
 from app.models import async_db_session
-from app.models.kerberos import PikaSecurityNominateIssue
+from app.models.kerberos import SecurityNominateIssueModel
 
 
 class KerberosDao(object):
@@ -29,33 +29,36 @@ class KerberosDao(object):
     async def add_encrypt_issue(**kwargs):
         pending_begin = [{**index, **{"create_emp_no": kwargs["emp_no"]}} for index in
                          [dict(element) for element in kwargs["security"].security]]
-        await AsyncDbSession.begin_lock(pending_begin_number=len(pending_begin), max_begin_number=100)
+        await AsyncDbSession.begin_lock(pending_begin_number=len(pending_begin),
+                                        max_begin_number=100)
         new_begin_key, new_questions_list = [index["question"] for index in pending_begin], []
         async with async_db_session() as session:
             async with session.begin():
-                sql = select(distinct(PikaSecurityNominateIssue.question)).where(
-                    PikaSecurityNominateIssue.question.in_(new_begin_key))
+                sql = select(distinct(SecurityNominateIssueModel.question)).where(
+                    SecurityNominateIssueModel.question.in_(new_begin_key))
                 execute_exists_question = await session.execute(sql)
-                exists_question = [index[0] for index in [question for question in execute_exists_question.all()]]
+                exists_question = [index[0] for index in
+                                   [question for question in execute_exists_question.all()]]
                 for index in pending_begin:
                     if index.get("question", None) not in exists_question:
                         new_questions_list.append(index)
                 if len(new_questions_list) > 0:
-                    await session.execute(PikaSecurityNominateIssue.__table__.insert(), new_questions_list)
+                    await session.execute(SecurityNominateIssueModel.__table__.insert(),
+                                          new_questions_list)
                 elif not new_questions_list:
-                    return PikaResponse.failed(code=SysFailedCodeEnum.VAR_ERROR, detail="数据均已存在！",
-                                               result={"exists_question": exists_question})
+                    return PikaResponse.failed(code=SysCodeEnum.VAR_ERROR, detail="数据均已存在！",
+                                               data={"exists_question": exists_question})
                 if not exists_question:
                     return PikaResponse.success()
                 elif len(exists_question) > 0 and len(new_questions_list):
-                    return PikaResponse.failed(code=SysFailedCodeEnum.VAR_ERROR,
+                    return PikaResponse.failed(code=SysCodeEnum.VAR_ERROR,
                                                detail=f"部分添加成功！",
                                                result={"exists_question": exists_question})
 
     @staticmethod
     async def delete_encrypt_issue(**kwargs):
         ids = kwargs["request"].ids.split(",")
-        del_sql = delete(PikaSecurityNominateIssue).where(PikaSecurityNominateIssue.id.in_(ids))
+        del_sql = delete(SecurityNominateIssueModel).where(SecurityNominateIssueModel.id.in_(ids))
         return await AsyncDbSession.delete(ids=ids, do_sql=del_sql)
 
     @staticmethod
@@ -74,15 +77,15 @@ class KerberosDao(object):
                     pending_index += dispose_index
                     dispose_index += pending_index
                     # 查询是否存在
-                    sql = select(distinct(PikaSecurityNominateIssue.id)).where(
-                        PikaSecurityNominateIssue.id.in_([index.id for index in pending_begin_]))
+                    sql = select(distinct(SecurityNominateIssueModel.id)).where(
+                        SecurityNominateIssueModel.id.in_([index.id for index in pending_begin_]))
                     execute_exists_id = await session.execute(sql)
                     exists_id = [index[0] for index in [id_ for id_ in execute_exists_id.all()]]
                     # 遍历更新
                     for pb in pending_begin_:
                         if pb.id in exists_id:
-                            sql = update(PikaSecurityNominateIssue).where(
-                                PikaSecurityNominateIssue.id == pb.id).values(
+                            sql = update(SecurityNominateIssueModel).where(
+                                SecurityNominateIssueModel.id == pb.id).values(
                                 {"update_emp_no": update_emp_no, "question": pb.question,
                                  "description": pb.description})
                             try:
@@ -100,18 +103,20 @@ class KerberosDao(object):
                         msg = "修改失败"
                     else:
                         msg = "部分修改成功"
-                    return PikaResponse.success(code=SysFailedCodeEnum.MYSQL_ERROR,
+                    return PikaResponse.success(code=SysCodeEnum.MYSQL_ERROR,
                                                 message=f'{msg},详情请查阅返回值！',
-                                                data={"success": success, "failed": failed, "not_funded": not_funded})
+                                                data={"success": success, "failed": failed,
+                                                      "not_funded": not_funded})
 
     @staticmethod
     async def query_encrypt_issue(db, request):
-        all_do_sql = select(PikaSecurityNominateIssue)
-        dim_do_sql = select(PikaSecurityNominateIssue).where(
-            or_(PikaSecurityNominateIssue.id == request.id, PikaSecurityNominateIssue.question == request.question,
-                PikaSecurityNominateIssue.create_emp_no.like(f"%{request.create_emp_no}%"),
-                PikaSecurityNominateIssue.update_emp_no.like(f"%{request.update_emp_no}%"),
-                and_(PikaSecurityNominateIssue.create_date >= request.create_date,
-                     PikaSecurityNominateIssue.update_date <= request.update_date)
+        all_do_sql = select(SecurityNominateIssueModel)
+        dim_do_sql = select(SecurityNominateIssueModel).where(
+            or_(SecurityNominateIssueModel.id == request.id,
+                SecurityNominateIssueModel.question == request.question,
+                SecurityNominateIssueModel.create_emp_no.like(f"%{request.create_emp_no}%"),
+                SecurityNominateIssueModel.update_emp_no.like(f"%{request.update_emp_no}%"),
+                and_(SecurityNominateIssueModel.create_date >= request.create_date,
+                     SecurityNominateIssueModel.update_date <= request.update_date)
                 ))
         return await AsyncDbSession.query(db, str(request.query_type), all_do_sql, dim_do_sql)

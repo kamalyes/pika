@@ -19,12 +19,12 @@ from hutools.time import Moment
 from jinja2 import Environment, FileSystemLoader
 
 from app.core.handler.execres import ThirdException, ValidException
-from app.enums.statuscode import SysFailedCodeEnum
-from app.enums.sysvar import PikaGlobalVarEnum
+from app.enums.SysCodeEnum import SysCodeEnum
+from app.enums.SysvarEnum import PikaGlobalVarEnum
 from config import PikaAppConfig
 
 
-class EmailHander:
+class EmailManger:
     @staticmethod
     def sub_template(file_name, target_dict):
         """
@@ -65,10 +65,11 @@ class EmailHander:
             "send_time": send_time,
             "root_email": PikaGlobalVarEnum.PL_EMAIL,
         }
-        return EmailHander.sub_template("register_succeed.html", target_dict)
+        return EmailManger.sub_template("register_succeed.html", target_dict)
 
     @staticmethod
-    def exc_events_template(username, emp_no, events_key: int, send_time=Moment.get_now_time("%Y-%m-%d %H:%M:%S")):
+    def exc_events_template(username, emp_no, events_key: int,
+                            send_time=Moment.get_now_time("%Y-%m-%d %H:%M:%S")):
         """
         异常操作事件邮件模板
         Args:
@@ -100,7 +101,7 @@ class EmailHander:
             "form": PikaGlobalVarEnum.APP_NAME,
             "send_time": send_time,
         }
-        return EmailHander.sub_template("event.html", target_dict)
+        return EmailManger.sub_template("event.html", target_dict)
 
     @staticmethod
     def get_reg_code_template(email, auth_code, valid_time,
@@ -124,7 +125,7 @@ class EmailHander:
             "valid_time": valid_time,
             "send_time": redis_time,
         }
-        return EmailHander.sub_template("get_reg_code.html", target_dict)
+        return EmailManger.sub_template("get_reg_code.html", target_dict)
 
     @staticmethod
     def get_security_code_template(username, emp_no, auth_code, valid_time,
@@ -150,10 +151,11 @@ class EmailHander:
             "valid_time": valid_time,
             "send_time": redis_time,
         }
-        return EmailHander.sub_template("authcode.html", target_dict)
+        return EmailManger.sub_template("authcode.html", target_dict)
 
     @staticmethod
-    def reset_ewd_template(username, new_password, valid_time, send_time=Moment.get_now_time("%Y-%m-%d %H:%M:%S")):
+    def reset_ewd_template(username, new_password, valid_time,
+                           send_time=Moment.get_now_time("%Y-%m-%d %H:%M:%S")):
         """
         重置密码邮件模板
         Args:
@@ -164,7 +166,7 @@ class EmailHander:
 
         Returns:
         Example::
-            >>> print(EmailHander.reset_ewd_template(username="Test001",
+            >>> print(EmailManger.reset_ewd_template(username="Test001",
             ... new_password="1235678", valid_time=5555, send_time=55))
 
         """
@@ -177,7 +179,7 @@ class EmailHander:
             "send_time": send_time,
             "root_email": PikaGlobalVarEnum.PL_EMAIL,
         }
-        return EmailHander.sub_template("reset_pwd.html", target_dict)
+        return EmailManger.sub_template("reset_pwd.html", target_dict)
 
     @staticmethod
     def reset_encrypt_template(
@@ -196,7 +198,7 @@ class EmailHander:
         Returns:
 
         Example::
-            >>> print(EmailHander.reset_encrypt_template(username="Test001",
+            >>> print(EmailManger.reset_encrypt_template(username="Test001",
             ... security_question="密保问题？",encrypted_answers="密保答案？",
             ... valid_time=5555, send_time=55))
         """
@@ -210,7 +212,7 @@ class EmailHander:
             "send_time": send_time,
             "root_email": PikaGlobalVarEnum.PL_EMAIL,
         }
-        return EmailHander.sub_template("reset_encrypted.html", target_dict)
+        return EmailManger.sub_template("reset_encrypted.html", target_dict)
 
     @staticmethod
     def test_report_template(**kwargs):
@@ -220,7 +222,7 @@ class EmailHander:
         Returns:
 
         """
-        return EmailHander.sub_template("report.html", **kwargs)
+        return EmailManger.sub_template("report.html", **kwargs)
 
     @staticmethod
     def send_email(
@@ -259,7 +261,7 @@ class EmailHander:
                 # 开启 DEBUG
                 # email_cursor.set_debuglevel(1)
             except Exception as e:
-                raise ThirdException(code=SysFailedCodeEnum.SEND_EMAIL_ERROR, detail=f"发送邮件失败，错误原因：{e}")
+                raise ThirdException(code=SysCodeEnum.SEND_EMAIL_ERROR, detail=f"发送邮件失败，错误原因：{e}")
             else:
                 return True
             finally:
@@ -267,8 +269,8 @@ class EmailHander:
                     email_cursor.quit()
                 except Exception as e:
                     raise ThirdException(
-                        code=SysFailedCodeEnum.EMAIL_CURSOR_ERROR,
+                        code=SysCodeEnum.EMAIL_CURSOR_ERROR,
                         detail=f"关闭邮件游标失败，错误原因{e}",
                     )
         else:
-            raise ValidException(code=SysFailedCodeEnum.FIELD_TYPE_ERROR, detail="邮箱地址格式不正确")
+            raise ValidException(code=SysCodeEnum.FIELD_TYPE_ERROR, detail="邮箱地址格式不正确")

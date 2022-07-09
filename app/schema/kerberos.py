@@ -14,7 +14,7 @@ from typing import List, Optional
 from fastapi import Body
 from pydantic import BaseModel
 
-from app.enums.bytesize import ByteSizeEnum
+from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.schema.base import PikaDeleteModel, PikaQueryModel, PikaQueryTypeModel
 
 

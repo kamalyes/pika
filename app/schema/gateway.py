@@ -11,7 +11,7 @@
 """
 from pydantic import validator, BaseModel
 
-from app.excpetions.ParamsException import ParamsError
+from app.excpetions.business.ParamsException import VariablesNullError
 from app.schema.base import PikaBaseModel
 
 
@@ -21,12 +21,14 @@ class PikaGatewayForm(BaseModel):
     name: str = ''
     gateway: str = ''
 
+    # noinspection PyMethodParameters
     @validator("env", 'name')
     def name_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)
 
+    # noinspection PyMethodParameters
     @validator('gateway', whole=True)
     def prefix_match(cls, v):
         if not v.startswith(("http://", "https://", "ws://", "wss://")):
-            raise ParamsError("前缀不为http或ws")
+            raise VariablesNullError("前缀不为http或ws")
         return v

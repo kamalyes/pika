@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python 3.9.11
 """
-@File    :  database.py
+@File    :  DatabaseEnum.py
 @Time    :  2022/6/18 7:18 PM
 @Author  :  YuYanQing
 @Version :  1.0
@@ -27,6 +27,7 @@ class DatabaseForm(BaseModel):
     sql_type: int
     env: int
 
+    # noinspection PyMethodParameters
     @validator("name", "host", "port", "username", "password", "database", "sql_type", "env")
     def data_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)

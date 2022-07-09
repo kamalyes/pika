@@ -13,7 +13,7 @@ from typing import Optional
 
 from fastapi import Body
 
-from app.enums.bytesize import ByteSizeEnum
+from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.schema.base import PikaOnlyDescModel, PikaOnlyIdModel
 
 

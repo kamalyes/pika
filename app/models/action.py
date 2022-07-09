@@ -13,36 +13,36 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy import ForeignKey
 
-from app.enums.bytesize import ByteSizeEnum
-from app.enums.sysvar import PikaGlobalVarEnum
-from app.models.basic import PikaNormBase
-from app.models.menu import PikaMenu
-from app.models.user import PikaUser
+from app.enums.ByteSizeEnum import ByteSizeEnum
+from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.models.basic import NormBaseModel
+from app.models.menu import MenuModel
+from app.models.user import SysUserModel
 
 
-class PikaActionControl(PikaNormBase):
+class ActionControlModel(NormBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_sys_action"
     __table_args__ = {"comment": "权限控制配置表"}
     action_name = Column(String(ByteSizeEnum.LENGTH_128), nullable=False, comment="权限名称")
 
 
-class RoleAction(PikaNormBase):
+class RoleAction(NormBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_user_action_relation"
     __table_args__ = {"comment": "角色活动表"}
     emp_no = Column(
         String(ByteSizeEnum.LENGTH_20),
-        ForeignKey(PikaUser.emp_no, ondelete="cascade", onupdate="cascade"),
+        ForeignKey(SysUserModel.emp_no, ondelete="cascade", onupdate="cascade"),
         comment="员工编号",
         nullable=False,
     )
     menu_id = Column(
         Integer,
-        ForeignKey(PikaMenu.id, ondelete="cascade", onupdate="cascade"),
+        ForeignKey(MenuModel.id, ondelete="cascade", onupdate="cascade"),
         comment="对应menu_config表中的id",
     )
     control_id = Column(
         Integer,
-        ForeignKey(PikaActionControl.id, ondelete="cascade", onupdate="cascade"),
+        ForeignKey(ActionControlModel.id, ondelete="cascade", onupdate="cascade"),
         nullable=False,
         comment="权限控制id",
     )

@@ -12,11 +12,11 @@
 from app.core.handler.logger import PikaLogger
 from app.crud import PikaMapper
 from app.middleware.xredis import RedisHelper, PikaRedisManager
-from app.models.redis_config import PikaRedis
+from app.models.redis_config import RedisModel
 from app.utils.decorator import dao
 
 
-@dao(PikaRedis, PikaLogger("RedisConfigConfigDao"))
+@dao(RedisModel, PikaLogger("RedisConfigConfigDao"))
 class PikaRedisConfigDao(PikaMapper):
 
     @staticmethod
@@ -27,7 +27,8 @@ class PikaRedisConfigDao(PikaMapper):
                 raise Exception("Redis配置不存在")
             if not redis_config.cluster:
                 client = PikaRedisManager.get_single_node_client(redis_config.id, redis_config.addr,
-                                                                 redis_config.password, redis_config.db)
+                                                                 redis_config.password,
+                                                                 redis_config.db)
             else:
                 client = PikaRedisManager.get_cluster_client(redis_config.id, redis_config.addr)
             return await RedisHelper.execute_command(client, command)

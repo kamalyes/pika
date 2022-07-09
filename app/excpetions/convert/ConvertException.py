@@ -1,2 +1,15 @@
+# -*- coding:utf-8 -*-
+# !/usr/bin/env python 3.9.11
+"""
+@File    :  ConvertException.py
+@Time    :  2022/7/9 2:50 AM
+@Author  :  YuYanQing
+@Version :  1.0
+@Contact :  mryu168@163.com
+@License :  (C)Copyright 2022-2026
+@Desc    :  None
+"""
+
+
 class HarConvertException(Exception):
     pass

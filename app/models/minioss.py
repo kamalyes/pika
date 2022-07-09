@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python 3.9.11
 """
-@File    :  minioss.py
+@File    :  OssEnum.py
 @Time    :  2021/10/18 2:28 AM
 @Author  :  YuYanQing
 @Version :  1.0
@@ -11,19 +11,20 @@
 """
 from sqlalchemy import String, Column, UniqueConstraint
 
-from app.enums.sysvar import PikaGlobalVarEnum
-from app.models.basic import PikaLargeBase
+from app.enums.ByteSizeEnum import ByteSizeEnum
+from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.models.basic import LargeBaseModel
 
 units = (
     "B", "KB", "MB", "GB", "TB"
 )
 
 
-class PikaOssFile(PikaLargeBase):
+class OssFileModel(LargeBaseModel):
     # 因为没有目录的概念，都是目录+文件名
-    file_path = Column(String(64), nullable=False, index=True, comment="文件路径")
-    view_url = Column(String(256), nullable=False, comment="文件预览url")
-    file_size = Column(String(16), comment="文件大小")
+    file_path = Column(String(ByteSizeEnum.LENGTH_64), nullable=False, index=True, comment="文件路径")
+    view_url = Column(String(ByteSizeEnum.LENGTH_256), nullable=False, comment="文件预览url")
+    file_size = Column(String(ByteSizeEnum.LENGTH_16), comment="文件大小")
 
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_oss_file"
     __fields__ = (file_path, view_url, file_size)

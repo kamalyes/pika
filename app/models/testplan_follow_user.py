@@ -11,11 +11,11 @@
 """
 from sqlalchemy import INT, Column, UniqueConstraint
 
-from app.enums.sysvar import PikaGlobalVarEnum
-from app.models.basic import PikaLargeBase
+from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.models.basic import LargeBaseModel
 
 
-class PikaTestPlanFollowUserRel(PikaLargeBase):
+class ApiTestPlanFollowUserRelModel(LargeBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_testplan_follow_user_rel"
     __table_args__ = (UniqueConstraint('emp_no', 'plan_id'), {"comment": "测试计划关注用户表"})
 

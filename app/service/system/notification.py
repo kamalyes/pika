@@ -18,15 +18,15 @@ from app.crud.system.broadcast import BroadcastReadDao
 from app.crud.system.notification import PikaNotificationDao
 from app.enums.MessageEnum import MessageStateEnum
 from app.models import get_async_session
-from app.models.broadcast import PikaBroadcastReadUser
-from app.models.notification import PikaNotification
+from app.models.broadcast import BroadcastReadUserModel
+from app.models.notification import NotificationModel
 from app.schema.notification import NotificationForm
 from app.service import Permission
 
 router = APIRouter()
 
 
-@router.get("/list", description="获取用户消息列表")
+@router.get("/list", summary="获取用户消息列表")
 async def list_msg(msg_status: int, msg_type: int, user_info=Depends(Permission())):
     try:
         data = await PikaNotificationDao.list_messages(msg_type=msg_type, msg_status=msg_status,
@@ -36,26 +36,28 @@ async def list_msg(msg_status: int, msg_type: int, user_info=Depends(Permission(
         return PikaResponse.failed(detail=str(e))
 
 
-@router.post("/read", description="用户读取消息")
+@router.post("/read", summary="用户读取消息")
 async def read_msg(form: NotificationForm, user_info=Depends(Permission())):
     try:
         if form.personal:
             await PikaNotificationDao.update_by_map(user_info['emp_no'],
-                                                    PikaNotification.id.in_(form.personal),
-                                                    PikaNotification.receiver == user_info['emp_no'],
+                                                    NotificationModel.id.in_(form.personal),
+                                                    NotificationModel.receiver == user_info[
+                                                        'emp_no'],
                                                     msg_status=MessageStateEnum.read.value)
         if form.broadcast:
             operator = user_info['emp_no']
             for f in form.broadcast:
-                model = PikaBroadcastReadUser(f, operator)
+                model = BroadcastReadUserModel(f, operator)
                 await BroadcastReadDao.insert_record(model)
         return PikaResponse.success()
     except Exception as e:
         return PikaResponse.failed(detail=str(e))
 
 
-@router.post("/delete", description="用户删除消息")
-async def read_msg(msg_id: List[int], user_info=Depends(Permission()), session=Depends(get_async_session)):
+@router.post("/delete", summary="用户删除消息")
+async def read_msg(msg_id: List[int], user_info=Depends(Permission()),
+                   session=Depends(get_async_session)):
     try:
         await PikaNotificationDao.delete_message(session, msg_id, user_info['emp_no'])
         return PikaResponse.success()

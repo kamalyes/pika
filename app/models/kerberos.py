@@ -12,30 +12,30 @@
 from sqlalchemy import Column, INT, String, UniqueConstraint
 from sqlalchemy import ForeignKey
 
-from app.enums.bytesize import ByteSizeEnum
-from app.enums.sysvar import PikaGlobalVarEnum
-from app.models.basic import PikaNormBase
-from app.models.user import PikaUser
+from app.enums.ByteSizeEnum import ByteSizeEnum
+from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.models.basic import NormBaseModel
+from app.models.user import SysUserModel
 
 
-class PikaSecurityNominateIssue(PikaNormBase):
+class SecurityNominateIssueModel(NormBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_security_issue"
     __table_args__ = (UniqueConstraint("question"), {"comment": "密保问题推荐表"})
     question = Column(String(ByteSizeEnum.LENGTH_255), nullable=False, comment="密保问题")
 
 
-class PikaSecurityRelIssues(PikaNormBase):
+class PikaSecurityRelIssues(NormBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_user_security"
     __table_args__ = {"comment": "用户密保问题表"}
     uid = Column(
         INT,
-        ForeignKey(PikaUser.id, ondelete="cascade", onupdate="cascade"),
+        ForeignKey(SysUserModel.id, ondelete="cascade", onupdate="cascade"),
         nullable=False,
         comment="员工编号",
     )
     emp_no = Column(
         String(ByteSizeEnum.LENGTH_20),
-        ForeignKey(PikaUser.emp_no, ondelete="cascade", onupdate="cascade"),
+        ForeignKey(SysUserModel.emp_no, ondelete="cascade", onupdate="cascade"),
         comment="员工编号",
         nullable=False,
     )

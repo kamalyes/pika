@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python 3.9.11
 """
-@File    :  operation.py
+@File    :  OperationEnum.py
 @Time    :  2022/6/7 8:21 PM
 @Author  :  YuYanQing
 @Version :  1.0
@@ -15,7 +15,7 @@ from typing import Optional
 from fastapi import Query
 from hutools.time import Moment
 
-from app.enums.bytesize import ByteSizeEnum
+from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.schema.base import PikaQueryTypeModel
 
 

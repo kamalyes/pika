@@ -13,6 +13,7 @@ class RedisConfigForm(BaseModel):
     cluster: bool = False
     env: int
 
+    # noinspection PyMethodParameters
     @validator("name", "addr", "cluster", "db", "env")
     def data_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)

@@ -11,19 +11,19 @@
 """
 from sqlalchemy import Column, String, UniqueConstraint, INT
 
-from app.enums.bytesize import ByteSizeEnum
-from app.enums.sysvar import PikaGlobalVarEnum
-from app.models.basic import PikaNormBase, PikaLargeBase
+from app.enums.ByteSizeEnum import ByteSizeEnum
+from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.models.basic import NormBaseModel, LargeBaseModel
 
 
-class PikaSensitiveWord(PikaNormBase):
+class SensitiveWordModel(NormBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_sys_sensitive_word"
     __table_args__ = {"comment": "敏感词库"}
     name = Column(String(ByteSizeEnum.LENGTH_64), comment="名词", nullable=False)
     genre = Column(String(ByteSizeEnum.LENGTH_64), comment="类型", nullable=False)
 
 
-class UserAlias(PikaLargeBase):
+class UserAlias(LargeBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_user_alias"
     __table_args__ = (UniqueConstraint("english_alias"), {"comment": "化名词库"})
     english_alias = Column(String(ByteSizeEnum.LENGTH_16), comment="英文花名")
@@ -31,9 +31,8 @@ class UserAlias(PikaLargeBase):
     moral = Column(String(ByteSizeEnum.LENGTH_64), comment="寓意")
     gender_bias = Column(INT, server_default="0", comment="性别倾向：0-未填写，1-男，2-女")
 
-    def __init__(
-            self, english_alias, chinese_transliteration=None, moral=None, gender_bias=0
-    ):
+    def __init__(self, english_alias, chinese_transliteration=None, moral=None, gender_bias=0):
+        super().__init__()
         self.english_alias = english_alias
         self.chinese_transliteration = chinese_transliteration
         self.moral = moral

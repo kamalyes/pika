@@ -3,12 +3,12 @@ from typing import TypeVar
 from fastapi import WebSocket
 
 from app.core.handler.logger import PikaLogger
-from app.crud.system.notification import PikaNotificationDao
-from app.models.notification import PikaNotification
-
 from app.core.notice.wss_msg import WebSocketMessage
+from app.crud.system.notification import PikaNotificationDao
+from app.models.notification import NotificationModel
 
 MsgType = TypeVar('MsgType', str, dict, bytes)
+
 
 class ConnectionManager:
     BROADCAST = -1
@@ -67,14 +67,17 @@ class ConnectionManager:
         msg = dict(type=msg_type, record_msg=record_msg)
         await self.send_personal_message(emp_no, msg)
 
-    async def notify(self, emp_no, title=None, content=None, notice: PikaNotification = None):
+    async def notify(self, emp_no, title=None, content=None, notice: NotificationModel = None):
         """
         根据user_id推送对应的
-        :param content:
-        :param title:
-        :param emp_no: 当user_id为-1的时候代表是广播消息
-        :param notice:
-        :return:
+        Args:
+            emp_no:
+            title:
+            content:
+            notice:
+
+        Returns:
+
         """
         try:
             # 判断是否为桌面通知

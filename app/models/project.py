@@ -1,29 +1,29 @@
 from sqlalchemy import INT, Column, String, BOOLEAN, ForeignKey
-
-from app.enums.bytesize import ByteSizeEnum
-from app.enums.sysvar import PikaGlobalVarEnum
-from app.models.basic import PikaLargeBase
-from app.models.user import PikaUser
 from sqlalchemy.orm import relationship, backref
 
+from app.enums.ByteSizeEnum import ByteSizeEnum
+from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.models.basic import LargeBaseModel
+from app.models.user import SysUserModel
 
-class PikaProject(PikaLargeBase):
+
+class ProjectModel(LargeBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_project'
     __table_args__ = {"comment": "项目管理表"}
-    name = Column(String(16), unique=True, index=True, comment="项目名称")
+    name = Column(String(ByteSizeEnum.LENGTH_16), unique=True, index=True, comment="项目名称")
     owner = Column(
         String(ByteSizeEnum.LENGTH_16),
-        ForeignKey(PikaUser.emp_no, ondelete="cascade", onupdate="cascade"),
+        ForeignKey(SysUserModel.emp_no, ondelete="cascade", onupdate="cascade"),
         comment="项目所有者",
         nullable=False,
     )
-    app = Column(String(32), index=True, comment="项目所属应用")
+    app = Column(String(ByteSizeEnum.LENGTH_32), index=True, comment="项目所属应用")
     private = Column(BOOLEAN, default=False, comment="是否私有")
-    description = Column(String(200), comment="项目描述")
-    avatar = Column(String(128), nullable=True, comment="项目头像")
-    dingtalk_url = Column(String(128), nullable=True, comment="钉钉通知url")
-    qy_wx_url = Column(String(128), nullable=True, comment="企微通知url")
-    relationship(PikaUser, backref=backref("children", cascade="all, delete"))
+    description = Column(String(ByteSizeEnum.LENGTH_200), comment="项目描述")
+    avatar = Column(String(ByteSizeEnum.LENGTH_128), nullable=True, comment="项目头像")
+    dingtalk_url = Column(String(ByteSizeEnum.LENGTH_128), nullable=True, comment="钉钉通知url")
+    qy_wx_url = Column(String(ByteSizeEnum.LENGTH_128), nullable=True, comment="企微通知url")
+    relationship(SysUserModel, backref=backref("children", cascade="all, delete"))
 
     def __init__(self, name, app, owner, operator, description="",
                  private=False, avatar=None, dingtalk_url='', qy_wx_url=''):
@@ -38,17 +38,17 @@ class PikaProject(PikaLargeBase):
         self.qy_wx_url = qy_wx_url
 
 
-class ProjectRole(PikaLargeBase):
+class ProjectRoleModel(LargeBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_project_role'
     __table_args__ = {"comment": "项目人员关联表"}
     emp_no = Column(
         String(ByteSizeEnum.LENGTH_16),
-        ForeignKey(PikaUser.emp_no, ondelete="cascade", onupdate="cascade"),
+        ForeignKey(SysUserModel.emp_no, ondelete="cascade", onupdate="cascade"),
         nullable=False,
         comment="项目成员编号（用户编号）")
     project_id = Column(INT, index=True, comment="项目id")
     project_role = Column(INT, index=True, comment="角色")
-    relationship(PikaUser, backref=backref("children", cascade="all, delete"))
+    relationship(SysUserModel, backref=backref("children", cascade="all, delete"))
 
     def __init__(self, emp_no, project_id, project_role, operator):
         super().__init__(operator)

@@ -16,13 +16,14 @@ from hutools.pagination.async_sqlalchemy import paginate
 
 from app.core.handler.execres import ValidException
 from app.core.handler.jsonres import PikaResponse
-from app.enums.statuscode import SysFailedCodeEnum
+from app.enums.SysCodeEnum import SysCodeEnum
 from app.models import async_db_session
 
 
 class AsyncDbSession:
     @staticmethod
-    async def begin_lock(pending_begin_number: int = 0, min_begin_number: int = 1, max_begin_number: int = 50):
+    async def begin_lock(pending_begin_number: int = 0, min_begin_number: int = 1,
+                         max_begin_number: int = 50):
         """
 
         Args:
@@ -57,13 +58,14 @@ class AsyncDbSession:
                 pass_ids.append(ids[index])
             else:
                 end_value, start_value, split_key = ids[index], ids[index - 1] + ",", index * ","
-                start_index, end_index = len(start_value + split_key), len(start_value + end_value + split_key)
+                start_index, end_index = len(start_value + split_key), len(
+                    start_value + end_value + split_key)
                 # print(ids, start_value, end_value, split_key, start_index, end_index)
                 error_ids.append({"start_index": start_index - 1, "start_value": start_value,
                                   "end_index": end_index, "end_value": end_value})
         if len(error_ids) > 0:
-            return PikaResponse.failed(code=SysFailedCodeEnum.VAR_ERROR, detail="参数错误，请检查格式是否为,进行分割！",
-                                       result={"error_values": error_ids})
+            return PikaResponse.failed(code=SysCodeEnum.VAR_ERROR, detail="参数错误，请检查格式是否为,进行分割！",
+                                       data={"error_values": error_ids})
         async with async_db_session() as session:
             async with session.begin():
                 await session.execute(do_sql)
@@ -87,5 +89,6 @@ class AsyncDbSession:
         elif query_type == '1':
             data = await paginate(db, dim_do_sql)
         else:
-            return PikaResponse.failed(code=SysFailedCodeEnum.VAR_ERROR, detail=f"query_type值不对，仅可传0：全部数据，1：条件查询")
+            return PikaResponse.failed(code=SysCodeEnum.VAR_ERROR,
+                                       detail=f"query_type值不对，仅可传0：全部数据，1：条件查询")
         return data

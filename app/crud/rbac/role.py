@@ -16,12 +16,12 @@ from sqlalchemy import select, distinct, update, delete, or_, and_
 from app.core.handler.asyncsql import AsyncDbSession
 from app.core.handler.jsonres import PikaResponse
 from app.core.handler.logger import PikaLogger
-from app.enums.bytesize import ByteSizeEnum
-from app.enums.gebruikersrol import RoleEnum
-from app.enums.statuscode import SysFailedCodeEnum
+from app.enums.ByteSizeEnum import ByteSizeEnum
+from app.enums.RbacEnum import RoleEnum
+from app.enums.SysCodeEnum import SysCodeEnum
 from app.models import async_db_session
-from app.models.role import PikaRole, PikaRoleRel
-from app.models.user import PikaUser
+from app.models.role import SysRoleModel, SysRoleRelModel
+from app.models.user import SysUserModel
 
 
 class RoleDao(object):
@@ -46,13 +46,13 @@ class RoleDao(object):
                                         max_begin_number=max_begin_number)
         async with async_db_session() as session:
             async with session.begin():
-                await session.execute(PikaRole.__table__.insert(), pending_begin)
+                await session.execute(SysRoleModel.__table__.insert(), pending_begin)
                 return PikaResponse.success()
 
     @staticmethod
     async def delete_role(**kwargs):
         ids = kwargs["request"].ids.split(",")
-        del_sql = delete(PikaRole).where(PikaRole.id.in_(ids))
+        del_sql = delete(SysRoleModel).where(SysRoleModel.id.in_(ids))
         return await AsyncDbSession.delete(ids=ids, do_sql=del_sql)
 
     @staticmethod
@@ -71,14 +71,16 @@ class RoleDao(object):
                     pending_index += dispose_index
                     dispose_index += pending_index
                     # 查询是否存在
-                    sql = select(distinct(PikaRole.id)).where(PikaRole.id.in_([index.id for index in pending_begin_]))
+                    sql = select(distinct(SysRoleModel.id)).where(
+                        SysRoleModel.id.in_([index.id for index in pending_begin_]))
                     execute_exists_id = await session.execute(sql)
                     exists_id = [index[0] for index in [id_ for id_ in execute_exists_id.all()]]
                     # 遍历更新
                     for pb in pending_begin_:
                         if int(pb.id) in exists_id:
-                            sql = update(PikaRole).where(
-                                PikaRole.id == pb.id).values(dict(pb.__dict__, **{"update_emp_no": update_emp_no}))
+                            sql = update(SysRoleModel).where(
+                                SysRoleModel.id == pb.id).values(
+                                dict(pb.__dict__, **{"update_emp_no": update_emp_no}))
                             try:
                                 await session.execute(sql)
                             except Exception as e:
@@ -94,20 +96,22 @@ class RoleDao(object):
                         msg = "修改失败"
                     else:
                         msg = "部分修改成功"
-                    return PikaResponse.success(code=SysFailedCodeEnum.MYSQL_ERROR,
+                    return PikaResponse.success(code=SysCodeEnum.MYSQL_ERROR,
                                                 message=f'{msg},详情请查阅返回值！',
-                                                data={"success": success, "failed": failed, "not_funded": not_funded})
+                                                data={"success": success, "failed": failed,
+                                                      "not_funded": not_funded})
 
     @staticmethod
-    async def query_role(db, request):
-        all_do_sql = select(PikaRole)
-        dim_do_sql = select(PikaRole).where(
-            or_(PikaRole.id == request.id, PikaRole.name == request.name,
-                PikaRole.role_type == request.role_type, PikaRole.menus_id == request.menus_id,
-                PikaRole.create_emp_no.like(f"%{request.create_emp_no}%"),
-                PikaRole.update_emp_no.like(f"%{request.update_emp_no}%"),
-                and_(PikaRole.create_date >= request.create_date,
-                     PikaRole.update_date <= request.update_date)
+    async def list_role(db, request):
+        all_do_sql = select(SysRoleModel)
+        dim_do_sql = select(SysRoleModel).where(
+            or_(SysRoleModel.id == request.id, SysRoleModel.name == request.name,
+                SysRoleModel.role_type == request.role_type,
+                SysRoleModel.menus_id == request.menus_id,
+                SysRoleModel.create_emp_no.like(f"%{request.create_emp_no}%"),
+                SysRoleModel.update_emp_no.like(f"%{request.update_emp_no}%"),
+                and_(SysRoleModel.create_date >= request.create_date,
+                     SysRoleModel.update_date <= request.update_date)
                 ))
         return await AsyncDbSession.query(db, str(request.query_type), all_do_sql, dim_do_sql)
 
@@ -123,13 +127,15 @@ class RoleDao(object):
             async with session.begin():
                 for index in pending_begin:
                     temp_index = index.__dict__
-                    exists_emp_nos = await session.execute(select(PikaUser).where(PikaUser.emp_no == index.emp_no))
+                    exists_emp_nos = await session.execute(
+                        select(SysUserModel).where(SysUserModel.emp_no == index.emp_no))
                     exists_role_ids = await session.execute(
-                        select(distinct(PikaRole.id)).where(PikaRole.id == index.role_id))
+                        select(distinct(SysRoleModel.id)).where(SysRoleModel.id == index.role_id))
                     exists_relations = await session.execute(
-                        select(PikaRoleRel).where(or_(PikaRoleRel.id == index.id,
-                                                      and_(PikaRoleRel.role_id == index.role_id,
-                                                           PikaRoleRel.emp_no == index.emp_no))))
+                        select(SysRoleRelModel).where(or_(SysRoleRelModel.id == index.id,
+                                                          and_(
+                                                              SysRoleRelModel.role_id == index.role_id,
+                                                              SysRoleRelModel.emp_no == index.emp_no))))
                     exists_emp_no, exists_role_id, exists_relation = \
                         exists_emp_nos.scalars().first(), \
                         exists_role_ids.scalars().first(), \
@@ -141,13 +147,14 @@ class RoleDao(object):
                             else:
                                 del temp_index["id"]
                                 temp_index.update({"update_emp_no": emp_no})
-                                update_sql = update(PikaRoleRel) \
-                                    .where(and_(PikaRoleRel.id == exists_relation.id)) \
+                                update_sql = update(SysRoleRelModel) \
+                                    .where(and_(SysRoleRelModel.id == exists_relation.id)) \
                                     .values(temp_index)
                                 await session.execute(update_sql)
                         else:
-                            temp_index.update({"id": index.id, "rel_type": 1, "is_verify": 3, "create_emp_no": emp_no})
-                            await session.execute(PikaRoleRel.__table__.insert(), temp_index)
+                            temp_index.update({"id": index.id, "rel_type": 1,
+                                               "is_verify": 3, "create_emp_no": emp_no})
+                            await session.execute(SysRoleRelModel.__table__.insert(), temp_index)
                         success.append(index)
                     if exists_emp_no is None:
                         emp_no_not_exists.append(index.emp_no)
@@ -156,16 +163,17 @@ class RoleDao(object):
                 if len(success) == len(pending_begin):
                     return PikaResponse.success(message=f"关联成功！")
                 else:
-                    if (len(role_id_not_exists) >= 0 or len(emp_no_not_exists)) and len(success) <= 0:
+                    if (len(role_id_not_exists) >= 0 or len(emp_no_not_exists)) and len(
+                            success) <= 0:
                         msg = "关联失败"
                     else:
                         msg = "部分关联成功"
                     failed = {"role_id_not_exists": set(role_id_not_exists),
                               "emp_no_not_exists": set(emp_no_not_exists)}
-                    return PikaResponse.success(code=SysFailedCodeEnum.MYSQL_ERROR,
+                    return PikaResponse.success(code=SysCodeEnum.MYSQL_ERROR,
                                                 message=f'{msg},详情请查阅返回值！',
                                                 data={"success": success,
-                                                        "failed": failed})
+                                                      "failed": failed})
 
     @staticmethod
     async def apply_role(**kwargs):
@@ -180,15 +188,16 @@ class RoleDao(object):
                 for index in pending_begin:
                     temp_index = index.__dict__
                     exists_role_ids = await session.execute(
-                        select(distinct(PikaRole.id)).where(PikaRole.id == index.role_id))
+                        select(distinct(SysRoleModel.id)).where(SysRoleModel.id == index.role_id))
                     exists_relations = await session.execute(
-                        select(PikaRoleRel).where(PikaRoleRel.role_id == index.role_id, PikaRoleRel.emp_no == emp_no))
+                        select(SysRoleRelModel).where(SysRoleRelModel.role_id == index.role_id,
+                                                      SysRoleRelModel.emp_no == emp_no))
                     exists_role_id, exists_relation = \
                         exists_role_ids.scalars().first(), \
                         exists_relations.scalars().first()
                     if exists_role_id and not exists_relation:
                         temp_index.update({"rel_type": 2, "is_verify": 0, "emp_no": emp_no})
-                        await session.execute(PikaRoleRel.__table__.insert(), temp_index)
+                        await session.execute(SysRoleRelModel.__table__.insert(), temp_index)
                         success.append(index)
                     if exists_relation:
                         role_relo_id_is_exists.append(exists_relation.id)
@@ -197,16 +206,17 @@ class RoleDao(object):
                 if len(success) == len(pending_begin):
                     return PikaResponse.success(message=f"申请成功！")
                 else:
-                    if (len(role_id_not_exists) >= 0 or len(role_relo_id_is_exists) >= 0) and len(success) <= 0:
+                    if (len(role_id_not_exists) >= 0 or len(role_relo_id_is_exists) >= 0) and len(
+                            success) <= 0:
                         msg = "申请失败"
                     else:
                         msg = "部分申请成功"
                     failed = {"role_id_not_exists": set(role_id_not_exists),
                               "role_relo_id_is_exists": set(role_relo_id_is_exists)}
-                    return PikaResponse.success(code=SysFailedCodeEnum.MYSQL_ERROR,
+                    return PikaResponse.success(code=SysCodeEnum.MYSQL_ERROR,
                                                 message=f'{msg},详情请查阅返回值！',
                                                 data={"success": success,
-                                                        "failed": failed})
+                                                      "failed": failed})
 
     @staticmethod
     async def audit_role(**kwargs):
@@ -219,15 +229,18 @@ class RoleDao(object):
         async with async_db_session() as session:
             async with session.begin():
                 for index in pending_begin:
-                    where_ = and_(PikaRoleRel.id == index.id)
-                    exists_relations = await session.execute(select(PikaRoleRel).where(where_))
+                    where_ = and_(SysRoleRelModel.id == index.id)
+                    exists_relations = await session.execute(select(SysRoleRelModel).where(where_))
                     exists_relation = exists_relations.scalars().first()
                     if exists_relation:
                         role_level = int(userinfo.get('identity', 0)) >= RoleEnum.ADMIN
                         if exists_relation.rel_type == 2 and exists_relation.is_verify == 0:
                             is_verify = 3 if role_level else 2
-                            update_value = {"is_verify": is_verify, "create_emp_no": userinfo["emp_no"]}
-                            update_sql = update(PikaRoleRel).where(PikaRoleRel.id == index.id).values(update_value)
+                            update_value = {"is_verify": is_verify,
+                                            "create_emp_no": userinfo["emp_no"]}
+                            update_sql = update(SysRoleRelModel).where(
+                                SysRoleRelModel.id == index.id).values(
+                                update_value)
                             await session.execute(update_sql)
                             success.append(index)
                         elif exists_relation.rel_type != 2:
@@ -240,7 +253,8 @@ class RoleDao(object):
                 if len(success) == len(pending_begin):
                     return PikaResponse.success(message=f"{audit_str}！")
                 else:
-                    err = (len(is_verify_err) > 0 or len(id_is_not_exists) > 0 or len(rel_type_err) > 0)
+                    err = (len(is_verify_err) > 0 or len(id_is_not_exists) > 0 or len(
+                        rel_type_err) > 0)
                     if err and len(success) <= 0:
                         msg = "审核失败"
                     else:
@@ -248,7 +262,7 @@ class RoleDao(object):
                     failed = {"is_verify_err": set(is_verify_err),
                               "rel_type_err": set(rel_type_err),
                               "id_is_not_exists": set(id_is_not_exists)}
-                    return PikaResponse.success(code=SysFailedCodeEnum.MYSQL_ERROR,
+                    return PikaResponse.success(code=SysCodeEnum.MYSQL_ERROR,
                                                 message=f'{msg},详情请查阅返回值！',
                                                 data={"success": success,
-                                                        "failed": failed})
+                                                      "failed": failed})

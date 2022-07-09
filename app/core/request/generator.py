@@ -18,19 +18,20 @@ from typing import List
 from loguru import logger
 
 from app.enums.CaseStatusEnum import CaseStatus
-from app.enums.ConstructorEnum import ConstructorType
-from app.enums.RequestBodyEnum import BodyType
+from app.enums.ConstructorEnum import ConstructorTypeEnum
+from app.enums.RequestBodyEnum import ReqBodyTypeEnum
 from app.enums.RequestTypeEnum import RequestType
 from app.excpetions.convert.GenerateException import GenerateException
+from app.schema.api_testcase import TestCaseForm
 from app.schema.constructor import ConstructorForm
 from app.schema.request import RequestInfo
-from app.schema.testcase_schema import TestCaseForm
 
 
 class CaseGenerator(object):
     # 忽略的字段
     ignored = (
-        "Content-Type", "Connection", "Date", "Content-Length", "Host", "access-control-allow-credentials",
+        "Content-Type", "Connection", "Date", "Content-Length", "Host",
+        "access-control-allow-credentials",
         "access-control-allow-origin", "User-Agent", "Server"
     )
 
@@ -45,12 +46,12 @@ class CaseGenerator(object):
     def get_body_type(headers):
         content_type = headers.get("Content-Type", "").lower()
         if "json" in content_type:
-            return BodyType.json
+            return ReqBodyTypeEnum.json
         if "x-www-form" in content_type:
-            return BodyType.x_form
+            return ReqBodyTypeEnum.x_form
         if "form" in content_type:
-            return BodyType.form
-        return BodyType.none
+            return ReqBodyTypeEnum.form
+        return ReqBodyTypeEnum.none
 
     @staticmethod
     def generate_constructors(requests: List[RequestInfo]) -> List[ConstructorForm]:
@@ -65,9 +66,10 @@ class CaseGenerator(object):
                 request_method=requests[r].request_method,
                 body_type=CaseGenerator.get_body_type(requests[r].request_headers),
             ), ensure_ascii=False)
-            c = ConstructorForm(name=name, value=f"http_res_{r + 1}", constructor_json=constructor_json,
+            c = ConstructorForm(name=name, value=f"http_res_{r + 1}",
+                                constructor_json=constructor_json,
                                 enable=True, public=True, suffix=False, index=r + 1,
-                                type=ConstructorType.http.value)
+                                type=ConstructorTypeEnum.http.value)
             constructors.append(c)
         return constructors
 
@@ -84,8 +86,11 @@ class CaseGenerator(object):
     def extract_field(requests: List[RequestInfo]) -> List[str]:
         """
         遍历接口，并提取其中的变量
-        :param requests:
-        :return:
+        Args:
+            requests:
+
+        Returns:
+
         """
         var_pool = defaultdict(list)
         replaced = []
@@ -235,4 +240,3 @@ class CaseGenerator(object):
             request.url = f"{http}//{'/'.join(new_url)}"
             return
         request.url = f"{http}//{'/'.join(new_url)}?{'&'.join(new_query)}"
-

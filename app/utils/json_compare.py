@@ -64,6 +64,7 @@ class JsonCompare(object):
                     f"!= {b}" if path != "" else
                     f"数据不一致: {a} != {b}【❌】")
 
+    # noinspection PyMethodMayBeStatic
     def _to_json(self, string):
         try:
             float(string)

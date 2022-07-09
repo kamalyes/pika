@@ -1,3 +1,14 @@
+# -*- coding:utf-8 -*-
+# !/usr/bin/env python 3.9.11
+"""
+@File    :  qiniu.py
+@Time    :  2022/6/17 12:55 AM
+@Author  :  YuYanQing
+@Version :  1.0
+@Contact :  mryu168@163.com
+@License :  (C)Copyright 2022-2026
+@Desc    :  None
+"""
 import os
 from io import BytesIO
 
@@ -27,7 +38,8 @@ class QiniuOss(OssFile):
         key = self.get_real_path(filepath, base_path)
         token = self.auth.upload_token(self.bucket, key, 3600)
         file_name = os.path.basename(filepath)
-        ret, info = put_stream(token, key, QiniuOss._convert_to_stream(content), file_name, len(content))
+        ret, info = put_stream(token, key, QiniuOss._convert_to_stream(content), file_name,
+                               len(content))
         if ret['key'] != key:
             raise Exception("上传失败")
         return QiniuOss.get_url(key), len(content)

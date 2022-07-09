@@ -20,6 +20,7 @@ class OnlineSQLForm(BaseModel):
     id: Optional[int] = None
     sql: Optional[str]
 
+    # noinspection PyMethodParameters
     @validator("sql", 'id')
     def name_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)
@@ -29,6 +30,7 @@ class OnlineRedisForm(BaseModel):
     id: Optional[int] = None
     command: Optional[str]
 
+    # noinspection PyMethodParameters
     @validator('id', 'command')
     def name_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)

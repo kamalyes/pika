@@ -15,7 +15,7 @@ jobs:
       - name: 拉取代码
         uses: actions/checkout@master
 
-      - name: copy file via ssh password
+      - name: scp file to ssh
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -24,14 +24,3 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           source: "*"
           target: "/home/tester/pika/"
-
-      - name: executing remote ssh commands using password
-        uses: appleboy/ssh-action@master
-        with:
-          script_stop: true
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_TESTER_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd /home/tester/pika && pip3 install -r requirements.txt && pkill gunicorn

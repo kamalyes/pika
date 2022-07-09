@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python 3.9.11
 """
-@File    :  gconfig.py
+@File    :  GconfigEnum.py
 @Time    :  2022/6/18 2:28 AM
 @Author  :  YuYanQing
 @Version :  1.0
@@ -22,6 +22,7 @@ class GConfigForm(BaseModel):
     key_type: int
     enable: bool
 
+    # noinspection PyMethodParameters
     @validator("key", "value", "key_type", "enable")
     def name_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)

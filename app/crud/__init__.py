@@ -18,11 +18,11 @@ from typing import List, Tuple
 from sqlalchemy import select, update
 
 from app.core.handler.execres import ValidException
-from app.enums.operation import SqlOperationTypeEnum
+from app.enums.OperationEnum import SqlOperationTypeEnum
 from app.middleware.xredis import RedisHelper
 from app.models import async_session, DatabaseHelper
-from app.models.basic import PikaRelationField
-from app.models.system import PikaOperationLog
+from app.models.basic import RelationFieldModel
+from app.models.system import OperationLogModel
 from config import PikaAppConfig
 
 
@@ -89,7 +89,8 @@ class PikaMapper(object):
             if like and len(v) == 2:
                 continue
             # 如果是like模式，则使用Model.字段.like 否则用 Model.字段 等于
-            DatabaseHelper.where(v, getattr(cls.model, k).like(v) if like else getattr(cls.model, k) == v,
+            DatabaseHelper.where(v, getattr(cls.model, k).like(v) if like else getattr(cls.model,
+                                                                                       k) == v,
                                  conditions)
         sql = select(cls.model).where(*conditions)
         if _sort and isinstance(_sort, tuple):
@@ -126,7 +127,8 @@ class PikaMapper(object):
                     if log:
                         async with session.begin():
                             await asyncio.create_task(
-                                cls.insert_log(session, model.operator, SqlOperationTypeEnum.ONLY_INSERT, model,
+                                cls.insert_log(session, model.operator,
+                                               SqlOperationTypeEnum.ONLY_INSERT, model,
                                                key=model.id))
                     # 这里直接return了，不会继续走下面的add
                     return model
@@ -148,7 +150,8 @@ class PikaMapper(object):
         try:
             async with async_session() as session:
                 async with session.begin():
-                    sql = update(cls.model).where(*condition).values(**kwargs, update_date=datetime.now(),
+                    sql = update(cls.model).where(*condition).values(**kwargs,
+                                                                     update_date=datetime.now(),
                                                                      update_emp_no=emp_no)
                     await session.execute(sql)
         except Exception as e:
@@ -173,7 +176,8 @@ class PikaMapper(object):
                 if log:
                     async with session.begin():
                         await asyncio.create_task(
-                            cls.insert_log(session, operator, SqlOperationTypeEnum.ONLY_UPDATE, now, old, model.id,
+                            cls.insert_log(session, operator, SqlOperationTypeEnum.ONLY_UPDATE, now,
+                                           old, model.id,
                                            changed=changed))
                 return now
         except Exception as e:
@@ -194,12 +198,14 @@ class PikaMapper(object):
         session.expunge(original)
         if log:
             await asyncio.create_task(
-                cls.insert_log(session, operator, SqlOperationTypeEnum.ONLY_DELETE, original, key=value))
+                cls.insert_log(session, operator, SqlOperationTypeEnum.ONLY_DELETE, original,
+                               key=value))
             return original
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def delete_record_by_id(cls, session, operator: int, value: int, log=True, key='id', exists=True,
+    async def delete_record_by_id(cls, session, operator: int, value: int, log=True, key='id',
+                                  exists=True,
                                   session_begin=False):
         """
         逻辑删除
@@ -241,7 +247,8 @@ class PikaMapper(object):
                 session.expunge(original)
                 if log:
                     await asyncio.create_task(
-                        cls.insert_log(session, operator, SqlOperationTypeEnum.ONLY_DELETE, original, key=id_))
+                        cls.insert_log(session, operator, SqlOperationTypeEnum.ONLY_DELETE,
+                                       original, key=id_))
         except Exception as e:
             cls.log.exception(f"删除{cls.model}记录失败, error: {e}")
             raise Exception(f"删除记录失败")
@@ -265,8 +272,8 @@ class PikaMapper(object):
         diff, title = await cls.get_diff(session, mode, now, old, changed)
         tag = getattr(now, PikaAppConfig.TABLE_TAG, '未设置')
         diff_data = json.dumps(diff, ensure_ascii=False)
-        model = PikaOperationLog(operator=operator, mode=mode, title="&".join(title),
-                                 tag=tag, description=diff_data, key=key)
+        model = OperationLogModel(operator=operator, mode=mode, title="&".join(title),
+                                  tag=tag, description=diff_data, key=key)
         session.add(model)
 
     @classmethod
@@ -302,10 +309,12 @@ class PikaMapper(object):
                          c not in fields] if mode != SqlOperationTypeEnum.ONLY_UPDATE else changed_fields
         result, title = [], []
         for f in detail_fields:
-            item = await cls.get_field_alias(session, getattr(now, PikaAppConfig.RELATION, None), f, now, old)
+            item = await cls.get_field_alias(session, getattr(now, PikaAppConfig.RELATION, None), f,
+                                             now, old)
             result.append(item)
         for d in fields:
-            item = await cls.get_field_alias(session, getattr(now, PikaAppConfig.RELATION, None), d, now, old)
+            item = await cls.get_field_alias(session, getattr(now, PikaAppConfig.RELATION, None), d,
+                                             now, old)
             title.append(f"{item.get('name')}={item.get('now')}")
         return result, title
 
@@ -337,7 +346,8 @@ class PikaMapper(object):
         cls_ = id_field.parent.class_
         if old_id is None:
             id_list = await cls.get_id_list(new_id)
-            data = await session.execute(select(cls_).where(getattr(cls_, id_field.name).in_(id_list)))
+            data = await session.execute(
+                select(cls_).where(getattr(cls_, id_field.name).in_(id_list)))
             result = data.scalars().all()
             if result is None:
                 return new_id, None
@@ -375,7 +385,8 @@ class PikaMapper(object):
         return field
 
     @classmethod
-    async def get_field_alias(cls, session, relation: Tuple[PikaRelationField], name, now, old=None):
+    async def get_field_alias(cls, session, relation: Tuple[RelationFieldModel], name, now,
+                              old=None):
         """
         获取别名操作，如果字段是别的表的主键，则还需要根据此字段查询别的表的对应字段
         Args:
@@ -400,13 +411,14 @@ class PikaMapper(object):
                         return dict(name=alias.get(name, name), old=old_value, now=current_value)
                     if callable(r.foreign):
                         # foreign支持方法和数据库其他表，如果callable为True 说明是function
-                        # 参考 ProjectRoleEnum.name方法 里面将int转为具体角色的方法
+                        # 参考 ProjectRoleModelEnum.name方法 里面将int转为具体角色的方法
                         real_value = r.foreign(current_value)
                         real_old_value = r.foreign(old_value)
                         return dict(name=alias.get(name, name), old=real_old_value, now=real_value)
                     # 更新字段
                     id_field, name_field = r.foreign
-                    current, old = await cls.fetch_id_with_name(session, id_field, name_field, old_value, current_value)
+                    current, old = await cls.fetch_id_with_name(session, id_field, name_field,
+                                                                old_value, current_value)
                     return dict(name=alias.get(name, name), old=old, now=current)
         return dict(name=alias.get(name, name), old=old_value, now=current_value)
 

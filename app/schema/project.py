@@ -1,6 +1,6 @@
 from pydantic import validator, BaseModel
 
-from app.excpetions.ParamsException import ParamsError
+from app.excpetions.business.ParamsException import VariablesNullError
 
 
 class ProjectForm(BaseModel):
@@ -12,10 +12,11 @@ class ProjectForm(BaseModel):
     dingtalk_url: str = None
     qy_wx_url: str = None
 
+    # noinspection PyMethodParameters
     @validator('name', 'app', 'owner')
     def name_not_empty(cls, v):
         if isinstance(v, str) and len(v.strip()) == 0:
-            raise ParamsError("不能为空")
+            raise VariablesNullError("不能为空")
         return v
 
 
@@ -29,43 +30,47 @@ class ProjectEditForm(BaseModel):
     dingtalk_url: str = None
     qy_wx_url: str = None
 
+    # noinspection PyMethodParameters
     @validator('id', 'name', 'app', 'owner')
     def name_not_empty(cls, v):
         if isinstance(v, str) and len(v.strip()) == 0:
-            raise ParamsError("不能为空")
+            raise VariablesNullError("不能为空")
         return v
 
 
-class ProjectRoleForm(BaseModel):
+class ProjectRoleModelForm(BaseModel):
     emp_no: str
     project_role: int
     project_id: int
 
+    # noinspection PyMethodParameters
     @validator('emp_no', 'project_role', 'project_id')
     def name_not_empty(cls, v):
         if isinstance(v, str) and len(v.strip()) == 0:
-            raise ParamsError("不能为空")
+            raise VariablesNullError("不能为空")
         return v
 
 
-class ProjectRoleEditForm(BaseModel):
+class ProjectRoleModelEditForm(BaseModel):
     id: int
     emp_no: str
     project_role: int
     project_id: int
 
+    # noinspection PyMethodParameters
     @validator('id', 'emp_no', 'project_role', 'project_id')
     def name_not_empty(cls, v):
         if isinstance(v, str) and len(v.strip()) == 0:
-            raise ParamsError("不能为空")
+            raise VariablesNullError("不能为空")
         return v
 
 
 class ProjectDelForm(BaseModel):
     id: int
 
+    # noinspection PyMethodParameters
     @validator('id')
     def name_not_empty(cls, v):
         if isinstance(v, str) and len(v.strip()) == 0:
-            raise ParamsError("不能为空")
+            raise VariablesNullError("不能为空")
         return v

@@ -16,6 +16,7 @@ from app.core.paramters.status_code_parser import StatusCodeParser
 from app.enums.CaseParametersEnum import CaseParametersEnum
 
 
+# noinspection PyPep8Naming
 def ParametersParser(parameter_type: CaseParametersEnum):
     if parameter_type == CaseParametersEnum.TEXT:
         return RegexParser.parse

@@ -18,27 +18,29 @@ from sqlalchemy import select, and_, or_, null
 from app.core.handler.logger import PikaLogger
 from app.crud import PikaMapper
 from app.crud.project.project import ProjectDao
-from app.enums.operation import SqlOperationTypeEnum
+from app.enums.OperationEnum import SqlOperationTypeEnum
 from app.models import async_session, DatabaseHelper
-from app.models.test_plan import PikaTestPlan
-from app.models.test_report import PikaTestReport
-from app.models.testplan_follow_user import PikaTestPlanFollowUserRel
-from app.schema.test_plan import PikaTestPlanForm
+from app.models.api_test_report import ApiTestReportModel
+from app.models.api_testplan import ApiTestPlanModel
+from app.models.testplan_follow_user import ApiTestPlanFollowUserRelModel
+from app.schema.api_testplan import ApiTestPlanForm
 from app.utils.decorator import dao
 
 
-@dao(PikaTestPlan, PikaLogger("PikaTestPlanDao"))
-class PikaTestPlanDao(PikaMapper):
+@dao(ApiTestPlanModel, PikaLogger("ApiTestPlanDao"))
+class ApiTestPlanDao(PikaMapper):
 
     @staticmethod
-    async def list_test_plan(page: int, size: int, project_id: int = None, name: str = '', priority: str = '',
+    async def list_test_plan(page: int, size: int, project_id: int = None, name: str = '',
+                             priority: str = '',
                              role: str = None, operator: int = None,
                              emp_no: int = None, follow: bool = None):
         try:
             async with async_session() as session:
-                conditions = [PikaTestPlan.is_delete == 0]
+                conditions = [ApiTestPlanModel.is_delete == 0]
                 if project_id:
-                    DatabaseHelper.where(project_id, PikaTestPlan.project_id == project_id, conditions)
+                    DatabaseHelper.where(project_id, ApiTestPlanModel.project_id == project_id,
+                                         conditions)
                 else:
                     # 找出用户能看到的项目
                     projects = await ProjectDao.list_project_id_by_user(session, operator, role)
@@ -46,64 +48,68 @@ class PikaTestPlanDao(PikaMapper):
                         # 说明用户一个项目都没有，不需要继续查询了
                         return [], 0
                     if len(projects) > 0:
-                        DatabaseHelper.where(projects, PikaTestPlan.project_id.in_(projects), conditions)
-                DatabaseHelper.where(name, PikaTestPlan.name.like(f"%{name}%"), conditions) \
-                    .where(priority, PikaTestPlan.priority == priority, conditions) \
-                    .where(operator, PikaTestPlan.operator == operator, conditions)
+                        DatabaseHelper.where(projects, ApiTestPlanModel.project_id.in_(projects),
+                                             conditions)
+                DatabaseHelper.where(name, ApiTestPlanModel.name.like(f"%{name}%"), conditions) \
+                    .where(priority, ApiTestPlanModel.priority == priority, conditions) \
+                    .where(operator, ApiTestPlanModel.operator == operator, conditions)
                 if follow is None:
-                    sql = select(PikaTestPlan, PikaTestPlanFollowUserRel.id) \
-                        .outerjoin(PikaTestPlanFollowUserRel,
+                    sql = select(ApiTestPlanModel, ApiTestPlanFollowUserRelModel.id) \
+                        .outerjoin(ApiTestPlanFollowUserRelModel,
                                    and_(
-                                       PikaTestPlanFollowUserRel.operator == operator,
-                                       PikaTestPlanFollowUserRel.is_delete == 0,
-                                       PikaTestPlanFollowUserRel.plan_id == PikaTestPlan.id)) \
+                                       ApiTestPlanFollowUserRelModel.operator == operator,
+                                       ApiTestPlanFollowUserRelModel.is_delete == 0,
+                                       ApiTestPlanFollowUserRelModel.plan_id == ApiTestPlanModel.id)) \
                         .where(*conditions)
                 elif follow:
-                    sql = select(PikaTestPlan, PikaTestPlanFollowUserRel.id) \
-                        .outerjoin(PikaTestPlanFollowUserRel,
-                                   PikaTestPlanFollowUserRel.plan_id == PikaTestPlan.id,
+                    sql = select(ApiTestPlanModel, ApiTestPlanFollowUserRelModel.id) \
+                        .outerjoin(ApiTestPlanFollowUserRelModel,
+                                   ApiTestPlanFollowUserRelModel.plan_id == ApiTestPlanModel.id,
                                    ).where(
-                        *conditions, PikaTestPlanFollowUserRel.operator == operator,
-                                     PikaTestPlanFollowUserRel.is_delete == 0)
+                        *conditions, ApiTestPlanFollowUserRelModel.operator == operator,
+                                     ApiTestPlanFollowUserRelModel.is_delete == 0)
                 else:
-                    sql = select(PikaTestPlan, null().label('null_bar')) \
-                        .outerjoin(PikaTestPlanFollowUserRel,
-                                   PikaTestPlanFollowUserRel.plan_id == PikaTestPlan.id).where(
-                        *conditions, or_(PikaTestPlanFollowUserRel.id == None,
-                                         PikaTestPlanFollowUserRel.delete_date != 0))
+                    sql = select(ApiTestPlanModel, null().label('null_bar')) \
+                        .outerjoin(ApiTestPlanFollowUserRelModel,
+                                   ApiTestPlanFollowUserRelModel.plan_id == ApiTestPlanModel.id).where(
+                        *conditions, or_(ApiTestPlanFollowUserRelModel.id is None,
+                                         ApiTestPlanFollowUserRelModel.delete_date != 0))
                 result, total = await DatabaseHelper.pagination(page, size, session, sql, False)
                 return result, total
         except Exception as e:
-            PikaTestPlanDao.log.error(f"获取测试计划失败: {str(e)}")
+            ApiTestPlanDao.log.error(f"获取测试计划失败: {str(e)}")
             raise Exception(f"获取测试计划失败: {str(e)}")
 
     @staticmethod
-    async def insert_test_plan(plan: PikaTestPlanForm, user: int) -> PikaTestPlan:
+    async def insert_test_plan(plan: ApiTestPlanForm, operator: int) -> ApiTestPlanModel:
         try:
             async with async_session() as session:
                 async with session.begin():
-                    query = await session.execute(select(PikaTestPlan).where(PikaTestPlan.project_id == plan.project_id,
-                                                                             PikaTestPlan.name == plan.name,
-                                                                             PikaTestPlan.is_delete == 0))
+                    query = await session.execute(
+                        select(ApiTestPlanModel).where(
+                            ApiTestPlanModel.project_id == plan.project_id,
+                            ApiTestPlanModel.name == plan.name,
+                            ApiTestPlanModel.is_delete == 0))
                     if query.scalars().first() is not None:
                         raise Exception("测试计划已存在")
-                    test_plan = PikaTestPlan(**plan.dict(), user=user)
+                    test_plan = ApiTestPlanModel(**plan.dict(), operator=operator)
                     session.add(test_plan)
                     await session.flush()
                     await session.refresh(test_plan)
                     session.expunge(test_plan)
                     return test_plan
         except Exception as e:
-            PikaTestPlanDao.log.error(f"新增测试计划失败: {str(e)}")
+            ApiTestPlanDao.log.error(f"新增测试计划失败: {str(e)}")
             raise Exception(f"添加失败: {str(e)}")
 
     @classmethod
-    async def update_test_plan(cls, plan: PikaTestPlanForm, user: int, log=False):
+    async def update_test_plan(cls, plan: ApiTestPlanForm, user: int, log=False):
         try:
             async with async_session() as session:
                 async with session.begin():
                     query = await session.execute(
-                        select(PikaTestPlan).where(PikaTestPlan.id == plan.id, PikaTestPlan.is_delete == 0))
+                        select(ApiTestPlanModel).where(ApiTestPlanModel.id == plan.id,
+                                                       ApiTestPlanModel.is_delete == 0))
                     data = query.scalars().first()
                     if data is None:
                         raise Exception("测试计划不存在")
@@ -118,11 +124,12 @@ class PikaTestPlanDao(PikaMapper):
                 if log:
                     async with session.begin():
                         await asyncio.create_task(
-                            cls.insert_log(session, user, SqlOperationTypeEnum.ONLY_UPDATE, data, old, plan.id,
+                            cls.insert_log(session, user, SqlOperationTypeEnum.ONLY_UPDATE, data,
+                                           old, plan.id,
                                            changed))
         except Exception as e:
-            PikaTestPlanDao.log.exception(f"编辑测试计划失败: {str(e)}")
-            PikaTestPlanDao.log.error(f"编辑测试计划失败: {str(e)}")
+            ApiTestPlanDao.log.exception(f"编辑测试计划失败: {str(e)}")
+            ApiTestPlanDao.log.error(f"编辑测试计划失败: {str(e)}")
             raise Exception(f"编辑失败: {str(e)}")
 
     @staticmethod
@@ -131,7 +138,8 @@ class PikaTestPlanDao(PikaMapper):
             async with async_session() as session:
                 async with session.begin():
                     query = await session.execute(
-                        select(PikaTestPlan).where(PikaTestPlan.id == id, PikaTestPlan.is_delete == 0))
+                        select(ApiTestPlanModel).where(ApiTestPlanModel.id == id,
+                                                       ApiTestPlanModel.is_delete == 0))
                     data = query.scalars().first()
                     if data is None:
                         raise Exception("测试计划不存在")
@@ -140,18 +148,19 @@ class PikaTestPlanDao(PikaMapper):
                     # session.expunge(data)
                     # return data
         except Exception as e:
-            PikaTestPlanDao.log.error(f"编辑测试计划失败: {str(e)}")
+            ApiTestPlanDao.log.error(f"编辑测试计划失败: {str(e)}")
             raise Exception(f"编辑失败: {str(e)}")
 
     @staticmethod
-    async def query_test_plan(id: int) -> PikaTestPlan:
+    async def query_test_plan(id: int) -> ApiTestPlanModel:
         try:
             async with async_session() as session:
-                sql = select(PikaTestPlan).where(PikaTestPlan.is_delete == 0, PikaTestPlan.id == id)
+                sql = select(ApiTestPlanModel).where(ApiTestPlanModel.is_delete == 0,
+                                                     ApiTestPlanModel.id == id)
                 data = await session.execute(sql)
                 return data.scalars().first()
         except Exception as e:
-            PikaTestPlanDao.log.error(f"获取测试计划失败: {str(e)}")
+            ApiTestPlanDao.log.error(f"获取测试计划失败: {str(e)}")
             raise Exception(f"获取测试计划失败: {str(e)}")
 
     # @staticmethod
@@ -160,48 +169,56 @@ class PikaTestPlanDao(PikaMapper):
     #         async with async_session() as session:
     #             async with session.begin():
     #                 query = await session.execute(
-    #                     select(PikaTestPlan).where(PikaTestPlan.id == id, PikaTestPlan.is_delete == 0))
+    #                     select(ApiTestPlanModel).where(ApiTestPlanModel.id == id, ApiTestPlanModel.is_delete == 0))
     #                 data = query.scalars().first()
     #                 if data is None:
     #                     raise Exception("测试计划不存在")
     #                 DatabaseHelper.delete_model(data, user)
     #     except Exception as e:
-    #         PikaTestPlanDao.log.error(f"删除测试计划失败: {str(e)}")
+    #         ApiTestPlanDao.log.error(f"删除测试计划失败: {str(e)}")
     #         raise Exception(f"删除失败: {str(e)}")
 
     @staticmethod
     async def follow_test_plan(plan_id: int, operator: int):
         """
         关注测试计划
-        :param plan_id:
-        :param operator:
-        :return:
+        Args:
+            plan_id:
+            operator:
+
+        Returns:
+
         """
         async with async_session() as session:
             async with session.begin():
-                sql = select(PikaTestPlanFollowUserRel).where(PikaTestPlanFollowUserRel.is_delete == 0,
-                                                              PikaTestPlanFollowUserRel.plan_id == plan_id,
-                                                              PikaTestPlanFollowUserRel.operator == operator)
+                sql = select(ApiTestPlanFollowUserRelModel).where(
+                    ApiTestPlanFollowUserRelModel.is_delete == 0,
+                    ApiTestPlanFollowUserRelModel.plan_id == plan_id,
+                    ApiTestPlanFollowUserRelModel.operator == operator)
                 data = await session.execute(sql)
                 ans = data.scalars().first()
                 if ans is not None:
                     raise Exception("已关注过此测试计划")
-                model = PikaTestPlanFollowUserRel(plan_id, operator, operator)
+                model = ApiTestPlanFollowUserRelModel(plan_id, operator, operator)
                 session.add(model)
 
     @staticmethod
     async def unfollow_test_plan(plan_id: int, operator: int):
         """
         取关测试计划
-        :param plan_id:
-        :param operator:
-        :return:
+        Args:
+            plan_id:
+            operator:
+
+        Returns:
+
         """
         async with async_session() as session:
             async with session.begin():
-                sql = select(PikaTestPlanFollowUserRel).where(PikaTestPlanFollowUserRel.is_delete == 0,
-                                                              PikaTestPlanFollowUserRel.plan_id == plan_id,
-                                                              PikaTestPlanFollowUserRel.operator == operator)
+                sql = select(ApiTestPlanFollowUserRelModel).where(
+                    ApiTestPlanFollowUserRelModel.is_delete == 0,
+                    ApiTestPlanFollowUserRelModel.plan_id == plan_id,
+                    ApiTestPlanFollowUserRelModel.operator == operator)
                 data = await session.execute(sql)
                 ans = data.scalars().first()
                 if ans is None:
@@ -212,24 +229,28 @@ class PikaTestPlanDao(PikaMapper):
     async def query_user_follow_test_plan(operator: int):
         """
         根据用户id查询出用户关注的测试计划执行数据
-        :param operator:
-        :return:
+        Args:
+            operator:
+
+        Returns:
+
         """
         ans = []
         async with async_session() as session:
             # 找到最近7次通过率
-            sql = select(PikaTestPlan, PikaTestPlanFollowUserRel.id) \
-                .outerjoin(PikaTestPlanFollowUserRel,
-                           PikaTestPlanFollowUserRel.plan_id == PikaTestPlan.id,
+            sql = select(ApiTestPlanModel, ApiTestPlanFollowUserRelModel.id) \
+                .outerjoin(ApiTestPlanFollowUserRelModel,
+                           ApiTestPlanFollowUserRelModel.plan_id == ApiTestPlanModel.id,
                            ).where(
-                PikaTestPlanFollowUserRel.emp_no == operator,
-                PikaTestPlanFollowUserRel.is_delete == 0,
-                PikaTestPlan.is_delete == 0)
+                ApiTestPlanFollowUserRelModel.emp_no == operator,
+                ApiTestPlanFollowUserRelModel.is_delete == 0,
+                ApiTestPlanModel.is_delete == 0)
             data = await session.execute(sql)
             for d in data.scalars().all():
                 reports = list()
-                query = await session.execute(select(PikaTestReport).where(PikaTestReport.plan_id == d.id).order_by(
-                    PikaTestReport.start_at.desc()).limit(7))
+                query = await session.execute(
+                    select(ApiTestReportModel).where(ApiTestReportModel.plan_id == d.id).order_by(
+                        ApiTestReportModel.start_at.desc()).limit(7))
                 for report in query.scalars().all():
                     reports.append(report)
                 ans.append({

@@ -115,7 +115,6 @@ class PikaResponse:
             data: Union[list, dict, str] = None,
             total: Union[list, dict, str] = None,
             message: str = "Success",
-            x_cookies=None,
     ) -> Response:
         """
         响应成功 应用列表
@@ -125,7 +124,6 @@ class PikaResponse:
             data:
             total:
             message:
-            x_cookies:
 
         Returns:
 
@@ -195,7 +193,8 @@ class PikaResponse:
 
     @staticmethod
     def file(filepath, filename):
-        return FileResponse(filepath, filename=filename, background=BackgroundTask(lambda: os.remove(filepath)))
+        return FileResponse(filepath, filename=filename,
+                            background=BackgroundTask(lambda: os.remove(filepath)))
 
     @staticmethod
     def forbidden():

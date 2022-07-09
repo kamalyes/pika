@@ -16,8 +16,8 @@ from fastapi import Body, Header
 from fastapi.params import Form, Query
 from pydantic import BaseModel
 
-from app.enums.bytesize import ByteSizeEnum
-from app.enums.gebruikersrol import RoleEnum
+from app.enums.ByteSizeEnum import ByteSizeEnum
+from app.enums.RbacEnum import RoleEnum
 from app.schema.base import PikaQueryModel, PikaQueryTypeModel, PikaDeleteModel
 
 
@@ -59,7 +59,8 @@ class RegisterModel(BaseModel):
     avatar: Optional[str] = Body(None, title="头像", max_length=ByteSizeEnum.LENGTH_255)
     gender: Optional[int] = Body(None, title="性别")
     location: Optional[str] = Body(None, title="所在城市")
-    identity: Optional[str] = Body(RoleEnum.ORDINARY.value, title="用户身份", max_length=ByteSizeEnum.LENGTH_255)
+    identity: Optional[str] = Body(RoleEnum.ORDINARY.value, title="用户身份",
+                                   max_length=ByteSizeEnum.LENGTH_255)
 
 
 class AddUserModel(RegisterModel):
@@ -72,7 +73,8 @@ class OAuth2LoginModel:
 
     def __init__(
             self,
-            dynamic_code: Optional[str] = Form(None, title="动态码", max_length=ByteSizeEnum.LENGTH_06),
+            dynamic_code: Optional[str] = Form(None, title="动态码",
+                                               max_length=ByteSizeEnum.LENGTH_06),
             grant_type: Optional[str] = Form(..., title="授权方式, account：用户名/员工编号、email：邮箱验证码",
                                              max_length=ByteSizeEnum.LENGTH_255),
             username: Optional[str] = Form(None, title="用户名", max_length=ByteSizeEnum.LENGTH_16),
@@ -100,6 +102,7 @@ class QueryUserInModel(PikaQueryModel, PikaQueryTypeModel):
     emp_no: Optional[str] = Query(None, title="用户编码")
     email: Optional[str] = Query(None, title="邮箱地址")
     mobile: Optional[str] = Query(None, title="手机号码")
+
     # identity: Optional[str] = Query(None, title="用户身份")
 
     class Config:
@@ -119,7 +122,8 @@ class QueryUserOutModel(PikaQueryModel):
 
 
 class SendAuthCodeModel:
-    def __init__(self, dynamic_code: Optional[str] = Form(None, title="动态验证码", max_length=ByteSizeEnum.LENGTH_06)):
+    def __init__(self, dynamic_code: Optional[str] = Form(None, title="动态验证码",
+                                                          max_length=ByteSizeEnum.LENGTH_06)):
         self.dynamic_code = dynamic_code
 
 

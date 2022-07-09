@@ -9,7 +9,6 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from app.service.itst.apitest import router as aiptest_router
-from app.service.itst.functest import router as functest_router
-from app.service.itst.testcase import router as testcase_router
-from app.service.itst.testplan import router as testplan_router
+from app.service.itst.api.functest import router as functest_router
+from app.service.itst.api.testcase import router as testcase_router
+from app.service.itst.api.testplan import router as testplan_router

@@ -20,6 +20,7 @@ class PyScriptForm(BaseModel):
     command: Optional[str]
     value: Optional[str]
 
+    # noinspection PyMethodParameters
     @validator("command")
     def name_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)

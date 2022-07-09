@@ -13,13 +13,15 @@ import logging
 import os
 import sys
 import time
-from hutools.core import DataHand, System
-from loguru import logger
-from loguru._defaults import LOGURU_FORMAT
 from pprint import pformat
 from urllib import parse
 
-from app.enums.sysvar import PikaGlobalVarEnum
+from hutools.core import DataHand, System
+from loguru import logger
+# noinspection PyProtectedMember
+from loguru._defaults import LOGURU_FORMAT
+
+from app.enums.SysvarEnum import PikaGlobalVarEnum
 
 
 class PikaAppConfig(object):

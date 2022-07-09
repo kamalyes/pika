@@ -11,10 +11,10 @@
 """
 from app.core.request.convertor import Convertor
 from app.core.request.har_convertor import HarConvertor
-from app.enums.ConvertorEnum import CaseConvertorType
+from app.enums.ConvertorEnum import CaseConvertorTypeEnum
 
 
-def get_convertor(c: CaseConvertorType) -> (Convertor.convert, str):
-    if c == CaseConvertorType.har:
-        return HarConvertor.convert, CaseConvertorType.har.name
+def get_convertor(c: CaseConvertorTypeEnum) -> (Convertor.convert, str):
+    if c == CaseConvertorTypeEnum.har:
+        return HarConvertor.convert, CaseConvertorTypeEnum.har.name
     return None, ""

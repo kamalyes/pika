@@ -10,13 +10,12 @@
 @Desc    :  None
 """
 import json
-import time
 
 import aiohttp
 from aiohttp import FormData
 from hutools.time import Moment
 
-from app.enums.RequestBodyEnum import BodyType
+from app.enums.RequestBodyEnum import ReqBodyTypeEnum
 from app.middleware.oss import OssClient
 from config import PikaAppConfig
 
@@ -57,18 +56,20 @@ class AsyncRequest(object):
 
     async def download(self):
         async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar(unsafe=True)) as session:
-            async with session.request("GET", self.url, timeout=self.timeout, proxy=self.proxy, ssl=False,
+            async with session.request("GET", self.url, timeout=self.timeout, proxy=self.proxy,
+                                       ssl=False,
                                        **self.kwargs) as resp:
                 if resp.status != 200:
                     raise Exception("download file failed")
                 return await resp.content.read()
 
     @staticmethod
-    async def client(url: str, body_type: BodyType = BodyType.json, timeout=15, **kwargs):
+    async def client(url: str, body_type: ReqBodyTypeEnum = ReqBodyTypeEnum.json, timeout=15,
+                     **kwargs):
         if not url.startswith(("http://", "https://")):
             raise Exception("请输入正确的url, 记得带上http哦")
         headers = kwargs.get("headers", {})
-        if body_type == BodyType.json:
+        if body_type == ReqBodyTypeEnum.json:
             if "Content-Type" not in headers:
                 headers['Content-Type'] = "application/json; charset=UTF-8"
             # 新增json校验，修复史诗级bug: json被额外序列化
@@ -80,7 +81,7 @@ class AsyncRequest(object):
                 raise Exception(f"json格式不正确: {e}")
             r = AsyncRequest(url, headers=headers, timeout=timeout,
                              json=body)
-        elif body_type == BodyType.form:
+        elif body_type == ReqBodyTypeEnum.form:
             try:
                 body = kwargs.get("body")
                 form_data = None
@@ -99,7 +100,7 @@ class AsyncRequest(object):
                 r = AsyncRequest(url, headers=headers, data=form_data, timeout=timeout)
             except Exception as e:
                 raise Exception(f"解析form-data失败: {str(e)}")
-        elif body_type == BodyType.x_form:
+        elif body_type == ReqBodyTypeEnum.x_form:
             body = kwargs.get("body", "{}")
             body = json.loads(body)
             r = AsyncRequest(url, headers=headers, data=body, timeout=timeout)
@@ -135,19 +136,24 @@ class AsyncRequest(object):
                       request_headers=None, cookies=None, elapsed=None, msg="success", **kwargs):
         """
         收集http返回数据
-        :param status: 请求状态
-        :param request_data: 请求入参
-        :param status_code: 状态码
-        :param response: 相应
-        :param response_headers: 返回header
-        :param request_headers:  请求header
-        :param cookies:  cookie
-        :param elapsed: 耗时
-        :param msg: 报错信息
-        :return:
+        Args:
+            status: 请求状态
+            request_data: 请求入参
+            status_code: 状态码
+            response: 相应
+            response_headers: 返回header
+            request_headers:  请求header
+            cookies:  cookie
+            elapsed: 耗时
+            msg: 报错信息
+            **kwargs:
+
+        Returns:
+
         """
-        request_headers = json.dumps({k: v for k, v in request_headers.items()} if request_headers is not None else {},
-                                     ensure_ascii=False)
+        request_headers = json.dumps(
+            {k: v for k, v in request_headers.items()} if request_headers is not None else {},
+            ensure_ascii=False)
         response_headers = json.dumps(
             {k: v for k, v in response_headers.items()} if response_headers is not None else {},
             ensure_ascii=False)

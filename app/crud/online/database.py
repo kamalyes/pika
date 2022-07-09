@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python 3.9.11
 """
-@File    :  database.py
+@File    :  DatabaseEnum.py
 @Time    :  2022/6/18 2:27 AM
 @Author  :  YuYanQing
 @Version :  1.0
@@ -22,7 +22,7 @@ from app.core.handler.logger import PikaLogger
 from app.crud.online.environment import EnvironmentDao
 from app.middleware.xredis import RedisHelper
 from app.models import async_session, DatabaseHelper, db_helper
-from app.models.database import PikaDatabase
+from app.models.database import DatabaseModel
 from app.schema.database import DatabaseForm
 
 
@@ -42,14 +42,14 @@ class DbConfigDao(object):
         """
         try:
             async with async_session() as session:
-                query = [PikaDatabase.is_delete == 0]
+                query = [DatabaseModel.is_delete == 0]
                 if name:
-                    query.append(PikaDatabase.name.like(f'%{name}%'))
+                    query.append(DatabaseModel.name.like(f'%{name}%'))
                 if database:
-                    query.append(PikaDatabase.database.like(f"%{database}%"))
+                    query.append(DatabaseModel.database.like(f"%{database}%"))
                 if env is not None:
-                    query.append(PikaDatabase.env == env)
-                result = await session.execute(select(PikaDatabase).where(*query))
+                    query.append(DatabaseModel.env == env)
+                result = await session.execute(select(DatabaseModel).where(*query))
                 return result.scalars().all()
         except Exception as e:
             DbConfigDao.log.error(f"获取数据库配置失败, error: {e}")
@@ -61,12 +61,13 @@ class DbConfigDao(object):
             async with async_session() as session:
                 async with session.begin():
                     result = await session.execute(
-                        select(PikaDatabase).where(PikaDatabase.name == data.name, PikaDatabase.is_delete == 0,
-                                                   PikaDatabase.env == data.env))
+                        select(DatabaseModel).where(DatabaseModel.name == data.name,
+                                                    DatabaseModel.is_delete == 0,
+                                                    DatabaseModel.env == data.env))
                     query = result.scalars().first()
                     if query is not None:
                         raise Exception("数据库配置已存在")
-                    session.add(PikaDatabase(**data.dict(), operator=operator))
+                    session.add(DatabaseModel(**data.dict(), operator=operator))
         except Exception as e:
             DbConfigDao.log.error(f"新增数据库配置: {data.name}失败, {e}")
             raise Exception("新增数据库配置失败")
@@ -76,11 +77,13 @@ class DbConfigDao(object):
         try:
             async with async_session() as session:
                 async with session.begin():
-                    result = await session.execute(select(PikaDatabase).where(data.id == PikaDatabase.id))
+                    result = await session.execute(
+                        select(DatabaseModel).where(data.id == DatabaseModel.id))
                     query = result.scalars().first()
                     if query is None:
                         raise Exception("数据库配置不存在")
-                    db_helper.remove_connection(query.host, query.port, query.username, query.password, query.database)
+                    db_helper.remove_connection(query.host, query.port, query.username,
+                                                query.password, query.database)
                     DatabaseHelper.update_model(query, data, operator)
         except Exception as e:
             DbConfigDao.log.error(f"编辑数据库配置: {data.name}失败, {e}")
@@ -92,7 +95,8 @@ class DbConfigDao(object):
             async with async_session() as session:
                 async with session.begin():
                     result = await session.execute(
-                        select(PikaDatabase).where(id == PikaDatabase.id, PikaDatabase.is_delete == 0))
+                        select(DatabaseModel).where(id == DatabaseModel.id,
+                                                    DatabaseModel.is_delete == 0))
                     query = result.scalars().first()
                     if query is None:
                         raise Exception("数据库配置不存在或已删除")
@@ -107,7 +111,8 @@ class DbConfigDao(object):
         try:
             async with async_session() as session:
                 result = await session.execute(
-                    select(PikaDatabase).where(PikaDatabase.id == id, PikaDatabase.is_delete == 0))
+                    select(DatabaseModel).where(DatabaseModel.id == id,
+                                                DatabaseModel.is_delete == 0))
                 return result.scalars().first()
         except Exception as e:
             DbConfigDao.log.error(f"获取数据库配置失败, error: {e}")
@@ -118,8 +123,9 @@ class DbConfigDao(object):
         try:
             async with async_session() as session:
                 result = await session.execute(
-                    select(PikaDatabase).where(PikaDatabase.env == env, PikaDatabase.name == name,
-                                               PikaDatabase.is_delete == 0))
+                    select(DatabaseModel).where(DatabaseModel.env == env,
+                                                DatabaseModel.name == name,
+                                                DatabaseModel.is_delete == 0))
                 return result.scalars().first()
         except Exception as e:
             DbConfigDao.log.error(f"获取数据库配置失败, error: {e}")
@@ -142,7 +148,8 @@ class DbConfigDao(object):
             # 获取数据库相关的信息
             table_map = defaultdict(set)
             async with async_session() as session:
-                query = await session.execute(select(PikaDatabase).where(PikaDatabase.is_delete == 0))
+                query = await session.execute(
+                    select(DatabaseModel).where(DatabaseModel.is_delete == 0))
                 data = query.scalars().all()
                 for d in data:
                     name = env_map[d.env]
@@ -158,15 +165,17 @@ class DbConfigDao(object):
             raise Exception(f"获取数据库配置详情失败: {err}")
 
     @staticmethod
-    async def get_tables(table_map: dict, data: PikaDatabase, children: List):
-        conn = await db_helper.get_connection(data.sql_type, data.host, data.port, data.username, data.password,
+    async def get_tables(table_map: dict, data: DatabaseModel, children: List):
+        conn = await db_helper.get_connection(data.sql_type, data.host, data.port, data.username,
+                                              data.password,
                                               data.database)
         database_child = list()
         dbs = dict(title=f"{data.database}（{data.host}:{data.port}）", key=f"database_{data.id}",
                    children=database_child, sql_type=data.sql_type)
         eng = conn.get('engine')
         async with eng.connect() as conn:
-            await conn.run_sync(DbConfigDao.load_table, table_map, data, database_child, children, dbs)
+            await conn.run_sync(DbConfigDao.load_table, table_map, data, database_child, children,
+                                dbs)
 
     @staticmethod
     def load_table(conn, table_map, data, database_child, children, dbs):
@@ -205,7 +214,8 @@ class DbConfigDao(object):
             query = await DbConfigDao.query_database(id)
             if query is None:
                 raise Exception("未找到对应的数据库配置")
-            data = await db_helper.get_connection(query.sql_type, query.host, query.port, query.username,
+            data = await db_helper.get_connection(query.sql_type, query.host, query.port,
+                                                  query.username,
                                                   query.password, query.database)
             return await DbConfigDao.execute(data, sql)
         except Exception as e:
@@ -236,7 +246,8 @@ class DbConfigDao(object):
             query = await DbConfigDao.query_database_by_env_and_name(env, name)
             if query is None:
                 raise Exception("未找到对应的数据库配置")
-            data = await db_helper.get_connection(query.sql_type, query.host, query.port, query.username,
+            data = await db_helper.get_connection(query.sql_type, query.host, query.port,
+                                                  query.username,
                                                   query.password,
                                                   query.database)
             result = await DbConfigDao.execute(data, sql)

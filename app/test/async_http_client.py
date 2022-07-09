@@ -19,6 +19,7 @@ import requests
 url = "https://www.baidu.com"
 
 
+# noinspection PyPep8Naming
 async def fetchBaidu():
     async with aiohttp.ClientSession() as session:
         resp = await session.get(url)

@@ -1,10 +1,12 @@
+from abc import ABC
+
 from sqlalchemy.orm import Mapper
 
 from app.core.handler.logger import PikaLogger
-from app.models.minioss import PikaOssFile
+from app.models.minioss import OssFileModel
 from app.utils.decorator import dao
 
 
-@dao(PikaOssFile, PikaLogger("PikaOssDao"))
-class PikaOssDao(Mapper):
+@dao(OssFileModel, PikaLogger("PikaOssDao"))
+class PikaOssDao(Mapper, ABC):
     pass

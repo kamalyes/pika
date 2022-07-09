@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python 3.9.11
 """
-@File    :  redis
+@File    :  redis.py
 @Time    :  2022/6/20 11:16 PM
 @Author  :  YuYanQing
 @Version :  1.0

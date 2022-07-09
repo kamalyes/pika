@@ -6,39 +6,39 @@ from collections import defaultdict
 from datetime import datetime
 from typing import List, Any
 
-from app.core.constructor.case_constructor import TestcaseConstructor
+from app.core.constructor.case_constructor import TestCaseConstructor
 from app.core.constructor.http_constructor import HttpConstructor
 from app.core.constructor.python_constructor import PythonConstructor
 from app.core.constructor.redis_constructor import RedisConstructor
 from app.core.constructor.sql_constructor import SqlConstructor
 from app.core.handler.logger import PikaLogger
 from app.core.notice.dingtalk import DingTalk
-from app.core.notice.email import EmailHander
+from app.core.notice.email import EmailManger
 from app.core.paramters import ParametersParser
-from app.crud.itst.testcase import TestCaseDao
-from app.crud.itst.testcase_assert import TestCaseAssertsDao
-from app.crud.itst.testcase_data import TestCaseDataDao
-from app.crud.itst.testcase_out_params import PikaTestCaseOutParametersDao
-from app.crud.itst.testreport import TestReportDao
-from app.crud.itst.testresult import TestResultDao
+from app.crud.itst.api.testcase import ApiTestCaseDao
+from app.crud.itst.api.testcase_assert import ApiTestCaseModelAssertsDao
+from app.crud.itst.api.testcase_data import ApiTestCaseDataDao
+from app.crud.itst.api.testcase_out_params import ApiTestCaseOutParametersDao
+from app.crud.itst.api.testreport import ApiTestReportDao
+from app.crud.itst.api.testresult import ApiTestResultDao
 from app.crud.online.environment import EnvironmentDao
-from app.crud.online.gateway import PikaGatewayDao
+from app.crud.online.gateway import GatewayDao
 from app.crud.online.gconfig import GConfigDao
 from app.crud.project.project import ProjectDao
-from app.crud.project.testplan import PikaTestPlanDao
+from app.crud.project.testplan import ApiTestPlanDao
 from app.crud.rbac.user import UserDao
-from app.enums.constructor import ConstructorTypeEnum
-from app.enums.gconfig import GConfigTypeEnum, GConfigParserEnum
-from app.enums.notification import NoticeTypeEnum
-from app.enums.sysvar import PikaGlobalVarEnum
-from app.enums.testcase import ReqBodyTypeEnum
+from app.enums.ConstructorEnum import ConstructorTypeEnum
+from app.enums.GconfigEnum import GConfigTypeEnum, GConfigParserEnum
+from app.enums.NoticeEnum import NoticeTypeEnum
+from app.enums.RequestBodyEnum import ReqBodyTypeEnum
+from app.enums.SysvarEnum import PikaGlobalVarEnum
 from app.middleware.async_ask import AsyncRequest
-from app.models.constructor import PikaConstructor
-from app.models.out_parameters import PikaTestCaseOutParameters
-from app.models.project import PikaProject
-from app.models.test_case import PikaTestCase
-from app.models.test_plan import PikaTestPlan
-from app.models.testcase_asserts import PikaTestCaseAsserts
+from app.models.api_test_case import ApiTestCaseModel
+from app.models.api_testcase_asserts import ApiTestCaseAssertsModel
+from app.models.api_testcase_out_parameters import ApiTestCaseOutParametersModel
+from app.models.api_testplan import ApiTestPlanModel
+from app.models.constructor import ConstructorModel
+from app.models.project import ProjectModel
 from app.utils.case_logger import CaseLog
 from app.utils.decorator import case_log, lock
 from app.utils.gconfig_parser import StringGConfigParser, JSONGConfigParser, YamlGConfigParser
@@ -67,9 +67,9 @@ class Executor(object):
         return self._logger
 
     @staticmethod
-    def get_constructor_type(c: PikaConstructor):
+    def get_constructor_type(c: ConstructorModel):
         if c.type == ConstructorTypeEnum.testcase:
-            return TestcaseConstructor
+            return TestCaseConstructor
         if c.type == ConstructorTypeEnum.sql:
             return SqlConstructor
         if c.type == ConstructorTypeEnum.redis:
@@ -123,7 +123,8 @@ class Executor(object):
                     new_value = parse(cf.value, v)
                     new_field = field_origin.replace("${%s}" % v, new_value)
                     setattr(data, field, new_field)
-                    self.append("替换全局变量成功, 字段: [{}]:\n\n[{}] -> [{}]\n".format(field, "${%s}" % v, new_value))
+                    self.append("替换全局变量成功, 字段: [{}]:\n\n[{}] -> [{}]\n".format(field, "${%s}" % v,
+                                                                               new_value))
                     field_origin = new_field
             self.append("获取{}字段: [{}]中的el表达式".format(name, field), True)
         except Exception as e:
@@ -165,7 +166,7 @@ class Executor(object):
             new_data["${%s}" % v] = new_value
         return new_data
 
-    async def parse_params(self, data: PikaTestCase, params: dict):
+    async def parse_params(self, data: ApiTestCaseModel, params: dict):
         self.append("正在替换变量")
         try:
             for c in data.__table__.columns:
@@ -182,10 +183,10 @@ class Executor(object):
     @case_log
     async def get_constructor(self, case_id):
         """获取构造数据"""
-        return await TestCaseDao.async_select_constructor(case_id)
+        return await ApiTestCaseDao.async_select_constructor(case_id)
 
     async def execute_constructors(self, env: int, path, case_info, params, req_params,
-                                   constructors: List[PikaConstructor],
+                                   constructors: List[ConstructorModel],
                                    asserts, suffix=False):
         """开始构造数据"""
         if len(constructors) == 0:
@@ -197,7 +198,8 @@ class Executor(object):
                 self.replace_args(params, case_info, constructors, asserts)
                 current += 1
 
-    async def execute_constructor(self, env, index, path, params, req_params, constructor: PikaConstructor):
+    async def execute_constructor(self, env, index, path, params, req_params,
+                                  constructor: ConstructorModel):
         if not constructor.enable:
             self.append(f"当前路径: {path}, 构造方法: {constructor.name} 已关闭, 不继续执行")
             return False
@@ -205,14 +207,18 @@ class Executor(object):
         if construct is None:
             self.append(f"构造方法类型: {constructor.type} 不合法, 请检查")
             return
-        await construct.run(self, env, index, path, params, req_params, constructor, executor_class=Executor)
+        await construct.run(self, env, index, path, params, req_params, constructor,
+                            executor_class=Executor)
 
     def add_header(self, case_info, headers):
         """
-        @ desperate
-        :param case_info:
-        :param headers:
-        :return:
+
+        Args:
+            case_info:
+            headers:
+
+        Returns:
+
         """
         if case_info.body_type == ReqBodyTypeEnum.none:
             return
@@ -221,7 +227,7 @@ class Executor(object):
                 headers['Content-Type'] = "application/json; charset=UTF-8"
 
     @case_log
-    def extract_out_parameters(self, response_info, data: List[PikaTestCaseOutParameters]):
+    def extract_out_parameters(self, response_info, data: List[ApiTestCaseOutParametersModel]):
         """提取出参数据"""
         result = dict()
         for d in data:
@@ -229,7 +235,8 @@ class Executor(object):
             result[d.name] = p(response_info, d.expression, d.match_index)
         return result
 
-    async def run(self, env: int, case_id: int, params_pool: dict = None, request_param: dict = None, path="主case"):
+    async def run(self, env: int, case_id: int, params_pool: dict = None,
+                  request_param: dict = None, path="主case"):
         """
         开始执行测试用例
         """
@@ -245,7 +252,7 @@ class Executor(object):
             req_params = dict()
 
         try:
-            case_info, err = await TestCaseDao.async_query_test_case(case_id)
+            case_info, err = await ApiTestCaseDao.async_query_test_case(case_id)
             if err:
                 return response_info, err
             response_info['case_id'] = case_info.id
@@ -266,10 +273,10 @@ class Executor(object):
                 await self.parse_gconfig(c, GConfigTypeEnum.constructor, env, "constructor_json")
 
             # Step4: 获取断言
-            asserts = await TestCaseAssertsDao.async_list_test_case_asserts(case_id)
+            asserts = await ApiTestCaseModelAssertsDao.async_list_test_case_asserts(case_id)
 
             # 获取出参信息
-            out_parameters = await PikaTestCaseOutParametersDao.list_record(case_id=case_id)
+            out_parameters = await ApiTestCaseOutParametersDao.list_record(case_id=case_id)
 
             for ast in asserts:
                 await self.parse_gconfig(ast, GConfigTypeEnum.asserts, env, "expected", "actually")
@@ -278,7 +285,8 @@ class Executor(object):
             self.replace_args(req_params, case_info, constructors, asserts)
 
             # Step6: 执行前置条件
-            await self.execute_constructors(env, path, case_info, case_params, req_params, constructors, asserts)
+            await self.execute_constructors(env, path, case_info, case_params, req_params,
+                                            constructors, asserts)
 
             # Step7: 批量改写主方法参数
             await self.parse_params(case_info, case_params)
@@ -295,13 +303,14 @@ class Executor(object):
 
             # Step9: 替换base_path
             if case_info.base_path:
-                base_path = await PikaGatewayDao.query_gateway(env, case_info.base_path)
+                base_path = await GatewayDao.query_gateway(env, case_info.base_path)
                 case_info.url = f"{base_path}{case_info.url}"
 
             response_info["url"] = case_info.url
 
             # Step9: 完成http请求
-            request_obj = await AsyncRequest.client(url=case_info.url, body_type=case_info.body_type, headers=headers,
+            request_obj = await AsyncRequest.client(url=case_info.url,
+                                                    body_type=case_info.body_type, headers=headers,
                                                     body=body)
             res = await request_obj.invoke(method)
             self.append(f"http请求过程\n\nRequest Method: {case_info.request_method}\n\n"
@@ -322,7 +331,8 @@ class Executor(object):
             self.replace_constructors(req_params, constructors)
 
             # Step10: 执行后置条件
-            await self.execute_constructors(env, path, case_info, case_params, req_params, constructors, asserts, True)
+            await self.execute_constructors(env, path, case_info, case_params, req_params,
+                                            constructors, asserts, True)
 
             # Step11: 断言
             asserts, ok = self.my_assert(asserts, response_info.get('json_format'))
@@ -355,28 +365,31 @@ class Executor(object):
                         fd = fd.replace(a, b)
                         setattr(cls, f, fd)
 
-    def replace_args(self, params, data: PikaTestCase, constructors: List[PikaConstructor], asserts: List[PikaTestCaseAsserts]):
+    def replace_args(self, params, data: ApiTestCaseModel, constructors: List[ConstructorModel],
+                     asserts: List[ApiTestCaseAssertsModel]):
         self.replace_testcase(params, data)
         self.replace_constructors(params, constructors)
         self.replace_asserts(params, asserts)
 
-    def replace_testcase(self, params: dict, data: PikaTestCase):
+    def replace_testcase(self, params: dict, data: ApiTestCaseModel):
         """替换测试用例中的参数"""
         self.replace_cls(params, data, "request_headers", "body", "url")
 
-    def replace_constructors(self, params: dict, constructors: List[PikaConstructor]):
+    def replace_constructors(self, params: dict, constructors: List[ConstructorModel]):
         """替换数据构造器中的参数"""
         for c in constructors:
             self.replace_cls(params, c, "constructor_json")
 
-    def replace_asserts(self, params, asserts: List[PikaTestCaseAsserts]):
+    def replace_asserts(self, params, asserts: List[ApiTestCaseAssertsModel]):
         """替换断言中的参数"""
         for a in asserts:
             self.replace_cls(params, a, "expected", "actually")
 
     @staticmethod
-    async def run_with_test_data(env, data, report_id, case_id, params_pool: dict = None, request_param: dict = None,
-                                 path='主case', name: str = "", data_id: int = None, retry_minutes: int = 0):
+    async def run_with_test_data(env, data, report_id, case_id, params_pool: dict = None,
+                                 request_param: dict = None,
+                                 path='主case', name: str = "", data_id: int = None,
+                                 retry_minutes: int = 0):
         retry_times = PikaAppConfig.RETRY_TIMES if retry_minutes > 0 else 0
         for i in range(retry_times + 1):
             start_at = datetime.now()
@@ -405,18 +418,20 @@ class Executor(object):
             cookies = result.get("cookies")
             req = json.dumps(request_param, ensure_ascii=False)
             data[case_id].append(status)
-            await TestResultDao.insert(report_id, case_id, case_name, status,
-                                       case_logs, start_at, finished_at,
-                                       url, body, request_method, request_headers, cost,
-                                       asserts, response_headers, response,
-                                       status_code, cookies, 0, req, name, data_id)
+            await ApiTestResultDao.insert(report_id, case_id, case_name, status,
+                                          case_logs, start_at, finished_at,
+                                          url, body, request_method, request_headers, cost,
+                                          asserts, response_headers, response,
+                                          status_code, cookies, 0, req, name, data_id)
             break
 
     @staticmethod
-    async def run_single(env: int, data, report_id, case_id, params_pool: dict = None, path="主case", retry_minutes=0):
-        test_data = await TestCaseDataDao.list_testcase_data_by_env(env, case_id)
+    async def run_single(env: int, data, report_id, case_id, params_pool: dict = None, path="主case",
+                         retry_minutes=0):
+        test_data = await ApiTestCaseDataDao.list_testcase_data_by_env(env, case_id)
         if not test_data:
-            await Executor.run_with_test_data(env, data, report_id, case_id, params_pool, dict(), path,
+            await Executor.run_with_test_data(env, data, report_id, case_id, params_pool, dict(),
+                                              path,
                                               "默认数据", retry_minutes=retry_minutes)
         else:
             await asyncio.gather(
@@ -548,6 +563,7 @@ class Executor(object):
             return False, f"预期结果: {exp} 文本不包含于 实际结果: {act}【✔】"
         return False, "不支持的断言方式💔"
 
+    # noinspection PyMethodMayBeStatic
     def get_el_expression(self, string: str):
         """获取字符串中的el表达式
         """
@@ -562,6 +578,7 @@ class Executor(object):
         """
         return json.loads(data)
 
+    # noinspection PyMethodMayBeStatic
     def replace_branch(self, branch: str, params: dict):
         if not params:
             return branch
@@ -611,39 +628,49 @@ class Executor(object):
         return json.dumps(result, ensure_ascii=False)
 
     @staticmethod
-    async def notice(env: list, plan: PikaTestPlan, project: PikaProject, report_dict: dict, users: list):
+    async def notice(env: list, plan: ApiTestPlanModel, project: ProjectModel, report_dict: dict,
+                     users: list):
         """
         消息通知方法
-        :param env:
-        :param plan:
-        :param project:
-        :param report_dict:
-        :param users:
-        :return:
+        Args:
+            env:
+            plan:
+            project:
+            report_dict:
+            users:
+
+        Returns:
+
         """
         for e in env:
             msg_types = plan.msg_type.split(",")
             if msg_types and users:
                 for m in msg_types:
                     if int(m) == NoticeTypeEnum.EMAIL:
-                        content = EmailHander.test_report_template(plan_name=plan.name, **report_dict[e])
-                        return EmailHander.send_email(
+                        content = EmailManger.test_report_template(plan_name=plan.name,
+                                                                   **report_dict[e])
+                        subject = f"【{report_dict[e].get('env')}】测试计划【{plan.name}】执行完毕（{report_dict[e].get('plan_result')}）"
+                        return EmailManger.send_email(
                             content=content,
-                            subject=f"【{report_dict[e].get('env')}】测试计划【{plan.name}】执行完毕（{report_dict[e].get('plan_result')}）",
+                            subject=subject,
                             addressee=[r.get("email") for r in users]
                         )
                     if int(m) == NoticeTypeEnum.DINGDING:
-                        report_dict[e]['result_color'] = '#67C23A' if report_dict[e]['plan_result'] == '通过' \
+                        report_dict[e]['result_color'] = '#67C23A' if report_dict[e][
+                                                                          'plan_result'] == '通过' \
                             else '#E6A23C'
                         # 批量获取用户手机号
                         users = [r.get("phone") for r in users]
-                        report_dict[e]['notification_user'] = " ".join(map(lambda x: f"@{x}", users))
-                        render_markdown = DingTalk.render_markdown(**report_dict[e], plan_name=plan.name)
+                        report_dict[e]['notification_user'] = " ".join(
+                            map(lambda x: f"@{x}", users))
+                        render_markdown = DingTalk.render_markdown(**report_dict[e],
+                                                                   plan_name=plan.name)
                         if not project.dingtalk_url:
                             Executor.log.debug("项目未配置钉钉通知机器人")
                             continue
                         ding = DingTalk(project.dingtalk_url)
-                        await ding.send_msg(f"{PikaGlobalVarEnum.APP_NAME_LOWER}测试报告", render_markdown, None, users)
+                        await ding.send_msg(f"{PikaGlobalVarEnum.APP_NAME_LOWER}测试报告",
+                                            render_markdown, None, users)
 
     @staticmethod
     @lock("test_plan")
@@ -657,13 +684,13 @@ class Executor(object):
         Returns:
 
         """
-        plan = await PikaTestPlanDao.query_test_plan(plan_id)
+        plan = await ApiTestPlanDao.query_test_plan(plan_id)
         if plan is None:
             Executor.log.debug(f"测试计划: [{plan_id}]不存在")
             return
         try:
             # 设置为running
-            await PikaTestPlanDao.update_test_plan_state(plan.id, 1)
+            await ApiTestPlanDao.update_test_plan_state(plan.id, 1)
             project, _ = await ProjectDao.query_project(plan.project_id)
             env = list(map(int, plan.env.split(",")))
             case_list = list(map(int, plan.case_list.split(",")))
@@ -671,9 +698,11 @@ class Executor(object):
             # 聚合报告dict
             report_dict = dict()
             await asyncio.gather(
-                *(Executor.run_multiple(executor, int(e), case_list, mode=1, retry_minutes=plan.retry_minutes,
-                                        plan_id=plan.id, ordered=plan.ordered, report_dict=report_dict) for e in env))
-            await PikaTestPlanDao.update_test_plan_state(plan.id, 0)
+                *(Executor.run_multiple(executor, int(e), case_list, mode=1,
+                                        retry_minutes=plan.retry_minutes,
+                                        plan_id=plan.id, ordered=plan.ordered,
+                                        report_dict=report_dict) for e in env))
+            await ApiTestPlanDao.update_test_plan_state(plan.id, 0)
             users = await UserDao.list_user_touch(*receiver)
             await Executor.notice(env, plan, project, report_dict, users)
             if executor != 0:
@@ -683,7 +712,8 @@ class Executor(object):
             Executor.log.error(f"执行测试计划: 【{plan.name}】失败: {str(e)}")
 
     @staticmethod
-    async def run_multiple(executor: int, env: int, case_list: List[int], mode=0, plan_id: int = None, ordered=False,
+    async def run_multiple(executor: int, env: int, case_list: List[int], mode=0,
+                           plan_id: int = None, ordered=False,
                            report_dict: dict = None, retry_minutes: int = 0):
         try:
             current_env = await EnvironmentDao.query_env(env)
@@ -695,20 +725,24 @@ class Executor(object):
                 name = "CPU"
             st = time.perf_counter()
             # step1: 新增测试报告数据
-            report_id = await TestReportDao.start(executor, env, mode, plan_id=plan_id)
+            report_id = await ApiTestReportDao.start(executor, env, mode, plan_id=plan_id)
             # step2: 开始执行用例
             result_data = defaultdict(list)
             # step3: 将报告改为 running状态
-            await TestReportDao.update(report_id, 1)
+            await ApiTestReportDao.update(report_id, 1)
             # step4: 执行用例并搜集数据
             if not ordered:
                 await asyncio.gather(
-                    *(Executor.run_single(env, result_data, report_id, c, retry_minutes=retry_minutes) for c in
-                      case_list))
+                    *(
+                        Executor.run_single(env, result_data, report_id, c,
+                                            retry_minutes=retry_minutes)
+                        for c in
+                        case_list))
             else:
                 # 顺序执行
                 for c in case_list:
-                    await Executor.run_single(env, result_data, report_id, c, retry_minutes=retry_minutes)
+                    await Executor.run_single(env, result_data, report_id, c,
+                                              retry_minutes=retry_minutes)
             ok, fail, skip, error = 0, 0, 0, 0
             for case_id, status in result_data.items():
                 for s in status:
@@ -723,7 +757,7 @@ class Executor(object):
             cost = time.perf_counter() - st
             cost = "%.2f" % cost
             # step5: 回写数据到报告
-            report = await TestReportDao.end(report_id, ok, fail, error, skip, 3, cost)
+            report = await ApiTestReportDao.end(report_id, ok, fail, error, skip, 3, cost)
             if report_dict is not None:
                 report_dict[env] = {
                     "report_url": f"{PikaAppConfig.SERVER_REPORT}{report_id}",

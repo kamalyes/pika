@@ -13,11 +13,11 @@ from datetime import datetime
 
 from sqlalchemy import Column, INT, DATETIME, BIGINT
 
-from app.enums.sysvar import PikaGlobalVarEnum
+from app.enums.SysvarEnum import PikaGlobalVarEnum
 from app.models import Base
 
 
-class PikaBroadcastReadUser(Base):
+class BroadcastReadUserModel(Base):
     __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_broadcast_read_user'
     id = Column(BIGINT, primary_key=True)
     notification_id = Column(INT, comment="对应消息id", index=True)

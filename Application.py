@@ -36,11 +36,10 @@ from app.core.handler.jsonres import PikaResponse
 from app.core.notice.wss_msg import WebSocketMessage
 from app.crud.system.notification import PikaNotificationDao
 from app.enums.MessageEnum import MessageTypeEnum, MessageStateEnum
-from app.enums.sysvar import PikaGlobalVarEnum
+from app.enums.SysvarEnum import PikaGlobalVarEnum
 from app.models import async_redis, async_create_table
 from app.service.ask import http_router
 from app.service.ask import mock_router
-from app.service.itst import functest_router
 from app.service.itst import testcase_router
 from app.service.itst import testplan_router
 from app.service.itstem import dbconfig_router
@@ -112,7 +111,8 @@ class PikaFastApi:
             Returns:
 
             """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code, detail=exc.detail)
+            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
+                                       detail=exc.detail)
 
         @app.exception_handler(AuthException)
         async def auth_exc_handler(request: Request, exc: AuthException) -> Response:
@@ -125,7 +125,8 @@ class PikaFastApi:
             Returns:
 
             """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code, detail=exc.detail)
+            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
+                                       detail=exc.detail)
 
         @app.exception_handler(RegisterException)
         async def register_exc_handler(request: Request, exc: RegisterException) -> Response:
@@ -138,7 +139,8 @@ class PikaFastApi:
             Returns:
 
             """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code, detail=exc.detail)
+            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
+                                       detail=exc.detail)
 
         @app.exception_handler(SystemException)
         async def sys_exc_handler(request: Request, exc: SystemException) -> Response:
@@ -151,7 +153,8 @@ class PikaFastApi:
             Returns:
 
             """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code, detail=exc.detail)
+            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
+                                       detail=exc.detail)
 
         @app.exception_handler(AccessException)
         async def access_exc_handler(request: Request, exc: AccessException) -> Response:
@@ -164,7 +167,8 @@ class PikaFastApi:
             Returns:
 
             """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code, detail=exc.detail)
+            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
+                                       detail=exc.detail)
 
         @app.exception_handler(OperationException)
         async def operation_exc_handler(request: Request, exc: OperationException) -> Response:
@@ -177,7 +181,8 @@ class PikaFastApi:
             Returns:
 
             """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code, detail=exc.detail)
+            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
+                                       detail=exc.detail)
 
         @app.exception_handler(DbExecuteException)
         async def db_execute_exc_handler(request: Request, exc: DbExecuteException) -> Response:
@@ -190,7 +195,8 @@ class PikaFastApi:
             Returns:
 
             """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code, detail=exc.detail)
+            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
+                                       detail=exc.detail)
 
         @app.exception_handler(RedisException)
         async def redis_execute_exc_handler(request: Request, exc: RedisException) -> Response:
@@ -203,7 +209,8 @@ class PikaFastApi:
             Returns:
 
             """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code, detail=exc.detail)
+            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
+                                       detail=exc.detail)
 
         @app.exception_handler(ThirdException)
         async def third_exc_handler(request: Request, exc: ThirdException) -> Response:
@@ -216,7 +223,8 @@ class PikaFastApi:
             Returns:
 
             """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code, detail=exc.detail)
+            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
+                                       detail=exc.detail)
 
         @app.exception_handler(RateLimitException)
         async def rate_limit_exc_handler(request: Request, exc: RateLimitException) -> Response:
@@ -229,7 +237,8 @@ class PikaFastApi:
             Returns:
 
             """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code, detail=exc.detail)
+            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
+                                       detail=exc.detail)
 
         @app.exception_handler(Exception)
         async def all_exc_handler(request: Request, exc: Exception) -> Response:
@@ -243,10 +252,13 @@ class PikaFastApi:
 
             """
             error_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-            return PikaResponse.custom(code=error_code, status_code=error_code, detail=traceback.format_exc())
+            return PikaResponse.custom(code=error_code, status_code=error_code,
+                                       detail=traceback.format_exc())
 
+    # noinspection PyShadowingNames
     @staticmethod
-    def create_app(app_name=None, origins=None, title=f"{PikaGlobalVarEnum.APP_NAME}测试平台", requirements=None):
+    def create_app(app_name=None, origins=None, title=f"{PikaGlobalVarEnum.APP_NAME}测试平台",
+                   requirements=None):
         """
         初始化app、配置路由及swagger
         Args:
@@ -341,9 +353,9 @@ class PikaFastApi:
         pika.include_router(testcase_router, prefix="/testcase", tags=["接口测试"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
-        pika.include_router(functest_router, prefix="/test", tags=["功能测试"],
-                            dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+        # pika.include_router(functest_router, prefix="/test", tags=["功能测试"],
+        #                     dependencies=[Depends(PikaFastApi.request_info),
+        #                                   Depends(RateLimiter(counts=20, minutes=1))])
         pika.include_router(mock_router, prefix="/ask", tags=["ask服务"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
@@ -395,7 +407,8 @@ async def init_database():
         await async_create_table()
         logger.bind(name=None).success("table created success.        ✔")
     except Exception as e:
-        logger.bind(name=None).error(f"table created failed, Please check config.py for database config.        ❌")
+        logger.bind(name=None).error(
+            f"table created failed, Please check config.py for database config.        ❌")
         raise e
 
 
@@ -409,7 +422,8 @@ async def init_redis():
         await Limiter.init(async_redis)
         logger.bind(name=None).success("redis connected success.        ✔")
     except Exception as e:
-        logger.bind(name=None).error(f"Redis connect failed, Please check config.py for redis config.        ❌")
+        logger.bind(name=None).error(
+            f"Redis connect failed, Please check config.py for redis config.        ❌")
         raise e
 
 
@@ -437,7 +451,8 @@ async def websocket_endpoint(websocket: WebSocket, emp_no: str):
         }
 
         # 存储连接后获取消息
-        msg_records = await PikaNotificationDao.list_messages(msg_type=MessageTypeEnum.all.value, receiver=emp_no,
+        msg_records = await PikaNotificationDao.list_messages(msg_type=MessageTypeEnum.all.value,
+                                                              receiver=emp_no,
                                                               msg_status=MessageStateEnum.unread.value)
         # 如果有未读消息, 则推送给前端对应的count
         if len(msg_records) > 0:
@@ -448,7 +463,8 @@ async def websocket_endpoint(websocket: WebSocket, emp_no: str):
             data: str = await websocket.receive_text()
             du = data.upper()
             if du in questions_and_answers_map:
-                await ws_manage.send_personal_message(message=questions_and_answers_map.get(du), websocket=websocket)
+                await ws_manage.send_personal_message(message=questions_and_answers_map.get(du),
+                                                      websocket=websocket)
     except WebSocketDisconnect:
         if emp_no in ws_manage.active_connections:
             ws_manage.disconnect(emp_no)

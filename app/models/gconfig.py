@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python 3.9.11
 """
-@File    :  gconfig.py
+@File    :  GconfigEnum.py
 @Time    :  2022/7/7 15:21 PM
 @Author  :  YuYanQing
 @Version :  1.0
@@ -11,14 +11,15 @@
 """
 from sqlalchemy import INT, Column, String, TEXT, UniqueConstraint
 
-from app.enums.sysvar import PikaGlobalVarEnum
-from app.models.basic import PikaLargeBase
+from app.enums.ByteSizeEnum import ByteSizeEnum
+from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.models.basic import LargeBaseModel
 
 
-class PikaGConfig(PikaLargeBase):
+class GConfigModel(LargeBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_gconfig'
     env = Column(INT)
-    key = Column(String(16))
+    key = Column(String(ByteSizeEnum.LENGTH_16))
     value = Column(TEXT)
     key_type = Column(INT, nullable=False, comment="0: string 1: json 2: yaml")
 

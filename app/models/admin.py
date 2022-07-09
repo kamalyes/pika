@@ -13,24 +13,24 @@ from sqlalchemy import ForeignKey
 from sqlalchemy import INT, Column, DATETIME, String
 from sqlalchemy.orm import relationship, backref
 
-from app.enums.bytesize import ByteSizeEnum
-from app.enums.sysvar import PikaGlobalVarEnum
-from app.models.basic import PikaLargeBase
-from app.models.user import PikaUser
+from app.enums.ByteSizeEnum import ByteSizeEnum
+from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.models.basic import LargeBaseModel
+from app.models.user import SysUserModel
 
 
-class PikaUserAdmin(PikaLargeBase):
+class UserAdminModel(LargeBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_sys_admin"
     __table_args__ = {"comment": "账号管理表"}
     uid = Column(
         INT,
-        ForeignKey(PikaUser.id, ondelete="cascade", onupdate="cascade"),
+        ForeignKey(SysUserModel.id, ondelete="cascade", onupdate="cascade"),
         nullable=False,
         comment="员工编号",
     )
     emp_no = Column(
         String(ByteSizeEnum.LENGTH_16),
-        ForeignKey(PikaUser.emp_no, ondelete="cascade", onupdate="cascade"),
+        ForeignKey(SysUserModel.emp_no, ondelete="cascade", onupdate="cascade"),
         comment="员工编号",
         nullable=False,
     )
@@ -47,10 +47,12 @@ class PikaUserAdmin(PikaLargeBase):
     last_login_location = Column(String(ByteSizeEnum.LENGTH_30), comment="最后一次登录所在城市")
     last_login_date = Column(DATETIME, server_default=None, comment="最后一次登录时间")
     last_logout_date = Column(DATETIME, server_default=None, comment="最后一次退出登录时间")
-    relationship(PikaUser, backref=backref("children", cascade="all, delete"))
+    relationship(SysUserModel, backref=backref("children", cascade="all, delete"))
 
     def __init__(self, uid, emp_no, password, is_activate=0, create_emp_no=None,
-                 registration_ip=None, registration_date=None, pwd_valid_date=PikaGlobalVarEnum.PWD_VALID_DATE):
+                 registration_ip=None,
+                 registration_date=None, pwd_valid_date=PikaGlobalVarEnum.PWD_VALID_DATE):
+        super().__init__()
         self.uid = uid
         self.emp_no = emp_no
         self.password = password

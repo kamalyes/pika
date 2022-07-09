@@ -12,7 +12,7 @@
 
 from fastapi import status
 
-from app.enums.statuscode import SysFailedCodeEnum
+from app.enums.SysCodeEnum import SysCodeEnum
 
 
 class ValidException(Exception):
@@ -126,7 +126,7 @@ class DbExecuteException(Exception):
 class RedisException(Exception):
     def __init__(
             self,
-            code: int = SysFailedCodeEnum.REDIS_ERROR,
+            code: int = SysCodeEnum.REDIS_ERROR,
             detail: str = "Redis operation failed",
             status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
     ):

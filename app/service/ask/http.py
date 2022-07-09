@@ -10,7 +10,7 @@ from fastapi import Depends, APIRouter
 
 from app.core.handler.executor import Executor
 from app.core.handler.jsonres import PikaResponse
-from app.crud.itst.testcase_data import TestCaseDataDao
+from app.crud.itst.api.testcase_data import ApiTestCaseDataDao
 from app.middleware.async_ask import AsyncRequest
 from app.schema.http import HttpRequestForm
 from app.service import Permission
@@ -20,14 +20,14 @@ from app.enums.CertEnum import CertType
 
 router = APIRouter()
 
-# random_dict = dict()
 CERT_URL = "http://mitm.it/cert/"
 
 
 @router.post("/request/http")
 async def http_request(data: HttpRequestForm, _=Depends(Permission())):
     try:
-        r = await AsyncRequest.client(data.url, data.body_type, headers=data.headers, body=data.body)
+        r = await AsyncRequest.client(data.url, data.body_type, headers=data.headers,
+                                      body=data.body)
         response = await r.invoke(data.method)
         if response.get("status"):
             return PikaResponse.success(response)
@@ -56,7 +56,7 @@ async def http_request(cert: CertType):
 async def execute_case(env: int, case_id: int, _=Depends(Permission())):
     try:
         executor = Executor()
-        test_data = await TestCaseDataDao.list_testcase_data_by_env(env, case_id)
+        test_data = await ApiTestCaseDataDao.list_testcase_data_by_env(env, case_id)
         ans = dict()
         if not test_data:
             result, _ = await executor.run(env, case_id)
@@ -80,7 +80,7 @@ async def re_run_case(env: int, case_id: int, data_id: int = 0, _=Depends(Permis
         params = dict()
         if data_id != 0:
             # if data_id not exists, use original params (empty dict)
-            test_data = await TestCaseDataDao.query_record(id=data_id)
+            test_data = await ApiTestCaseDataDao.query_record(id=data_id)
             params = json.loads(test_data.json_data)
         result, _ = await executor.run(env, case_id, request_param=params)
         return PikaResponse.success(result)

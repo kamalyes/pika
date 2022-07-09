@@ -14,7 +14,7 @@ from typing import Optional
 
 from fastapi import Body, Form, Query
 
-from app.enums.bytesize import ByteSizeEnum
+from app.enums.ByteSizeEnum import ByteSizeEnum
 
 
 class EditRoleActionModel:
@@ -23,10 +23,14 @@ class EditRoleActionModel:
             role_action_id: Optional[int] = Body(0, title="id"),
             menu_id: Optional[int] = Body(0, title="菜单id"),
             emp_no: Optional[str] = Body(..., title="员工编号", max_length=ByteSizeEnum.LENGTH_20),
-            auth_control_id: Optional[str] = Body(..., title="权限控制id", max_length=ByteSizeEnum.LENGTH_255),
-            auth_control_desc: Optional[str] = Body(..., title="权限控制说明", max_length=ByteSizeEnum.LENGTH_255),
-            create_emp_no: Optional[str] = Query(None, title="创建者员工编号", max_length=ByteSizeEnum.LENGTH_20),
-            update_emp_no: Optional[str] = Query(None, title="修改者员工编号", max_length=ByteSizeEnum.LENGTH_20),
+            auth_control_id: Optional[str] = Body(..., title="权限控制id",
+                                                  max_length=ByteSizeEnum.LENGTH_255),
+            auth_control_desc: Optional[str] = Body(..., title="权限控制说明",
+                                                    max_length=ByteSizeEnum.LENGTH_255),
+            create_emp_no: Optional[str] = Query(None, title="创建者员工编号",
+                                                 max_length=ByteSizeEnum.LENGTH_20),
+            update_emp_no: Optional[str] = Query(None, title="修改者员工编号",
+                                                 max_length=ByteSizeEnum.LENGTH_20),
     ):
         self.role_action_id = role_action_id
         self.menu_id = menu_id

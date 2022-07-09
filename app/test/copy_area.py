@@ -45,6 +45,7 @@ class Administrative(object):
                 province_id = self.connect_mysql(sql, province_data)
 
                 trs = self.get_response(province_url, None)
+                # noinspection PyAssignmentToLoopOrWithParameter
                 for tr in trs[1:]:  # 循环每个市
                     city_code = tr.find_all("td")[0].string
                     city_name = tr.find_all("td")[1].string
@@ -55,6 +56,7 @@ class Administrative(object):
 
                     city_url = base_url + tr.find_all("td")[1].a.get("href")
                     trs = self.get_response(city_url, None)
+                    # noinspection PyAssignmentToLoopOrWithParameter
                     for tr in trs[1:]:  # 循环每个区县
                         county_code = tr.find_all("td")[0].string
                         county_name = tr.find_all("td")[1].string

@@ -15,11 +15,11 @@ from typing import Tuple
 
 from sqlalchemy import INT, DATETIME, Column, String, BOOLEAN, text
 
-from app.enums.bytesize import ByteSizeEnum
+from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.models import Base
 
 
-class PikaLargeBase(Base):
+class LargeBaseModel(Base):
     id = Column(INT, primary_key=True, autoincrement=True, comment="id")
     is_usable = Column(BOOLEAN, server_default="1", comment="是否可用 1：启用，0：禁用")
     is_delete = Column(BOOLEAN, server_default="0", comment="是否被删除 1：已删除，0：未删除")
@@ -55,7 +55,7 @@ class PikaLargeBase(Base):
         self.description = description
 
 
-class PikaNormBase(Base):
+class NormBaseModel(Base):
     id = Column(INT, primary_key=True, autoincrement=True, comment="id")
     description = Column(String(ByteSizeEnum.LENGTH_600), default=None, comment="备注信息")
     create_emp_no = Column(String(ByteSizeEnum.LENGTH_16), comment="创建者emp_no")
@@ -85,7 +85,7 @@ class PikaNormBase(Base):
         self.description = description
 
 
-class PikaTimestampBase(Base):
+class TimestampBaseModel(Base):
     create_emp_no = Column(String(ByteSizeEnum.LENGTH_16), comment="创建者emp_no")
     update_emp_no = Column(String(ByteSizeEnum.LENGTH_16), comment="修改者emp_no")
     create_date = Column(
@@ -113,7 +113,7 @@ class PikaTimestampBase(Base):
         self.description = description
 
 
-class PikaMinBase(Base):
+class MinBaseModel(Base):
     id = Column(INT, primary_key=True, autoincrement=True, comment="id")
     description = Column(String(ByteSizeEnum.LENGTH_600), default=None, comment="备注信息")
     operator = Column(String(ByteSizeEnum.LENGTH_16), comment="操作者emp_no")
@@ -136,7 +136,7 @@ class PikaMinBase(Base):
         self.operator_date = operator_date
 
 
-class PikaRelationField(object):
+class RelationFieldModel(object):
     def __init__(self, field, foreign=None):
         self.field = field
         self.foreign = foreign

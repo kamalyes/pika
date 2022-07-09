@@ -6,7 +6,7 @@
 Pika
 </h1>
 <p align="center">
-    <em>Pika是一款专注于自动化建设的平台，采用Python+FastApi+Reace开发</em>
+    <em>Pika是一款专注于自动化建设的平台，采用Python+FastApi+React开发</em>
 </p>
 
 <p align="center">
@@ -40,24 +40,21 @@ from sqlalchemy.orm import selectinload
 
 Base = declarative_base()
 
-
 class A(Base):
-    __tablename__ = "a"
+__tablename__ = "a"
 
     id = Column(Integer, primary_key=True)
     data = Column(String)
     bs = relationship("B")
 
-
 class B(Base):
-    __tablename__ = "b"
-    id = Column(Integer, primary_key=True)
-    a_id = Column(ForeignKey("a.id"))
-    data = Column(String)
-
+__tablename__ = "b"
+id = Column(Integer, primary_key=True)
+a_id = Column(ForeignKey("a.id"))
+data = Column(String)
 
 async def async_main():
-    """Main program function."""
+"""Main program function."""
 
     engine = create_async_engine(
         "postgresql+asyncpg://scott:tiger@localhost/test",
@@ -108,30 +105,28 @@ async def async_main():
 
         await session.commit()
 
-
 asyncio.run(async_main())
+
 ```
 
 !!! note "sqlalchemy +databases (官网案例)"
 ```
-from typing import List
-import databases
+
+from typing import List import databases
 
 import sqlalchemy
 
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI from pydantic import BaseModel
 
 # SQLAlchemy specific code, as with any other app
+
 DATABASE_URL = "sqlite:///./test.db"
+
 # DATABASE_URL = "postgresql://user:password@postgresserver/db"
 
 database = databases.Database(DATABASE_URL)
 
-
 metadata = sqlalchemy.MetaData()
-
-
 
 notes = sqlalchemy.Table(
 
@@ -147,72 +142,63 @@ notes = sqlalchemy.Table(
 
 )
 
-
-
 engine = sqlalchemy.create_engine(
-    DATABASE_URL, connect_args={"check_same_thread": False}
+DATABASE_URL, connect_args={"check_same_thread": False}
 )
 metadata.create_all(engine)
 
-
 class NoteIn(BaseModel):
-    text: str
-    completed: bool
-
+text: str completed: bool
 
 class Note(BaseModel):
-    id: int
-    text: str
-    completed: bool
-
+id: int text: str completed: bool
 
 app = FastAPI()
 
-
 @app.on_event("startup")
 async def startup():
-    await database.connect()
-
+await database.connect()
 
 @app.on_event("shutdown")
 async def shutdown():
-    await database.disconnect()
-
+await database.disconnect()
 
 @app.get("/notes/", response_model=List[Note])
 async def read_notes():
-    query = notes.select()
-    return await database.fetch_all(query)
-
+query = notes.select()
+return await database.fetch_all(query)
 
 @app.post("/notes/", response_model=Note)
 async def create_note(note: NoteIn):
-    query = notes.insert().values(text=note.text, completed=note.completed)
-    last_record_id = await database.execute(query)
-    return {**note.dict(), "id": last_record_id}
+query = notes.insert().values(text=note.text, completed=note.completed)
+last_record_id = await database.execute(query)
+return {**note.dict(), "id": last_record_id}
+
 ```
 
 !!! note "单独使用database异步提供的方案"
 ```
-from databases import Database
-database = Database('sqlite:///example.db')
+
+from databases import Database database = Database('sqlite:///example.db')
 await database.connect()
 
 # Create a table.
+
 query = """CREATE TABLE HighScores (id INTEGER PRIMARY KEY, name VARCHAR(100), score INTEGER)"""
 await database.execute(query=query)
 
 # Insert some data.
+
 query = "INSERT INTO HighScores(name, score) VALUES (:name, :score)"
 values = [
-    {"name": "Daisy", "score": 92},
-    {"name": "Neil", "score": 87},
-    {"name": "Carol", "score": 43},
+{"name": "Daisy", "score": 92}, {"name": "Neil", "score": 87}, {"name": "Carol", "score": 43},
 ]
 await database.execute_many(query=query, values=values)
 
 # Run a database query.
+
 query = "SELECT * FROM HighScores"
 rows = await database.fetch_all(query=query)
 print('High Scores:', rows)
+
 ```

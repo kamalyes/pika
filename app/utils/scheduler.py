@@ -32,16 +32,20 @@ class Scheduler(object):
     def edit_test_plan(plan_id, plan_name, cron):
         """
         通过测试计划id，更新测试计划任务的cron，name等数据
-        :param plan_id:
-        :param plan_name:
-        :param cron:
-        :return:
+        Args:
+            plan_id:
+            plan_name:
+            cron:
+
+        Returns:
+
         """
         job = Scheduler.scheduler.get_job(str(plan_id))
         if job is None:
             # 新增job
             return Scheduler.add_test_plan(plan_id, plan_name, cron)
-        Scheduler.scheduler.modify_job(job_id=str(plan_id), trigger=CronTrigger.from_crontab(cron), name=plan_name)
+        Scheduler.scheduler.modify_job(job_id=str(plan_id), trigger=CronTrigger.from_crontab(cron),
+                                       name=plan_name)
         Scheduler.scheduler.pause_job(str(plan_id))
         Scheduler.scheduler.resume_job(str(plan_id))
 
@@ -49,9 +53,12 @@ class Scheduler(object):
     def pause_resume_test_plan(plan_id, status):
         """
         暂停或恢复测试计划，会影响到next_run_at
-        :param plan_id:
-        :param status:
-        :return:
+        Args:
+            plan_id:
+            status:
+
+        Returns:
+
         """
         if status:
             Scheduler.scheduler.resume_job(job_id=str(plan_id))
@@ -62,8 +69,11 @@ class Scheduler(object):
     def remove(plan_id):
         """
         删除job，当删除测试计划时，调用此方法
-        :param plan_id:
-        :return:
+        Args:
+            plan_id:
+
+        Returns:
+
         """
         Scheduler.scheduler.remove_job(str(plan_id))
 

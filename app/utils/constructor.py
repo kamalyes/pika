@@ -10,16 +10,16 @@
 @Desc    :  None
 """
 
-from app.models.constructor import PikaConstructor
+from app.models.constructor import ConstructorModel
 
 
 class ConstructorHelper(object):
 
-    def parse(self, path, data: PikaConstructor):
+    def parse(self, path, data: ConstructorModel):
         pass
 
 
 class TestCaseConstructorHelper(ConstructorHelper):
 
-    def parse(self, path, data: PikaConstructor):
+    def parse(self, path, data: ConstructorModel):
         pass

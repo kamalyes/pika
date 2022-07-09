@@ -1,8 +1,19 @@
+# -*- coding:utf-8 -*-
+# !/usr/bin/env python 3.9.11
+"""
+@File    :  DatabaseEnum.py
+@Time    :  2022/6/18 2:27 AM
+@Author  :  YuYanQing
+@Version :  1.0
+@Contact :  mryu168@163.com
+@License :  (C)Copyright 2022-2026
+@Desc    :  None
+"""
 from fastapi import Depends, APIRouter
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud.online.database import DbConfigDao
-from app.enums.gebruikersrol import RoleEnum
+from app.enums.RbacEnum import RoleEnum
 from app.models import DatabaseHelper, db_helper
 from app.schema.database import DatabaseForm
 from app.service import Permission
@@ -10,7 +21,7 @@ from app.service import Permission
 router = APIRouter()
 
 
-@router.post("/dbconfig/insert", name="增加数据库配置")
+@router.post("/dbconfig/insert", summary="增加数据库配置")
 async def insert_dbconfig(form: DatabaseForm, user_info=Depends(Permission(RoleEnum.ADMIN))):
     try:
         await DbConfigDao.insert_database(form, user_info['emp_no'])
@@ -19,7 +30,7 @@ async def insert_dbconfig(form: DatabaseForm, user_info=Depends(Permission(RoleE
         return PikaResponse.failed(detail=str(err))
 
 
-@router.delete("/dbconfig/delete", name="删除数据库配置")
+@router.delete("/dbconfig/delete", summary="删除数据库配置")
 async def delete_dbconfig(id: int, user_info=Depends(Permission(RoleEnum.ADMIN))):
     try:
         await DbConfigDao.delete_database(id, user_info['emp_no'])
@@ -28,7 +39,7 @@ async def delete_dbconfig(id: int, user_info=Depends(Permission(RoleEnum.ADMIN))
         return PikaResponse.failed(detail=str(err))
 
 
-@router.post("/dbconfig/update", name="更新数据库配置")
+@router.post("/dbconfig/update", summary="更新数据库配置")
 async def update_dbconfig(form: DatabaseForm, user_info=Depends(Permission(RoleEnum.ADMIN))):
     try:
         await DbConfigDao.update_database(form, user_info['emp_no'])
@@ -37,7 +48,7 @@ async def update_dbconfig(form: DatabaseForm, user_info=Depends(Permission(RoleE
         return PikaResponse.failed(detail=str(err))
 
 
-@router.get("/dbconfig/list", name="查询数据库配置")
+@router.get("/dbconfig/list", summary="查询数据库配置")
 async def list_dbconfig(name: str = '', database: str = '', env: int = None,
                         user_info=Depends(Permission(RoleEnum.MANAGER))):
     try:
@@ -47,8 +58,9 @@ async def list_dbconfig(name: str = '', database: str = '', env: int = None,
         return PikaResponse.failed(detail=str(err))
 
 
-@router.get("/dbconfig/connect", name="测试数据库连接")
-async def connect_test(sql_type: int, host: str, port: int, username: str, password: str, database: str,
+@router.get("/dbconfig/connect", summary="测试数据库连接")
+async def connect_test(sql_type: int, host: str, port: int, username: str, password: str,
+                       database: str,
                        user_info=Depends(Permission(RoleEnum.MANAGER))):
     try:
         data = await db_helper.get_connection(sql_type, host, port, username, password, database)

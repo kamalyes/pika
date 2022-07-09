@@ -12,7 +12,7 @@
 
 from pydantic import BaseModel, validator
 
-from app.excpetions.ParamsException import ParamsError
+from app.excpetions.business.ParamsException import VariablesNullError
 
 
 class HttpRequestForm(BaseModel):
@@ -22,8 +22,9 @@ class HttpRequestForm(BaseModel):
     body_type: int = 0
     headers: dict = {}
 
+    # noinspection PyMethodParameters
     @validator('method', 'url')
     def name_not_empty(cls, v):
         if isinstance(v, str) and len(v.strip()) == 0:
-            raise ParamsError("不能为空")
+            raise VariablesNullError("不能为空")
         return v

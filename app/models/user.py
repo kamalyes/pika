@@ -11,12 +11,12 @@
 """
 from sqlalchemy import Column, String, INT, UniqueConstraint
 
-from app.enums.bytesize import ByteSizeEnum
-from app.enums.sysvar import PikaGlobalVarEnum
-from app.models.basic import PikaNormBase
+from app.enums.ByteSizeEnum import ByteSizeEnum
+from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.models.basic import NormBaseModel
 
 
-class PikaUser(PikaNormBase):
+class SysUserModel(NormBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_sys_user"
     __table_args__ = (UniqueConstraint("emp_no", "email", "mobile"), {"comment": "用户表"})
     emp_no = Column(String(ByteSizeEnum.LENGTH_16), comment="员工编号")
@@ -34,19 +34,10 @@ class PikaUser(PikaNormBase):
     email = Column(String(ByteSizeEnum.LENGTH_255), comment="邮箱地址")
     location = Column(String(ByteSizeEnum.LENGTH_255), server_default=None, comment="所在城市名称")
 
-    def __init__(
-            self,
-            emp_no,
-            username=None,
-            email=None,
-            user_alias=None,
-            identity=0,
-            avatar=None,
-            gender=None,
-            plane=None,
-            mobile=None,
-            location=None,
-    ):
+    def __init__(self, emp_no, username=None, email=None, user_alias=None, identity=0, avatar=None,
+                 gender=None,
+                 plane=None, mobile=None, location=None):
+        super().__init__()
         self.emp_no = emp_no
         self.username = username
         self.email = email

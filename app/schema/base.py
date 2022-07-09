@@ -17,7 +17,7 @@ from hutools.time import Moment
 from pydantic import BaseModel
 
 from app.core.handler.execres import ValidException
-from app.enums.bytesize import ByteSizeEnum
+from app.enums.ByteSizeEnum import ByteSizeEnum
 
 
 class PikaBaseModel(object):
@@ -36,7 +36,7 @@ class PikaBaseModel(object):
             datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
             return time
         except Exception as e:
-            raise ValidException(details='时间日期格式有误')
+            raise ValidException(detail='时间日期格式有误')
 
     @property
     def parameters(self):
@@ -64,7 +64,8 @@ class PikaOnlyUsableModel(BaseModel):
 
 
 class PikaOnlyDelModel(BaseModel):
-    is_delete: Optional[str] = Query("0", title="是否被删除 1：已删除，0：未删除", max_length=ByteSizeEnum.LENGTH_20)
+    is_delete: Optional[str] = Query("0", title="是否被删除 1：已删除，0：未删除",
+                                     max_length=ByteSizeEnum.LENGTH_20)
 
 
 class PikaOnlyEmpNoModel(BaseModel):
@@ -87,4 +88,5 @@ class PikaDeleteModel(PikaOnlyIdsModel):
 
 
 class PikaQueryTypeModel(BaseModel):
-    query_type: Optional[str] = Form("0", title="查询方式：0：全部，1：条件查询", max_length=ByteSizeEnum.LENGTH_255)
+    query_type: Optional[str] = Form("0", title="查询方式：0：全部，1：条件查询",
+                                     max_length=ByteSizeEnum.LENGTH_255)

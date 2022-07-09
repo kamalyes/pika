@@ -18,22 +18,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.handler.execres import ValidException
 from app.core.handler.jsonres import PikaResponse
 from app.crud.rbac.user import UserDao
-from app.enums.gebruikersrol import RoleEnum
+from app.enums.RbacEnum import RoleEnum
 from app.models import pagination_db
-from app.schema.user import RegisterModel, OAuth2LoginModel, ForgetPwdModel, OAuth2TokenModel, AddUserModel, \
-    ModifyUserInfoModel, QueryUserInModel, QueryUserOutModel, GetVerifyCodeModel, ModifySecretModel, EditSecurityModel, \
+from app.schema.user import RegisterModel, OAuth2LoginModel, \
+    ForgetPwdModel, OAuth2TokenModel, AddUserModel, \
+    ModifyUserInfoModel, QueryUserInModel, QueryUserOutModel, \
+    GetVerifyCodeModel, ModifySecretModel, EditSecurityModel, \
     DelSecurityModel, QuerySecurityOutModel, EmailVerifyCode
 from app.service import Permission
 
 router = APIRouter()
 
 
-@router.post("/register", name="普通用户注册")
+@router.post("/register", summary="普通用户注册")
 async def register(request: Request, register_model: RegisterModel):
     return await UserDao.register_user(request, register_model)
 
 
-@router.post("/login/", name="（编号、用户名）及密码登录", include_in_schema=True)
+@router.post("/login/", summary="（编号、用户名）及密码登录", include_in_schema=True)
 async def login(request: Request, oauth2_login: OAuth2LoginModel = Depends()):
     if oauth2_login.grant_type == "account":
         return await UserDao.account_login(request, oauth2_login)
@@ -43,13 +45,14 @@ async def login(request: Request, oauth2_login: OAuth2LoginModel = Depends()):
         raise ValidException(detail="暂不支持该model！")
 
 
-@router.post("/verifytoken", name="验证Token（用于刷新时使用）")
+@router.post("/verifytoken", summary="验证Token（用于刷新时使用）")
 async def login(request: OAuth2TokenModel = Depends()):
     user_info = await UserDao.verify_token(request)
-    return PikaResponse.success(message="Authentication success", data={**user_info, **{"token": request.token}})
+    return PikaResponse.success(message="Authentication success",
+                                data={**user_info, **{"token": request.token}})
 
 
-@router.delete("/logout", name="注销/退出登录")
+@router.delete("/logout", summary="注销/退出登录")
 async def logout(request: Request, oauth2_logout: OAuth2TokenModel = Depends()):
     return await UserDao.account_logout(request, oauth2_logout)
 
@@ -59,13 +62,13 @@ async def create_user(request: AddUserModel, user_info=Depends(Permission(RoleEn
     return await UserDao.add_user(request, user_info)
 
 
-@router.post("/info/update", name="用户更新自己相关资料")
+@router.post("/info/update", summary="用户更新自己相关资料")
 async def update_user_info(modify_user_info: ModifyUserInfoModel,
                            user_info=Depends(Permission())):
     return await UserDao.update_user_info(modify_user_info, user_info)
 
 
-@router.get("/alluser", name="查询所有用户信息")
+@router.get("/alluser", summary="查询所有用户信息")
 async def query_all_users(user_info=Depends(Permission())):
     try:
         user = await UserDao.query_all_users()
@@ -74,34 +77,34 @@ async def query_all_users(user_info=Depends(Permission())):
         return PikaResponse.failed(detail=str(e))
 
 
-@router.get("/list/query", name="查询用户列表", response_model=LimitOffsetPage[QueryUserOutModel])
+@router.get("/list", summary="查询用户列表", response_model=LimitOffsetPage[QueryUserOutModel])
 async def query_user_list(request: QueryUserInModel = Depends(),
                           user_info=Depends(Permission(RoleEnum.ADMIN.value)),
                           db: AsyncSession = Depends(pagination_db)) -> Any:
     return await UserDao.query_user_info_list(db, request)
 
 
-@router.get("/personal/detail", name="获取用户个人资料详细")
+@router.get("/personal/detail", summary="获取用户个人资料详细")
 async def query_user_details(user_info=Depends(Permission())):
     return user_info
 
 
-@router.get("/auth/qrcode", name="获取动态验证码")
+@router.get("/auth/qrcode", summary="获取动态验证码")
 async def get_dynamic_code(request: Request):
     return await UserDao.rand_dynamic_code(request)
 
 
-@router.post("/auth/elcode", name="获取邮箱验证码")
+@router.post("/auth/elcode", summary="获取邮箱验证码")
 async def send_email_verify_code(request: EmailVerifyCode):
     return await UserDao.send_email_verify_code(request)
 
 
-@router.post("/auth/verifycode", name="发送验证码-邮件")
+@router.post("/auth/verifycode", summary="发送验证码-邮件")
 async def send_verify_code(request: GetVerifyCodeModel, user_info=Depends(Permission())):
     return await UserDao.get_verifycode(request, user_info)
 
 
-@router.post("/pwd/forget", name="忘记密码？通过（邮箱验证码/密保）重置密码")
+@router.post("/pwd/forget", summary="忘记密码？通过（邮箱验证码/密保）重置密码")
 async def forget_pwd(request: ForgetPwdModel = Depends(), user_info=Depends(Permission())):
     alter_type_list = [1, 2]
     if request.alter_type == alter_type_list[0]:
@@ -114,30 +117,34 @@ async def forget_pwd(request: ForgetPwdModel = Depends(), user_info=Depends(Perm
     return PikaResponse.success()
 
 
-@router.post("/pwd/update", name="通过旧密码去更新密码")
+@router.post("/pwd/update", summary="通过旧密码去更新密码")
 async def update_pwd(request: ModifySecretModel = Depends(), user_info=Depends(Permission())):
-    await UserDao.old_value_update_pwd(emp_no=user_info["emp_no"], old_password=request.old_password,
+    await UserDao.old_value_update_pwd(emp_no=user_info["emp_no"],
+                                       old_password=request.old_password,
                                        new_password=request.new_password)
     return PikaResponse.success()
 
 
-@router.post("/security/add", name="添加密保信息")
+@router.post("/security/add", summary="添加密保信息")
 async def add_security(request: EditSecurityModel = Depends(), user_info=Depends(Permission())):
     return await UserDao.add_security(request=request, user_info=user_info)
 
 
-@router.delete("/security/empty", name="清空密保问题（非软删）")
-async def delete_security(security_ids: DelSecurityModel = Depends(), user_info=Depends(Permission())):
+@router.delete("/security/empty", summary="清空密保问题（非软删）")
+async def delete_security(security_ids: DelSecurityModel = Depends(),
+                          user_info=Depends(Permission())):
     return await UserDao.empty_security(request=security_ids, emp_no=user_info["emp_no"])
 
 
-@router.post("/security/update", name="更新密保问题")
+@router.post("/security/update", summary="更新密保问题")
 async def update_security(request: EditSecurityModel = Depends(), user_info=Depends(Permission())):
     return await UserDao.update_security(request=request, user_info=user_info)
 
 
-@router.get("/security/info", name="查询用户自己设置过的密保信息", response_model=LimitOffsetPage[QuerySecurityOutModel])
-async def query_security(user_info=Depends(Permission()), db: AsyncSession = Depends(pagination_db)) -> Any:
+@router.get("/security/info", summary="查询用户自己设置过的密保信息",
+            response_model=LimitOffsetPage[QuerySecurityOutModel])
+async def query_security(user_info=Depends(Permission()),
+                         db: AsyncSession = Depends(pagination_db)) -> Any:
     return await UserDao.query_security(db=db, emp_no=user_info["emp_no"])
 
 

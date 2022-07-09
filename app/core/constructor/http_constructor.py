@@ -1,26 +1,28 @@
 import json
 
 from app.core.constructor.constructor import ConstructorAbstract
-from app.crud.online.gateway import PikaGatewayDao
+from app.crud.online.gateway import GatewayDao
 from app.middleware.async_ask import AsyncRequest
-from app.models.constructor import PikaConstructor
+from app.models.constructor import ConstructorModel
 
 
 class HttpConstructor(ConstructorAbstract):
 
     @staticmethod
-    async def run(executor, env, index, path, params, req_params, constructor: PikaConstructor, **kwargs):
+    async def run(executor, env, index, path, params, req_params, constructor: ConstructorModel,
+                  **kwargs):
         try:
             executor.append(f"当前路径: {path}, 第{index + 1}条{HttpConstructor.get_name(constructor)}")
             data = json.loads(constructor.constructor_json)
             url = data.get("url")
             if data.get("base_path"):
-                base_path = await PikaGatewayDao.query_gateway(env, data.get("base_path"))
+                base_path = await GatewayDao.query_gateway(env, data.get("base_path"))
                 url = f"{base_path}{url}"
             headers = data.get("headers")
             if isinstance(headers, str):
                 headers = json.loads(data.get("headers"))
-            client = await AsyncRequest.client(url=url, body_type=data.get("body_type"), headers=headers,
+            client = await AsyncRequest.client(url=url, body_type=data.get("body_type"),
+                                               headers=headers,
                                                body=data.get("body"))
             resp = await client.invoke(data.get("request_method"))
             executor.append(f"当前{ConstructorAbstract.get_name(constructor)}类型为http, url: {url}")

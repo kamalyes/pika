@@ -11,12 +11,12 @@
 """
 from sqlalchemy import Column, INT, String, Boolean, UniqueConstraint
 
-from app.enums.bytesize import ByteSizeEnum
-from app.enums.sysvar import PikaGlobalVarEnum
-from app.models.basic import PikaLargeBase
+from app.enums.ByteSizeEnum import ByteSizeEnum
+from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.models.basic import LargeBaseModel
 
 
-class PikaRedis(PikaLargeBase):
+class RedisModel(LargeBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_redis_info"
     __table_args__ = (
         UniqueConstraint('env', 'name'),

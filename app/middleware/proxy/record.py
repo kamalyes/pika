@@ -1,6 +1,13 @@
+# -*- coding:utf-8 -*-
+# !/usr/bin/env python 3.9.11
 """
-流量录制->生成case功能
-record steps and generate testcase
+@File    :  record.py
+@Time    :  2022/6/17 12:55 AM
+@Author  :  YuYanQing
+@Version :  1.0
+@Contact :  mryu168@163.com
+@License :  (C)Copyright 2022-2026
+@Desc    :  流量录制->生成case功能
 """
 import asyncio
 import json
@@ -13,9 +20,11 @@ from app.utils.ws_manager import ws_manage
 
 
 class PikaRecorder(object):
+    # noinspection PyMethodMayBeStatic
     def request(self, flow):
         flow.request.headers["X-Forwarded-For"] = flow.client_conn.address[0]
 
+    # noinspection PyMethodMayBeStatic
     async def response(self, flow):
         if "Pika.fun" in flow.request.url or flow.request.method.lower() == "options" or \
                 flow.request.url.endswith(("js", "css", "ttf", "jpg", "svg", "gif")):

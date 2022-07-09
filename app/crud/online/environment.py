@@ -16,12 +16,12 @@ from app.core.handler.execres import ValidException
 from app.core.handler.logger import PikaLogger
 from app.crud import PikaMapper
 from app.models import async_session
-from app.models.environment import PikaEnvironment
+from app.models.environment import EnvironmentModel
 from app.schema.environment import EnvironmentForm
 from app.utils.decorator import dao
 
 
-@dao(PikaEnvironment, PikaLogger("EnvironmentDao"))
+@dao(EnvironmentModel, PikaLogger("EnvironmentDao"))
 class EnvironmentDao(PikaMapper):
 
     @staticmethod
@@ -36,7 +36,8 @@ class EnvironmentDao(PikaMapper):
         """
         async with async_session() as session:
             ans = await session.execute(
-                select(PikaEnvironment).where(PikaEnvironment.id == id, PikaEnvironment.is_delete == 0))
+                select(EnvironmentModel).where(EnvironmentModel.id == id,
+                                               EnvironmentModel.is_delete == 0))
             if ans is None:
                 raise ValidException(detail=f"环境: {id}不存在")
             return ans.scalars().first()
@@ -46,21 +47,21 @@ class EnvironmentDao(PikaMapper):
         async with async_session() as session:
             async with session.begin():
                 query = await session.execute(
-                    select(PikaEnvironment).where(PikaEnvironment.name == data.name,
-                                                  PikaEnvironment.is_delete == 0))
+                    select(EnvironmentModel).where(EnvironmentModel.name == data.name,
+                                                   EnvironmentModel.is_delete == 0))
                 if query.scalars().first() is not None:
                     raise ValidException(detail=f"添加失败，环境名称：{data.name}已存在")
-                env = PikaEnvironment(**data.dict(), operator=emp_no)
+                env = EnvironmentModel(**data.dict(), operator=emp_no)
                 session.add(env)
 
     @classmethod
     async def list_env(cls, page, size, name=None, exactly=False):
         try:
-            search = [PikaEnvironment.is_delete == 0]
+            search = [EnvironmentModel.is_delete == 0]
             async with async_session() as session:
                 if name:
-                    search.append(PikaEnvironment.name.like("%{}%".format(name)))
-                sql = select(PikaEnvironment).where(*search)
+                    search.append(EnvironmentModel.name.like("%{}%".format(name)))
+                sql = select(EnvironmentModel).where(*search)
                 query = await session.execute(sql)
                 if exactly:
                     data = query.scalars().all()

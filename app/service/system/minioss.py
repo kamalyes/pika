@@ -3,16 +3,16 @@ from fastapi import APIRouter, File, Depends, UploadFile
 from app.core.handler.jsonres import PikaResponse
 from app.crud.rbac.user import UserDao
 from app.crud.system.minioss import PikaOssDao
-from app.enums.gebruikersrol import RoleEnum
+from app.enums.RbacEnum import RoleEnum
 from app.middleware.oss import OssClient
 from app.models import async_db_session
-from app.models.minioss import PikaOssFile
+from app.models.minioss import OssFileModel
 from app.service import Permission
 
 router = APIRouter()
 
 
-@router.post("/upload", name="文件上传")
+@router.post("/upload", summary="文件上传")
 async def create_oss_file(filepath: str, file: UploadFile = File(...),
                           user_info=Depends(Permission(RoleEnum.MANAGER))):
     try:
@@ -21,7 +21,8 @@ async def create_oss_file(filepath: str, file: UploadFile = File(...),
         # oss上传 WARNING: 可能存在数据不同步的问题，oss成功本地失败
         file_url, file_size = await client.create_file(filepath, file_content)
         # 本地数据也要备份一份
-        model = PikaOssFile(user_info['emp_no'], filepath, file_url, PikaOssFile.get_size(file_size))
+        model = OssFileModel(user_info['emp_no'], filepath, file_url,
+                             OssFileModel.get_size(file_size))
         record = await PikaOssDao.query_record(file_path=filepath, is_delete=0)
         if record is not None:
             record.file_path = filepath
@@ -35,8 +36,9 @@ async def create_oss_file(filepath: str, file: UploadFile = File(...),
         return PikaResponse.failed(detail=f"上传失败: {e}")
 
 
-@router.post("/avatar", name="上传用户头像")
-async def upload_avatar(file: UploadFile = File(...), user_info=Depends(Permission(RoleEnum.MANAGER))):
+@router.post("/avatar", summary="上传用户头像")
+async def upload_avatar(file: UploadFile = File(...),
+                        user_info=Depends(Permission(RoleEnum.MANAGER))):
     try:
         file_content = await file.read()
         suffix = file.filename.split(".")[-1]
@@ -49,16 +51,17 @@ async def upload_avatar(file: UploadFile = File(...), user_info=Depends(Permissi
         return PikaResponse.failed(detail=f"上传头像失败: {e}")
 
 
-@router.get("/list", name="查询文件")
+@router.get("/list", summary="查询文件")
 async def list_oss_file(filepath: str = '', _=Depends(Permission(RoleEnum.MANAGER))):
     try:
-        records = await PikaOssDao.list_record(condition=[PikaOssFile.file_path.like(f'%{filepath}%')])
+        records = await PikaOssDao.list_record(
+            condition=[OssFileModel.file_path.like(f'%{filepath}%')])
         return PikaResponse.records(records)
     except Exception as e:
         return PikaResponse.failed(detail=f"获取失败: {e}")
 
 
-@router.get("/delete", name="删除文件")
+@router.get("/delete", summary="删除文件")
 async def delete_oss_file(filepath: str, user_info=Depends(Permission(RoleEnum.MANAGER)),
                           session=Depends(async_db_session)):
     try:
@@ -74,7 +77,7 @@ async def delete_oss_file(filepath: str, user_info=Depends(Permission(RoleEnum.M
         return PikaResponse.failed(detail=f"删除失败: {e}")
 
 
-@router.get("/download", name="下载文件")
+@router.get("/download", summary="下载文件")
 async def download_oss_file(filepath: str):
     try:
         client = OssClient.get_oss_client()

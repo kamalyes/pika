@@ -9,5 +9,5 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from app.service.ask.mock import router as mock_router
 from app.service.ask.http import router as http_router
+from app.service.ask.mock import router as mock_router

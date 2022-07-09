@@ -15,32 +15,32 @@ from hutools.pagination import add_pagination
 router = APIRouter()
 
 
-@router.post("/action/add", name="添加活动")
+@router.post("/action/add", summary="添加活动")
 async def add_action():
     pass
 
 
-@router.put("/action/update", name="更新活动配置信息")
+@router.put("/action/update", summary="更新活动配置信息")
 async def update_action():
     pass
 
 
-@router.delete("/action/delete", name="删除活动配置")
+@router.delete("/action/delete", summary="删除活动配置")
 async def delete_action():
     pass
 
 
-@router.get("/action/query", name="查询活动配置")
-async def query_action():
+@router.get("/action/list", summary="查询活动配置")
+async def list_action():
     pass
 
 
-@router.post("/action/bind", name="给成员绑定活动")
+@router.post("/action/bind", summary="给成员绑定活动")
 async def bind_action():
     pass
 
 
-@router.delete("/action/unbind", name="给成员解绑活动")
+@router.delete("/action/unbind", summary="给成员解绑活动")
 async def unbind_action():
     pass
 

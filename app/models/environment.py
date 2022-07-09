@@ -11,12 +11,12 @@
 """
 from sqlalchemy import Column, String, UniqueConstraint
 
-from app.enums.bytesize import ByteSizeEnum
-from app.enums.sysvar import PikaGlobalVarEnum
-from app.models.basic import PikaLargeBase
+from app.enums.ByteSizeEnum import ByteSizeEnum
+from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.models.basic import LargeBaseModel
 
 
-class PikaEnvironment(PikaLargeBase):
+class EnvironmentModel(LargeBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_environment'
     name = Column(String(ByteSizeEnum.LENGTH_50))
 

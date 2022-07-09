@@ -60,7 +60,7 @@ C:\ProgramData\PyPA\pip\pip.conf (Windows 7及以后)
 
 2. pip.conf 配置内容
 
-```bash
+```shell
 [global]
 index-url = http://pypi.douban.com/simple #豆瓣源，可以换成其他的源
 extra-index-url = https://pypi.tuna.tsinghua.edu.cn/simple

@@ -11,10 +11,10 @@
 """
 from app.core.handler.logger import PikaLogger
 from app.crud import PikaMapper
-from app.models.broadcast import PikaBroadcastReadUser
+from app.models.broadcast import BroadcastReadUserModel
 from app.utils.decorator import dao
 
 
-@dao(PikaBroadcastReadUser, PikaLogger("BroadcastReadDao"))
+@dao(BroadcastReadUserModel, PikaLogger("BroadcastReadDao"))
 class BroadcastReadDao(PikaMapper):
     pass

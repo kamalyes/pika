@@ -70,9 +70,12 @@ class HarConvertor(Convertor):
     def get_kv(request_data: dict, key: str = "headers") -> dict:
         """
         通过response/request获取header信息
-        :param key:
-        :param request_data:
-        :return:
+        Args:
+            request_data:
+            key:
+
+        Returns:
+
         """
         headers = request_data.get(key)
         result = dict()
