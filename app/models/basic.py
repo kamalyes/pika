@@ -50,7 +50,8 @@ class LargeBaseModel(Base):
         self.update_emp_no = operator
         self.is_usable = is_usable
         self.is_delete = is_delete
-        self.delete_date = delete_date
+        if isinstance(delete_date, DATETIME):
+            self.delete_date = delete_date
         self.description = description
 
 

@@ -10,7 +10,7 @@
 @Desc    :  None
 """
 
-from sqlalchemy import select
+from sqlalchemy import select, asc, desc
 
 from app.core.handler.execres import ValidException
 from app.core.handler.logger import PikaLogger
@@ -61,7 +61,7 @@ class EnvironmentDao(PikaMapper):
             async with async_session() as session:
                 if name:
                     search.append(EnvironmentModel.name.like("%{}%".format(name)))
-                sql = select(EnvironmentModel).where(*search)
+                sql = select(EnvironmentModel).where(*search).order_by(desc(EnvironmentModel.update_date))
                 query = await session.execute(sql)
                 if exactly:
                     data = query.scalars().all()
