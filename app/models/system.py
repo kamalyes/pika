@@ -39,7 +39,7 @@ class SysRecordModel(NormBaseModel):
 class OperationLogModel(MinBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_operation_log'
     title = Column(String(ByteSizeEnum.LENGTH_128), nullable=False, comment="操作title")
-    tag = Column(String(ByteSizeEnum.LENGTH_56), comment="操作tag")
+    tag = Column(String(ByteSizeEnum.LENGTH_1000), comment="操作tag")
     mode = Column(SMALLINT, comment="操作类型")
     key = Column(INT, nullable=True, comment="关键id，可能是目录id，case_id或者其他id")
 

@@ -25,7 +25,7 @@ CREATE TABLE `user_group`
     `id`             int(11) NOT NULL AUTO_INCREMENT COMMENT '用户组id',
     `name`           varchar(255) NOT NULL COMMENT '用户组名称',
     `description`    varchar(255)          DEFAULT NULL COMMENT '备注信息',
-    `is_enabled`     int(11) DEFAULT '1' COMMENT '禁用/启用 1：启用、0：禁用',
+    `is_usable`     int(11) DEFAULT '1' COMMENT '禁用/启用 1：启用、0：禁用',
     `create_user_no` varchar(20)           DEFAULT NULL COMMENT '创建者用户编号',
     `update_user_no` varchar(20)           DEFAULT NULL COMMENT '修改者用户编号',
     `create_time`    datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

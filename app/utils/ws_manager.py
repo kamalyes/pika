@@ -48,7 +48,7 @@ class ConnectionManager:
         else:
             raise TypeError(F"websocket不能发送{type(message)}的内容！")
 
-    async def send_personal_message(self, operator: int, message: MsgType) -> None:
+    async def send_personal_message(self, operator: str, message: MsgType) -> None:
         """
         发送个人信息
         """

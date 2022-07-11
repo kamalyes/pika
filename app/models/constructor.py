@@ -21,7 +21,7 @@ class ConstructorModel(LargeBaseModel):
     __table_args__ = (UniqueConstraint('case_id', 'suffix', 'name'), {"comment": "数据构造器表"})
     type = Column(INT, default=0, comment="0: testcase 1: sqlscript 2: redis 3: py脚本 4: 其它")
     name = Column(String(ByteSizeEnum.LENGTH_64), comment="数据初始化描述")
-    enable = Column(BOOLEAN, default=True, nullable=False)
+    is_usable = Column(BOOLEAN, default=True, nullable=False)
     constructor_json = Column(TEXT, nullable=False)
     value = Column(String(ByteSizeEnum.LENGTH_16), comment="返回值")
     case_id = Column(INT, nullable=False, comment="所属用例id")
@@ -29,12 +29,12 @@ class ConstructorModel(LargeBaseModel):
     index = Column(INT, comment="前置条件顺序")
     suffix = Column(BOOLEAN, default=False, comment="是否是后置条件，默认为否")
 
-    def __init__(self, type, name, enable, constructor_json, case_id, public,
+    def __init__(self, type, name, is_usable, constructor_json, case_id, public,
                  operator, value="", suffix=False, id=None, index=0):
         super().__init__(operator, id)
         self.type = type
         self.name = name
-        self.enable = enable
+        self.is_usable = is_usable
         self.constructor_json = constructor_json
         self.case_id = case_id
         self.public = public

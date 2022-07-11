@@ -68,7 +68,7 @@ class CaseGenerator(object):
             ), ensure_ascii=False)
             c = ConstructorForm(name=name, value=f"http_res_{r + 1}",
                                 constructor_json=constructor_json,
-                                enable=True, public=True, suffix=False, index=r + 1,
+                                is_usable=True, public=True, suffix=False, index=r + 1,
                                 type=ConstructorTypeEnum.http.value)
             constructors.append(c)
         return constructors

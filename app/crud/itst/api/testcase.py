@@ -67,7 +67,7 @@ class ApiTestCaseDao(PikaMapper):
             async with async_session() as session:
                 sql = select(ApiTestCaseModel).where(ApiTestCaseModel.is_delete == 0,
                                                      ApiTestCaseModel.directory_id == directory_id).order_by(
-                    ApiTestCaseModel.name.asc())
+                    ApiTestCaseModel.update_date.desc())
                 result = await session.execute(sql)
                 ans = []
                 case_map = dict()
@@ -90,7 +90,7 @@ class ApiTestCaseDao(PikaMapper):
         return len(data)
 
     @staticmethod
-    async def _insert(session, case_id: int, operator: int, form: TestCaseInfo, **fields: tuple):
+    async def _insert(session, case_id: int, operator: str, form: TestCaseInfo, **fields: tuple):
         for field, model_info in fields.items():
             md, model = model_info
             field_data = getattr(form, field)
@@ -103,7 +103,7 @@ class ApiTestCaseDao(PikaMapper):
                 await md.insert_record(data, ss=session)
 
     @staticmethod
-    async def insert_test_case(session, data: TestCaseInfo, operator: int) -> ApiTestCaseModel:
+    async def insert_test_case(session, data: TestCaseInfo, operator: str) -> ApiTestCaseModel:
         """
         测试数据和用户id
         Args:
@@ -135,7 +135,7 @@ class ApiTestCaseDao(PikaMapper):
         return cs
 
     @classmethod
-    async def update_test_case(cls, test_case: TestCaseForm, operator: int) -> ApiTestCaseModel:
+    async def update_test_case(cls, test_case: TestCaseForm, operator: str) -> ApiTestCaseModel:
         """
         更新测试用例
         Args:
@@ -441,7 +441,7 @@ class ApiTestCaseDao(PikaMapper):
         return ans
 
     @staticmethod
-    async def query_weekly_user_case(operator: int, start_time: datetime,
+    async def query_weekly_user_case(operator: str, start_time: datetime,
                                      end_time: datetime) -> List:
         ans = dict()
         async with async_session() as session:

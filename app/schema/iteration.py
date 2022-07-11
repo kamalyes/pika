@@ -25,7 +25,7 @@ class EditIterateModel(BaseModel):
     name: Optional[str] = Body(..., title="名称", max_length=ByteSizeEnum.LENGTH_30)
     description: Optional[str] = Body(None, title="描述", max_length=ByteSizeEnum.LENGTH_255)
     is_private: Optional[int] = Body(0, title="是否私有 1：私有 0：公开")
-    is_enabled: Optional[int] = Body(1, title="禁用/启用 1：启用、0：禁用")
+    is_usable: Optional[int] = Body(1, title="禁用/启用 1：启用、0：禁用")
 
     class Config:
         orm_mode = True
@@ -39,7 +39,7 @@ class QueryIterateModel(PikaQueryModel):
     id: Optional[int] = Query(None, title="迭代id")
     name: Optional[str] = Query(None, title="迭代名称", max_length=ByteSizeEnum.LENGTH_30)
     is_private: Optional[int] = Query(0, title="是否私有 1：私有 0：公开")
-    is_enabled: Optional[int] = Query(None, title="禁用/启用 1：启用、0：禁用")
+    is_usable: Optional[int] = Query(None, title="禁用/启用 1：启用、0：禁用")
 
     class Config:
         orm_mode = True

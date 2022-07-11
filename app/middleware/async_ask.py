@@ -47,7 +47,7 @@ class AsyncRequest(object):
                 #     return await self.collect(False, self.get_data(self.kwargs), resp.status, msg="http状态码不为200")
                 end_time = Moment.get_now_time("13timestamp")
                 cost = "%.0fms" % ((end_time - start_time) / 1000)
-                print("invoke请求耗时", start_time, end_time)
+                # print("invoke请求耗时", start_time, end_time)
                 response, json_format = await AsyncRequest.get_resp(resp)
                 cookie = self.get_cookie(session)
                 return await self.collect(True, self.get_data(self.kwargs), resp.status, response,

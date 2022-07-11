@@ -48,7 +48,7 @@ class ConstructorDao(PikaMapper):
             raise Exception(f"获取初始化数据失败, {e}")
 
     @staticmethod
-    async def insert_constructor(data: ConstructorForm, operator: int) -> None:
+    async def insert_constructor(data: ConstructorForm, operator: str) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -66,7 +66,7 @@ class ConstructorDao(PikaMapper):
             raise Exception(f"新增前/后置条件失败, {e}")
 
     @staticmethod
-    async def update_constructor(data: ConstructorForm, operator: int) -> None:
+    async def update_constructor(data: ConstructorForm, operator: str) -> None:
         """
         更新前后置条件
         Args:
@@ -90,7 +90,7 @@ class ConstructorDao(PikaMapper):
             raise Exception(f"编辑前后置条件失败, {e}")
 
     @classmethod
-    async def delete_constructor(cls, id: int, operator: int) -> None:
+    async def delete_constructor(cls, id: int, operator: str) -> None:
         """
         删除前后置条件
         Args:

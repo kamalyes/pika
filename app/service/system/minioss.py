@@ -5,7 +5,7 @@ from app.crud.rbac.user import UserDao
 from app.crud.system.minioss import PikaOssDao
 from app.enums.RbacEnum import RoleEnum
 from app.middleware.oss import OssClient
-from app.models import async_db_session
+from app.models import get_async_session
 from app.models.minioss import OssFileModel
 from app.service import Permission
 
@@ -63,7 +63,7 @@ async def list_oss_file(filepath: str = '', _=Depends(Permission(RoleEnum.MANAGE
 
 @router.get("/delete", summary="删除文件")
 async def delete_oss_file(filepath: str, user_info=Depends(Permission(RoleEnum.MANAGER)),
-                          session=Depends(async_db_session)):
+                          session=Depends(get_async_session)):
     try:
         # 先获取到本地的记录，拿到sha值
         record = await PikaOssDao.query_record(file_path=filepath, is_delete=0)

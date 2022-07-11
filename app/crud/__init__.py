@@ -127,7 +127,7 @@ class PikaMapper(object):
                     if log:
                         async with session.begin():
                             await asyncio.create_task(
-                                cls.insert_log(session, model.operator,
+                                cls.insert_log(session, model.create_emp_no,
                                                SqlOperationTypeEnum.ONLY_INSERT, model,
                                                key=model.id))
                     # 这里直接return了，不会继续走下面的add
@@ -137,7 +137,7 @@ class PikaMapper(object):
             ss.expunge(model)
             if log:
                 await asyncio.create_task(
-                    cls.insert_log(ss, model.operator, SqlOperationTypeEnum.ONLY_INSERT, model,
+                    cls.insert_log(ss, model.create_emp_no, SqlOperationTypeEnum.ONLY_INSERT, model,
                                    key=model.id))
             return model
         except Exception as e:
@@ -160,7 +160,7 @@ class PikaMapper(object):
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def update_record_by_id(cls, operator: int, model, not_null=False, log=False):
+    async def update_record_by_id(cls, operator: str, model, not_null=False, log=False):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -204,7 +204,7 @@ class PikaMapper(object):
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def delete_record_by_id(cls, session, operator: int, value: int, log=True, key='id',
+    async def delete_record_by_id(cls, session, operator: str, value: int, log=True, key='id',
                                   exists=True,
                                   session_begin=False):
         """
@@ -399,10 +399,13 @@ class PikaMapper(object):
         Returns:
         """
         alias = getattr(now, PikaAppConfig.ALIAS, {})
-        current_value = getattr(now, name, None)
-        current_value = cls.get_json_field(current_value)
-        old_value = getattr(old, name, None) if old is not None else None
-        old_value = cls.get_json_field(old_value)
+        current_value = None
+        old_value = None
+        if name:
+            current_value = getattr(now, name, None)
+            current_value = cls.get_json_field(current_value)
+            old_value = getattr(old, name, None) if old is not None else None
+            old_value = cls.get_json_field(old_value)
         if relation is not None:
             for r in relation:
                 if r.field.name == name:

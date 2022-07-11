@@ -198,7 +198,7 @@ class RedisHelper(object):
 
     @staticmethod
     @awaitable
-    def set_address_record(operator: int, address: str, regex: str):
+    def set_address_record(operator: str, address: str, regex: str):
         """
         设置录制状态
         Args:

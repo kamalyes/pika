@@ -91,7 +91,7 @@ class ProjectDao(PikaMapper):
         return list(ans) if len(ans) > 0 else None
 
     @classmethod
-    async def is_project_admin(cls, session, project_id: int, operator: int):
+    async def is_project_admin(cls, session, project_id: int, operator: str):
         query = await session.execute(
             select(ProjectModel.owner).where(ProjectModel.id == project_id))
         return query.scalars().first() == operator
@@ -113,7 +113,7 @@ class ProjectDao(PikaMapper):
                 session.add(pr)
 
     @classmethod
-    async def update_avatar(cls, project_id: int, operator: int, user_role: int, file_url: str):
+    async def update_avatar(cls, project_id: int, operator: str, user_role: int, file_url: str):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -394,7 +394,7 @@ class ProjectRoleDao(PikaMapper):
             raise Exception(f"更新用户角色失败: {e}")
 
     @staticmethod
-    async def delete_project_role(role_id: int, operator: int, user_role: int) -> None:
+    async def delete_project_role(role_id: int, operator: str, user_role: int) -> None:
         """
         删除用户角色
         Args:

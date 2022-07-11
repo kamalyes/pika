@@ -241,6 +241,7 @@ class DatabaseHelper(object):
             dist.delete_date = int(time.time() * 1000)
         dist.update_date = datetime.now()
         dist.update_emp_no = operator
+        dist.is_delete = 1
 
     @classmethod
     def where(cls, param, sentence, condition: List):

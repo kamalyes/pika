@@ -9,20 +9,16 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from pydantic import BaseModel, validator
+from fastapi import Body
+from pydantic import BaseModel
 
-from app.schema.base import PikaBaseModel
+from app.enums.ByteSizeEnum import ByteSizeEnum
 
 
 class GConfigForm(BaseModel):
-    id: int = None
-    key: str
-    value: str
-    env: str = None
-    key_type: int
-    enable: bool
-
-    # noinspection PyMethodParameters
-    @validator("key", "value", "key_type", "enable")
-    def name_not_empty(cls, v):
-        return PikaBaseModel.not_empty(v)
+    id: int = Body(None, name="id")
+    key: str = Body(None, name="key", max_length=ByteSizeEnum.LENGTH_56)
+    value: str = Body(None, name="value", max_length=ByteSizeEnum.LENGTH_1W)
+    env: int = Body(None, name="环境id")
+    key_type: int = Body(None, name="参数类型 0: string 1: json 2: yaml")
+    is_usable: bool = Body(True, name="是否可用")

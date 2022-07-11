@@ -29,13 +29,13 @@ router = APIRouter()
 @router.get("/list", summary="测试计划列表查询")
 async def list_test_plan(page: int, size: int, project_id: int = None, name: str = "",
                          priority: str = '',
-                         operator: int = None, follow: bool = None,
+                         operator: str = None, follow: bool = None,
                          user_info=Depends(Permission())):
     try:
         data, total = await ApiTestPlanDao.list_test_plan(page, size, project_id=project_id,
                                                           name=name,
                                                           follow=follow, priority=priority,
-                                                          role=user_info['role'],
+                                                          role=user_info["identity"],
                                                           operator=operator,
                                                           emp_no=user_info['emp_no'])
 

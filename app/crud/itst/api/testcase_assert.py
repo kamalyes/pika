@@ -60,7 +60,7 @@ class ApiTestCaseModelAssertsDao(PikaMapper):
             raise Exception(f"获取用例断言失败: {str(e)}")
 
     @staticmethod
-    async def insert_test_case_asserts(form: TestCaseAssertsForm, operator: int):
+    async def insert_test_case_asserts(form: TestCaseAssertsForm, operator: str):
         try:
             ans = None
             async with async_session() as session:
@@ -86,7 +86,7 @@ class ApiTestCaseModelAssertsDao(PikaMapper):
 
     @classmethod
     async def update_test_case_asserts(cls, form: TestCaseAssertsForm,
-                                       operator: int) -> ApiTestCaseAssertsModel:
+                                       operator: str) -> ApiTestCaseAssertsModel:
         """
         更新用例断言
         Args:
@@ -115,7 +115,7 @@ class ApiTestCaseModelAssertsDao(PikaMapper):
             raise Exception(f"编辑用例断言失败, {e}")
 
     @classmethod
-    async def delete_test_case_asserts(cls, id: int, operator: int) -> None:
+    async def delete_test_case_asserts(cls, id: int, operator: str) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():

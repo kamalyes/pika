@@ -26,7 +26,7 @@ class PikaRecorder(object):
 
     # noinspection PyMethodMayBeStatic
     async def response(self, flow):
-        if "Pika.fun" in flow.request.url or flow.request.method.lower() == "options" or \
+        if "pika.fun" in flow.request.url or flow.request.method.lower() == "options" or \
                 flow.request.url.endswith(("js", "css", "ttf", "jpg", "svg", "gif")):
             # 如果是Pika，options请求，js等url直接拒绝
             return

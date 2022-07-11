@@ -18,22 +18,17 @@ from app.models.basic import LargeBaseModel
 
 class GConfigModel(LargeBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_gconfig'
-    env = Column(INT)
-    key = Column(String(ByteSizeEnum.LENGTH_16))
-    value = Column(TEXT)
-    key_type = Column(INT, nullable=False, comment="0: string 1: json 2: yaml")
+    env = Column(INT, comment="环境")
+    key = Column(String(ByteSizeEnum.LENGTH_56), comment="key")
+    value = Column(TEXT, comment="变量")
+    key_type = Column(INT, nullable=False, comment="参数类型 0: string 1: json 2: yaml")
 
     __table_args__ = (
         UniqueConstraint('env', 'key'),
     )
 
-    __fields__ = (env, key)
-    __tag__ = "全局变量"
-    __alias__ = dict(env="环境", key="名称", key_type="类型", value="值")
-    __show__ = 2
-
-    def __init__(self, env, key, value, key_type, emp_no, id=None):
-        super().__init__(emp_no, id)
+    def __init__(self, env, key, value, key_type, operator, is_usable, id=None):
+        super().__init__(operator, is_usable, id)
         self.env = env
         self.key = key
         self.value = value

@@ -26,7 +26,7 @@ from app.utils.decorator import dao
 class ApiTestCaseDataDao(PikaMapper):
 
     @classmethod
-    async def insert_testcase_data(cls, form: ApiTestCaseDataForm, operator: int):
+    async def insert_testcase_data(cls, form: ApiTestCaseDataForm, operator: str):
         try:
             async with async_session() as session:
                 async with session.begin():

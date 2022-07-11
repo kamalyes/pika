@@ -33,7 +33,7 @@ class ApiTestPlanDao(PikaMapper):
     @staticmethod
     async def list_test_plan(page: int, size: int, project_id: int = None, name: str = '',
                              priority: str = '',
-                             role: str = None, operator: int = None,
+                             role: str = None, operator: str = None,
                              emp_no: int = None, follow: bool = None):
         try:
             async with async_session() as session:
@@ -81,7 +81,7 @@ class ApiTestPlanDao(PikaMapper):
             raise Exception(f"获取测试计划失败: {str(e)}")
 
     @staticmethod
-    async def insert_test_plan(plan: ApiTestPlanForm, operator: int) -> ApiTestPlanModel:
+    async def insert_test_plan(plan: ApiTestPlanForm, operator: str) -> ApiTestPlanModel:
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -179,7 +179,7 @@ class ApiTestPlanDao(PikaMapper):
     #         raise Exception(f"删除失败: {str(e)}")
 
     @staticmethod
-    async def follow_test_plan(plan_id: int, operator: int):
+    async def follow_test_plan(plan_id: int, operator: str):
         """
         关注测试计划
         Args:
@@ -203,7 +203,7 @@ class ApiTestPlanDao(PikaMapper):
                 session.add(model)
 
     @staticmethod
-    async def unfollow_test_plan(plan_id: int, operator: int):
+    async def unfollow_test_plan(plan_id: int, operator: str):
         """
         取关测试计划
         Args:
@@ -226,7 +226,7 @@ class ApiTestPlanDao(PikaMapper):
                 ans.delete_date = int(time.time() * 1000)
 
     @staticmethod
-    async def query_user_follow_test_plan(operator: int):
+    async def query_user_follow_test_plan(operator: str):
         """
         根据用户id查询出用户关注的测试计划执行数据
         Args:

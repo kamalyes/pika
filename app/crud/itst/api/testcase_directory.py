@@ -43,7 +43,7 @@ class ApiTestCaseDirectoryDao(object):
             async with async_session() as session:
                 sql = select(ApiTestCaseDirectoryModel) \
                     .where(ApiTestCaseDirectoryModel.is_delete == 0,
-                           ApiTestCaseDirectoryModel.project_id == project_id) \
+                           ApiTestCaseDirectoryModel.id == project_id) \
                     .order_by(asc(ApiTestCaseDirectoryModel.name))
                 result = await session.execute(sql)
                 return result.scalars().all()
@@ -60,7 +60,7 @@ class ApiTestCaseDirectoryDao(object):
                         ApiTestCaseDirectoryModel.is_delete == 0,
                         ApiTestCaseDirectoryModel.name == form.name,
                         ApiTestCaseDirectoryModel.parent == form.parent,
-                        ApiTestCaseDirectoryModel.project_id == form.project_id)
+                        ApiTestCaseDirectoryModel.id == form.project_id)
                     result = await session.execute(sql)
                     if result.scalars().first() is not None:
                         raise Exception("目录已存在")

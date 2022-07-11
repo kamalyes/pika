@@ -37,7 +37,7 @@ class EditDeptModel(BaseModel):
     dept_name: Optional[str] = Body(..., title="部门名称", min_length=2,
                                     max_length=ByteSizeEnum.LENGTH_255)
     description: Optional[str] = Body(None, title="备注信息", max_length=ByteSizeEnum.LENGTH_255)
-    is_enabled: Optional[int] = Body(1, title="禁用/启用 1：启用、0：禁用")
+    is_usable: Optional[int] = Body(1, title="禁用/启用 1：启用、0：禁用")
 
     class Config:
         orm_mode = True

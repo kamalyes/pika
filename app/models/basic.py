@@ -10,7 +10,6 @@
 @Desc    :  公共基础字段
 """
 
-from datetime import datetime
 from typing import Tuple
 
 from sqlalchemy import INT, DATETIME, Column, String, BOOLEAN, text
@@ -45,13 +44,13 @@ class LargeBaseModel(Base):
     __alias__ = dict(name="名称")
     __show__ = 1
 
-    def __init__(self, description=None, operator=None, is_usable=1, is_delete=0, id=0):
+    def __init__(self, operator=None, description=None, delete_date=None, is_usable=1, is_delete=0, id=0):
         self.id = id
         self.create_emp_no = operator
         self.update_emp_no = operator
         self.is_usable = is_usable
         self.is_delete = is_delete
-        self.delete_date = datetime.now()
+        self.delete_date = delete_date
         self.description = description
 
 

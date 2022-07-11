@@ -15,13 +15,13 @@ class ConstructorForm(BaseModel):
     name: Optional[str] = Body("", title="", max_length=ByteSizeEnum.LENGTH_255)
     index: Optional[int] = Body(0, title="前置条件顺序")
     constructor_json: Optional[str] = Body("", title="constructor_json")
-    enable: Optional[bool] = Body(None, title="密保问题")
+    is_usable: Optional[bool] = Body(None, title="是否可用")
     case_id: Optional[int] = Body(0, title="所属用例id")
     public: Optional[bool] = Body(False, title="是否共享")
     suffix: Optional[bool] = Body(False, title="是否是后置条件，默认为否")
 
     # noinspection PyMethodParameters
-    @validator("name", "constructor_json", "type", "public", "enable", "suffix")
+    @validator("name", "constructor_json", "type", "public", "is_usable", "suffix")
     def name_not_empty(cls, v):
         if isinstance(v, str) and len(v.strip()) == 0:
             raise VariablesNullError("不能为空")

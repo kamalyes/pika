@@ -101,7 +101,7 @@ async def query_testcase(caseId: int, _=Depends(Permission())):
 # @router.get("/list")
 # async def query_testcase(user_info=Depends(Permission())):
 #     try:
-#         projects, _, _ = ProjectDao.list_project(user_info["role"], user_info["id"], 1, 2000)
+#         projects, _, _ = ProjectDao.list_project(user_info["role"], user_info["emp_no"], 1, 2000)
 #         data = ApiTestCaseDao.list_testcase_tree(projects)
 #         return dict(code=0, data=data, msg="操作成功")
 #     except Exception as e:
@@ -237,12 +237,20 @@ async def get_testcase_directory(project_id: int, move: bool = False,
     return PikaResponse.success(data=tree_data)
 
 
-# 获取case目录+case
 @router.get("/tree")
 async def get_directory_and_case(project_id: int, user_info=Depends(Permission())):
+    """
+    获取case目录+case
+    Args:
+        project_id:
+        user_info:
+
+    Returns:
+
+    """
     try:
-        directory_tree_map = (project_id, ApiTestCaseDao.get_test_case_by_directory_id)
-        tree_data, cs_map = await ApiTestCaseDirectoryDao.get_directory_tree(directory_tree_map)
+        directory_tree_map = {"project_id": project_id, "case_node": ApiTestCaseDao.get_test_case_by_directory_id}
+        tree_data, cs_map = await ApiTestCaseDirectoryDao.get_directory_tree(**directory_tree_map)
         return PikaResponse.success(data=dict(tree=tree_data, case_map=cs_map))
     except Exception as e:
         return PikaResponse.failed(detail=str(e))
@@ -252,7 +260,7 @@ async def get_directory_and_case(project_id: int, user_info=Depends(Permission()
 async def query_testcase_directory(directory_id: int, user_info=Depends(Permission())):
     try:
         data = await ApiTestCaseDirectoryDao.query_directory(directory_id)
-        await ProjectRoleDao.read_permission(data.project_id, user_info["id"], user_info['role'])
+        await ProjectRoleDao.read_permission(data.project_id, user_info["emp_no"], user_info["identity"])
         return PikaResponse.success(data=data)
     except AuthException:
         return PikaResponse.forbidden()
@@ -320,7 +328,7 @@ async def delete_testcase_data(id: int, user_info=Depends(Permission())):
 async def move_testcase(form: MoveApiTestCaseFrom, user_info=Depends(Permission())):
     try:
         # 判断是否有移动case的权限
-        await ProjectRoleDao.read_permission(form.project_id, user_info["id"], user_info['role'])
+        await ProjectRoleDao.read_permission(form.project_id, user_info["emp_no"], user_info["identity"])
         await ApiTestCaseDao.update_by_map(user_info['emp_no'],
                                            ApiTestCaseModel.id.in_(form.id_list),
                                            directory_id=form.directory_id)
