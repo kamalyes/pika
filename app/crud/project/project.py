@@ -68,7 +68,7 @@ class ProjectDao(PikaMapper):
             raise Exception(f"获取用户: {operator_emp_no}项目列表失败")
 
     @classmethod
-    async def list_project_id_by_user(cls, session, emp_no, role):
+    async def list_project_id_by_user(cls, session, operator_emp_no, role):
         """
         获取用户可见的项目
         :return:
@@ -77,13 +77,13 @@ class ProjectDao(PikaMapper):
             return []
         ans = set()
         # 找到包含用户的角色
-        sel_role2user = select(ProjectRoleModel.project_id).where(ProjectRoleModel.emp_no == emp_no)
+        sel_role2user = select(ProjectRoleModel.project_id).where(ProjectRoleModel.emp_no == operator_emp_no)
         roles = await session.execute(sel_role2user)
         for r in roles.all():
             ans.add(r[0])
         # 找到未删除的项目
         sel_not_del_dt = select(ProjectModel.id).where(
-            or_(ProjectModel.private is False, ProjectModel.owner == emp_no),
+            or_(ProjectModel.private is False, ProjectModel.owner == operator_emp_no),
             ProjectModel.is_delete == 0)
         roles = await session.execute(sel_not_del_dt)
         for r in roles.all():
@@ -91,10 +91,10 @@ class ProjectDao(PikaMapper):
         return list(ans) if len(ans) > 0 else None
 
     @classmethod
-    async def is_project_admin(cls, session, project_id: int, operator: str):
+    async def is_project_admin(cls, session, project_id: int, operator_emp_no: str):
         query = await session.execute(
             select(ProjectModel.owner).where(ProjectModel.id == project_id))
-        return query.scalars().first() == operator
+        return query.scalars().first() == operator_emp_no
 
     @classmethod
     async def add_project(cls, name, app, owner, operator_emp_no, private, description, dingtalk_url='',

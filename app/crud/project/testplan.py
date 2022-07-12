@@ -52,12 +52,12 @@ class ApiTestPlanDao(PikaMapper):
                                              conditions)
                 DatabaseHelper.where(name, ApiTestPlanModel.name.like(f"%{name}%"), conditions) \
                     .where(priority, ApiTestPlanModel.priority == priority, conditions) \
-                    .where(operator, ApiTestPlanModel.operator == operator, conditions)
+                    .where(operator, ApiTestPlanModel.create_emp_no == operator, conditions)
                 if follow is None:
                     sql = select(ApiTestPlanModel, ApiTestPlanFollowUserRelModel.id) \
                         .outerjoin(ApiTestPlanFollowUserRelModel,
                                    and_(
-                                       ApiTestPlanFollowUserRelModel.operator_emp_no == operator_emp_no,
+                                       ApiTestPlanFollowUserRelModel.emp_no == operator_emp_no,
                                        ApiTestPlanFollowUserRelModel.is_delete == 0,
                                        ApiTestPlanFollowUserRelModel.plan_id == ApiTestPlanModel.id)) \
                         .where(*conditions)
@@ -66,7 +66,7 @@ class ApiTestPlanDao(PikaMapper):
                         .outerjoin(ApiTestPlanFollowUserRelModel,
                                    ApiTestPlanFollowUserRelModel.plan_id == ApiTestPlanModel.id,
                                    ).where(
-                        *conditions, ApiTestPlanFollowUserRelModel.operator_emp_no == operator_emp_no,
+                        *conditions, ApiTestPlanFollowUserRelModel.emp_no == operator_emp_no,
                                      ApiTestPlanFollowUserRelModel.is_delete == 0)
                 else:
                     sql = select(ApiTestPlanModel, null().label('null_bar')) \
