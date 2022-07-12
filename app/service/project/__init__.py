@@ -10,3 +10,4 @@
 @Desc    :  None
 """
 from app.service.project.project import router as project_router
+from app.service.project.project_role import router as project_role_router

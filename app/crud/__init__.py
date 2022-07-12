@@ -146,13 +146,13 @@ class PikaMapper(object):
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def update_by_map(cls, emp_no, *condition, **kwargs):
+    async def update_by_map(cls, operator_emp_no, *condition, **kwargs):
         try:
             async with async_session() as session:
                 async with session.begin():
                     sql = update(cls.model).where(*condition).values(**kwargs,
                                                                      update_date=datetime.now(),
-                                                                     update_emp_no=emp_no)
+                                                                     update_emp_no=operator_emp_no)
                     await session.execute(sql)
         except Exception as e:
             cls.log.error(f"更新数据失败: {e}")
@@ -160,7 +160,7 @@ class PikaMapper(object):
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def update_record_by_id(cls, operator: str, model, not_null=False, log=False):
+    async def update_record_by_id(cls, operator_emp_no: str, model, not_null=False, log=False):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -170,13 +170,13 @@ class PikaMapper(object):
                     if now is None:
                         raise Exception("数据不存在")
                     old = deepcopy(now)
-                    changed = DatabaseHelper.update_model(now, model, operator, not_null)
+                    changed = DatabaseHelper.update_model(now, model, operator_emp_no, not_null)
                     await session.flush()
                     session.expunge_all()
                 if log:
                     async with session.begin():
                         await asyncio.create_task(
-                            cls.insert_log(session, operator, SqlOperationTypeEnum.ONLY_UPDATE, now,
+                            cls.insert_log(session, operator_emp_no, SqlOperationTypeEnum.ONLY_UPDATE, now,
                                            old, model.id,
                                            changed=changed))
                 return now
@@ -185,7 +185,7 @@ class PikaMapper(object):
             raise Exception(f"更新数据失败")
 
     @classmethod
-    async def _inner_delete(cls, session, operator, value, log, key, exists):
+    async def _inner_delete(cls, session, operator_emp_no, value, log, key, exists):
         query = cls.query_wrapper(**{key: value})
         result = await session.execute(query)
         original = result.scalars().first()
@@ -193,25 +193,25 @@ class PikaMapper(object):
             if exists:
                 raise ValidException(detail="记录不存在")
             return None
-        DatabaseHelper.delete_model(original, operator)
+        DatabaseHelper.delete_model(original, operator_emp_no)
         await session.flush()
         session.expunge(original)
         if log:
             await asyncio.create_task(
-                cls.insert_log(session, operator, SqlOperationTypeEnum.ONLY_DELETE, original,
+                cls.insert_log(session, operator_emp_no, SqlOperationTypeEnum.ONLY_DELETE, original,
                                key=value))
             return original
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def delete_record_by_id(cls, session, operator: str, value: int, log=True, key='id',
+    async def delete_record_by_id(cls, session, operator_emp_no: str, value: int, log=True, key='id',
                                   exists=True,
                                   session_begin=False):
         """
         逻辑删除
         Args:
             session:
-            operator:
+            operator_emp_no:
             value:
             log:
             key:
@@ -224,16 +224,16 @@ class PikaMapper(object):
         try:
             if session_begin:
                 # 说明在外面已经开启了session
-                return await cls._inner_delete(session, operator, value, log, key, exists)
+                return await cls._inner_delete(session, operator_emp_no, value, log, key, exists)
             async with session.begin():
-                return await cls._inner_delete(session, operator, value, log, key, exists)
+                return await cls._inner_delete(session, operator_emp_no, value, log, key, exists)
         except Exception as e:
             cls.log.exception(f"删除{cls.model.__name__}记录失败: \n{e}")
             raise ValidException(detail=f"删除失败,\n{e}")
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def delete_records(cls, session, operator, id_list: List[int], column="id", log=True):
+    async def delete_records(cls, session, operator_emp_no, id_list: List[int], column="id", log=True):
         try:
             for id_ in id_list:
                 query = cls.query_wrapper(**{column: id_})
@@ -242,12 +242,12 @@ class PikaMapper(object):
                 if original is None:
                     continue
                     # raise Exception("记录不存在")
-                DatabaseHelper.delete_model(original, operator)
+                DatabaseHelper.delete_model(original, operator_emp_no)
                 await session.flush()
                 session.expunge(original)
                 if log:
                     await asyncio.create_task(
-                        cls.insert_log(session, operator, SqlOperationTypeEnum.ONLY_DELETE,
+                        cls.insert_log(session, operator_emp_no, SqlOperationTypeEnum.ONLY_DELETE,
                                        original, key=id_))
         except Exception as e:
             cls.log.exception(f"删除{cls.model}记录失败, error: {e}")

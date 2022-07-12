@@ -90,7 +90,7 @@ class DbConfigDao(object):
             raise Exception("编辑数据库配置失败")
 
     @staticmethod
-    async def delete_database(id: int, operator: str):
+    async def delete_database(id: int, operator_emp_no: str):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -101,7 +101,7 @@ class DbConfigDao(object):
                     if query is None:
                         raise Exception("数据库配置不存在或已删除")
                     query.delete_date = datetime.now()
-                    query.update_emp_no = operator
+                    query.update_emp_no = operator_emp_no
         except Exception as e:
             DbConfigDao.log.error(f"删除数据库配置: {id}失败, {e}")
             raise Exception("删除数据库配置失败")

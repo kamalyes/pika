@@ -33,26 +33,28 @@ async def add_mock_deploy(request: EditMockModel):
 
 @router.delete("/mock/delete", summary="删除mock配置（软删）")
 async def delete_mock_deploy(request: DelMockModel = Depends(),
-                             emp_no=Depends(Permission(return_emp_no=True))):
+                             escarole=Depends(Permission(escarole=True))):
+    emp_no, role = escarole
     return await MockDao.delete_mock_deploy(request=request, emp_no=emp_no)
 
 
 @router.post("/mock/update", summary="编辑mock配置")
 async def update_mock_deploy(request: EditMockModel,
-                             emp_no=Depends(Permission(return_emp_no=True))):
+                             escarole=Depends(Permission(escarole=True))):
+    emp_no, role = escarole
     return await MockDao.update_mock_deploy(request=request, emp_no=emp_no)
 
 
 @router.get("/mock/list", summary="分页获取mock配置", response_model=LimitOffsetPage[QueryMockOutModel])
 async def list_mock_deploy(request: QueryMockInModel = Depends(),
-                           emp_no=Depends(Permission(return_emp_no=True)),
+                           escarole=Depends(Permission(escarole=True)),
                            db: AsyncSession = Depends(pagination_db)) -> Any:
     return await MockDao.list_mock_deploy(db, request)
 
 
 @router.get("/mock/call", summary="请求mock返回")
 async def call_mock_template(request: PikaOnlyIdModel = Depends(),
-                             emp_no=Depends(Permission(return_emp_no=True))) -> Any:
+                             escarole=Depends(Permission(escarole=True))) -> Any:
     return await MockDao.call_mock_template(request)
 
 

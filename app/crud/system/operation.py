@@ -25,11 +25,11 @@ from app.utils.decorator import dao
 class PikaOperationDao(PikaMapper):
 
     @classmethod
-    async def count_user_activities(cls, operator, start_time: datetime, end_time: datetime):
+    async def count_user_activities(cls, operator_emp_no, start_time: datetime, end_time: datetime):
         """
         根据开始/结束时间 获取用户的活动日历（操作记录的数量）
         Args:
-            operator:
+            operator_emp_no:
             start_time:
             end_time:
 
@@ -41,7 +41,7 @@ class PikaOperationDao(PikaMapper):
                 sql = select(OperationLogModel.operator_date,
                              func.count(OperationLogModel.id)).where(
                     OperationLogModel.operator_date.between(start_time, end_time),
-                    OperationLogModel.operator == operator) \
+                    OperationLogModel.operator == operator_emp_no) \
                     .group_by(OperationLogModel.operator_date).order_by(
                     OperationLogModel.operator_date)
                 data = await session.execute(sql)

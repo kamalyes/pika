@@ -51,6 +51,7 @@ from app.service.online import redis_router
 from app.service.online import script_router
 from app.service.online import sql_router
 from app.service.project import project_router
+from app.service.project import project_role_router
 from app.service.rbac import access_router
 from app.service.rbac import kerberos_router
 from app.service.rbac import menus_router
@@ -345,6 +346,9 @@ class PikaFastApi:
 
         # itst
         pika.include_router(project_router, prefix="/project", tags=["项目"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+        pika.include_router(project_role_router, prefix="/project", tags=["项目"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
         pika.include_router(testplan_router, prefix="/testplan", tags=["测试计划"],

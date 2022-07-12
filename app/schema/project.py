@@ -1,76 +1,32 @@
-from pydantic import validator, BaseModel
+from fastapi import Body
+from pydantic import BaseModel
 
-from app.excpetions.business.ParamsException import VariablesNullError
+from app.enums.ByteSizeEnum import ByteSizeEnum
 
 
 class ProjectForm(BaseModel):
-    name: str
-    app: str
-    owner: str
-    private: bool = False
-    description: str = ''
-    dingtalk_url: str = None
-    qy_wx_url: str = None
-
-    # noinspection PyMethodParameters
-    @validator('name', 'app', 'owner')
-    def name_not_empty(cls, v):
-        if isinstance(v, str) and len(v.strip()) == 0:
-            raise VariablesNullError("不能为空")
-        return v
+    name: str = Body(..., name="项目名称", max_length=ByteSizeEnum.LENGTH_16)
+    app: str = Body(..., name="项目名称", max_length=ByteSizeEnum.LENGTH_32)
+    owner: str = Body(..., name="项目名称", max_length=ByteSizeEnum.LENGTH_16)
+    private: bool = Body(False, name="项目名称")
+    description: str = Body(None, name="项目名称", max_length=ByteSizeEnum.LENGTH_600)
+    dingtalk_url: str = Body(None, name="项目名称", max_length=ByteSizeEnum.LENGTH_128)
+    qy_wx_url: str = Body(None, name="项目名称", max_length=ByteSizeEnum.LENGTH_128)
 
 
-class ProjectEditForm(BaseModel):
-    id: int
-    name: str
-    app: str
-    owner: str
-    private: bool = False
-    description: str = ''
-    dingtalk_url: str = None
-    qy_wx_url: str = None
-
-    # noinspection PyMethodParameters
-    @validator('id', 'name', 'app', 'owner')
-    def name_not_empty(cls, v):
-        if isinstance(v, str) and len(v.strip()) == 0:
-            raise VariablesNullError("不能为空")
-        return v
-
-
-class ProjectRoleModelForm(BaseModel):
-    emp_no: str
-    project_role: int
-    project_id: int
-
-    # noinspection PyMethodParameters
-    @validator('emp_no', 'project_role', 'project_id')
-    def name_not_empty(cls, v):
-        if isinstance(v, str) and len(v.strip()) == 0:
-            raise VariablesNullError("不能为空")
-        return v
-
-
-class ProjectRoleModelEditForm(BaseModel):
-    id: int
-    emp_no: str
-    project_role: int
-    project_id: int
-
-    # noinspection PyMethodParameters
-    @validator('id', 'emp_no', 'project_role', 'project_id')
-    def name_not_empty(cls, v):
-        if isinstance(v, str) and len(v.strip()) == 0:
-            raise VariablesNullError("不能为空")
-        return v
+class ProjectEditForm(ProjectForm):
+    id: int = Body(..., name="项目id")
 
 
 class ProjectDelForm(BaseModel):
-    id: int
+    id: int = Body(..., name="项目id")
 
-    # noinspection PyMethodParameters
-    @validator('id')
-    def name_not_empty(cls, v):
-        if isinstance(v, str) and len(v.strip()) == 0:
-            raise VariablesNullError("不能为空")
-        return v
+
+class ProjectRoleForm(BaseModel):
+    emp_no: str = Body(..., name="员工编号", max_length=ByteSizeEnum.LENGTH_16)
+    project_role: int = Body(..., name="项目角色")
+    project_id: int = Body(..., name="项目id")
+
+
+class ProjectRoleEditForm(ProjectRoleForm):
+    id: int = Body(..., name="项目角色id")

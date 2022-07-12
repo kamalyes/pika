@@ -26,7 +26,7 @@ class GConfigDao(PikaMapper):
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def insert_gconfig(cls, form: GConfigForm, operator: int) -> None:
+    async def insert_gconfig(cls, form: GConfigForm, operator_emp_no: int) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -37,7 +37,7 @@ class GConfigDao(PikaMapper):
                     data = query.scalars().first()
                     if data is not None:
                         raise Exception(f"变量: {data.key}已存在")
-                    config = GConfigModel(**form.dict(), operator=operator)
+                    config = GConfigModel(**form.dict(), operator=operator_emp_no)
                     session.add(config)
         except Exception as e:
             cls.log.error(f"新增变量: {form.key}失败, {e}")

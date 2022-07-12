@@ -12,9 +12,10 @@ router = APIRouter(prefix="/operation")
 
 @router.get("/list", summary="获取用户操作记录")
 async def list_user_operation(request: PikaOperationFrom = Depends(),
-                              operator=Depends(Permission(return_emp_no=True))):
+                              escarole=Depends(Permission(escarole=True))):
+    operator_emp_no, operator_role = escarole
     try:
-        records = await PikaOperationDao.list_record(operator=operator, tag=request.tag, condition=[
+        records = await PikaOperationDao.list_record(operator=operator_emp_no, tag=request.tag, condition=[
             OperationLogModel.operator_date.between(request.start_time, request.end_time)],
                                                      _sort=[desc(OperationLogModel.operator_date)])
         return PikaResponse.records(records)

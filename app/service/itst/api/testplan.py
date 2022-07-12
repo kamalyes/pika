@@ -30,14 +30,15 @@ router = APIRouter()
 async def list_test_plan(page: int, size: int, project_id: int = None, name: str = "",
                          priority: str = '',
                          operator: str = None, follow: bool = None,
-                         user_info=Depends(Permission())):
+                         escarole=Depends(Permission(escarole=True))):
     try:
+        operator_emp_no, operator_identity = escarole
         data, total = await ApiTestPlanDao.list_test_plan(page, size, project_id=project_id,
                                                           name=name,
                                                           follow=follow, priority=priority,
-                                                          role=user_info["identity"],
+                                                          operator_identity=operator_identity,
                                                           operator=operator,
-                                                          emp_no=user_info['emp_no'])
+                                                          operator_emp_no=operator_emp_no)
 
         ans = Scheduler.list_test_plan(data)
         return PikaResponse.success_with_size(data=ans, total=total)

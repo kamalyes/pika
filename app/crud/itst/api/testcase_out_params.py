@@ -50,7 +50,7 @@ class ApiTestCaseOutParametersDao(PikaMapper):
     @classmethod
     @RedisHelper.up_cache("dao")
     async def update_many(cls, case_id: int, data: List[ApiTestCaseOutParametersForm],
-                          operator: str):
+                          operator_emp_no: str):
         result = []
         try:
             async with async_session() as session:
@@ -65,7 +65,7 @@ class ApiTestCaseOutParametersDao(PikaMapper):
                         if item.id is None:
                             # add
                             temp = ApiTestCaseOutParametersModel(**item.dict(), case_id=case_id,
-                                                                 operator=operator)
+                                                                 operator=operator_emp_no)
                             session.add(temp)
                         else:
                             query = await session.execute(
@@ -76,7 +76,7 @@ class ApiTestCaseOutParametersDao(PikaMapper):
                             if temp is None:
                                 # 走新增逻辑
                                 temp = ApiTestCaseOutParametersModel(**item.dict(), case_id=case_id,
-                                                                     operator=operator)
+                                                                     operator=operator_emp_no)
                                 session.add(temp)
                             else:
                                 temp.name = item.name
@@ -84,7 +84,7 @@ class ApiTestCaseOutParametersDao(PikaMapper):
                                 temp.expression = item.expression
                                 temp.source = item.source
                                 temp.match_index = item.match_index
-                                temp.update_user = operator
+                                temp.update_user = operator_emp_no
                                 temp.update_date = datetime.now()
                         await session.flush()
                         session.expunge(temp)

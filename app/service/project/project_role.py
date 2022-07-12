@@ -9,25 +9,29 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from fastapi import Depends
+from fastapi import Depends, APIRouter
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud.project.project import ProjectRoleDao
 from app.models.project import ProjectRoleModel
-from app.schema.project import ProjectRoleModelForm, ProjectRoleModelEditForm, ProjectDelForm
+from app.schema.project import ProjectRoleForm, ProjectRoleEditForm, ProjectDelForm
 from app.service import Permission
-from app.service.project.project import router
+
+router = APIRouter()
 
 
 @router.post("/role/insert")
-async def insert_project_role(role: ProjectRoleModelForm, user_info=Depends(Permission())):
+async def insert_project_role(role: ProjectRoleForm, escarole=Depends(Permission())):
     try:
-        operator, identity = user_info["emp_no"], user_info["identity"]
+        operator_emp_no, operator_identity = escarole
         query = await ProjectRoleDao.query_record(emp_no=role.emp_no, project_id=role.project_id)
         if query is not None:
             raise Exception("该用户已存在")
-        await ProjectRoleDao.has_permission(role.project_id, role.project_role, operator, user_info)
-        model = ProjectRoleModel(**role.dict(), operator=operator)
+        await ProjectRoleDao.has_permission(project_id=role.project_id,
+                                            project_role=role.project_role,
+                                            operator_emp_no=operator_emp_no,
+                                            operator_identity=operator_identity)
+        model = ProjectRoleModel(**role.dict(), operator=operator_emp_no)
         await ProjectRoleDao.insert_record(model, True)
     except Exception as e:
         return PikaResponse.failed(detail=str(e))
@@ -35,14 +39,14 @@ async def insert_project_role(role: ProjectRoleModelForm, user_info=Depends(Perm
 
 
 @router.post("/role/update")
-async def update_project_role(role: ProjectRoleModelEditForm, user_info=Depends(Permission())):
-    operator, identity = user_info["emp_no"], user_info["identity"]
-    await ProjectRoleDao.update_project_role(role, operator, identity)
+async def update_project_role(prole: ProjectRoleEditForm, escarole=Depends(Permission())):
+    operator_emp_no, operator_identity = escarole
+    await ProjectRoleDao.update_project_role(prole, operator_emp_no, operator_identity)
     return PikaResponse.success()
 
 
 @router.post("/role/delete")
-async def delete_project_role(role: ProjectDelForm, user_info=Depends(Permission())):
-    operator, identity = user_info["emp_no"], user_info["identity"]
-    await ProjectRoleDao.delete_project_role(role.id, operator, identity)
+async def delete_project_role(prole: ProjectDelForm, escarole=Depends(Permission(escarole=True))):
+    operator_emp_no, operator_identity = escarole
+    await ProjectRoleDao.delete_project_role(prole.id, operator_emp_no, operator_identity)
     return PikaResponse.success()

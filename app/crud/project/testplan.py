@@ -33,8 +33,8 @@ class ApiTestPlanDao(PikaMapper):
     @staticmethod
     async def list_test_plan(page: int, size: int, project_id: int = None, name: str = '',
                              priority: str = '',
-                             role: str = None, operator: str = None,
-                             emp_no: int = None, follow: bool = None):
+                             operator_identity: str = None, operator: str = None,
+                             operator_emp_no: int = None, follow: bool = None):
         try:
             async with async_session() as session:
                 conditions = [ApiTestPlanModel.is_delete == 0]
@@ -43,7 +43,7 @@ class ApiTestPlanDao(PikaMapper):
                                          conditions)
                 else:
                     # 找出用户能看到的项目
-                    projects = await ProjectDao.list_project_id_by_user(session, operator, role)
+                    projects = await ProjectDao.list_project_id_by_user(session, operator_emp_no, operator_identity)
                     if projects is None:
                         # 说明用户一个项目都没有，不需要继续查询了
                         return [], 0
@@ -57,7 +57,7 @@ class ApiTestPlanDao(PikaMapper):
                     sql = select(ApiTestPlanModel, ApiTestPlanFollowUserRelModel.id) \
                         .outerjoin(ApiTestPlanFollowUserRelModel,
                                    and_(
-                                       ApiTestPlanFollowUserRelModel.operator == operator,
+                                       ApiTestPlanFollowUserRelModel.operator_emp_no == operator_emp_no,
                                        ApiTestPlanFollowUserRelModel.is_delete == 0,
                                        ApiTestPlanFollowUserRelModel.plan_id == ApiTestPlanModel.id)) \
                         .where(*conditions)
@@ -66,7 +66,7 @@ class ApiTestPlanDao(PikaMapper):
                         .outerjoin(ApiTestPlanFollowUserRelModel,
                                    ApiTestPlanFollowUserRelModel.plan_id == ApiTestPlanModel.id,
                                    ).where(
-                        *conditions, ApiTestPlanFollowUserRelModel.operator == operator,
+                        *conditions, ApiTestPlanFollowUserRelModel.operator_emp_no == operator_emp_no,
                                      ApiTestPlanFollowUserRelModel.is_delete == 0)
                 else:
                     sql = select(ApiTestPlanModel, null().label('null_bar')) \
@@ -226,11 +226,11 @@ class ApiTestPlanDao(PikaMapper):
                 ans.delete_date = int(time.time() * 1000)
 
     @staticmethod
-    async def query_user_follow_test_plan(operator: str):
+    async def query_user_follow_test_plan(operator_emp_no: str):
         """
         根据用户id查询出用户关注的测试计划执行数据
         Args:
-            operator:
+            operator_emp_no:    操作者员工编号
 
         Returns:
 
@@ -242,7 +242,7 @@ class ApiTestPlanDao(PikaMapper):
                 .outerjoin(ApiTestPlanFollowUserRelModel,
                            ApiTestPlanFollowUserRelModel.plan_id == ApiTestPlanModel.id,
                            ).where(
-                ApiTestPlanFollowUserRelModel.emp_no == operator,
+                ApiTestPlanFollowUserRelModel.emp_no == operator_emp_no,
                 ApiTestPlanFollowUserRelModel.is_delete == 0,
                 ApiTestPlanModel.is_delete == 0)
             data = await session.execute(sql)

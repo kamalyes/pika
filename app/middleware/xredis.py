@@ -198,11 +198,11 @@ class RedisHelper(object):
 
     @staticmethod
     @awaitable
-    def set_address_record(operator: str, address: str, regex: str):
+    def set_address_record(operator_emp_no: str, address: str, regex: str):
         """
         设置录制状态
         Args:
-            operator:
+            operator_emp_no:    操作者员工编号
             address:
             regex: 录制的url正则
 
@@ -210,7 +210,7 @@ class RedisHelper(object):
 
         """
         # 默认录制1小时
-        value = json.dumps({"operator": operator, "regex": regex}, ensure_ascii=False)
+        value = json.dumps({"operator": operator_emp_no, "regex": regex}, ensure_ascii=False)
         RedisHelper.pika_redis_client.set(RedisHelper.get_key(f"record:ip:{address}"), value,
                                           ex=3600)
         # 清楚上次录制数据

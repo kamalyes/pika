@@ -192,13 +192,13 @@ class DatabaseHelper(object):
             self.connections.pop(key)
 
     @staticmethod
-    def update_model(dist, source, operator=None, not_null=False):
+    def update_model(dist, source, operator_emp_no=None, not_null=False):
         """
 
         Args:
             dist:
             source:
-            operator:
+            operator_emp_no:
             not_null:
 
         Returns:
@@ -220,17 +220,17 @@ class DatabaseHelper(object):
                 if getattr(dist, var) != value:
                     changed.append(var)
                     setattr(dist, var, value)
-        if operator:
-            setattr(dist, 'update_emp_no', operator)
+        if operator_emp_no:
+            setattr(dist, 'update_emp_no', operator_emp_no)
         return changed
 
     @staticmethod
-    def delete_model(dist, operator):
+    def delete_model(dist, operator_emp_no):
         """
         删除数据
         Args:
             dist:
-            operator:
+            operator_emp_no:
 
         Returns:
 
@@ -240,7 +240,7 @@ class DatabaseHelper(object):
         else:
             dist.delete_date = int(time.time() * 1000)
         dist.update_date = datetime.now()
-        dist.update_emp_no = operator
+        dist.update_emp_no = operator_emp_no
         dist.is_delete = 1
 
     @classmethod

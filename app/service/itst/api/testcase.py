@@ -257,10 +257,11 @@ async def get_directory_and_case(project_id: int, user_info=Depends(Permission()
 
 
 @router.get("/directory/query")
-async def query_testcase_directory(directory_id: int, user_info=Depends(Permission())):
+async def query_testcase_directory(directory_id: int, escarole=Depends(Permission(escarole=True))):
+    operator_emp_no, operator_identity = escarole
     try:
         data = await ApiTestCaseDirectoryDao.query_directory(directory_id)
-        await ProjectRoleDao.read_permission(data.project_id, user_info["emp_no"], user_info["identity"])
+        await ProjectRoleDao.read_permission(data.project_id, operator_emp_no, operator_identity)
         return PikaResponse.success(data=data)
     except AuthException:
         return PikaResponse.forbidden()
@@ -325,11 +326,12 @@ async def delete_testcase_data(id: int, user_info=Depends(Permission())):
 
 
 @router.post("/move", summary="移动case到其他目录")
-async def move_testcase(form: MoveApiTestCaseFrom, user_info=Depends(Permission())):
+async def move_testcase(form: MoveApiTestCaseFrom, escarole=Depends(Permission(escarole=True))):
     try:
         # 判断是否有移动case的权限
-        await ProjectRoleDao.read_permission(form.project_id, user_info["emp_no"], user_info["identity"])
-        await ApiTestCaseDao.update_by_map(user_info['emp_no'],
+        operator_emp_no, operator_identity = escarole
+        await ProjectRoleDao.read_permission(form.project_id, operator_emp_no, operator_identity)
+        await ApiTestCaseDao.update_by_map(operator_emp_no,
                                            ApiTestCaseModel.id.in_(form.id_list),
                                            directory_id=form.directory_id)
         return PikaResponse.success()
@@ -368,8 +370,7 @@ async def update_testcase_out_parameters(form: ApiTestCaseOutParametersForm,
 @router.get("/parameters/delete")
 async def delete_testcase_out_parameters(id: int, user_info=Depends(Permission()),
                                          session=Depends(get_async_session)):
-    await ApiTestCaseOutParametersDao.delete_record_by_id(session, id, user_info['emp_no'],
-                                                          log=False)
+    await ApiTestCaseOutParametersDao.delete_record_by_id(session, user_info['emp_no'], id, log=False)
     return PikaResponse.success()
 
 

@@ -26,26 +26,29 @@ router = APIRouter()
 
 
 @router.post("/funccase/add", summary="增加功能测试用例")
-async def add_funccase(request: EditFuncCaseModel, emp_no=Depends(Permission(return_emp_no=True))):
+async def add_funccase(request: EditFuncCaseModel, escarole=Depends(Permission(escarole=True))):
+    emp_no, role = escarole
     return await FuncCaseDao.add_funccase(request=request, emp_no=emp_no)
 
 
 @router.delete("/funccase/delete", summary="删除功能测试用例（软删）")
 async def delete_funccase(request: DelFuncCaseModel = Depends(),
-                          emp_no=Depends(Permission(return_emp_no=True))):
+                          escarole=Depends(Permission(escarole=True))):
+    emp_no, role = escarole
     return await FuncCaseDao.delete_funccase(request=request, emp_no=emp_no)
 
 
 @router.post("/funccase/update", summary="编辑功能测试用例")
 async def update_funccase(request: EditFuncCaseModel,
-                          emp_no=Depends(Permission(return_emp_no=True))):
+                          escarole=Depends(Permission(escarole=True))):
+    emp_no, role = escarole
     return await FuncCaseDao.update_funccase(request=request, emp_no=emp_no)
 
 
 @router.get("/funccase/list", summary="分页获取功能测试用例",
             response_model=LimitOffsetPage[QueryFuncCaseOutModel])
 async def list_funccase(request: QueryFuncCaseInModel = Depends(),
-                        emp_no=Depends(Permission(return_emp_no=True)),
+                        escarole=Depends(Permission(escarole=True)),
                         db: AsyncSession = Depends(pagination_db)) -> Any:
     return await FuncCaseDao.list_funccase(db, request)
 
