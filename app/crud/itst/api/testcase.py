@@ -19,14 +19,14 @@ from sqlalchemy.future import select
 from app.core.handler.logger import PikaLogger
 from app.crud import PikaMapper
 from app.crud.itst.api.constructor import ConstructorDao
-from app.crud.itst.api.testcase_assert import ApiTestCaseModelAssertsDao
+from app.crud.itst.api.testcase_assert import ApiTestCaseAssertsDao
 from app.crud.itst.api.testcase_data import ApiTestCaseDataDao
 from app.crud.itst.api.testcase_directory import ApiTestCaseDirectoryDao
 from app.crud.itst.api.testcase_out_params import ApiTestCaseOutParametersDao
 from app.enums.ConstructorEnum import ConstructorTypeEnum
 from app.middleware.xredis import RedisHelper
 from app.models import DatabaseHelper, async_session
-from app.models.admin import UserAdminModel
+from app.models.admin import SysUserAdminModel
 from app.models.api_test_case import ApiTestCaseModel
 from app.models.api_testcase_asserts import ApiTestCaseAssertsModel
 from app.models.api_testcase_data import ApiTestCaseDataModel
@@ -81,12 +81,12 @@ class ApiTestCaseDao(PikaMapper):
 
     @staticmethod
     async def get_case_children(case_id: int):
-        data = await ApiTestCaseModelAssertsDao.list_test_case_asserts(case_id)
+        data = await ApiTestCaseAssertsDao.list_test_case_asserts(case_id)
         return [dict(key=f"asserts_{d.id}", title=d.name, case_id=case_id) for d in data]
 
     @staticmethod
     async def get_case_children_length(case_id: int):
-        data = await ApiTestCaseModelAssertsDao.list_test_case_asserts(case_id)
+        data = await ApiTestCaseAssertsDao.list_test_case_asserts(case_id)
         return len(data)
 
     @staticmethod
@@ -127,7 +127,7 @@ class ApiTestCaseDao(PikaMapper):
         session.expunge(cs)
         await ApiTestCaseDao._insert(session, cs.id, operator_emp_no, data,
                                      constructor=(ConstructorDao, ConstructorModel),
-                                     asserts=(ApiTestCaseModelAssertsDao, ApiTestCaseAssertsModel),
+                                     asserts=(ApiTestCaseAssertsDao, ApiTestCaseAssertsModel),
                                      out_parameters=(
                                          ApiTestCaseOutParametersDao,
                                          ApiTestCaseOutParametersModel),
@@ -182,7 +182,7 @@ class ApiTestCaseDao(PikaMapper):
                 if data is None:
                     raise Exception("用例不存在")
                 # 获取断言部分
-                asserts = await ApiTestCaseModelAssertsDao.async_list_test_case_asserts(data.id)
+                asserts = await ApiTestCaseAssertsDao.async_list_test_case_asserts(data.id)
                 # 获取数据构造器
                 constructors = await ConstructorDao.list_constructor(case_id)
                 constructors_case = await ApiTestCaseDao.query_test_case_by_constructors(
@@ -392,7 +392,7 @@ class ApiTestCaseDao(PikaMapper):
         Returns:
 
         """
-        asserts = await ApiTestCaseModelAssertsDao.async_list_test_case_asserts(case_id)
+        asserts = await ApiTestCaseAssertsDao.async_list_test_case_asserts(case_id)
         for a in asserts:
             temp = dict(id=f"assert_{a.id}", label=f"{a.name}", children=list())
             parent.get("children").append(temp)
@@ -428,9 +428,9 @@ class ApiTestCaseDao(PikaMapper):
         async with async_session() as session:
             async with session.begin():
                 sql = select(ApiTestCaseModel.create_emp_no, func.count(ApiTestCaseModel.id)) \
-                    .outerjoin(UserAdminModel,
-                               and_(UserAdminModel.is_delete == 0,
-                                    ApiTestCaseModel.create_emp_no == UserAdminModel.emp_no)).where(
+                    .outerjoin(SysUserAdminModel,
+                               and_(SysUserAdminModel.is_delete == 0,
+                                    ApiTestCaseModel.create_emp_no == SysUserAdminModel.emp_no)).where(
                     ApiTestCaseModel.is_delete == 0).group_by(
                     ApiTestCaseModel.create_emp_no).order_by(
                     desc(func.count(ApiTestCaseModel.id)))

@@ -35,7 +35,7 @@ from app.enums.SysCodeEnum import SysCodeEnum
 from app.enums.SysvarEnum import PikaGlobalVarEnum, ValidTimeEnum
 from app.middleware.xredis import RedisHelper
 from app.models import async_db_session, async_redis, async_session
-from app.models.admin import UserAdminModel
+from app.models.admin import SysUserAdminModel
 from app.models.kerberos import PikaSecurityRelIssues
 from app.models.user import SysUserModel
 from config import PikaAppConfig
@@ -106,11 +106,11 @@ class UserDao(object):
                 session.add(user)
             await session.refresh(user)
             pwd_valid_date = PikaGlobalVarEnum.PWD_VALID_DATE
-            user_admin = UserAdminModel(uid=user.id, emp_no=user.emp_no, is_activate=is_activate,
-                                        password=pwd,
-                                        pwd_valid_date=pwd_valid_date,
-                                        registration_date=Moment.get_now_time("%Y-%m-%d %H:%M:%S"),
-                                        registration_ip=user_ip)
+            user_admin = SysUserAdminModel(uid=user.id, emp_no=user.emp_no, is_activate=is_activate,
+                                           password=pwd,
+                                           pwd_valid_date=pwd_valid_date,
+                                           registration_date=Moment.get_now_time("%Y-%m-%d %H:%M:%S"),
+                                           registration_ip=user_ip)
             session.add(user_admin)
         try:
             await Email.register_succeed(emp_no=user.emp_no, username=register_model.username,
@@ -142,13 +142,13 @@ class UserDao(object):
         async with async_db_session() as session:
             async with session.begin():
                 err_pwd_counts = await session.execute(
-                    select(UserAdminModel.err_pwd_count).where(UserAdminModel.uid == kwargs["uid"]))
+                    select(SysUserAdminModel.err_pwd_count).where(SysUserAdminModel.uid == kwargs["uid"]))
                 err_pwd_count = err_pwd_counts.scalars().first()
                 if err_pwd_count >= ValidTimeEnum.ERR_PWD_COUNT.value:
                     raise AuthException(code=SysCodeEnum.PASSWORD_ERROR_COUNT_OUT,
                                         detail="错误密码次数超出限制，请联系管理员或稍后重试！")
                 else:
-                    sql = update(UserAdminModel).where(UserAdminModel.uid == kwargs["uid"]).values(
+                    sql = update(SysUserAdminModel).where(SysUserAdminModel.uid == kwargs["uid"]).values(
                         {"err_pwd_count": int(err_pwd_count + 1)})
                     await session.execute(sql)
                     await session.commit()
@@ -217,8 +217,8 @@ class UserDao(object):
         uid, emp_no = kwargs.get("uid", None), kwargs.get("emp_no", None)
         async with async_db_session() as session:
             async with session.begin():
-                sql = update(UserAdminModel).where(
-                    or_(UserAdminModel.id == uid, UserAdminModel.emp_no == emp_no)).values(
+                sql = update(SysUserAdminModel).where(
+                    or_(SysUserAdminModel.id == uid, SysUserAdminModel.emp_no == emp_no)).values(
                     {"last_login_ip": kwargs["last_login_ip"],
                      "last_login_date": Moment.get_now_time("%Y-%m-%d %H:%M:%S")})
                 await session.execute(sql)
@@ -229,8 +229,8 @@ class UserDao(object):
             "last_logout_ip"]
         async with async_db_session() as session:
             async with session.begin():
-                sql = update(UserAdminModel).where(
-                    or_(UserAdminModel.id == uid, UserAdminModel.emp_no == emp_no)).values(
+                sql = update(SysUserAdminModel).where(
+                    or_(SysUserAdminModel.id == uid, SysUserAdminModel.emp_no == emp_no)).values(
                     {"last_logout_ip": last_logout_ip,
                      "last_logout_date": Moment.get_now_time("%Y-%m-%d %H:%M:%S")})
                 await session.execute(sql)
@@ -251,8 +251,8 @@ class UserDao(object):
                 select(SysUserModel).where(
                     or_(SysUserModel.id == uid, SysUserModel.emp_no == emp_no)))
             user_admins = await session.execute(
-                select(UserAdminModel).where(
-                    or_(UserAdminModel.uid == uid, UserAdminModel.emp_no == emp_no)))
+                select(SysUserAdminModel).where(
+                    or_(SysUserAdminModel.uid == uid, SysUserAdminModel.emp_no == emp_no)))
             user, user_admin = users.scalars().first(), user_admins.scalars().first()
             if user and user_admin:
                 user_infos = DataHand.chain_all([PikaResponse.model_to_dict(user),
@@ -289,9 +289,9 @@ class UserDao(object):
                 user = users.scalars().first()
                 if user:
                     user_admins = await session.execute(
-                        select(UserAdminModel).where(
-                            and_(UserAdminModel.password == oauth2_login.password,
-                                 UserAdminModel.uid == user.id)))
+                        select(SysUserAdminModel).where(
+                            and_(SysUserAdminModel.password == oauth2_login.password,
+                                 SysUserAdminModel.uid == user.id)))
                     user_admin = user_admins.scalars().first()
                     if user_admin:
                         await UserDao.account_status_verify(uid=user_admin.uid,
@@ -349,7 +349,7 @@ class UserDao(object):
                                                        model=2,
                                                        emp_no=user.emp_no)
                     user_admins = await session.execute(
-                        select(UserAdminModel).where(UserAdminModel.uid == user.id))
+                        select(SysUserAdminModel).where(SysUserAdminModel.uid == user.id))
                     user_admin = user_admins.scalars().first()
                     if user_admin:
                         await UserDao.account_status_verify(uid=user_admin.uid,
@@ -380,8 +380,8 @@ class UserDao(object):
         await UserDao.update_last_login_field(uid=user.id, last_login_ip=user_ip)
         async with async_db_session as session:
             async with session.begin():
-                sql = update(UserAdminModel).where(
-                    or_(UserAdminModel.emp_no == user.emp_no)).values({"err_pwd_count": 0})
+                sql = update(SysUserAdminModel).where(
+                    or_(SysUserAdminModel.emp_no == user.emp_no)).values({"err_pwd_count": 0})
                 await session.execute(sql)
                 session.execute()
         user_infos = await UserDao.query_user_info(uid=user.id)
@@ -447,11 +447,11 @@ class UserDao(object):
                                     identity=request.identity, email=request.email)
                 session.add(user)
             await session.refresh(user)
-            user_admin = UserAdminModel(uid=user.id, emp_no=user.emp_no, is_activate=1,
-                                        password=pwd,
-                                        pwd_valid_date=PikaGlobalVarEnum.PWD_VALID_DATE,
-                                        create_emp_no=user_info.get("emp_no", None),
-                                        registration_date=Moment.get_now_time("%Y-%m-%d %H:%M:%S"))
+            user_admin = SysUserAdminModel(uid=user.id, emp_no=user.emp_no, is_activate=1,
+                                           password=pwd,
+                                           pwd_valid_date=PikaGlobalVarEnum.PWD_VALID_DATE,
+                                           create_emp_no=user_info.get("emp_no", None),
+                                           registration_date=Moment.get_now_time("%Y-%m-%d %H:%M:%S"))
             session.add(user_admin)
             return PikaResponse.success(data=user, message=PromptEnum.REGISTER_SUCCEED.value)
 
@@ -607,7 +607,7 @@ class UserDao(object):
         update_info = {'password': pwd, 'pwd_valid_date': pwd_valid_date}
         async with async_db_session() as session:
             async with session.begin():
-                sql = update(UserAdminModel).where(UserAdminModel.emp_no == emp_no).values(
+                sql = update(SysUserAdminModel).where(SysUserAdminModel.emp_no == emp_no).values(
                     update_info)
                 await session.execute(sql)
 
@@ -618,9 +618,9 @@ class UserDao(object):
         async with async_db_session() as session:
             async with session.begin():
                 user_admins = await session.execute(
-                    select(UserAdminModel).where(
-                        and_(UserAdminModel.password == old_password,
-                             UserAdminModel.emp_no == emp_no)))
+                    select(SysUserAdminModel).where(
+                        and_(SysUserAdminModel.password == old_password,
+                             SysUserAdminModel.emp_no == emp_no)))
                 user_admin = user_admins.scalars().first()
                 if user_admin:
                     await UserDao.update_pwd(new_password=new_password, emp_no=emp_no)
@@ -714,8 +714,10 @@ class UserDao(object):
     async def query_all_users():
         try:
             async with async_session() as session:
-                query = await session.execute(select(SysUserModel))
-                return query.scalars().all()
+                query_sql = select(SysUserModel)\
+                    .outerjoin(SysUserAdminModel, SysUserModel.id == SysUserAdminModel.uid)
+                query_result = await session.execute(query_sql)
+                return query_result.scalars().all()
         except Exception as e:
             UserDao.log.error(f"获取用户列表失败: {str(e)}")
             raise Exception("获取用户列表失败")

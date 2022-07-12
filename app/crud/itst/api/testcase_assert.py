@@ -21,8 +21,8 @@ from app.schema.api_testcase import TestCaseAssertsForm
 from app.utils.decorator import dao
 
 
-@dao(ApiTestCaseAssertsModel, PikaLogger("ApiTestCaseModelAssertsDao"))
-class ApiTestCaseModelAssertsDao(PikaMapper):
+@dao(ApiTestCaseAssertsModel, PikaLogger("ApiTestCaseAssertsDao"))
+class ApiTestCaseAssertsDao(PikaMapper):
 
     @classmethod
     async def list_test_case_asserts(cls, case_id: int) -> List[ApiTestCaseAssertsModel]:
@@ -60,7 +60,7 @@ class ApiTestCaseModelAssertsDao(PikaMapper):
             raise Exception(f"获取用例断言失败: {str(e)}")
 
     @staticmethod
-    async def insert_test_case_asserts(form: TestCaseAssertsForm, operator: str):
+    async def insert_test_case_asserts(form: TestCaseAssertsForm, operator_emp_no: str):
         try:
             ans = None
             async with async_session() as session:
@@ -73,25 +73,26 @@ class ApiTestCaseModelAssertsDao(PikaMapper):
                     data = result.scalars().first()
                     if data is not None:
                         raise Exception("断言信息已存在, 请检查")
-                    new_assert = ApiTestCaseAssertsModel(**form.dict(), operator=operator)
+                    new_assert = ApiTestCaseAssertsModel(**form.dict(), operator=operator_emp_no)
                     session.add(new_assert)
+                    # TODO bug：Could not refresh instance '<ApiTestCaseAssertsModel at 0x155e8af9be0>
                     await session.flush()
                     await session.refresh(new_assert)
-                    session.expunge(new_assert)
-                    return new_assert
+                    # session.expunge(new_assert)
+                    # return new_assert
             return ans
         except Exception as e:
-            ApiTestCaseModelAssertsDao.log.error(f"新增用例断言失败, error: {e}")
+            ApiTestCaseAssertsDao.log.error(f"新增用例断言失败, error: {e}")
             raise Exception(f"新增用例断言失败, {e}")
 
     @classmethod
     async def update_test_case_asserts(cls, form: TestCaseAssertsForm,
-                                       operator: str) -> ApiTestCaseAssertsModel:
+                                       operator_emp_no: str) -> ApiTestCaseAssertsModel:
         """
         更新用例断言
         Args:
             form:
-            operator:
+            operator_emp_no:
 
         Returns:
 
@@ -106,7 +107,7 @@ class ApiTestCaseModelAssertsDao(PikaMapper):
                     data = result.scalars().first()
                     if data is None:
                         raise Exception("断言信息不存在, 请检查")
-                    DatabaseHelper.update_model(data, form, operator)
+                    DatabaseHelper.update_model(data, form, operator_emp_no)
                     await session.flush()
                     session.expunge(data)
                     return data
@@ -115,7 +116,7 @@ class ApiTestCaseModelAssertsDao(PikaMapper):
             raise Exception(f"编辑用例断言失败, {e}")
 
     @classmethod
-    async def delete_test_case_asserts(cls, id: int, operator: str) -> None:
+    async def delete_test_case_asserts(cls, id: int, operator_emp_no: str) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -125,7 +126,7 @@ class ApiTestCaseModelAssertsDao(PikaMapper):
                     data = result.scalars().first()
                     if data is None:
                         raise Exception("断言信息不存在, 请检查")
-                    DatabaseHelper.delete_model(data, operator)
+                    DatabaseHelper.delete_model(data, operator_emp_no)
         except Exception as e:
             cls.log.error(f"编辑用例断言失败, error: {e}")
             raise Exception(f"编辑用例断言失败, {e}")

@@ -114,7 +114,7 @@ async def execute_case(env: int, case_id: List[int], user_info=Depends(Permissio
 
 @router.post("/request/run/multiple")
 async def execute_as_report(env: int, case_id: List[int], user_info=Depends(Permission())):
-    report_id = await Executor.run_multiple(user_info['id'], env, case_id)
+    report_id = await Executor.run_multiple(user_info['emp_no'], env, case_id)
     return PikaResponse.success(report_id)
     # task = asyncio.create_task(Executor.run_multiple(user_info['id'], env, case_id))
     # random_id = uuid.uuid5(uuid.NAMESPACE_URL, "task")

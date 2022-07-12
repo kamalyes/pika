@@ -10,7 +10,7 @@ from app.core.request import get_convertor
 from app.core.request.generator import CaseGenerator
 from app.crud.itst.api.constructor import ConstructorDao
 from app.crud.itst.api.testcase import ApiTestCaseDao
-from app.crud.itst.api.testcase_assert import ApiTestCaseModelAssertsDao
+from app.crud.itst.api.testcase_assert import ApiTestCaseAssertsDao
 from app.crud.itst.api.testcase_data import ApiTestCaseDataDao
 from app.crud.itst.api.testcase_directory import ApiTestCaseDirectoryDao
 from app.crud.itst.api.testcase_out_params import ApiTestCaseOutParametersDao
@@ -79,8 +79,8 @@ async def delete_testcase(id_list: List[int], user_info=Depends(Permission()),
         async with session.begin():
             await ApiTestCaseDao.delete_records(session, user_info['emp_no'], id_list)
             # 删除断言
-            await ApiTestCaseModelAssertsDao.delete_records(session, user_info['emp_no'], id_list,
-                                                            column="case_id")
+            await ApiTestCaseAssertsDao.delete_records(session, user_info['emp_no'], id_list,
+                                                       column="case_id")
             # 删除测试数据
             await ApiTestCaseDataDao.delete_records(session, user_info['emp_no'], id_list,
                                                     column="case_id")
@@ -111,9 +111,7 @@ async def query_testcase(caseId: int, _=Depends(Permission())):
 @router.post("/asserts/insert")
 async def insert_testcase_asserts(data: TestCaseAssertsForm, user_info=Depends(Permission())):
     try:
-        new_assert = await ApiTestCaseModelAssertsDao.insert_test_case_asserts(data,
-                                                                               operator=user_info[
-                                                                                   "id"])
+        new_assert = await ApiTestCaseAssertsDao.insert_test_case_asserts(data, operator_emp_no=user_info["emp_no"])
         return PikaResponse.success(data=new_assert)
     except Exception as e:
         return PikaResponse.failed(detail=str(e))
@@ -122,35 +120,33 @@ async def insert_testcase_asserts(data: TestCaseAssertsForm, user_info=Depends(P
 @router.post("/asserts/update")
 async def insert_testcase_asserts(data: TestCaseAssertsForm, user_info=Depends(Permission())):
     try:
-        updated = await ApiTestCaseModelAssertsDao.update_test_case_asserts(data,
-                                                                            operator=user_info[
-                                                                                "id"])
+        updated = await ApiTestCaseAssertsDao.update_test_case_asserts(data, operator_emp_no=user_info["emp_no"])
         return PikaResponse.success(data=updated)
     except Exception as e:
         return PikaResponse.failed(detail=str(e))
 
 
 @router.get("/asserts/delete")
-async def insert_testcase_asserts(id: int, user_info=Depends(Permission())):
-    await ApiTestCaseModelAssertsDao.delete_test_case_asserts(id, operator=user_info["id"])
+async def delete_test_case_asserts(id: int, user_info=Depends(Permission())):
+    await ApiTestCaseAssertsDao.delete_test_case_asserts(id, operator_emp_no=user_info["emp_no"])
     return PikaResponse.success()
 
 
 @router.post("/constructor/insert")
 async def insert_constructor(data: ConstructorForm, user_info=Depends(Permission())):
-    await ConstructorDao.insert_constructor(data, operator=user_info["id"])
+    await ConstructorDao.insert_constructor(data, operator_emp_no=user_info["emp_no"])
     return PikaResponse.success()
 
 
 @router.post("/constructor/update")
 async def update_constructor(data: ConstructorForm, user_info=Depends(Permission())):
-    await ConstructorDao.update_constructor(data, operator=user_info["id"])
+    await ConstructorDao.update_constructor(data, operator_emp_no=user_info["emp_no"])
     return PikaResponse.success()
 
 
 @router.get("/constructor/delete")
 async def update_constructor(id: int, user_info=Depends(Permission())):
-    await ConstructorDao.delete_constructor(id, operator=user_info["id"])
+    await ConstructorDao.delete_constructor(id, operator_emp_no=user_info["emp_no"])
     return PikaResponse.success()
 
 

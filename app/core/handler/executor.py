@@ -16,7 +16,7 @@ from app.core.notice.dingtalk import DingTalk
 from app.core.notice.email import EmailManger
 from app.core.paramters import ParametersParser
 from app.crud.itst.api.testcase import ApiTestCaseDao
-from app.crud.itst.api.testcase_assert import ApiTestCaseModelAssertsDao
+from app.crud.itst.api.testcase_assert import ApiTestCaseAssertsDao
 from app.crud.itst.api.testcase_data import ApiTestCaseDataDao
 from app.crud.itst.api.testcase_out_params import ApiTestCaseOutParametersDao
 from app.crud.itst.api.testreport import ApiTestReportDao
@@ -273,7 +273,7 @@ class Executor(object):
                 await self.parse_gconfig(c, GConfigTypeEnum.constructor, env, "constructor_json")
 
             # Step4: 获取断言
-            asserts = await ApiTestCaseModelAssertsDao.async_list_test_case_asserts(case_id)
+            asserts = await ApiTestCaseAssertsDao.async_list_test_case_asserts(case_id)
 
             # 获取出参信息
             out_parameters = await ApiTestCaseOutParametersDao.list_record(case_id=case_id)

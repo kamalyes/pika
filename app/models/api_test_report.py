@@ -12,7 +12,7 @@ class ApiTestReportModel(Base):
     __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_test_report'
     __table_args__ = {"comment": "测试报告表"}
     id = Column(INT, primary_key=True)
-    executor = Column(INT, index=True, comment="执行人 0则为CPU")
+    executor = Column(String(ByteSizeEnum.LENGTH_16), server_default="0", index=True, comment="执行人 0则为CPU")
     env = Column(INT, nullable=False, comment="环境")
     cost = Column(String(ByteSizeEnum.LENGTH_08), comment="花费时间")
     plan_id = Column(INT, index=True, nullable=True, comment="测试集合id，预留字段")

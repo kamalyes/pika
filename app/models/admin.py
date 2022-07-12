@@ -19,7 +19,7 @@ from app.models.basic import LargeBaseModel
 from app.models.user import SysUserModel
 
 
-class UserAdminModel(LargeBaseModel):
+class SysUserAdminModel(LargeBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_sys_admin"
     __table_args__ = {"comment": "账号管理表"}
     uid = Column(

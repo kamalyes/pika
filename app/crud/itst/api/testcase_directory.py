@@ -43,7 +43,7 @@ class ApiTestCaseDirectoryDao(object):
             async with async_session() as session:
                 sql = select(ApiTestCaseDirectoryModel) \
                     .where(ApiTestCaseDirectoryModel.is_delete == 0,
-                           ApiTestCaseDirectoryModel.id == project_id) \
+                           ApiTestCaseDirectoryModel.project_id == project_id) \
                     .order_by(asc(ApiTestCaseDirectoryModel.name))
                 result = await session.execute(sql)
                 return result.scalars().all()

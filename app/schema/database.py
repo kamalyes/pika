@@ -28,6 +28,6 @@ class DatabaseForm(BaseModel):
     env: int
 
     # noinspection PyMethodParameters
-    @validator("name", "host", "port", "username", "password",  "sql_type", "env")
+    @validator("name", "host", "port", "username", "password", "sql_type", "env")
     def data_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)
