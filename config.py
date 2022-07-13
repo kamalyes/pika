@@ -27,8 +27,8 @@ from app.enums.SysvarEnum import PikaGlobalVarEnum
 class PikaAppConfig(object):
     # system
     WORKSPACES_PATH = os.path.dirname(os.path.abspath(__file__))
-    ENVIRONMENT = "ignore"
-    # ENVIRONMENT = "dev"
+    # ENVIRONMENT = "ignore"
+    ENVIRONMENT = "dev"
     GLOBAL_POOL_CONFIG = System.get_pool_config(
         work_spaces_path=WORKSPACES_PATH, environment=ENVIRONMENT
     )
@@ -239,6 +239,8 @@ class InterceptHandler(logging.Handler):
         # change handler for default uvicorn log
         intercept_handler = InterceptHandler()
         logging.getLogger("uvicorn").handlers = [intercept_handler]
+        # logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+        # logging.basicConfig(level=logging.INFO)
         logger.add(
             PikaAppConfig.INFO_LOG_FILE,
             enqueue=True,

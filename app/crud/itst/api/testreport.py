@@ -34,7 +34,6 @@ class ApiTestReportDao(object):
                 async with session.begin():
                     report = ApiTestReportModel(executor, env, mode=mode, plan_id=plan_id)
                     session.add(report)
-                    await session.flush()
                     return report.id
         except Exception as e:
             ApiTestReportDao.log.error(f"新增报告失败, error: {e}")
@@ -51,7 +50,6 @@ class ApiTestReportDao(object):
                     if report is None:
                         raise Exception("更新报告失败")
                     report.status = status
-                    await session.flush()
         except Exception as e:
             ApiTestReportDao.log.error(f"更新报告失败, error: {e}")
             raise Exception("更新报告失败")

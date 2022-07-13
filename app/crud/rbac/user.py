@@ -109,21 +109,21 @@ class UserDao(object):
                                  email=register_model.email)
                 session.add(user)
                 await session.flush()
-            await session.refresh(user)
-            pwd_valid_date = PikaGlobalVarEnum.PWD_VALID_DATE
-            user_admin = SysUserAdminModel(uid=user.id, emp_no=user.emp_no, is_activate=is_activate,
-                                           password=pwd,
-                                           pwd_valid_date=pwd_valid_date,
-                                           registration_date=Moment.get_now_time("%Y-%m-%d %H:%M:%S"),
-                                           registration_ip=user_ip)
-            session.add(user_admin)
-        try:
-            await Email.register_succeed(emp_no=user.emp_no, username=register_model.username,
-                                         addressee=register_model.email,
-                                         pwd_valid_date=pwd_valid_date)
-        except Exception as e:
-            pass
-        return PikaResponse.success(data=user, message=PromptEnum.REGISTER_SUCCEED.value)
+                await session.refresh(user)
+                pwd_valid_date = PikaGlobalVarEnum.PWD_VALID_DATE
+                user_admin = SysUserAdminModel(uid=user.id, emp_no=user.emp_no, is_activate=is_activate,
+                                               password=pwd,
+                                               pwd_valid_date=pwd_valid_date,
+                                               registration_date=Moment.get_now_time("%Y-%m-%d %H:%M:%S"),
+                                               registration_ip=user_ip)
+                session.add(user_admin)
+            try:
+                await Email.register_succeed(emp_no=user.emp_no, username=register_model.username,
+                                             addressee=register_model.email,
+                                             pwd_valid_date=pwd_valid_date)
+            except Exception as e:
+                pass
+            return PikaResponse.success(data=user, message=PromptEnum.REGISTER_SUCCEED.value)
 
     @staticmethod
     async def account_status_verify(**kwargs):

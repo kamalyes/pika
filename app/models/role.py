@@ -17,7 +17,7 @@ from app.models.basic import TimestampBaseModel
 
 
 class RoleModel(TimestampBaseModel):
-    __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_roles'
+    __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_role'
     __table_args__ = {"comment": "角色表"}
     id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
     name = Column(String(ByteSizeEnum.LENGTH_64), nullable=True, comment='菜单名称', index=True)

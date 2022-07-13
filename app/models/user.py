@@ -37,8 +37,8 @@ class UserModel(NormBaseModel):
 
     def __init__(self, emp_no, username=None, email=None, user_alias=None, identity=0, roles=None, avatar=None,
                  gender=None,
-                 plane=None, mobile=None, location=None):
-        super().__init__()
+                 plane=None, mobile=None, location=None, operator=None):
+        super().__init__(operator)
         self.emp_no = emp_no
         self.username = username
         self.email = email
