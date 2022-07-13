@@ -12,7 +12,7 @@ from app.core.handler.executor import Executor
 from app.core.handler.jsonres import PikaResponse
 from app.crud.itst.api.testcase_data import ApiTestCaseDataDao
 from app.middleware.async_ask import AsyncRequest
-from app.schema.http import HttpRequestForm
+from app.schema.http import HttpRequestSchema
 from app.service import Permission
 
 deque
@@ -24,7 +24,7 @@ CERT_URL = "http://mitm.it/cert/"
 
 
 @router.post("/request/http")
-async def http_request(data: HttpRequestForm, _=Depends(Permission())):
+async def http_request(data: HttpRequestSchema, _=Depends(Permission())):
     try:
         r = await AsyncRequest.client(data.url, data.body_type, headers=data.headers,
                                       body=data.body)

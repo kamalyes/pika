@@ -9,12 +9,13 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
+
 from fastapi import Depends
 
 from app.core.handler.execres import AuthException
 from app.crud.rbac.user import UserDao
 from app.excpetions.business.RequestException import PermissionException
-from app.schema.user import OAuth2TokenModel
+from app.schema.user import OAuth2TokenSchema
 
 FORBIDDEN = "对不起, 你没有足够的权限"
 
@@ -24,7 +25,7 @@ class Permission:
         self.identity = identity
         self.escarole = escarole
 
-    async def __call__(self, request: OAuth2TokenModel = Depends()):
+    async def __call__(self, request: OAuth2TokenSchema = Depends()):
         try:
             user_info = await UserDao.verify_token(request)
             if self.identity is None or int(user_info.get('identity', 0)) >= self.identity:

@@ -17,10 +17,10 @@ from app.core.handler.jsonres import PikaResponse
 from app.crud.system.broadcast import BroadcastReadDao
 from app.crud.system.notification import PikaNotificationDao
 from app.enums.MessageEnum import MessageStateEnum
-from app.models import get_async_session
+from app.models import async_db_session
 from app.models.broadcast import BroadcastReadUserModel
 from app.models.notification import NotificationModel
-from app.schema.notification import NotificationForm
+from app.schema.notification import NotificationSchema
 from app.service import Permission
 
 router = APIRouter()
@@ -37,7 +37,7 @@ async def list_msg(msg_status: int, msg_type: int, user_info=Depends(Permission(
 
 
 @router.post("/read", summary="用户读取消息")
-async def read_msg(form: NotificationForm, user_info=Depends(Permission())):
+async def read_msg(form: NotificationSchema, user_info=Depends(Permission())):
     try:
         if form.personal:
             await PikaNotificationDao.update_by_map(user_info['emp_no'],
@@ -57,7 +57,7 @@ async def read_msg(form: NotificationForm, user_info=Depends(Permission())):
 
 @router.post("/delete", summary="用户删除消息")
 async def read_msg(msg_id: List[int], user_info=Depends(Permission()),
-                   session=Depends(get_async_session)):
+                   session=Depends(async_db_session)):
     try:
         await PikaNotificationDao.delete_message(session, msg_id, user_info['emp_no'])
         return PikaResponse.success()

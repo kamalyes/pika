@@ -16,7 +16,7 @@ from hutools.pagination.async_sqlalchemy import paginate
 
 from app.core.handler.execres import ValidException
 from app.core.handler.jsonres import PikaResponse
-from app.enums.SysCodeEnum import SysCodeEnum
+from app.enums.SysCodeEnum import ExcCodeEnum
 from app.models import async_db_session
 
 
@@ -64,7 +64,7 @@ class AsyncDbSession:
                 error_ids.append({"start_index": start_index - 1, "start_value": start_value,
                                   "end_index": end_index, "end_value": end_value})
         if len(error_ids) > 0:
-            return PikaResponse.failed(code=SysCodeEnum.VAR_ERROR, detail="参数错误，请检查格式是否为,进行分割！",
+            return PikaResponse.failed(code=ExcCodeEnum.VAR_ERROR, detail="参数错误，请检查格式是否为,进行分割！",
                                        data={"error_values": error_ids})
         async with async_db_session() as session:
             async with session.begin():
@@ -72,23 +72,14 @@ class AsyncDbSession:
         return PikaResponse.success(message=f"删除{message}成功！")
 
     @staticmethod
-    async def query(db: Any, query_type: str, all_do_sql: Any, dim_do_sql: Any):
+    async def query(db: Any, do_sql: Any):
         """
         db查询数据
         Args:
             db:
-            query_type:
-            all_do_sql:
-            dim_do_sql:
+            do_sql:
 
         Returns:
 
         """
-        if query_type == '0':
-            data = await paginate(db, all_do_sql)
-        elif query_type == '1':
-            data = await paginate(db, dim_do_sql)
-        else:
-            return PikaResponse.failed(code=SysCodeEnum.VAR_ERROR,
-                                       detail=f"query_type值不对，仅可传0：全部数据，1：条件查询")
-        return data
+        return await paginate(db, do_sql)

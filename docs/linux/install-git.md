@@ -18,7 +18,8 @@ yum -y remove git
 wget -c https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.9.5.tar.gz
 ```
 
-4.  解压并进入文件根目录
+4. 解压并进入文件根目录
+
 ```bash
 tar -zxvf git-2.9.5.tar.gz && cd git-2.9.5
 ```
@@ -28,6 +29,7 @@ tar -zxvf git-2.9.5.tar.gz && cd git-2.9.5
 ```bash
 make prefix=/usr/local/git all
 ```
+
 6. 设置安装路径
 
 ```bash
@@ -43,7 +45,7 @@ vim /etc/profile
 export PATH=$PATH:/usr/local/git/bin
 ```
 
-8.  刷新环境变量：
+8. 刷新环境变量：
 
 ```bash
 source /etc/profile

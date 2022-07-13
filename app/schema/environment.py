@@ -14,8 +14,8 @@ from typing import Optional
 from fastapi import Body
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.schema.base import PikaOnlyDescModel, PikaOnlyIdModel
+from app.schema.base import BaseOnlyDescSchema, BaseOnlyIdSchema
 
 
-class EnvironmentForm(PikaOnlyIdModel, PikaOnlyDescModel):
+class EnvironmentSchema(BaseOnlyIdSchema, BaseOnlyDescSchema):
     name: Optional[str] = Body(..., max_length=ByteSizeEnum.LENGTH_50)

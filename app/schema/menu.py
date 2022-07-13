@@ -9,29 +9,44 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from typing import Optional
+from typing import Optional, List
 
-from fastapi import Query, Body
-
-from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.schema.base import PikaDeleteModel, PikaQueryModel, PikaQueryTypeModel, PikaOnlyDescModel, \
-    PikaOnlyDelModel
+from app.schema.base import BaseQuerySchema, BaseQueryTypeSchema, BaseOnlyIdSchema
 
 
-class EditMenuModel(PikaOnlyDescModel, PikaOnlyDelModel):
-    son_id: Optional[int] = Body(None, title="子菜单id")
-    title: Optional[str] = Body(..., title="菜单名称", max_length=ByteSizeEnum.LENGTH_70)
-    icon: Optional[str] = Body(..., title="菜单图标", max_length=ByteSizeEnum.LENGTH_70)
-    path: Optional[str] = Body(..., title="路由地址", max_length=ByteSizeEnum.LENGTH_255)
-    type: Optional[str] = Body(..., title="菜单类型：用于区分模块、目录、菜单、按钮", max_length=ByteSizeEnum.LENGTH_20)
-    component: Optional[str] = Body(..., title="菜单对应的组件路径", max_length=ByteSizeEnum.LENGTH_255)
-    hidden: Optional[int] = Body(..., title="是否隐藏此菜单")
-    parent_id: Optional[int] = Body(None, title="父菜单id")
+class MenuSchema(BaseOnlyIdSchema):
+    path: Optional[str]
+    component: Optional[str]
+    title: Optional[str]
+    name: Optional[str]
+    isLink: Optional[bool]
+    isHide: Optional[bool]
+    isKeepAlive: Optional[bool]
+    isAffix: Optional[bool]
+    isIframe: Optional[bool]
+    icon: Optional[str]
+    parent_id: Optional[int]
+    redirect: Optional[str]
+    sort: Optional[int]
+    menu_type: Optional[int]
+    active_menu: Optional[str]
+    enabled_flag: Optional[bool]
 
 
-class DelMenuModel(PikaDeleteModel):
+class EditMenuSchema(MenuSchema):
+    roles: Optional[str]
+    children: List[MenuSchema]
+
+    class Config:
+        orm_mode = True
+
+
+class QueryMenuInSchema(MenuSchema, BaseQuerySchema, BaseQueryTypeSchema):
     pass
 
 
-class QueryMenuModel(PikaQueryModel, PikaQueryTypeModel):
-    menu_title: Optional[int] = Query(None, title="菜单名称")
+class QueryMenuOutSchema(EditMenuSchema):
+    pass
+
+    class Config:
+        orm_mode = True

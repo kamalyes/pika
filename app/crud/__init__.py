@@ -76,8 +76,8 @@ class PikaMapper(object):
     @classmethod
     def query_wrapper(cls, condition=None, **kwargs):
         conditions = condition if condition else list()
-        if getattr(cls.model, "is_delete", None):
-            conditions.append(getattr(cls.model, "is_delete") == 0)
+        if getattr(cls.model, "delete_flag", None):
+            conditions.append(getattr(cls.model, "delete_flag") == 0)
         _sort = kwargs.get("_sort")
         if _sort is not None:
             # 需要去掉desc，不然会影响之前的sql执行

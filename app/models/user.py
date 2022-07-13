@@ -16,7 +16,7 @@ from app.enums.SysvarEnum import PikaGlobalVarEnum
 from app.models.basic import NormBaseModel
 
 
-class SysUserModel(NormBaseModel):
+class UserModel(NormBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_sys_user"
     __table_args__ = (UniqueConstraint("emp_no", "email", "mobile"), {"comment": "用户表"})
     emp_no = Column(String(ByteSizeEnum.LENGTH_16), comment="员工编号")
@@ -27,6 +27,7 @@ class SysUserModel(NormBaseModel):
         server_default="0",
         comment="用户身份： 最高权限：999，管理员：888，普通成员：0",
     )
+    roles = Column(String(ByteSizeEnum.LENGTH_255), server_default="0", comment='用户角色')
     avatar = Column(String(ByteSizeEnum.LENGTH_255), comment="头像")
     gender = Column(INT, server_default="0", comment="性别：0-未填写，1-男，2-女")
     plane = Column(String(ByteSizeEnum.LENGTH_16), comment="座机")
@@ -34,7 +35,7 @@ class SysUserModel(NormBaseModel):
     email = Column(String(ByteSizeEnum.LENGTH_255), comment="邮箱地址")
     location = Column(String(ByteSizeEnum.LENGTH_255), server_default=None, comment="所在城市名称")
 
-    def __init__(self, emp_no, username=None, email=None, user_alias=None, identity=0, avatar=None,
+    def __init__(self, emp_no, username=None, email=None, user_alias=None, identity=0, roles=None, avatar=None,
                  gender=None,
                  plane=None, mobile=None, location=None):
         super().__init__()
@@ -43,6 +44,7 @@ class SysUserModel(NormBaseModel):
         self.email = email
         self.user_alias = user_alias
         self.identity = identity
+        self.roles = roles
         self.avatar = avatar
         self.gender = gender
         self.plane = plane

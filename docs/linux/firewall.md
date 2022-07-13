@@ -1,9 +1,11 @@
 查看是否有防火墙服务，没有则安装
+
 ```bash
 yum install iptables-services #安装iptables（防火墙服务）
 ```
 
 systemctl使用
+
 ```bash
 systemctl unmask firewalld #执行命令，即可实现取消服务的锁定
 systemctl mask firewalld # 下次需要锁定该服务时执行
@@ -20,6 +22,7 @@ systemctl --failed #查看启动失败的服务列表
 ```
 
 firewall-cmd使用
+
 ```bash
 firewall-cmd --state #查看防火墙状态
 firewall-cmd --reload #更新防火墙规则
@@ -41,6 +44,7 @@ firewall-cmd --get-zone-of-interface=eth0 #查看接口eth0所属区域
 ```
 
 例子
+
 ```bash
 firewall-cmd --query-port=8080/tcp # 查询端口是否开放
 

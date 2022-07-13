@@ -20,7 +20,7 @@ from app.crud import PikaMapper
 from app.middleware.xredis import RedisHelper
 from app.models import async_session
 from app.models.api_testcase_out_parameters import ApiTestCaseOutParametersModel
-from app.schema.api_testcase_out_parameters import ApiTestCaseOutParametersForm
+from app.schema.api_testcase_out_parameters import ApiTestCaseOutParametersSchema
 from app.utils.decorator import dao
 
 
@@ -49,7 +49,7 @@ class ApiTestCaseOutParametersDao(PikaMapper):
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def update_many(cls, case_id: int, data: List[ApiTestCaseOutParametersForm],
+    async def update_many(cls, case_id: int, data: List[ApiTestCaseOutParametersSchema],
                           operator_emp_no: str):
         result = []
         try:
@@ -57,7 +57,7 @@ class ApiTestCaseOutParametersDao(PikaMapper):
                 async with session.begin():
                     source = await session.execute(select(ApiTestCaseOutParametersModel).where(
                         ApiTestCaseOutParametersModel.case_id == case_id,
-                        ApiTestCaseOutParametersModel.is_delete == 0,
+                        ApiTestCaseOutParametersModel.delete_flag == False,
                     ))
                     before = source.scalars().all()
                     should_remove = await cls.should_remove(before, data)
@@ -93,7 +93,7 @@ class ApiTestCaseOutParametersDao(PikaMapper):
                         await session.execute(
                             update(ApiTestCaseOutParametersModel).where(
                                 ApiTestCaseOutParametersModel.id.in_(should_remove)).values(
-                                is_delete=int(time.time() * 1000)))
+                                delete_flag=int(time.time() * 1000)))
             return result
         except Exception as e:
             cls.log.error(f"批量更新出参数据失败: {e}")

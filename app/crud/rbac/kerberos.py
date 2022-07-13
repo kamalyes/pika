@@ -17,7 +17,7 @@ from app.core.handler.asyncsql import AsyncDbSession
 from app.core.handler.jsonres import PikaResponse
 from app.core.handler.logger import PikaLogger
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.enums.SysCodeEnum import SysCodeEnum
+from app.enums.SysCodeEnum import ExcCodeEnum
 from app.models import async_db_session
 from app.models.kerberos import SecurityNominateIssueModel
 
@@ -46,12 +46,12 @@ class KerberosDao(object):
                     await session.execute(SecurityNominateIssueModel.__table__.insert(),
                                           new_questions_list)
                 elif not new_questions_list:
-                    return PikaResponse.failed(code=SysCodeEnum.VAR_ERROR, detail="数据均已存在！",
+                    return PikaResponse.failed(code=ExcCodeEnum.VAR_ERROR, detail="数据均已存在！",
                                                data={"exists_question": exists_question})
                 if not exists_question:
                     return PikaResponse.success()
                 elif len(exists_question) > 0 and len(new_questions_list):
-                    return PikaResponse.failed(code=SysCodeEnum.VAR_ERROR,
+                    return PikaResponse.failed(code=ExcCodeEnum.VAR_ERROR,
                                                detail=f"部分添加成功！",
                                                result={"exists_question": exists_question})
 
@@ -103,7 +103,7 @@ class KerberosDao(object):
                         msg = "修改失败"
                     else:
                         msg = "部分修改成功"
-                    return PikaResponse.success(code=SysCodeEnum.MYSQL_ERROR,
+                    return PikaResponse.success(code=ExcCodeEnum.MYSQL_ERROR,
                                                 message=f'{msg},详情请查阅返回值！',
                                                 data={"success": success, "failed": failed,
                                                       "not_funded": not_funded})
@@ -119,4 +119,5 @@ class KerberosDao(object):
                 and_(SecurityNominateIssueModel.create_date >= request.create_date,
                      SecurityNominateIssueModel.update_date <= request.update_date)
                 ))
-        return await AsyncDbSession.query(db, str(request.query_type), all_do_sql, dim_do_sql)
+        do_sql = all_do_sql if request.query_type == 0 else dim_do_sql
+        return await AsyncDbSession.query(db, do_sql)

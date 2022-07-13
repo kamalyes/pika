@@ -17,7 +17,7 @@ from fastapi import Body, Form, Query
 from app.enums.ByteSizeEnum import ByteSizeEnum
 
 
-class EditRoleActionModel:
+class EditRoleActionSchema:
     def __init__(
             self,
             role_action_id: Optional[int] = Body(0, title="id"),
@@ -41,6 +41,6 @@ class EditRoleActionModel:
         self.update_emp_no = update_emp_no
 
 
-class DelRoleActionModel:
+class DelRoleActionSchema:
     def __init__(self, role_action_ids: Optional[list] = Form(None, title="活动id")):
         self.role_action_ids = role_action_ids

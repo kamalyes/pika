@@ -27,8 +27,8 @@ class GConfigModel(LargeBaseModel):
         UniqueConstraint('env', 'key'),
     )
 
-    def __init__(self, env, key, value, key_type, operator, is_usable, id=None):
-        super().__init__(operator, is_usable, id)
+    def __init__(self, env, key, value, key_type, operator, enabled_flag, id=None):
+        super().__init__(operator, enabled_flag, id)
         self.env = env
         self.key = key
         self.value = value

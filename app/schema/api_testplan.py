@@ -5,7 +5,7 @@ from pydantic import BaseModel, validator
 from app.schema.base import PikaBaseModel
 
 
-class ApiTestPlanForm(BaseModel):
+class ApiTestPlanSchema(BaseModel):
     id: int = None
     project_id: int
     name: str

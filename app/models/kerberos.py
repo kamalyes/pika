@@ -15,7 +15,7 @@ from sqlalchemy import ForeignKey
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysvarEnum import PikaGlobalVarEnum
 from app.models.basic import NormBaseModel
-from app.models.user import SysUserModel
+from app.models.user import UserModel
 
 
 class SecurityNominateIssueModel(NormBaseModel):
@@ -29,13 +29,13 @@ class PikaSecurityRelIssues(NormBaseModel):
     __table_args__ = {"comment": "用户密保问题表"}
     uid = Column(
         INT,
-        ForeignKey(SysUserModel.id, ondelete="cascade", onupdate="cascade"),
+        ForeignKey(UserModel.id, ondelete="cascade", onupdate="cascade"),
         nullable=False,
         comment="员工编号",
     )
     emp_no = Column(
         String(ByteSizeEnum.LENGTH_20),
-        ForeignKey(SysUserModel.emp_no, ondelete="cascade", onupdate="cascade"),
+        ForeignKey(UserModel.emp_no, ondelete="cascade", onupdate="cascade"),
         comment="员工编号",
         nullable=False,
     )

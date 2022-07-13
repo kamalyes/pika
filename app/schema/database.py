@@ -16,7 +16,7 @@ from pydantic import BaseModel, validator
 from app.schema.base import PikaBaseModel
 
 
-class DatabaseForm(BaseModel):
+class DatabaseSchema(BaseModel):
     id: Optional[int] = None
     name: Optional[str]
     host: Optional[str]

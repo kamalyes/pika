@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import INT, Column, DATETIME, String, BIGINT
+from sqlalchemy import INT, Column, DATETIME, String, BOOLEAN
 from sqlalchemy.dialects.mysql import SMALLINT
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
@@ -27,7 +27,7 @@ class ApiTestReportModel(Base):
                     index=True)
     mode = Column(SMALLINT, default=0, comment="case执行模式 0: 普通, 1: 测试集, 2: pipeline, 3: 其他")
 
-    is_delete = Column(BIGINT, nullable=False, default=0, comment="删除时间")
+    delete_flag = Column(BOOLEAN, server_default="0", comment="删除标识 1：已删除，0：未删除")
 
     def __init__(self, executor: int, env: int, success_count: int = 0, failed_count: int = 0,
                  error_count: int = 0, skipped_count: int = 0, status: int = 0, mode: int = 0,
@@ -45,4 +45,4 @@ class ApiTestReportModel(Base):
         self.status = status
         self.plan_id = plan_id
         self.finished_at = finished_at
-        self.is_delete = 0
+        self.delete_flag = 0

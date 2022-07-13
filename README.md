@@ -26,7 +26,7 @@ Pika是一款专注于自动化建设的平台，采用`Python`+`FastApi`+`React
 docker-compose -f ./devops/docker-compose.yaml up
 ```
 
-### Ubuntu 配置 pip.conf 添加国内源
+### 🌈Ubuntu 配置 pip.conf 添加国内源
 
 1. 新建文件夹和pip配置文件
 
@@ -136,9 +136,9 @@ timeout = 120
 
 #### 🍦 工作台
 
-#### 测试计划
+#### ⛱ 测试计划
 
-#### 测试报告
+#### 💒 测试报告
 
 #### 测试用例
 
@@ -204,7 +204,7 @@ ln -s /usr/local/python3/bin/pip3 /usr/bin/pip3
 
 ### 💪 落地效果
 
-### 赞助
+### 💌 赞助
 
 如果您觉得这个项目对你`有所帮助`，帮忙点个star，让创作更有动力，谢谢！
 

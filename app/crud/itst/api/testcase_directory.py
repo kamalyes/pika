@@ -18,7 +18,7 @@ from sqlalchemy import select, asc, or_
 from app.core.handler.logger import PikaLogger
 from app.models import async_session
 from app.models.api_testcase_directory import ApiTestCaseDirectoryModel
-from app.schema.api_testcase_directory import ApiTestCaseDirectoryForm
+from app.schema.api_testcase_directory import ApiTestCaseDirectorySchema
 
 
 class ApiTestCaseDirectoryDao(object):
@@ -30,7 +30,7 @@ class ApiTestCaseDirectoryDao(object):
             async with async_session() as session:
                 sql = select(ApiTestCaseDirectoryModel).where(
                     ApiTestCaseDirectoryModel.id == directory_id,
-                    ApiTestCaseDirectoryModel.is_delete == 0)
+                    ApiTestCaseDirectoryModel.delete_flag == False)
                 result = await session.execute(sql)
                 return result.scalars().first()
         except Exception as e:
@@ -42,7 +42,7 @@ class ApiTestCaseDirectoryDao(object):
         try:
             async with async_session() as session:
                 sql = select(ApiTestCaseDirectoryModel) \
-                    .where(ApiTestCaseDirectoryModel.is_delete == 0,
+                    .where(ApiTestCaseDirectoryModel.delete_flag == False,
                            ApiTestCaseDirectoryModel.project_id == project_id) \
                     .order_by(asc(ApiTestCaseDirectoryModel.name))
                 result = await session.execute(sql)
@@ -52,12 +52,12 @@ class ApiTestCaseDirectoryDao(object):
             raise Exception(f"获取用例目录失败, error: {e}")
 
     @staticmethod
-    async def insert_directory(form: ApiTestCaseDirectoryForm, operator_emp_no: int):
+    async def insert_directory(form: ApiTestCaseDirectorySchema, operator_emp_no: int):
         try:
             async with async_session() as session:
                 async with session.begin():
                     sql = select(ApiTestCaseDirectoryModel).where(
-                        ApiTestCaseDirectoryModel.is_delete == 0,
+                        ApiTestCaseDirectoryModel.delete_flag == False,
                         ApiTestCaseDirectoryModel.name == form.name,
                         ApiTestCaseDirectoryModel.parent == form.parent,
                         ApiTestCaseDirectoryModel.id == form.project_id)
@@ -70,13 +70,13 @@ class ApiTestCaseDirectoryDao(object):
             raise Exception(f"创建目录失败: {e}")
 
     @staticmethod
-    async def update_directory(form: ApiTestCaseDirectoryForm, operator_emp_no: int):
+    async def update_directory(form: ApiTestCaseDirectorySchema, operator_emp_no: int):
         try:
             async with async_session() as session:
                 async with session.begin():
                     sql = select(ApiTestCaseDirectoryModel).where(
                         ApiTestCaseDirectoryModel.id == form.id,
-                        ApiTestCaseDirectoryModel.is_delete == 0)
+                        ApiTestCaseDirectoryModel.delete_flag == False)
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
@@ -95,13 +95,13 @@ class ApiTestCaseDirectoryDao(object):
                 async with session.begin():
                     sql = select(ApiTestCaseDirectoryModel).where(
                         ApiTestCaseDirectoryModel.id == id,
-                        ApiTestCaseDirectoryModel.is_delete == 0)
+                        ApiTestCaseDirectoryModel.delete_flag == False)
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
                         raise Exception("目录不存在")
                     query.delete_date = Moment.get_now_time()
-                    query.is_delete = 1
+                    query.delete_flag = 1
                     query.update_emp_no = operator_emp_no
         except Exception as e:
             ApiTestCaseDirectoryDao.log.error(f"删除目录失败, error: {e}")
@@ -178,7 +178,7 @@ class ApiTestCaseDirectoryDao(object):
             ans = [directory_id]
             # 找出父类为directory_id或者非根的目录
             sql = select(ApiTestCaseDirectoryModel) \
-                .where(ApiTestCaseDirectoryModel.is_delete == 0,
+                .where(ApiTestCaseDirectoryModel.delete_flag == False,
                        or_(ApiTestCaseDirectoryModel.parent == directory_id,
                            ApiTestCaseDirectoryModel.parent is not None)) \
                 .order_by(asc(ApiTestCaseDirectoryModel.name))

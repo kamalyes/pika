@@ -11,7 +11,7 @@
 """
 from datetime import datetime
 
-from sqlalchemy import INT, Column, DATETIME, String, BIGINT
+from sqlalchemy import INT, Column, DATETIME, String, BOOLEAN
 from sqlalchemy import SMALLINT
 from sqlalchemy import TEXT
 
@@ -46,7 +46,7 @@ class ApiTestResultModel(Base):
     asserts = Column(TEXT, comment="断言")
     response_headers = Column(TEXT, comment="响应头部")
     response = Column(TEXT, comment="返回参数")
-    is_delete = Column(BIGINT, nullable=False, default=0, comment="删除时间")
+    delete_flag = Column(BOOLEAN, server_default="0", comment="删除标识 1：已删除，0：未删除")
 
     def __init__(self, report_id: int, case_id: int, case_name: str, status: int,
                  case_log: str, start_at: datetime, finished_at: datetime,
@@ -77,4 +77,4 @@ class ApiTestResultModel(Base):
         self.request_params = request_params
         self.data_name = data_name
         self.data_id = data_id
-        self.is_delete = 0
+        self.delete_flag = 0

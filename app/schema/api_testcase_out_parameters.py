@@ -3,7 +3,7 @@ from pydantic import BaseModel, validator
 from app.schema.base import PikaBaseModel
 
 
-class ApiTestCaseOutParametersForm(BaseModel):
+class ApiTestCaseOutParametersSchema(BaseModel):
     id: int = None
     case_id: int = None
     name: str

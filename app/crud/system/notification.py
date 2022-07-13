@@ -47,7 +47,7 @@ class PikaNotificationDao(PikaMapper):
             # 否则需要根据是否已读进行查询 只支持90天内数据
             async with async_session() as session:
                 # 找到3个月内的消息
-                default_condition = [NotificationModel.is_delete == 0,
+                default_condition = [NotificationModel.delete_flag == False,
                                      NotificationModel.create_date >= ninety_days]
                 if msg_type == MessageTypeEnum.broadcast:
                     conditions = [*default_condition, NotificationModel.msg_type == msg_type]

@@ -11,14 +11,13 @@
 """
 import json
 from typing import TypeVar
-
-import pydantic
 from loguru import logger
+from pydantic import BaseModel
 
 body = TypeVar("body", bytes, str)
 
 
-class RequestInfo(pydantic.BaseModel):
+class RequestInfoSchema(BaseModel):
     url: str
     body: str
     request_method: str
@@ -48,7 +47,7 @@ class RequestInfo(pydantic.BaseModel):
     def from_dict(self, **kwargs):
         for k, v in kwargs:
             if not hasattr(self, k):
-                raise Exception(f"set RequestInfo error, no field: {k}")
+                raise Exception(f"set RequestInfoSchema error, no field: {k}")
             setattr(self, k, v)
 
     @classmethod

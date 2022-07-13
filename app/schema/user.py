@@ -18,10 +18,10 @@ from pydantic import BaseModel
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.RbacEnum import RoleEnum
-from app.schema.base import PikaQueryModel, PikaQueryTypeModel, PikaDeleteModel
+from app.schema.base import BaseQuerySchema, BaseQueryTypeSchema, BaseBatchDelIdsSchema
 
 
-class OAuth2TokenModel:
+class OAuth2TokenSchema:
     """Token鉴权"""
 
     def __init__(
@@ -33,7 +33,7 @@ class OAuth2TokenModel:
         self.token = token
 
 
-class RegisterModel(BaseModel):
+class RegisterUserSchema(BaseModel):
     """用户注册"""
     username: Optional[str] = Body(
         ...,
@@ -62,12 +62,12 @@ class RegisterModel(BaseModel):
     identity: Optional[int] = Body(RoleEnum.ORDINARY.value, title="用户身份")
 
 
-class AddUserModel(RegisterModel):
+class AddUserSchema(RegisterUserSchema):
     """添加用户"""
     pass
 
 
-class OAuth2LoginModel:
+class OAuth2LoginSchema:
     """用户登录"""
 
     def __init__(
@@ -91,11 +91,11 @@ class OAuth2LoginModel:
         self.dynamic_code = dynamic_code
 
 
-class ModifyUserInfoModel(RegisterModel):
+class ModifyUserInfoSchema(RegisterUserSchema):
     pass
 
 
-class QueryUserInModel(PikaQueryModel, PikaQueryTypeModel):
+class QueryUserInSchema(BaseQuerySchema, BaseQueryTypeSchema):
     user_alias: Optional[str] = Query(None, title="用户花名")
     username: Optional[str] = Query(None, title="用户名", max_length=ByteSizeEnum.LENGTH_16)
     emp_no: Optional[str] = Query(None, title="用户编码")
@@ -108,7 +108,7 @@ class QueryUserInModel(PikaQueryModel, PikaQueryTypeModel):
         orm_mode = True
 
 
-class QueryUserOutModel(PikaQueryModel):
+class QueryUserOutSchema(BaseQuerySchema):
     username: Optional[str] = Query(None, title="用户名", max_length=ByteSizeEnum.LENGTH_16)
     user_alias: Optional[str] = Query(None, title="用户花名")
     emp_no: Optional[str] = Query(None, title="用户编码")
@@ -120,13 +120,13 @@ class QueryUserOutModel(PikaQueryModel):
         orm_mode = True
 
 
-class SendAuthCodeModel:
+class SendAuthCodeSchema:
     def __init__(self, dynamic_code: Optional[str] = Form(None, title="动态验证码",
                                                           max_length=ByteSizeEnum.LENGTH_06)):
         self.dynamic_code = dynamic_code
 
 
-class ItemSecurityModel(BaseModel):
+class ItemSecuritySchema(BaseModel):
     id: Optional[int] = Body(0, title="密保id")
     question: Optional[str] = Body(None, title="密保问题", max_length=ByteSizeEnum.LENGTH_255)
     answers: Optional[str] = Body(
@@ -140,16 +140,16 @@ class ItemSecurityModel(BaseModel):
         orm_mode = True
 
 
-class EditSecurityModel:
-    def __init__(self, security: List[ItemSecurityModel] = Body(None, title="密保信息")):
+class EditSecuritySchema:
+    def __init__(self, security: List[ItemSecuritySchema] = Body(None, title="密保信息")):
         self.security = security
 
 
-class DelSecurityModel(PikaDeleteModel):
+class DelSecuritySchema(BaseBatchDelIdsSchema):
     pass
 
 
-class QuerySecurityOutModel(BaseModel):
+class QuerySecuritySchema(BaseModel):
     id: Optional[int] = Body(0, title="id")
     question: Optional[str] = Body(None, title="密保问题", max_length=ByteSizeEnum.LENGTH_255)
     answers: Optional[str] = Body(
@@ -163,14 +163,14 @@ class QuerySecurityOutModel(BaseModel):
         orm_mode = True
 
 
-class GetVerifyCodeModel(BaseModel):
+class GetVerifyCodeSchema(BaseModel):
     models: Optional[int] = Body(1, title="模式：（1：忘记密码）")
 
     class Config:
         orm_mode = True
 
 
-class EmailVerifyCode(BaseModel):
+class EmailVerifyCodeSchema(BaseModel):
     model: Optional[int] = Body(3, title="模型：2：邮箱登录使用，3：用户注册时使用")
     email: Optional[str] = Body(None, title="邮箱地址")
 
@@ -178,17 +178,17 @@ class EmailVerifyCode(BaseModel):
         orm_mode = True
 
 
-class ForgetPwdModel(BaseModel):
+class ForgetPwdSchema(BaseModel):
     alter_type: Optional[int] = Body(1, title="验证方式：（1：邮箱验证码, 2：密保）")
     verify_code: Optional[str] = Body(None, title="验证码", max_length=ByteSizeEnum.LENGTH_06)
-    security: List[ItemSecurityModel] = Body(None, title="密保信息")
+    security: List[ItemSecuritySchema] = Body(None, title="密保信息")
     new_password: Optional[str] = Body(..., title="新密码", max_length=ByteSizeEnum.LENGTH_255)
 
     class Config:
         orm_mode = True
 
 
-class ModifySecretModel(BaseModel):
+class ModifySecretSchema(BaseModel):
     old_password: Optional[str] = Body(..., title="旧密码", max_length=ByteSizeEnum.LENGTH_255)
     new_password: Optional[str] = Body(..., title="新密码", max_length=ByteSizeEnum.LENGTH_255)
 

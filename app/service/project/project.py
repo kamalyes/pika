@@ -16,8 +16,8 @@ from app.crud.project.project import ProjectDao, ProjectRoleDao
 from app.crud.project.testplan import ApiTestPlanDao
 from app.enums.RbacEnum import RoleEnum
 from app.middleware.oss import OssClient
-from app.models import get_async_session
-from app.schema.project import ProjectEditForm, ProjectForm
+from app.models import async_db_session
+from app.schema.project import ProjectEditSchema, ProjectSchema
 from app.service import Permission
 
 router = APIRouter()
@@ -43,7 +43,7 @@ async def list_project(page: int = 1, size: int = 8, name: str = "",
 
 
 @router.post("/insert")
-async def insert_project(data: ProjectForm, escarole=Depends(Permission(RoleEnum.MANAGER, True))):
+async def insert_project(data: ProjectSchema, escarole=Depends(Permission(RoleEnum.MANAGER, True))):
     operator_emp_no, operator_identity = escarole
     await ProjectDao.add_project(operator_emp_no=operator_emp_no, **data.dict())
     return PikaResponse.success()
@@ -66,7 +66,7 @@ async def update_project_avatar(project_id: int, file: UploadFile = File(...),
 
 
 @router.post("/update")
-async def update_project(data: ProjectEditForm, escarole=Depends(Permission(escarole=True))):
+async def update_project(data: ProjectEditSchema, escarole=Depends(Permission(escarole=True))):
     operator_emp_no, operator_identity = escarole
     await ProjectDao.update_project(operator_emp_no=operator_emp_no, operator_identity=operator_identity, **data.dict())
     return PikaResponse.success()
@@ -87,7 +87,7 @@ async def query_project(project_id: int, escarole=Depends(Permission(escarole=Tr
 
 @router.delete("/delete", summary="删除项目")
 async def query_project(project_id: int, escarole=Depends(Permission(RoleEnum.MANAGER, True)),
-                        session=Depends(get_async_session)):
+                        session=Depends(async_db_session)):
     operator_emp_no, operator_identity = escarole
     try:
         async with session.begin():

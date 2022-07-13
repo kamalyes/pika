@@ -16,36 +16,36 @@ from fastapi import Query, Body
 from pydantic import BaseModel
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.schema.base import PikaDeleteModel, PikaQueryModel
+from app.schema.base import BaseBatchDelIdsSchema, BaseQuerySchema
 
 
-class EditIterateModel(BaseModel):
+class EditIterateSchema(BaseModel):
     iterate_id: Optional[int] = Body(0, title="迭代id")
     project_id: Optional[int] = Body(..., title="项目id")
     name: Optional[str] = Body(..., title="名称", max_length=ByteSizeEnum.LENGTH_30)
     description: Optional[str] = Body(None, title="描述", max_length=ByteSizeEnum.LENGTH_255)
     is_private: Optional[int] = Body(0, title="是否私有 1：私有 0：公开")
-    is_usable: Optional[int] = Body(1, title="禁用/启用 1：启用、0：禁用")
+    enabled_flag: Optional[int] = Body(1, title="启用标识 1：启用、0：禁用")
 
     class Config:
         orm_mode = True
 
 
-class DelIterateModel(PikaDeleteModel):
+class DelIterateSchema(BaseBatchDelIdsSchema):
     pass
 
 
-class QueryIterateModel(PikaQueryModel):
+class QueryIterateSchema(BaseQuerySchema):
     id: Optional[int] = Query(None, title="迭代id")
     name: Optional[str] = Query(None, title="迭代名称", max_length=ByteSizeEnum.LENGTH_30)
     is_private: Optional[int] = Query(0, title="是否私有 1：私有 0：公开")
-    is_usable: Optional[int] = Query(None, title="禁用/启用 1：启用、0：禁用")
+    enabled_flag: Optional[int] = Query(None, title="禁用/启用 1：启用、0：禁用")
 
     class Config:
         orm_mode = True
 
 
-class EditUserIterateRelModel(BaseModel):
+class EditUserIterateRelSchema(BaseModel):
     iterate_rel_id: Optional[int] = Body(None, title="迭代关联id")
     iterate_id: Optional[int] = Body(None, title="迭代id")
     emp_no: Optional[int] = Body(None, title="员工编号")
@@ -55,5 +55,5 @@ class EditUserIterateRelModel(BaseModel):
         orm_mode = True
 
 
-class DelUserIterateRelModel(PikaDeleteModel):
+class DelUserIterateRelSchema(BaseBatchDelIdsSchema):
     pass

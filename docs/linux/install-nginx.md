@@ -3,6 +3,7 @@
 ### 第一步：下载源码包解压编译（单机）
 
 1. 选择对应版本下载
+
 ```bash
 查看nginx包路径：http://nginx.org/download/，两种下载方式：
 
@@ -28,6 +29,7 @@ tar -zvxf nginx-1.20.1.tar.gz -C /usr/local/ && cd /usr/local/nginx-1.20.1/
 ```
 
 4. 进入Nginx目录进行编译安装
+
 ```bash
 ./configure \
 --prefix=/usr/local/nginx \
@@ -70,13 +72,16 @@ tar -zvxf nginx-1.20.1.tar.gz -C /usr/local/ && cd /usr/local/nginx-1.20.1/
 ```
 
 5. 完成编译安装
+
 ```bash
 make && make install
 mkdir -pv /var/tmp/nginx/client
 ```
 
 ### 第二步：添加SysV启动脚本
+
 1. 创建脚本
+
 ```bash
 vi /etc/init.d/nginx
 
@@ -191,12 +196,14 @@ useradd -r -g nginx nginx
 ```
 
 4. 添加至服务管理列表，设置开机自启
+
 ```bash
 chkconfig --add nginx
 chkconfig nginx on
 ```
 
 5. 启动Nginx
+
 ```bash
 方法一：启动服务
 关闭防火墙：systemctl stop firewalld
@@ -219,6 +226,7 @@ nginx -s reload
 ```
 
 6. 配置https
+
 ```bash
 #参考配置
 upstream project_name {
@@ -251,6 +259,7 @@ server {
 ```
 
 示例:
+
 ```bash
 
 ```

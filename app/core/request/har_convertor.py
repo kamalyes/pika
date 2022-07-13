@@ -15,12 +15,12 @@ from typing import List
 
 from app.core.request.convertor import Convertor
 from app.excpetions.convert.ConvertException import HarConvertException
-from app.schema.request import RequestInfo
+from app.schema.request import RequestInfoSchema
 
 
 class HarConvertor(Convertor):
     @staticmethod
-    def convert_from_file(file, regex: str = None) -> List[RequestInfo]:
+    def convert_from_file(file, regex: str = None) -> List[RequestInfoSchema]:
         with open(file, "r", encoding="utf-8") as f:
             return HarConvertor._convert(f, regex)
 
@@ -45,7 +45,7 @@ class HarConvertor(Convertor):
                     if flag is not None and not re.findall(flag, url):
                         # 由于不符合预期的url，所以过滤掉
                         continue
-                    info = RequestInfo(url=url, response_data=entry.get("response"),
+                    info = RequestInfoSchema(url=url, response_data=entry.get("response"),
                                        body=HarConvertor.get_body(request_data),
                                        status_code=response_data.get("status"),
                                        request_method=request_data.get("method"),
@@ -63,7 +63,7 @@ class HarConvertor(Convertor):
             raise HarConvertException(f"har文件转换失败: {e}")
 
     @staticmethod
-    def convert(file_data, regex: str = None) -> List[RequestInfo]:
+    def convert(file_data, regex: str = None) -> List[RequestInfoSchema]:
         return HarConvertor._convert(file_data, regex)
 
     @staticmethod

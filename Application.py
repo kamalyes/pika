@@ -50,8 +50,8 @@ from app.service.itstem import redis_config_router
 from app.service.online import redis_router
 from app.service.online import script_router
 from app.service.online import sql_router
-from app.service.project import project_router
 from app.service.project import project_role_router
+from app.service.project import project_router
 from app.service.rbac import access_router
 from app.service.rbac import kerberos_router
 from app.service.rbac import menus_router

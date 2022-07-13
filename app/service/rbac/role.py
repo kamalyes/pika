@@ -9,56 +9,49 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from typing import Any, List
+from typing import Any
 
 from fastapi import APIRouter, Depends
 from hutools.pagination import LimitOffsetPage, add_pagination
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.handler.jsonres import PikaResponse
 from app.crud.rbac.role import RoleDao
 from app.models import pagination_db
-from app.schema.role import EditRoleModel, DelRoleModel, QueryRoleInModel, QueryRoleOutModel, \
-    BindRoleModel, \
-    ApplyRoleModel, AuditRoleModel
+from app.schema.base import BaseOnlyIdSchema
+from app.schema.role import QueryRoleOutSchema, QueryRoleInSchema, EditRoleSchema
 from app.service import Permission
 
 router = APIRouter()
 
 
-@router.post("/role/add", summary="添加角色配置")
-async def add_role(request: EditRoleModel = Depends(), user_info=Depends(Permission())):
-    return await RoleDao.add_role(request=request, emp_no=user_info["emp_no"])
+@router.get("/role/list", summary="分页获取角色数据", response_model=LimitOffsetPage[QueryRoleOutSchema])
+async def query_encrypt_issue(request: QueryRoleInSchema = Depends(),
+                              user_info=Depends(Permission()),
+                              db: AsyncSession = Depends(pagination_db)) -> Any:
+    return await RoleDao.list(db, request=request)
 
 
-@router.put("/role/update", summary="更新角色配置信息")
-async def update_role(request: EditRoleModel = Depends(), user_info=Depends(Permission())):
-    return await RoleDao.update_role(request=request, emp_no=user_info["emp_no"])
+@router.post('/role/edit', summary="新增或更新角色")
+async def save_or_update(request: EditRoleSchema, user_info=Depends(Permission())):
+    try:
+        await RoleDao.save_or_update(request=request, operator_emp_no=user_info["emp_no"])
+    except Exception as err:
+        return PikaResponse.failed(detail=str(err))
+    return PikaResponse.success()
 
 
-@router.delete("/role/delete", summary="删除角色配置")
-async def delete_role(request: DelRoleModel = Depends(), user_info=Depends(Permission())):
-    return await RoleDao.delete_role(request=request)
-
-
-@router.get("/role/list", summary="查询角色配置", response_model=LimitOffsetPage[QueryRoleOutModel])
-async def list_role(request: QueryRoleInModel = Depends(), user_info=Depends(Permission()),
-                    db: AsyncSession = Depends(pagination_db)) -> Any:
-    return await RoleDao.list_role(db=db, request=request)
-
-
-@router.post("/role/bind", summary="给成员绑定角色")
-async def bind_role(request: List[BindRoleModel], user_info=Depends(Permission())):
-    return await RoleDao.bind_role(request=request, emp_no=user_info["emp_no"])
-
-
-@router.post("/role/apply", summary="角色关系申请")
-async def apply_role(request: List[ApplyRoleModel], user_info=Depends(Permission())):
-    return await RoleDao.apply_role(request=request, emp_no=user_info["emp_no"])
-
-
-@router.post("/role/audit", summary="角色关系审核")
-async def audit_role(request: List[AuditRoleModel], user_info=Depends(Permission())):
-    return await RoleDao.audit_role(request=request, userinfo=user_info)
+@router.delete('/role/delete', summary="删除角色")
+async def delete(request: BaseOnlyIdSchema):
+    """
+    删除角色
+    :return:
+    """
+    try:
+        await RoleDao.delete(id=request.id)
+    except Exception as err:
+        return PikaResponse.failed(detail=str(err))
+    return PikaResponse.success()
 
 
 add_pagination(router)

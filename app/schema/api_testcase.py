@@ -5,14 +5,14 @@ from pydantic import BaseModel, validator
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.excpetions.business.ParamsException import VariablesNullError
-from app.schema.api_testcase_data import ApiTestCaseDataForm
-from app.schema.api_testcase_out_parameters import ApiTestCaseOutParametersForm
+from app.schema.api_testcase_data import ApiTestCaseDataSchema
+from app.schema.api_testcase_out_parameters import ApiTestCaseOutParametersSchema
 from app.schema.base import PikaBaseModel
-from app.schema.constructor import ConstructorForm
-from app.schema.request import RequestInfo
+from app.schema.constructor import ConstructorSchema
+from app.schema.request import RequestInfoSchema
 
 
-class TestCaseForm(BaseModel):
+class TestCaseSchema(BaseModel):
     id: int = Body(None, title="id")
     priority: str = Body(None, title="用例优先级: p0-p3", max_length=ByteSizeEnum.LENGTH_03)
     url: str = Body("", title="请求url", max_length=ByteSizeEnum.LENGTH_1W)
@@ -25,7 +25,7 @@ class TestCaseForm(BaseModel):
     request_headers: str = Body(None, title="请求头，可为空", max_length=ByteSizeEnum.LENGTH_1000)
     request_method: str = Body(None, title="请求方式, 如果非http可为空", max_length=ByteSizeEnum.LENGTH_12)
     status: int = Body(0, title="用例状态: 1: 调试中 2: 暂时关闭 3: 正常运作")
-    out_parameters: List[ApiTestCaseOutParametersForm] = Body([], title="用例出参")
+    out_parameters: List[ApiTestCaseOutParametersSchema] = Body([], title="用例出参")
     directory_id: int = Body(0, title="所属目录")
     request_type: int = Body(0, title="请求类型 1: http 2: grpc 3: dubbo")
 
@@ -52,11 +52,11 @@ class TestCaseAssertsForm(BaseModel):
 
 
 class TestCaseInfo(BaseModel):
-    case: TestCaseForm = None
+    case: TestCaseSchema = None
     asserts: List[TestCaseAssertsForm] = []
-    data: List[ApiTestCaseDataForm] = []
-    constructor: List[ConstructorForm] = []
-    out_parameters: List[ApiTestCaseOutParametersForm] = []
+    data: List[ApiTestCaseDataSchema] = []
+    constructor: List[ConstructorSchema] = []
+    out_parameters: List[ApiTestCaseOutParametersSchema] = []
 
     # noinspection PyMethodParameters
     @validator("case")
@@ -66,5 +66,5 @@ class TestCaseInfo(BaseModel):
 
 class TestCaseGeneratorForm(BaseModel):
     directory_id: int
-    requests: List[RequestInfo]
+    requests: List[RequestInfoSchema]
     name: str

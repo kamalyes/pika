@@ -16,7 +16,7 @@ from sqlalchemy.orm import relationship, backref
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysvarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
-from app.models.user import SysUserModel
+from app.models.user import UserModel
 
 
 class SysUserAdminModel(LargeBaseModel):
@@ -24,13 +24,13 @@ class SysUserAdminModel(LargeBaseModel):
     __table_args__ = {"comment": "账号管理表"}
     uid = Column(
         INT,
-        ForeignKey(SysUserModel.id, ondelete="cascade", onupdate="cascade"),
+        ForeignKey(UserModel.id, ondelete="cascade", onupdate="cascade"),
         nullable=False,
         comment="员工编号",
     )
     emp_no = Column(
         String(ByteSizeEnum.LENGTH_16),
-        ForeignKey(SysUserModel.emp_no, ondelete="cascade", onupdate="cascade"),
+        ForeignKey(UserModel.emp_no, ondelete="cascade", onupdate="cascade"),
         comment="员工编号",
         nullable=False,
     )
@@ -47,7 +47,7 @@ class SysUserAdminModel(LargeBaseModel):
     last_login_location = Column(String(ByteSizeEnum.LENGTH_30), comment="最后一次登录所在城市")
     last_login_date = Column(DATETIME, server_default=None, comment="最后一次登录时间")
     last_logout_date = Column(DATETIME, server_default=None, comment="最后一次退出登录时间")
-    relationship(SysUserModel, backref=backref("children", cascade="all, delete"))
+    relationship(UserModel, backref=backref("children", cascade="all, delete"))
 
     def __init__(self, uid, emp_no, password, is_activate=0, create_emp_no=None,
                  registration_ip=None,

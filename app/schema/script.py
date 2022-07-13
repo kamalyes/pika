@@ -16,7 +16,7 @@ from pydantic import BaseModel, validator
 from app.schema.base import PikaBaseModel
 
 
-class PyScriptForm(BaseModel):
+class PyScriptSchema(BaseModel):
     command: Optional[str]
     value: Optional[str]
 

@@ -18,7 +18,7 @@ from app.core.handler.logger import PikaLogger
 from app.crud import PikaMapper
 from app.models import async_session, DatabaseHelper
 from app.models.api_testcase_data import ApiTestCaseDataModel
-from app.schema.api_testcase_data import ApiTestCaseDataForm
+from app.schema.api_testcase_data import ApiTestCaseDataSchema
 from app.utils.decorator import dao
 
 
@@ -26,7 +26,7 @@ from app.utils.decorator import dao
 class ApiTestCaseDataDao(PikaMapper):
 
     @classmethod
-    async def insert_testcase_data(cls, form: ApiTestCaseDataForm, operator_emp_no: str):
+    async def insert_testcase_data(cls, form: ApiTestCaseDataSchema, operator_emp_no: str):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -34,7 +34,7 @@ class ApiTestCaseDataDao(PikaMapper):
                         ApiTestCaseDataModel.case_id == form.case_id,
                         ApiTestCaseDataModel.env == form.env,
                         ApiTestCaseDataModel.name == form.name,
-                        ApiTestCaseDataModel.is_delete == 0)
+                        ApiTestCaseDataModel.delete_flag == False)
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is not None:
@@ -50,12 +50,12 @@ class ApiTestCaseDataDao(PikaMapper):
             raise Exception(f"新增测试数据失败, {str(e)}")
 
     @classmethod
-    async def update_testcase_data(cls, form: ApiTestCaseDataForm, operator_emp_no: int):
+    async def update_testcase_data(cls, form: ApiTestCaseDataSchema, operator_emp_no: int):
         try:
             async with async_session() as session:
                 async with session.begin():
                     sql = select(ApiTestCaseDataModel).where(ApiTestCaseDataModel.id == form.id,
-                                                             ApiTestCaseDataModel.is_delete == 0)
+                                                             ApiTestCaseDataModel.delete_flag == False)
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
@@ -74,7 +74,7 @@ class ApiTestCaseDataDao(PikaMapper):
             async with async_session() as session:
                 async with session.begin():
                     sql = select(ApiTestCaseDataModel).where(ApiTestCaseDataModel.id == id,
-                                                             ApiTestCaseDataModel.is_delete == 0)
+                                                             ApiTestCaseDataModel.delete_flag == False)
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
@@ -90,7 +90,7 @@ class ApiTestCaseDataDao(PikaMapper):
         try:
             async with async_session() as session:
                 sql = select(ApiTestCaseDataModel).where(ApiTestCaseDataModel.case_id == case_id,
-                                                         ApiTestCaseDataModel.is_delete == 0)
+                                                         ApiTestCaseDataModel.delete_flag == False)
                 result = await session.execute(sql)
                 query = result.scalars().all()
                 for q in query:
@@ -106,7 +106,7 @@ class ApiTestCaseDataDao(PikaMapper):
             async with async_session() as session:
                 sql = select(ApiTestCaseDataModel).where(ApiTestCaseDataModel.case_id == case_id,
                                                          ApiTestCaseDataModel.env == env,
-                                                         ApiTestCaseDataModel.is_delete == 0)
+                                                         ApiTestCaseDataModel.delete_flag == False)
                 result = await session.execute(sql)
                 return result.scalars().all()
         except Exception as e:

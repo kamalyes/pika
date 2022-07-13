@@ -5,7 +5,7 @@ from pydantic import BaseModel, validator
 from app.schema.base import PikaBaseModel
 
 
-class ApiTestCaseDirectoryForm(BaseModel):
+class ApiTestCaseDirectorySchema(BaseModel):
     id: int = None
     name: str
     project_id: int
@@ -17,7 +17,7 @@ class ApiTestCaseDirectoryForm(BaseModel):
         return PikaBaseModel.not_empty(v)
 
 
-class MoveApiTestCaseFrom(BaseModel):
+class MoveApiTestCaseSchema(BaseModel):
     project_id: int
     id_list: List[int]
     directory_id: int

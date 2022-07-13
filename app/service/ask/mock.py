@@ -18,42 +18,42 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.itst.api.mock import MockDao
 from app.models import pagination_db
-from app.schema.base import PikaOnlyIdModel
-from app.schema.mock import (EditMockModel, DelMockModel,
-                             QueryMockOutModel, QueryMockInModel)
+from app.schema.base import BaseOnlyIdSchema
+from app.schema.mock import (EditMockSchema, DelMockSchema,
+                             QueryMockOutSchema, QueryMockInSchema)
 from app.service import Permission
 
 router = APIRouter()
 
 
 @router.post("/mock/add", summary="增加mock配置")
-async def add_mock_deploy(request: EditMockModel):
+async def add_mock_deploy(request: EditMockSchema):
     return await MockDao.add_mock_deploy(request=request)
 
 
 @router.delete("/mock/delete", summary="删除mock配置（软删）")
-async def delete_mock_deploy(request: DelMockModel = Depends(),
+async def delete_mock_deploy(request: DelMockSchema = Depends(),
                              escarole=Depends(Permission(escarole=True))):
     emp_no, role = escarole
     return await MockDao.delete_mock_deploy(request=request, emp_no=emp_no)
 
 
 @router.post("/mock/update", summary="编辑mock配置")
-async def update_mock_deploy(request: EditMockModel,
+async def update_mock_deploy(request: EditMockSchema,
                              escarole=Depends(Permission(escarole=True))):
     emp_no, role = escarole
     return await MockDao.update_mock_deploy(request=request, emp_no=emp_no)
 
 
-@router.get("/mock/list", summary="分页获取mock配置", response_model=LimitOffsetPage[QueryMockOutModel])
-async def list_mock_deploy(request: QueryMockInModel = Depends(),
+@router.get("/mock/list", summary="分页获取mock配置", response_model=LimitOffsetPage[QueryMockOutSchema])
+async def list_mock_deploy(request: QueryMockInSchema = Depends(),
                            escarole=Depends(Permission(escarole=True)),
                            db: AsyncSession = Depends(pagination_db)) -> Any:
     return await MockDao.list_mock_deploy(db, request)
 
 
 @router.get("/mock/call", summary="请求mock返回")
-async def call_mock_template(request: PikaOnlyIdModel = Depends(),
+async def call_mock_template(request: BaseOnlyIdSchema = Depends(),
                              escarole=Depends(Permission(escarole=True))) -> Any:
     return await MockDao.call_mock_template(request)
 

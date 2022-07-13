@@ -17,7 +17,7 @@ from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysvarEnum import PikaGlobalVarEnum
 from app.models.basic import NormBaseModel
 from app.models.menu import MenuModel
-from app.models.user import SysUserModel
+from app.models.user import UserModel
 
 
 class ActionControlModel(NormBaseModel):
@@ -31,7 +31,7 @@ class RoleAction(NormBaseModel):
     __table_args__ = {"comment": "角色活动表"}
     emp_no = Column(
         String(ByteSizeEnum.LENGTH_20),
-        ForeignKey(SysUserModel.emp_no, ondelete="cascade", onupdate="cascade"),
+        ForeignKey(UserModel.emp_no, ondelete="cascade", onupdate="cascade"),
         comment="员工编号",
         nullable=False,
     )

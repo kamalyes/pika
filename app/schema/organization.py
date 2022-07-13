@@ -15,10 +15,10 @@ from fastapi import Body, Query
 from pydantic import BaseModel
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.schema.base import PikaDeleteModel, PikaQueryModel, PikaLargeEditModel
+from app.schema.base import BaseBatchDelIdsSchema, BaseQuerySchema, BaseLargeEditSchema
 
 
-class EditUserGroupModel(PikaLargeEditModel):
+class EditUserGroupSchema(BaseLargeEditSchema):
     group_id: Optional[int] = Body(0, title="用户组id")
     group_name: Optional[str] = Body(..., title="用户组名称", min_length=2,
                                      max_length=ByteSizeEnum.LENGTH_255)
@@ -27,27 +27,27 @@ class EditUserGroupModel(PikaLargeEditModel):
         orm_mode = True
 
 
-class DelUserGroupModel(PikaDeleteModel):
+class DelUserGroupSchema(BaseBatchDelIdsSchema):
     pass
 
 
-class EditDeptModel(BaseModel):
+class EditDeptSchema(BaseModel):
     dept_id: Optional[int] = Body(0, title="部门id")
     group_id: Optional[int] = Body(..., title="用户组id")
     dept_name: Optional[str] = Body(..., title="部门名称", min_length=2,
                                     max_length=ByteSizeEnum.LENGTH_255)
     description: Optional[str] = Body(None, title="备注信息", max_length=ByteSizeEnum.LENGTH_255)
-    is_usable: Optional[int] = Body(1, title="禁用/启用 1：启用、0：禁用")
+    enabled_flag: Optional[int] = Body(1, title="禁用/启用 1：启用、0：禁用")
 
     class Config:
         orm_mode = True
 
 
-class DelDeptModel(PikaDeleteModel):
+class DelDeptSchema(BaseBatchDelIdsSchema):
     pass
 
 
-class EditDeptRelModel(BaseModel):
+class EditDeptRelSchema(BaseModel):
     rel_id: Optional[int] = Body(0, title="应用id")
     dept_id: Optional[int] = Body(..., title="部门id")
     emp_no: Optional[str] = Body(..., title="员工编号", max_length=ByteSizeEnum.LENGTH_20)
@@ -59,11 +59,11 @@ class EditDeptRelModel(BaseModel):
         orm_mode = True
 
 
-class DelDeptRelModel(PikaDeleteModel):
+class DelDeptRelModel(BaseBatchDelIdsSchema):
     pass
 
 
-class QueryDeptRelModel(PikaQueryModel):
+class QueryDeptRelModel(BaseQuerySchema):
     rel_id: Optional[int] = Query(None, title="组织应用id")
     dept_id: Optional[int] = Query(None, title="部门id")
     emp_no: Optional[str] = Query(None, title="员工编号", max_length=ByteSizeEnum.LENGTH_20)

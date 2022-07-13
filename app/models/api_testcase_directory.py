@@ -16,7 +16,7 @@ from sqlalchemy import Column, INT, String, UniqueConstraint
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysvarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
-from app.schema.api_testcase_directory import ApiTestCaseDirectoryForm
+from app.schema.api_testcase_directory import ApiTestCaseDirectorySchema
 
 
 class ApiTestCaseDirectoryModel(LargeBaseModel):
@@ -27,7 +27,7 @@ class ApiTestCaseDirectoryModel(LargeBaseModel):
     project_id = Column(INT, index=True, comment="项目id")
     parent = Column(INT, comment="目录上级目录，如果没有则为None")
 
-    def __init__(self, form: ApiTestCaseDirectoryForm, operator):
+    def __init__(self, form: ApiTestCaseDirectorySchema, operator):
         super().__init__(operator)
         self.project_id = form.project_id
         self.name = form.name

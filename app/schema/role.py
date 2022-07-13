@@ -1,60 +1,48 @@
-# -*- coding:utf-8 -*-
-# !/usr/bin/env python 3.9.11
-"""
-@File    :  role.py
-@Time    :  2022/5/3 2:15 AM
-@Author  :  YuYanQing
-@Version :  1.0
-@Contact :  mryu168@163.com
-@License :  (C)Copyright 2022-2026
-@Desc    :  None
-"""
-from typing import Optional, List
+from typing import Optional
 
 from fastapi import Body
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.schema.base import PikaDeleteModel, PikaOnlyIdModel, PikaOnlyDescModel, PikaQueryModel, \
-    PikaQueryTypeModel, \
-    PikaOnlyEmpNoModel
+from app.schema.base import BaseQuerySchema, BaseQueryTypeSchema
 
 
-class RoleGlobalModel(PikaOnlyIdModel, PikaOnlyDescModel):
-    name: Optional[str] = Body(None, title="角色名称", max_length=ByteSizeEnum.LENGTH_255)
-    role_type: Optional[int] = Body(None, title="角色权限类型，10菜单权限，20用户组权限")
-    menus_id: Optional[str] = Body(None, title="菜单id", max_length=ByteSizeEnum.LENGTH_64)
+class QueryRoleOutSchema(BaseQuerySchema):
+    """角色查询序列化"""
+    name: Optional[str] = Body(None, name='菜单名称', max_length=ByteSizeEnum.LENGTH_64)
+    role_type: Optional[int] = Body(10, name='权限类型，10菜单权限，20用户组权限')
+    status: Optional[int] = Body(10, name='状态 10 启用 20 禁用')
+    description: Optional[str] = Body(None, name='描述', max_length=ByteSizeEnum.LENGTH_255)
 
-
-class EditRoleModel:
-    def __init__(self, role: List[RoleGlobalModel] = Body(..., title="角色信息")):
-        self.role = role
-
-
-class DelRoleModel(PikaDeleteModel):
-    pass
-
-
-class QueryRoleInModel(PikaQueryModel, PikaQueryTypeModel, RoleGlobalModel):
-    pass
-
-
-class QueryRoleOutModel(PikaQueryModel, RoleGlobalModel):
     class Config:
         orm_mode = True
 
 
-class BindRoleModel(PikaOnlyEmpNoModel):
-    id: Optional[int] = Body(0, title="id")
-    role_id: Optional[int] = Body(0, title="角色id")
-
-
-class ApplyRoleModel(PikaOnlyDescModel):
-    role_id: Optional[int] = Body(..., title="角色id")
-
-
-class AuditRoleModel(PikaOnlyIdModel, PikaOnlyDescModel):
+class QueryRoleInSchema(QueryRoleOutSchema, BaseQueryTypeSchema):
+    """角色查询序列化"""
     pass
 
 
-class DelRoleRelModel(PikaDeleteModel):
+class EditRoleSchema(BaseQuerySchema):
+    """创建/新增角色"""
+    name: Optional[str] = Body(None, name='菜单名称', max_length=ByteSizeEnum.LENGTH_64)
+    menus: Optional[list] = Body(..., name='菜单列表')
+    role_type: Optional[int] = Body(10, name='权限类型，10菜单权限，20用户组权限')
+    status: Optional[int] = Body(10, name='状态 10 启用 20 禁用')
+    description: Optional[str] = Body(None, name='描述', max_length=ByteSizeEnum.LENGTH_255)
     pass
+
+    class Config:
+        orm_mode = True
+
+    @staticmethod
+    def return_menu(obj):
+        """
+        初始化menus
+        source: 1,2,3,5
+        target: [1, 2, 3, 5]
+        :param obj:
+        :return:
+        """
+        if obj.menus:
+            return list(map(int, obj.menus.split(',')))
+        return []

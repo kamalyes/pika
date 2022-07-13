@@ -16,7 +16,7 @@ from pydantic import BaseModel, validator
 from app.schema.base import PikaBaseModel
 
 
-class OnlineSQLForm(BaseModel):
+class OnlineSqlSchema(BaseModel):
     id: Optional[int] = None
     sql: Optional[str]
 
@@ -26,7 +26,7 @@ class OnlineSQLForm(BaseModel):
         return PikaBaseModel.not_empty(v)
 
 
-class OnlineRedisForm(BaseModel):
+class OnlineRedisSchema(BaseModel):
     id: Optional[int] = None
     command: Optional[str]
 

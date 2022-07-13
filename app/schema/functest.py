@@ -12,25 +12,25 @@
 
 from pydantic import BaseModel
 
-from app.schema.base import PikaQueryModel, PikaQueryTypeModel, PikaDeleteModel
+from app.schema.base import BaseQuerySchema, BaseQueryTypeSchema, BaseBatchDelIdsSchema
 
 
-class FuncCaseGlobalModel(BaseModel):
+class FuncCaseGlobalSchema(BaseModel):
     class Config:
         orm_mode = True
 
 
-class EditFuncCaseModel(FuncCaseGlobalModel):
+class EditFuncCaseSchema(FuncCaseGlobalSchema):
     pass
 
 
-class DelFuncCaseModel(PikaDeleteModel):
+class DelFuncCaseSchema(BaseBatchDelIdsSchema):
     pass
 
 
-class QueryFuncCaseInModel(PikaQueryModel, PikaQueryTypeModel, FuncCaseGlobalModel):
+class QueryFuncCaseInSchema(BaseQuerySchema, BaseQueryTypeSchema, FuncCaseGlobalSchema):
     pass
 
 
-class QueryFuncCaseOutModel(PikaQueryModel, FuncCaseGlobalModel):
+class QueryFuncCaseOutSchema(BaseQuerySchema, FuncCaseGlobalSchema):
     pass

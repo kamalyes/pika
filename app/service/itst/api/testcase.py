@@ -18,15 +18,15 @@ from app.crud.itst.api.testreport import ApiTestReportDao
 from app.crud.project.project import ProjectRoleDao
 from app.enums.ConvertorEnum import CaseConvertorTypeEnum
 from app.middleware.xredis import RedisHelper
-from app.models import get_async_session
+from app.models import async_db_session
 from app.models.api_test_case import ApiTestCaseModel
 from app.models.api_testcase_out_parameters import ApiTestCaseOutParametersModel
-from app.schema.api_testcase import TestCaseAssertsForm, TestCaseForm, TestCaseInfo, \
+from app.schema.api_testcase import TestCaseAssertsForm, TestCaseSchema, TestCaseInfo, \
     TestCaseGeneratorForm
-from app.schema.api_testcase_data import ApiTestCaseDataForm
-from app.schema.api_testcase_directory import ApiTestCaseDirectoryForm, MoveApiTestCaseFrom
-from app.schema.api_testcase_out_parameters import ApiTestCaseOutParametersForm
-from app.schema.constructor import ConstructorForm, ConstructorIndex
+from app.schema.api_testcase_data import ApiTestCaseDataSchema
+from app.schema.api_testcase_directory import ApiTestCaseDirectorySchema, MoveApiTestCaseSchema
+from app.schema.api_testcase_out_parameters import ApiTestCaseOutParametersSchema
+from app.schema.constructor import ConstructorSchema, ConstructorIndexSchema
 from app.service import Permission
 
 router = APIRouter()
@@ -39,7 +39,7 @@ async def list_testcase(directory_id: int = None, name: str = "", operator: str 
 
 
 @router.post("/insert", summary="新增接口用例")
-async def insert_testcase(data: TestCaseForm, user_info=Depends(Permission())):
+async def insert_testcase(data: TestCaseSchema, user_info=Depends(Permission())):
     try:
         record = await ApiTestCaseDao.query_record(name=data.name, directory_id=data.directory_id)
         if record is not None:
@@ -54,14 +54,14 @@ async def insert_testcase(data: TestCaseForm, user_info=Depends(Permission())):
 # v2版本创建用例接口
 @router.post("/create", summary="创建接口测试用例")
 async def create_testcase(data: TestCaseInfo, user_info=Depends(Permission()),
-                          session=Depends(get_async_session)):
+                          session=Depends(async_db_session)):
     async with session.begin():
         await ApiTestCaseDao.insert_test_case(session, data, user_info['emp_no'])
     return PikaResponse.success()
 
 
 @router.post("/update")
-async def update_testcase(form: TestCaseForm, user_info=Depends(Permission())):
+async def update_testcase(form: TestCaseSchema, user_info=Depends(Permission())):
     try:
         data = await ApiTestCaseDao.update_test_case(form, user_info['emp_no'])
         result = await ApiTestCaseOutParametersDao.update_many(form.id, form.out_parameters,
@@ -73,7 +73,7 @@ async def update_testcase(form: TestCaseForm, user_info=Depends(Permission())):
 
 @router.delete("/delete", summary="删除测试用例")
 async def delete_testcase(id_list: List[int], user_info=Depends(Permission()),
-                          session=Depends(get_async_session)):
+                          session=Depends(async_db_session)):
     try:
         # 删除case
         async with session.begin():
@@ -96,16 +96,6 @@ async def query_testcase(caseId: int, _=Depends(Permission())):
         return PikaResponse.success(data=PikaResponse.dict_model_to_dict(data))
     except Exception as e:
         return PikaResponse.failed(detail=str(e))
-
-
-# @router.get("/list")
-# async def query_testcase(user_info=Depends(Permission())):
-#     try:
-#         projects, _, _ = ProjectDao.list_project(user_info["role"], user_info["emp_no"], 1, 2000)
-#         data = ApiTestCaseDao.list_testcase_tree(projects)
-#         return dict(code=0, data=data, msg="操作成功")
-#     except Exception as e:
-#         return dict(code=110, msg=str(e))
 
 
 @router.post("/asserts/insert")
@@ -133,13 +123,13 @@ async def delete_test_case_asserts(id: int, user_info=Depends(Permission())):
 
 
 @router.post("/constructor/insert")
-async def insert_constructor(data: ConstructorForm, user_info=Depends(Permission())):
+async def insert_constructor(data: ConstructorSchema, user_info=Depends(Permission())):
     await ConstructorDao.insert_constructor(data, operator_emp_no=user_info["emp_no"])
     return PikaResponse.success()
 
 
 @router.post("/constructor/update")
-async def update_constructor(data: ConstructorForm, user_info=Depends(Permission())):
+async def update_constructor(data: ConstructorSchema, user_info=Depends(Permission())):
     await ConstructorDao.update_constructor(data, operator_emp_no=user_info["emp_no"])
     return PikaResponse.success()
 
@@ -151,7 +141,7 @@ async def update_constructor(id: int, user_info=Depends(Permission())):
 
 
 @router.post("/constructor/order")
-async def update_constructor_index(data: List[ConstructorIndex], user_info=Depends(Permission())):
+async def update_constructor_index(data: List[ConstructorIndexSchema], user_info=Depends(Permission())):
     await ConstructorDao.update_constructor_index(data)
     return PikaResponse.success()
 
@@ -266,7 +256,7 @@ async def query_testcase_directory(directory_id: int, escarole=Depends(Permissio
 
 
 @router.post("/directory/insert")
-async def insert_testcase_directory(form: ApiTestCaseDirectoryForm,
+async def insert_testcase_directory(form: ApiTestCaseDirectorySchema,
                                     user_info=Depends(Permission())):
     try:
         await ApiTestCaseDirectoryDao.insert_directory(form, user_info['emp_no'])
@@ -276,7 +266,7 @@ async def insert_testcase_directory(form: ApiTestCaseDirectoryForm,
 
 
 @router.post("/directory/update")
-async def insert_testcase_directory(form: ApiTestCaseDirectoryForm,
+async def insert_testcase_directory(form: ApiTestCaseDirectorySchema,
                                     user_info=Depends(Permission())):
     try:
         await ApiTestCaseDirectoryDao.update_directory(form, user_info['emp_no'])
@@ -295,7 +285,7 @@ async def insert_testcase_directory(id: int, user_info=Depends(Permission())):
 
 
 @router.post("/data/insert")
-async def insert_testcase_data(form: ApiTestCaseDataForm, user_info=Depends(Permission())):
+async def insert_testcase_data(form: ApiTestCaseDataSchema, user_info=Depends(Permission())):
     try:
         data = await ApiTestCaseDataDao.insert_testcase_data(form, user_info['emp_no'])
         return PikaResponse.success(data=data)
@@ -304,7 +294,7 @@ async def insert_testcase_data(form: ApiTestCaseDataForm, user_info=Depends(Perm
 
 
 @router.post("/data/update")
-async def update_testcase_data(form: ApiTestCaseDataForm, user_info=Depends(Permission())):
+async def update_testcase_data(form: ApiTestCaseDataSchema, user_info=Depends(Permission())):
     try:
         data = await ApiTestCaseDataDao.update_testcase_data(form, user_info['emp_no'])
         return PikaResponse.success(data=data)
@@ -322,7 +312,7 @@ async def delete_testcase_data(id: int, user_info=Depends(Permission())):
 
 
 @router.post("/move", summary="移动case到其他目录")
-async def move_testcase(form: MoveApiTestCaseFrom, escarole=Depends(Permission(escarole=True))):
+async def move_testcase(form: MoveApiTestCaseSchema, escarole=Depends(Permission(escarole=True))):
     try:
         # 判断是否有移动case的权限
         operator_emp_no, operator_identity = escarole
@@ -338,7 +328,7 @@ async def move_testcase(form: MoveApiTestCaseFrom, escarole=Depends(Permission(e
 
 
 @router.post("/parameters/insert")
-async def insert_testcase_out_parameters(form: ApiTestCaseOutParametersForm,
+async def insert_testcase_out_parameters(form: ApiTestCaseOutParametersSchema,
                                          user_info=Depends(Permission())):
     query = await ApiTestCaseOutParametersDao.query_record(name=form.name, case_id=form.case_id)
     if query is not None:
@@ -350,14 +340,14 @@ async def insert_testcase_out_parameters(form: ApiTestCaseOutParametersForm,
 
 @router.post("/parameters/update/batch", summary="批量更新出参数据")
 async def update_batch_testcase_out_parameters(case_id: int,
-                                               form: List[ApiTestCaseOutParametersForm],
+                                               form: List[ApiTestCaseOutParametersSchema],
                                                user_info=Depends(Permission())):
     result = await ApiTestCaseOutParametersDao.update_many(case_id, form, user_info['emp_no'])
     return PikaResponse.success(data=result)
 
 
 @router.post("/parameters/update")
-async def update_testcase_out_parameters(form: ApiTestCaseOutParametersForm,
+async def update_testcase_out_parameters(form: ApiTestCaseOutParametersSchema,
                                          user_info=Depends(Permission())):
     data = await ApiTestCaseOutParametersDao.update_record_by_id(user_info['emp_no'], form)
     return PikaResponse.success(data=data)
@@ -365,7 +355,7 @@ async def update_testcase_out_parameters(form: ApiTestCaseOutParametersForm,
 
 @router.get("/parameters/delete")
 async def delete_testcase_out_parameters(id: int, user_info=Depends(Permission()),
-                                         session=Depends(get_async_session)):
+                                         session=Depends(async_db_session)):
     await ApiTestCaseOutParametersDao.delete_record_by_id(session, user_info['emp_no'], id, log=False)
     return PikaResponse.success()
 
@@ -403,7 +393,7 @@ async def remove_record(index: int, request: Request, _=Depends(Permission())):
 
 @router.post("/generate", summary="生成用例")
 async def generate_case(form: TestCaseGeneratorForm, user_info=Depends(Permission()),
-                        session=Depends(get_async_session)):
+                        session=Depends(async_db_session)):
     if len(form.requests) == 0:
         return PikaResponse.failed(detail="无http请求，请检查参数")
     CaseGenerator.extract_field(form.requests)

@@ -33,7 +33,7 @@ from app.models.api_testcase_data import ApiTestCaseDataModel
 from app.models.api_testcase_out_parameters import ApiTestCaseOutParametersModel
 from app.models.constructor import ConstructorModel
 from app.models.project import ProjectModel
-from app.schema.api_testcase import TestCaseInfo, TestCaseForm
+from app.schema.api_testcase import TestCaseInfo, TestCaseSchema
 from app.utils.decorator import dao
 
 
@@ -44,10 +44,10 @@ class ApiTestCaseDao(PikaMapper):
     @classmethod
     async def list_testcase(cls, directory_id: int = None, name: str = "", operator: str = None):
         try:
-            filters = [ApiTestCaseModel.is_delete == 0]
+            filters = [ApiTestCaseModel.delete_flag == False]
             if directory_id:
                 parents = await ApiTestCaseDirectoryDao.get_directory_son(directory_id)
-                filters = [ApiTestCaseModel.is_delete == 0,
+                filters = [ApiTestCaseModel.delete_flag == False,
                            ApiTestCaseModel.directory_id.in_(parents)]
                 if name:
                     filters.append(ApiTestCaseModel.name.like(f"%{name}%"))
@@ -65,7 +65,7 @@ class ApiTestCaseDao(PikaMapper):
     async def get_test_case_by_directory_id(directory_id: int):
         try:
             async with async_session() as session:
-                sql = select(ApiTestCaseModel).where(ApiTestCaseModel.is_delete == 0,
+                sql = select(ApiTestCaseModel).where(ApiTestCaseModel.delete_flag == False,
                                                      ApiTestCaseModel.directory_id == directory_id).order_by(
                     ApiTestCaseModel.update_date.desc())
                 result = await session.execute(sql)
@@ -117,7 +117,7 @@ class ApiTestCaseDao(PikaMapper):
         query = await session.execute(
             select(ApiTestCaseModel).where(ApiTestCaseModel.directory_id == data.case.directory_id,
                                            ApiTestCaseModel.name == data.case.name,
-                                           ApiTestCaseModel.is_delete == 0))
+                                           ApiTestCaseModel.delete_flag == False))
         if query.scalars().first() is not None:
             raise Exception("用例名称已存在")
         cs = ApiTestCaseModel(**data.case.dict(), operator=operator_emp_no)
@@ -135,7 +135,7 @@ class ApiTestCaseDao(PikaMapper):
         return cs
 
     @classmethod
-    async def update_test_case(cls, test_case: TestCaseForm, operator_emp_no: str) -> ApiTestCaseModel:
+    async def update_test_case(cls, test_case: TestCaseSchema, operator_emp_no: str) -> ApiTestCaseModel:
         """
         更新测试用例
         Args:
@@ -150,7 +150,7 @@ class ApiTestCaseDao(PikaMapper):
                 async with session.begin():
                     query = await session.execute(
                         select(ApiTestCaseModel).where(ApiTestCaseModel.id == test_case.id,
-                                                       ApiTestCaseModel.is_delete == 0))
+                                                       ApiTestCaseModel.delete_flag == False))
                     data = query.scalars().first()
                     if data is None:
                         raise Exception("用例不存在")
@@ -176,7 +176,7 @@ class ApiTestCaseDao(PikaMapper):
         try:
             async with async_session() as session:
                 sql = select(ApiTestCaseModel).where(ApiTestCaseModel.id == case_id,
-                                                     ApiTestCaseModel.is_delete == 0)
+                                                     ApiTestCaseModel.delete_flag == False)
                 result = await session.execute(sql)
                 data = result.scalars().first()
                 if data is None:
@@ -214,7 +214,7 @@ class ApiTestCaseDao(PikaMapper):
                             x.type == 0]
             async with async_session() as session:
                 sql = select(ApiTestCaseModel).where(ApiTestCaseModel.id.in_(constructors),
-                                                     ApiTestCaseModel.is_delete == 0)
+                                                     ApiTestCaseModel.delete_flag == False)
                 result = await session.execute(sql)
                 data = result.scalars().all()
                 return {x.id: x for x in data}
@@ -236,7 +236,7 @@ class ApiTestCaseDao(PikaMapper):
             async with async_session() as session:
                 result = await session.execute(
                     select(ApiTestCaseModel).where(ApiTestCaseModel.id == case_id,
-                                                   ApiTestCaseModel.is_delete == 0))
+                                                   ApiTestCaseModel.delete_flag == False))
                 data = result.scalars().first()
                 if data is None:
                     return None, "用例不存在"
@@ -271,7 +271,7 @@ class ApiTestCaseDao(PikaMapper):
             async with async_session() as session:
                 query = await session.execute(select(ApiTestCaseModel).where(
                     ApiTestCaseModel.project_id.in_(project_map.keys()),
-                    ApiTestCaseModel.is_delete == 0
+                    ApiTestCaseModel.delete_flag == False
                 ))
                 data = query.scalars().all()
                 for d in data:
@@ -299,7 +299,7 @@ class ApiTestCaseDao(PikaMapper):
             async with async_session() as session:
                 query = await session.execute(
                     select(ConstructorModel).where(ConstructorModel.case_id == case_id,
-                                                   ConstructorModel.is_delete == 0
+                                                   ConstructorModel.delete_flag == False
                                                    )).order_by(
                     desc(ConstructorModel.create_date))
                 return query.scalars().all()
@@ -319,7 +319,7 @@ class ApiTestCaseDao(PikaMapper):
         try:
             async with async_session() as session:
                 sql = select(ConstructorModel).where(ConstructorModel.case_id == case_id,
-                                                     ConstructorModel.is_delete == 0).order_by(
+                                                     ConstructorModel.delete_flag == False).order_by(
                     ConstructorModel.create_date)
                 data = await session.execute(sql)
                 return data.scalars().all()
@@ -429,9 +429,9 @@ class ApiTestCaseDao(PikaMapper):
             async with session.begin():
                 sql = select(ApiTestCaseModel.create_emp_no, func.count(ApiTestCaseModel.id)) \
                     .outerjoin(SysUserAdminModel,
-                               and_(SysUserAdminModel.is_delete == 0,
+                               and_(SysUserAdminModel.delete_flag == False,
                                     ApiTestCaseModel.create_emp_no == SysUserAdminModel.emp_no)).where(
-                    ApiTestCaseModel.is_delete == 0).group_by(
+                    ApiTestCaseModel.delete_flag == False).group_by(
                     ApiTestCaseModel.create_emp_no).order_by(
                     desc(func.count(ApiTestCaseModel.id)))
                 query = await session.execute(sql)
@@ -449,7 +449,7 @@ class ApiTestCaseDao(PikaMapper):
                 # date_ = func.date_format(ApiTestCaseModel.create_date, "%Y-%m-%d")
                 sql = select(ApiTestCaseModel.create_date, func.count(ApiTestCaseModel.id)).where(
                     ApiTestCaseModel.create_emp_no == operator_emp_no,
-                    ApiTestCaseModel.is_delete == 0,
+                    ApiTestCaseModel.delete_flag == False,
                     ApiTestCaseModel.create_date.between(start_time, end_time)).group_by(
                     ApiTestCaseModel.create_date).order_by(asc(ApiTestCaseModel.create_date))
                 query = await session.execute(sql)

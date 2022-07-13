@@ -17,7 +17,7 @@ from app.crud import PikaMapper
 from app.middleware.xredis import RedisHelper
 from app.models import async_session
 from app.models.gconfig import GConfigModel
-from app.schema.gconfig import GConfigForm
+from app.schema.gconfig import GConfigFormSchema
 from app.utils.decorator import dao
 
 
@@ -26,14 +26,14 @@ class GConfigDao(PikaMapper):
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def insert_gconfig(cls, form: GConfigForm, operator_emp_no: int) -> None:
+    async def insert_gconfig(cls, form: GConfigFormSchema, operator_emp_no: int) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():
                     query = await session.execute(
                         select(GConfigModel).where(GConfigModel.env == form.env,
                                                    GConfigModel.key == form.key,
-                                                   GConfigModel.is_delete == 0))
+                                                   GConfigModel.delete_flag == False))
                     data = query.scalars().first()
                     if data is not None:
                         raise Exception(f"变量: {data.key}已存在")
@@ -47,8 +47,8 @@ class GConfigDao(PikaMapper):
     @RedisHelper.cache("dao", 1800, True)
     async def async_get_gconfig_by_key(key: str, env: int) -> GConfigModel:
         try:
-            filters = [GConfigModel.key == key, GConfigModel.is_delete == 0,
-                       GConfigModel.is_usable is True,
+            filters = [GConfigModel.key == key, GConfigModel.delete_flag == False,
+                       GConfigModel.enabled_flag is True,
                        GConfigModel.env == env]
             async with async_session() as session:
                 sql = select(GConfigModel).where(*filters)

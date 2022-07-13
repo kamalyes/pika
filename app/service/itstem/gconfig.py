@@ -14,28 +14,28 @@ from fastapi import Depends, APIRouter
 from app.core.handler.jsonres import PikaResponse
 from app.crud.online.gconfig import GConfigDao
 from app.enums.RbacEnum import RoleEnum
-from app.models import get_async_session
-from app.schema.gconfig import GConfigForm
+from app.models import async_db_session
+from app.schema.gconfig import GConfigFormSchema
 from app.service import Permission
 
 router = APIRouter()
 
 
 @router.post("/gconfig/insert", summary="增加全局配置")
-async def insert_gconfig(data: GConfigForm, user_info=Depends(Permission(RoleEnum.ADMIN))):
+async def insert_gconfig(data: GConfigFormSchema, user_info=Depends(Permission(RoleEnum.ADMIN))):
     await GConfigDao.insert_gconfig(data, user_info['emp_no'])
     return PikaResponse.success()
 
 
 @router.delete("/gconfig/delete", summary="删除全局配置")
 async def delete_gconfig(id: int, user_info=Depends(Permission(RoleEnum.ADMIN)),
-                         session=Depends(get_async_session)):
+                         session=Depends(async_db_session)):
     await GConfigDao.delete_record_by_id(session, user_info['emp_no'], id, log=True)
     return PikaResponse.success()
 
 
 @router.post("/gconfig/update", summary="更新全局配置")
-async def update_gconfig(data: GConfigForm, user_info=Depends(Permission(RoleEnum.ADMIN))):
+async def update_gconfig(data: GConfigFormSchema, user_info=Depends(Permission(RoleEnum.ADMIN))):
     await GConfigDao.update_record_by_id(user_info['emp_no'], data, True, True)
     return PikaResponse.success()
 

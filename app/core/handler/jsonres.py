@@ -12,10 +12,11 @@
 import os
 from datetime import datetime
 from decimal import Decimal
+from functools import wraps
 from json import JSONEncoder
 from typing import Union, Any
 
-from fastapi import status, Response
+from fastapi import status, Response, Request
 from fastapi.encoders import jsonable_encoder
 from starlette.background import BackgroundTask
 from starlette.responses import JSONResponse, FileResponse
@@ -199,3 +200,18 @@ class PikaResponse:
     @staticmethod
     def forbidden():
         return dict(code=403, msg="对不起, 你没有权限")
+
+
+def json_required(func):
+    """
+    此装饰器可以装饰所有post请求 避免处理非json数据报错
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        json_dict = Request.json()
+        if json_dict is None:
+            return PikaResponse.failed(code=400, detail='json is required')
+        return func(*args, **kwargs)
+
+    return wrapper

@@ -8,20 +8,20 @@ from app.excpetions.business.ParamsException import VariablesNullError
 from app.schema.base import PikaBaseModel
 
 
-class ConstructorForm(BaseModel):
+class ConstructorSchema(BaseModel):
     id: Optional[int] = Body(0, title="id")
     value: Optional[str] = Body("", title="", max_length=ByteSizeEnum.LENGTH_255)
     type: Optional[int] = Body(0, title="类型 0: testcase 1: sqlscript 2: redis 3: py脚本 4: 其它")
     name: Optional[str] = Body("", title="", max_length=ByteSizeEnum.LENGTH_255)
     index: Optional[int] = Body(0, title="前置条件顺序")
     constructor_json: Optional[str] = Body("", title="constructor_json")
-    is_usable: Optional[bool] = Body(None, title="是否可用")
+    enabled_flag: Optional[bool] = Body(True, title="是否可用")
     case_id: Optional[int] = Body(0, title="所属用例id")
     public: Optional[bool] = Body(False, title="是否共享")
     suffix: Optional[bool] = Body(False, title="是否是后置条件，默认为否")
 
     # noinspection PyMethodParameters
-    @validator("name", "constructor_json", "type", "public", "is_usable", "suffix")
+    @validator("name", "constructor_json", "type", "public", "enabled_flag", "suffix")
     def name_not_empty(cls, v):
         if isinstance(v, str) and len(v.strip()) == 0:
             raise VariablesNullError("不能为空")
@@ -31,7 +31,7 @@ class ConstructorForm(BaseModel):
         return v
 
 
-class ConstructorIndex(BaseModel):
+class ConstructorIndexSchema(BaseModel):
     id: Optional[int] = Body(0, title="id")
     index: Optional[int] = Body(0, title="前置条件顺序")
 

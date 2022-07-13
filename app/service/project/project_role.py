@@ -14,14 +14,14 @@ from fastapi import Depends, APIRouter
 from app.core.handler.jsonres import PikaResponse
 from app.crud.project.project import ProjectRoleDao
 from app.models.project import ProjectRoleModel
-from app.schema.project import ProjectRoleForm, ProjectRoleEditForm, ProjectDelForm
+from app.schema.project import ProjectRoleSchema, ProjectRoleEditSchema, ProjectDelSchema
 from app.service import Permission
 
 router = APIRouter()
 
 
 @router.post("/role/insert")
-async def insert_project_role(role: ProjectRoleForm, escarole=Depends(Permission())):
+async def insert_project_role(role: ProjectRoleSchema, escarole=Depends(Permission())):
     try:
         operator_emp_no, operator_identity = escarole
         query = await ProjectRoleDao.query_record(emp_no=role.emp_no, project_id=role.project_id)
@@ -39,14 +39,14 @@ async def insert_project_role(role: ProjectRoleForm, escarole=Depends(Permission
 
 
 @router.post("/role/update")
-async def update_project_role(prole: ProjectRoleEditForm, escarole=Depends(Permission())):
+async def update_project_role(prole: ProjectRoleEditSchema, escarole=Depends(Permission())):
     operator_emp_no, operator_identity = escarole
     await ProjectRoleDao.update_project_role(prole, operator_emp_no, operator_identity)
     return PikaResponse.success()
 
 
 @router.post("/role/delete")
-async def delete_project_role(prole: ProjectDelForm, escarole=Depends(Permission(escarole=True))):
+async def delete_project_role(prole: ProjectDelSchema, escarole=Depends(Permission(escarole=True))):
     operator_emp_no, operator_identity = escarole
     await ProjectRoleDao.delete_project_role(prole.id, operator_emp_no, operator_identity)
     return PikaResponse.success()

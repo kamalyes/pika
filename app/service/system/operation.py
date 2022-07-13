@@ -4,14 +4,14 @@ from sqlalchemy import desc
 from app.core.handler.jsonres import PikaResponse
 from app.crud.system.operation import PikaOperationDao
 from app.models.system import OperationLogModel
-from app.schema.operation_log import PikaOperationFrom
+from app.schema.operation_log import OperationSchema
 from app.service import Permission
 
 router = APIRouter(prefix="/operation")
 
 
 @router.get("/list", summary="获取用户操作记录")
-async def list_user_operation(request: PikaOperationFrom = Depends(),
+async def list_user_operation(request: OperationSchema = Depends(),
                               escarole=Depends(Permission(escarole=True))):
     operator_emp_no, operator_role = escarole
     try:
@@ -24,7 +24,7 @@ async def list_user_operation(request: PikaOperationFrom = Depends(),
 
 
 @router.get("/count", summary="获取用户操作记录热力图以及参与的项目数量")
-async def list_user_activities(request: PikaOperationFrom = Depends()):
+async def list_user_activities(request: OperationSchema = Depends()):
     try:
         records = await PikaOperationDao.count_user_activities(request.operator, request.start_time,
                                                                request.end_time)

@@ -7,7 +7,7 @@
 @Version :  1.0
 @Contact :  mryu168@163.com
 @License :  (C)Copyright 2022-2026
-@Desc    :  case生成器，根据RequestInfo数组生成
+@Desc    :  case生成器，根据RequestInfoSchema数组生成
 """
 
 import json
@@ -22,9 +22,9 @@ from app.enums.ConstructorEnum import ConstructorTypeEnum
 from app.enums.RequestBodyEnum import ReqBodyTypeEnum
 from app.enums.RequestTypeEnum import RequestType
 from app.excpetions.convert.GenerateException import GenerateException
-from app.schema.api_testcase import TestCaseForm
-from app.schema.constructor import ConstructorForm
-from app.schema.request import RequestInfo
+from app.schema.api_testcase import TestCaseSchema
+from app.schema.constructor import ConstructorSchema
+from app.schema.request import RequestInfoSchema
 
 
 class CaseGenerator(object):
@@ -54,7 +54,7 @@ class CaseGenerator(object):
         return ReqBodyTypeEnum.none
 
     @staticmethod
-    def generate_constructors(requests: List[RequestInfo]) -> List[ConstructorForm]:
+    def generate_constructors(requests: List[RequestInfoSchema]) -> List[ConstructorSchema]:
         constructors = []
         for r in range(len(requests) - 1):
             name = f"http请求_{r + 1}"
@@ -66,16 +66,16 @@ class CaseGenerator(object):
                 request_method=requests[r].request_method,
                 body_type=CaseGenerator.get_body_type(requests[r].request_headers),
             ), ensure_ascii=False)
-            c = ConstructorForm(name=name, value=f"http_res_{r + 1}",
+            c = ConstructorSchema(name=name, value=f"http_res_{r + 1}",
                                 constructor_json=constructor_json,
-                                is_usable=True, public=True, suffix=False, index=r + 1,
+                                enabled_flag=True, public=True, suffix=False, index=r + 1,
                                 type=ConstructorTypeEnum.http.value)
             constructors.append(c)
         return constructors
 
     @staticmethod
-    def generate_case(directory_id: int, name: str, last: RequestInfo) -> TestCaseForm:
-        return TestCaseForm(directory_id=directory_id, name=name, url=last.url,
+    def generate_case(directory_id: int, name: str, last: RequestInfoSchema) -> TestCaseSchema:
+        return TestCaseSchema(directory_id=directory_id, name=name, url=last.url,
                             request_type=RequestType.http.value, body=last.body,
                             request_method=last.request_method,
                             body_type=CaseGenerator.get_body_type(last.request_headers).value,
@@ -83,7 +83,7 @@ class CaseGenerator(object):
                             case_type=0, status=CaseStatus.debugging.value, priority="P3")
 
     @staticmethod
-    def extract_field(requests: List[RequestInfo]) -> List[str]:
+    def extract_field(requests: List[RequestInfoSchema]) -> List[str]:
         """
         遍历接口，并提取其中的变量
         Args:
@@ -107,13 +107,13 @@ class CaseGenerator(object):
         return replaced
 
     @staticmethod
-    def replace_vars(request: RequestInfo, ans: dict, replaced: list):
+    def replace_vars(request: RequestInfoSchema, ans: dict, replaced: list):
         CaseGenerator.replace_url(request, ans, replaced)
         CaseGenerator.replace_headers(request, ans, replaced)
         CaseGenerator.replace_body(request, ans, replaced)
 
     @staticmethod
-    def record_vars(request: RequestInfo, ans: dict, var_name: str):
+    def record_vars(request: RequestInfoSchema, ans: dict, var_name: str):
         CaseGenerator.split_headers(request, ans, f"{var_name}.response_headers")
         CaseGenerator.split_body(request, ans, f"{var_name}.response")
 
@@ -137,7 +137,7 @@ class CaseGenerator(object):
                         ans[body].append(path)
 
     @staticmethod
-    def split_body(request: RequestInfo, ans: dict, var_name: str = ''):
+    def split_body(request: RequestInfoSchema, ans: dict, var_name: str = ''):
         if request.body:
             try:
                 body = json.loads(request.response_content)
@@ -149,21 +149,21 @@ class CaseGenerator(object):
                 raise GenerateException(f"解析接口body变量出错: {e}")
 
     @staticmethod
-    def split_headers(request: RequestInfo, ans: dict, var_name: str = ""):
+    def split_headers(request: RequestInfoSchema, ans: dict, var_name: str = ""):
         try:
             CaseGenerator.dfs(request.response_headers, var_name, ans, True)
         except Exception as e:
             raise GenerateException(f"解析接口headers变量出错: {e}")
 
     @staticmethod
-    def replace_headers(request: RequestInfo, ans: dict, replaced: list):
+    def replace_headers(request: RequestInfoSchema, ans: dict, replaced: list):
         for k, v in request.request_headers.items():
             if ans.get(v):
                 request.request_headers[k] = "${%s}" % ans.get(v)[0]
                 replaced.append("%s => ${%s}" % (k, ans.get(v)[0]))
 
     @staticmethod
-    def replace_body(request: RequestInfo, ans: dict, replaced: list):
+    def replace_body(request: RequestInfoSchema, ans: dict, replaced: list):
         if request.body:
             try:
                 data = json.loads(request.body)
@@ -206,7 +206,7 @@ class CaseGenerator(object):
             return None, None
 
     @staticmethod
-    def replace_url(request: RequestInfo, ans: dict, replaced: list):
+    def replace_url(request: RequestInfoSchema, ans: dict, replaced: list):
         """
         拆解url，将url里面的路由path和query参数
         :return:

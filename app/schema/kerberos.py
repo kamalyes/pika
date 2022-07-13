@@ -15,28 +15,28 @@ from fastapi import Body
 from pydantic import BaseModel
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.schema.base import PikaDeleteModel, PikaQueryModel, PikaQueryTypeModel
+from app.schema.base import BaseBatchDelIdsSchema, BaseQuerySchema, BaseQueryTypeSchema
 
 
-class KerberosGlobalModel(BaseModel):
+class KerberosGlobalSchema(BaseModel):
     id: Optional[int] = Body(0, title="id")
     question: Optional[str] = Body(None, title="密保问题", max_length=ByteSizeEnum.LENGTH_255)
     description: Optional[str] = Body(None, title="备注信息", max_length=ByteSizeEnum.LENGTH_255)
 
 
-class EditKerberosItemModel(BaseModel):
-    security: List[KerberosGlobalModel] = Body(..., title="密保信息")
+class EditKerberosItemSchema(BaseModel):
+    security: List[KerberosGlobalSchema] = Body(..., title="密保信息")
 
 
-class DelKerberosModel(PikaDeleteModel):
+class DelKerberosSchema(BaseBatchDelIdsSchema):
     pass
 
 
-class QueryKerberosInModel(PikaQueryModel, PikaQueryTypeModel, KerberosGlobalModel):
+class QueryKerberosInSchema(BaseQuerySchema, BaseQueryTypeSchema, KerberosGlobalSchema):
     class Config:
         orm_mode = True
 
 
-class QueryKerberosOutModel(PikaQueryModel, KerberosGlobalModel):
+class QueryKerberosOutSchema(BaseQuerySchema, KerberosGlobalSchema):
     class Config:
         orm_mode = True

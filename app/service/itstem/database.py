@@ -15,14 +15,14 @@ from app.core.handler.jsonres import PikaResponse
 from app.crud.online.database import DbConfigDao
 from app.enums.RbacEnum import RoleEnum
 from app.models import DatabaseHelper, db_helper
-from app.schema.database import DatabaseForm
+from app.schema.database import DatabaseSchema
 from app.service import Permission
 
 router = APIRouter()
 
 
 @router.post("/dbconfig/insert", summary="增加数据库配置")
-async def insert_dbconfig(form: DatabaseForm, user_info=Depends(Permission(RoleEnum.ADMIN))):
+async def insert_dbconfig(form: DatabaseSchema, user_info=Depends(Permission(RoleEnum.ADMIN))):
     try:
         await DbConfigDao.insert_database(form, user_info['emp_no'])
         return PikaResponse.success()
@@ -40,7 +40,7 @@ async def delete_dbconfig(id: int, user_info=Depends(Permission(RoleEnum.ADMIN))
 
 
 @router.post("/dbconfig/update", summary="更新数据库配置")
-async def update_dbconfig(form: DatabaseForm, user_info=Depends(Permission(RoleEnum.ADMIN))):
+async def update_dbconfig(form: DatabaseSchema, user_info=Depends(Permission(RoleEnum.ADMIN))):
     try:
         await DbConfigDao.update_database(form, user_info['emp_no'])
         return PikaResponse.success()

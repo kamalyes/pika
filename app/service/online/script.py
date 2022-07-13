@@ -12,14 +12,14 @@
 from fastapi import Depends, APIRouter
 
 from app.core.handler.jsonres import PikaResponse
-from app.schema.script import PyScriptForm
+from app.schema.script import PyScriptSchema
 from app.service import Permission
 
 router = APIRouter()
 
 
 @router.post("/pyscript", summary="Python脚本")
-def execute_py_script(data: PyScriptForm, user_info=Depends(Permission())):
+def execute_py_script(data: PyScriptSchema, user_info=Depends(Permission())):
     try:
         loc = dict()
         exec(data.command, loc)

@@ -30,7 +30,7 @@ from app.core.handler.execres import (
     AccessException,
     ThirdException, RedisException, RegisterException, SystemException)
 from app.enums.DatabaseEnum import DatabaseTypeEnum
-from app.enums.SysCodeEnum import SysCodeEnum
+from app.enums.SysCodeEnum import ExcCodeEnum
 from config import PikaAppConfig
 
 # 同步engine
@@ -88,20 +88,11 @@ def sync_db_session():
     except Exception as e:
         session.rollback()
         raise DbExecuteException(
-            code=SysCodeEnum.SQL_OPERATION_ERROR,
+            code=ExcCodeEnum.SQL_OPERATION_ERROR,
             detail=f"数据操作失败，错误原因：{traceback.format_exc()}",
         )
     finally:
         session.close()
-
-
-async def get_async_session():
-    """
-    获取异步session
-    :return:
-    """
-    async with async_session() as session:
-        yield session
 
 
 @asynccontextmanager
@@ -133,7 +124,7 @@ async def async_db_session() -> AsyncGenerator:
     except Exception as e:
         await session.rollback()
         raise DbExecuteException(
-            code=SysCodeEnum.SQL_OPERATION_ERROR,
+            code=ExcCodeEnum.SQL_OPERATION_ERROR,
             detail=f"数据操作失败，错误原因：{traceback.format_exc()}",
         )
     finally:
@@ -241,7 +232,7 @@ class DatabaseHelper(object):
             dist.delete_date = int(time.time() * 1000)
         dist.update_date = datetime.now()
         dist.update_emp_no = operator_emp_no
-        dist.is_delete = 1
+        dist.delete_flag = 1
 
     @classmethod
     def where(cls, param, sentence, condition: List):

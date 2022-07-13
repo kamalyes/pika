@@ -3,7 +3,7 @@ from pydantic import validator, BaseModel
 from app.schema.base import PikaBaseModel
 
 
-class RedisConfigForm(BaseModel):
+class RedisConfigSchema(BaseModel):
     id: int = None
     name: str
     addr: str

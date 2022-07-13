@@ -12,7 +12,7 @@
 
 from fastapi import APIRouter, Depends
 
-from app.schema.organization import DelUserGroupModel, QueryDeptRelModel
+from app.schema.organization import DelUserGroupSchema, QueryDeptRelModel
 
 router = APIRouter()
 
@@ -28,7 +28,7 @@ async def update_user_group():
 
 
 @router.delete("/group/delete", dependencies=[], name="删除集团")
-async def delete_user_group(request: DelUserGroupModel = Depends()):
+async def delete_user_group(request: DelUserGroupSchema = Depends()):
     pass
 
 

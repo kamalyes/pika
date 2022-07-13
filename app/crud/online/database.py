@@ -23,7 +23,7 @@ from app.crud.online.environment import EnvironmentDao
 from app.middleware.xredis import RedisHelper
 from app.models import async_session, DatabaseHelper, db_helper
 from app.models.database import DatabaseModel
-from app.schema.database import DatabaseForm
+from app.schema.database import DatabaseSchema
 
 
 class DbConfigDao(object):
@@ -42,7 +42,7 @@ class DbConfigDao(object):
         """
         try:
             async with async_session() as session:
-                query = [DatabaseModel.is_delete == 0]
+                query = [DatabaseModel.delete_flag == False]
                 if name:
                     query.append(DatabaseModel.name.like(f'%{name}%'))
                 if database:
@@ -56,13 +56,13 @@ class DbConfigDao(object):
             raise Exception("获取数据库配置失败")
 
     @staticmethod
-    async def insert_database(data: DatabaseForm, operator: str):
+    async def insert_database(data: DatabaseSchema, operator: str):
         try:
             async with async_session() as session:
                 async with session.begin():
                     result = await session.execute(
                         select(DatabaseModel).where(DatabaseModel.name == data.name,
-                                                    DatabaseModel.is_delete == 0,
+                                                    DatabaseModel.delete_flag == False,
                                                     DatabaseModel.env == data.env))
                     query = result.scalars().first()
                     if query is not None:
@@ -73,7 +73,7 @@ class DbConfigDao(object):
             raise Exception("新增数据库配置失败")
 
     @staticmethod
-    async def update_database(data: DatabaseForm, operator: str):
+    async def update_database(data: DatabaseSchema, operator: str):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -96,7 +96,7 @@ class DbConfigDao(object):
                 async with session.begin():
                     result = await session.execute(
                         select(DatabaseModel).where(id == DatabaseModel.id,
-                                                    DatabaseModel.is_delete == 0))
+                                                    DatabaseModel.delete_flag == False))
                     query = result.scalars().first()
                     if query is None:
                         raise Exception("数据库配置不存在或已删除")
@@ -112,7 +112,7 @@ class DbConfigDao(object):
             async with async_session() as session:
                 result = await session.execute(
                     select(DatabaseModel).where(DatabaseModel.id == id,
-                                                DatabaseModel.is_delete == 0))
+                                                DatabaseModel.delete_flag == False))
                 return result.scalars().first()
         except Exception as e:
             DbConfigDao.log.error(f"获取数据库配置失败, error: {e}")
@@ -125,7 +125,7 @@ class DbConfigDao(object):
                 result = await session.execute(
                     select(DatabaseModel).where(DatabaseModel.env == env,
                                                 DatabaseModel.name == name,
-                                                DatabaseModel.is_delete == 0))
+                                                DatabaseModel.delete_flag == False))
                 return result.scalars().first()
         except Exception as e:
             DbConfigDao.log.error(f"获取数据库配置失败, error: {e}")
@@ -149,7 +149,7 @@ class DbConfigDao(object):
             table_map = defaultdict(set)
             async with async_session() as session:
                 query = await session.execute(
-                    select(DatabaseModel).where(DatabaseModel.is_delete == 0))
+                    select(DatabaseModel).where(DatabaseModel.delete_flag == False))
                 data = query.scalars().all()
                 for d in data:
                     name = env_map[d.env]

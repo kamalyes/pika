@@ -25,7 +25,7 @@ CREATE TABLE `user_role_config`
     `id`             int(11) NOT NULL AUTO_INCREMENT COMMENT '角色id',
     `role_name`      varchar(255) NOT NULL COMMENT '角色名称',
     `description`    varchar(255)          DEFAULT NULL COMMENT '备注信息',
-    `is_usable`     int(11) DEFAULT '1' COMMENT '禁用/启用 1：启用、0：禁用',
+    `enabled_flag`   int(11) DEFAULT '1' COMMENT '禁用/启用 1：启用、0：禁用',
     `create_user_no` varchar(20)           DEFAULT NULL COMMENT '创建者用户编号',
     `update_user_no` varchar(20)           DEFAULT NULL COMMENT '修改者用户编号',
     `create_time`    datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

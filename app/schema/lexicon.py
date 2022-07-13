@@ -12,47 +12,47 @@
 
 from pydantic import BaseModel
 
-from app.schema.base import PikaQueryModel, PikaQueryTypeModel, PikaDeleteModel, PikaLargeEditModel
+from app.schema.base import BaseQuerySchema, BaseQueryTypeSchema, BaseBatchDelIdsSchema, BaseLargeEditSchema
 
 
 # 敏感词
-class SensitiveWordGlobalModel(BaseModel):
+class SensitiveWordGlobalSchema(BaseModel):
     class Config:
         orm_mode = True
 
 
-class EditSensitiveWordModel(SensitiveWordGlobalModel):
+class SensitiveWordGlobalSchema(SensitiveWordGlobalSchema):
     pass
 
 
-class DelSensitiveWordModel(PikaDeleteModel):
+class DelSensitiveWordSchema(BaseBatchDelIdsSchema):
     pass
 
 
-class QuerySensitiveWordInModel(PikaQueryModel, PikaQueryTypeModel, SensitiveWordGlobalModel):
+class QuerySensitiveWordInSchema(BaseQuerySchema, BaseQueryTypeSchema, SensitiveWordGlobalSchema):
     pass
 
 
-class QuerySensitiveWordOutModel(PikaQueryModel, SensitiveWordGlobalModel):
+class QuerySensitiveWordOutSchema(BaseQuerySchema, SensitiveWordGlobalSchema):
     pass
 
 
 # 化名
-class AliasGlobalModel(PikaLargeEditModel):
+class AliasGlobalSchema(BaseLargeEditSchema):
     pass
 
 
-class EditAliasWordModel(AliasGlobalModel):
+class EditAliasWordSchema(AliasGlobalSchema):
     pass
 
 
-class DelAliasWordModel(PikaDeleteModel):
+class DelAliasWordSchema(BaseBatchDelIdsSchema):
     pass
 
 
-class QueryAliasWordInModel(PikaQueryModel, PikaQueryTypeModel, AliasGlobalModel):
+class QueryAliasWordInSchema(BaseQuerySchema, BaseQueryTypeSchema, AliasGlobalSchema):
     pass
 
 
-class QueryAliasWordOutModel(PikaQueryModel, AliasGlobalModel):
+class QueryAliasWordOutSchema(BaseQuerySchema, AliasGlobalSchema):
     pass

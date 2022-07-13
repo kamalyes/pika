@@ -13,13 +13,13 @@ from fastapi import APIRouter
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud.online.rdconfig import PikaRedisConfigDao
-from app.schema.online import OnlineRedisForm
+from app.schema.online import OnlineRedisSchema
 
 router = APIRouter()
 
 
 @router.post("/redis/command")
-async def test_redis_command(form: OnlineRedisForm):
+async def test_redis_command(form: OnlineRedisSchema):
     try:
         res = await PikaRedisConfigDao.execute_command(form.command, id=form.id)
         return PikaResponse.success(data=res)

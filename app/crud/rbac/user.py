@@ -25,19 +25,23 @@ from app.core.handler.execres import AuthException, \
 from app.core.handler.jsonres import PikaResponse
 from app.core.handler.logger import PikaLogger
 from app.crud.rbac import regex_register_str, client_ip
+from app.crud.rbac.menu import MenuDao
 from app.crud.system import Email
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.OperationEnum import VerifyCodeEnum
 from app.enums.PromptEnum import PromptEnum
 from app.enums.RbacEnum import RoleEnum
 from app.enums.RedisEnum import RedisKeyEnum
-from app.enums.SysCodeEnum import SysCodeEnum
+from app.enums.SysCodeEnum import ExcCodeEnum
 from app.enums.SysvarEnum import PikaGlobalVarEnum, ValidTimeEnum
 from app.middleware.xredis import RedisHelper
 from app.models import async_db_session, async_redis, async_session
 from app.models.admin import SysUserAdminModel
 from app.models.kerberos import PikaSecurityRelIssues
-from app.models.user import SysUserModel
+from app.models.menu import MenuModel
+from app.models.role import RoleModel
+from app.models.user import UserModel
+from app.schema.menu import QueryMenuInSchema
 from config import PikaAppConfig
 
 
@@ -61,11 +65,11 @@ class UserDao(object):
 
         """
         if username == exists_username:
-            raise RegisterException(code=SysCodeEnum.USER_HAS_USED, detail="该用户名已被使用！")
+            raise RegisterException(code=ExcCodeEnum.USER_HAS_USED, detail="该用户名已被使用！")
         elif email == exists_email:
-            raise RegisterException(code=SysCodeEnum.EMAIL_HAS_USED, detail="该邮箱账号已被使用！")
+            raise RegisterException(code=ExcCodeEnum.EMAIL_HAS_USED, detail="该邮箱账号已被使用！")
         elif mobile == exists_mobile and (mobile is not None and exists_mobile is not None):
-            raise RegisterException(code=SysCodeEnum.EMAIL_HAS_USED, detail="该手机号已被使用！")
+            raise RegisterException(code=ExcCodeEnum.EMAIL_HAS_USED, detail="该手机号已被使用！")
 
     @staticmethod
     async def create_users_epd(users: Any, request):
@@ -92,18 +96,19 @@ class UserDao(object):
         await regex_register_str(email=register_model.email)
         async with async_db_session() as session:
             async with session.begin():
-                users = await session.execute(select(SysUserModel).where(
-                    or_(SysUserModel.username == register_model.username,
-                        SysUserModel.email == register_model.email)))
-                counts = await session.execute(select(func.count(SysUserModel.id)))
+                users = await session.execute(select(UserModel).where(
+                    or_(UserModel.username == register_model.username,
+                        UserModel.email == register_model.email)))
+                counts = await session.execute(select(func.count(UserModel.id)))
                 # 如果用户数量为0 则注册为超管,且激活状态为1
                 identity = RoleEnum.ADMIN.value if counts.scalars().first() == 0 else RoleEnum.ORDINARY.value
                 is_activate = 1 if identity == RoleEnum.ADMIN else 0
                 emp_no, pwd = await UserDao.create_users_epd(users=users, request=register_model)
-                user = SysUserModel(emp_no=emp_no, username=register_model.username,
-                                    identity=identity,
-                                    email=register_model.email)
+                user = UserModel(emp_no=emp_no, username=register_model.username,
+                                 identity=identity,
+                                 email=register_model.email)
                 session.add(user)
+                await session.flush()
             await session.refresh(user)
             pwd_valid_date = PikaGlobalVarEnum.PWD_VALID_DATE
             user_admin = SysUserAdminModel(uid=user.id, emp_no=user.emp_no, is_activate=is_activate,
@@ -123,19 +128,19 @@ class UserDao(object):
     @staticmethod
     async def account_status_verify(**kwargs):
         # 状态
-        if kwargs["is_delete"]:
-            raise AuthException(code=SysCodeEnum.ACCOUNT_HAS_DELETE, detail="账号已被删除！")
-        if kwargs["is_usable"] is False:
-            raise AuthException(code=SysCodeEnum.ACCOUNT_HAS_DIS_ENABLED, detail="账号已被禁用！")
+        if kwargs["delete_flag"]:
+            raise AuthException(code=ExcCodeEnum.ACCOUNT_HAS_DELETE, detail="账号已被删除！")
+        if kwargs["enabled_flag"] is False:
+            raise AuthException(code=ExcCodeEnum.ACCOUNT_HAS_DIS_ENABLED, detail="账号已被禁用！")
         if kwargs["is_activate"] == 0:
-            raise AuthException(code=SysCodeEnum.ACCOUNT_HAS_NOT_ACTIVATE, detail="账号未激活！")
+            raise AuthException(code=ExcCodeEnum.ACCOUNT_HAS_NOT_ACTIVATE, detail="账号未激活！")
         try:
             compare_time = Moment.compare_time(kwargs["pwd_valid_date"],
                                                Moment.get_now_time("%Y-%m-%d %H:%M:%S"))
         except Exception as e:
-            raise SystemException(code=SysCodeEnum.FIELD_TYPE_ERROR, detail=f"密码有效期对比失败！具体错误原因：{e}")
+            raise SystemException(code=ExcCodeEnum.FIELD_TYPE_ERROR, detail=f"密码有效期对比失败！具体错误原因：{e}")
         if compare_time is False:
-            raise AuthException(code=SysCodeEnum.PASSWORD_HAS_EXPIRED, detail="密码已过期，请修改后进行登录！")
+            raise AuthException(code=ExcCodeEnum.PASSWORD_HAS_EXPIRED, detail="密码已过期，请修改后进行登录！")
 
     @staticmethod
     async def pwd_mistake_limit(**kwargs):
@@ -145,14 +150,14 @@ class UserDao(object):
                     select(SysUserAdminModel.err_pwd_count).where(SysUserAdminModel.uid == kwargs["uid"]))
                 err_pwd_count = err_pwd_counts.scalars().first()
                 if err_pwd_count >= ValidTimeEnum.ERR_PWD_COUNT.value:
-                    raise AuthException(code=SysCodeEnum.PASSWORD_ERROR_COUNT_OUT,
+                    raise AuthException(code=ExcCodeEnum.PASSWORD_ERROR_COUNT_OUT,
                                         detail="错误密码次数超出限制，请联系管理员或稍后重试！")
                 else:
                     sql = update(SysUserAdminModel).where(SysUserAdminModel.uid == kwargs["uid"]).values(
                         {"err_pwd_count": int(err_pwd_count + 1)})
                     await session.execute(sql)
                     await session.commit()
-                    raise AuthException(code=SysCodeEnum.PASSWORD_ERROR, detail="登录密码错误！")
+                    raise AuthException(code=ExcCodeEnum.PASSWORD_ERROR, detail="登录密码错误！")
 
     @staticmethod
     async def generate_uuid_jwt(**kwargs):
@@ -170,7 +175,7 @@ class UserDao(object):
                                                     seconds=kwargs["valid_time"])
             return f'{jwt_encode_result}.{uuid4_}'.replace("4", str(random.randint(5, 9)))
         except Exception as uuid_jwt_err:
-            raise ThirdException(code=SysCodeEnum.JWT_ENCODE_ERROR,
+            raise ThirdException(code=ExcCodeEnum.JWT_ENCODE_ERROR,
                                  detail=f"加密失败，具体原因{uuid_jwt_err}")
 
     @staticmethod
@@ -239,7 +244,7 @@ class UserDao(object):
     async def update_avatar(emp_no, avatar):
         async with async_db_session() as session:
             async with session.begin():
-                sql = update(SysUserModel).where(SysUserModel.emp_no == emp_no).values(
+                sql = update(UserModel).where(UserModel.emp_no == emp_no).values(
                     {"avatar": avatar})
                 await session.execute(sql)
 
@@ -248,8 +253,8 @@ class UserDao(object):
         uid, emp_no = kwargs.get("uid", None), kwargs.get("emp_no", None)
         async with async_db_session() as session:
             users = await session.execute(
-                select(SysUserModel).where(
-                    or_(SysUserModel.id == uid, SysUserModel.emp_no == emp_no)))
+                select(UserModel).where(
+                    or_(UserModel.id == uid, UserModel.emp_no == emp_no)))
             user_admins = await session.execute(
                 select(SysUserAdminModel).where(
                     or_(SysUserAdminModel.uid == uid, SysUserAdminModel.emp_no == emp_no)))
@@ -259,14 +264,27 @@ class UserDao(object):
                                                  PikaResponse.model_to_dict(user_admin)])
                 # 屏蔽字段
                 dislodge = ["open_id", "private_key", "open_id", "password", "description", "id"]
-                user_infos = {key: val for key, val in user_infos.items() if key not in dislodge}
+                result = {key: val for key, val in user_infos.items() if key not in dislodge}
+                # 菜单权限
+                roles = RoleModel.get_roles_by_ids(user['roles'])
+                menu_ids = []
+                if roles:
+                    for i in roles:
+                        menu_ids += list(map(int, i.menus.split(',')))
+                # 前端角色报错只保存子节点数据，所有这里要做处理，把父级菜单也返回给前端
+                parent_ids = MenuModel.get_parent_id_by_ids(set(menu_ids))
+                menu_ids += [i.parent_id for i in parent_ids]
+                all_menu = QueryMenuInSchema().dump(MenuModel.get_menu_by_ids(set(menu_ids)), many=True)
+                parent_menu = [menu for menu in all_menu if menu['parent_id'] == 0]
+                result['menus'] = await MenuDao.menu_assembly(parent_menu, all_menu) if menu_ids else []
+                result['roles'] = ['all']
             else:
                 raise AuthException(detail="用户信息不存在！")
         # 更新在线用户信息
         await UserDao.user_info_sync_redis(name=f'{RedisKeyEnum.ONLINE_USER}',
                                            key=user.emp_no,
-                                           value=json.dumps(user_infos))
-        return user_infos
+                                           value=json.dumps(result))
+        return result
 
     @staticmethod
     async def account_login(request, oauth2_login):
@@ -283,8 +301,8 @@ class UserDao(object):
         # await UserDao.has_dynamic_code(oauth2_login.dynamic_code)
         async with async_db_session() as session:
             async with session.begin():
-                sql = select(SysUserModel).where(or_(SysUserModel.username == oauth2_login.username,
-                                                     SysUserModel.emp_no == oauth2_login.emp_no))
+                sql = select(UserModel).where(or_(UserModel.username == oauth2_login.username,
+                                                  UserModel.emp_no == oauth2_login.emp_no))
                 users = await session.execute(sql)
                 user = users.scalars().first()
                 if user:
@@ -296,8 +314,8 @@ class UserDao(object):
                     if user_admin:
                         await UserDao.account_status_verify(uid=user_admin.uid,
                                                             is_activate=user_admin.is_activate,
-                                                            is_delete=user_admin.is_delete,
-                                                            is_usable=user_admin.is_usable,
+                                                            delete_flag=user_admin.delete_flag,
+                                                            enabled_flag=user_admin.enabled_flag,
                                                             pwd_valid_date=str(
                                                                 user_admin.pwd_valid_date),
                                                             err_pwd_count=int(
@@ -319,7 +337,7 @@ class UserDao(object):
                             value=uuid_jwt,
                             ex=valid_time)
                 else:
-                    raise AuthException(code=SysCodeEnum.ACCOUNT_NOT_EXISTS,
+                    raise AuthException(code=ExcCodeEnum.ACCOUNT_NOT_EXISTS,
                                         detail="该用户名不存在，请使用正常的账户登录！")
         await UserDao.update_last_login_field(uid=user.id, last_login_ip=user_ip)
         user_infos = await UserDao.query_user_info(uid=user.id)
@@ -341,7 +359,7 @@ class UserDao(object):
             raise ValidException(detail="字段：email不能为空")
         async with async_db_session() as session:
             async with session.begin():
-                sql = select(SysUserModel).where(SysUserModel.email == oauth2_login.email)
+                sql = select(UserModel).where(UserModel.email == oauth2_login.email)
                 users = await session.execute(sql)
                 user = users.scalars().first()
                 if user:
@@ -354,8 +372,8 @@ class UserDao(object):
                     if user_admin:
                         await UserDao.account_status_verify(uid=user_admin.uid,
                                                             is_activate=user_admin.is_activate,
-                                                            is_delete=user_admin.is_delete,
-                                                            is_usable=user_admin.is_usable,
+                                                            delete_flag=user_admin.delete_flag,
+                                                            enabled_flag=user_admin.enabled_flag,
                                                             pwd_valid_date=str(
                                                                 user_admin.pwd_valid_date))
                     else:
@@ -375,7 +393,7 @@ class UserDao(object):
                             value=uuid_jwt,
                             ex=valid_time)
                 else:
-                    raise AuthException(code=SysCodeEnum.EMAIL_NOT_REGISTER,
+                    raise AuthException(code=ExcCodeEnum.EMAIL_NOT_REGISTER,
                                         detail="该邮箱暂未被注册，请使用正常的账户登录！")
         await UserDao.update_last_login_field(uid=user.id, last_login_ip=user_ip)
         async with async_db_session as session:
@@ -414,8 +432,8 @@ class UserDao(object):
             try:
                 await UserDao.account_status_verify(uid=user_infos["uid"],
                                                     is_activate=user_infos["is_activate"],
-                                                    is_delete=user_infos["is_delete"],
-                                                    is_usable=user_infos["is_usable"],
+                                                    delete_flag=user_infos["delete_flag"],
+                                                    enabled_flag=user_infos["enabled_flag"],
                                                     pwd_valid_date=str(
                                                         user_infos["pwd_valid_date"]),
                                                     err_pwd_count=int(user_infos["err_pwd_count"]))
@@ -439,12 +457,12 @@ class UserDao(object):
         await regex_register_str(email=request.email)
         async with async_db_session() as session:
             async with session.begin():
-                users = await session.execute(select(SysUserModel).where(
-                    or_(SysUserModel.username == request.username,
-                        SysUserModel.email == request.email)))
+                users = await session.execute(select(UserModel).where(
+                    or_(UserModel.username == request.username,
+                        UserModel.email == request.email)))
                 emp_no, pwd = await UserDao.create_users_epd(users, request)
-                user = SysUserModel(emp_no=emp_no, username=request.username,
-                                    identity=request.identity, email=request.email)
+                user = UserModel(emp_no=emp_no, username=request.username,
+                                 identity=request.identity, email=request.email)
                 session.add(user)
             await session.refresh(user)
             user_admin = SysUserAdminModel(uid=user.id, emp_no=user.emp_no, is_activate=1,
@@ -479,11 +497,11 @@ class UserDao(object):
 
         async with async_db_session() as session:
             async with session.begin():
-                sel_sql = select(SysUserModel).where(
-                    and_(or_(SysUserModel.email == modify_user_info.email,
-                             SysUserModel.mobile == modify_user_info.mobile,
-                             SysUserModel.plane == modify_user_info.plane),
-                         SysUserModel.emp_no != user_info.get("emp_no")))
+                sel_sql = select(UserModel).where(
+                    and_(or_(UserModel.email == modify_user_info.email,
+                             UserModel.mobile == modify_user_info.mobile,
+                             UserModel.plane == modify_user_info.plane),
+                         UserModel.emp_no != user_info.get("emp_no")))
                 sel_res = await session.execute(sel_sql)
                 exists_users = sel_res.scalars().first()
                 if exists_users:
@@ -491,7 +509,7 @@ class UserDao(object):
                                                    exists_username=exists_users.username,
                                                    email=modify_user_info.email,
                                                    exists_email=exists_users.email)
-                sql = update(SysUserModel).where(SysUserModel.id == user_info.get("uid")).values(
+                sql = update(UserModel).where(UserModel.id == user_info.get("uid")).values(
                     update_info)
                 await session.execute(sql)
         return PikaResponse.success()
@@ -499,20 +517,20 @@ class UserDao(object):
     @staticmethod
     async def query_user_info_list(db, request):
         if str(request.query_type) == '0':
-            return await paginate(db, select(SysUserModel))
+            return await paginate(db, select(UserModel))
         elif str(request.query_type) == '1':
-            return await paginate(db, select(SysUserModel).where(
-                or_(SysUserModel.id == request.id, SysUserModel.emp_no == request.emp_no,
-                    SysUserModel.email == request.email,
-                    SysUserModel.username.like(f"%{request.username}%"),
-                    SysUserModel.user_alias.like(f"%{request.user_alias}%"),
-                    SysUserModel.identity == SysUserModel.identity,
-                    SysUserModel.mobile.like(f"%{request.mobile}%")),
-                and_(SysUserModel.create_date >= request.create_date,
-                     SysUserModel.update_date <= request.update_date)
+            return await paginate(db, select(UserModel).where(
+                or_(UserModel.id == request.id, UserModel.emp_no == request.emp_no,
+                    UserModel.email == request.email,
+                    UserModel.username.like(f"%{request.username}%"),
+                    UserModel.user_alias.like(f"%{request.user_alias}%"),
+                    UserModel.identity == UserModel.identity,
+                    UserModel.mobile.like(f"%{request.mobile}%")),
+                and_(UserModel.create_date >= request.create_date,
+                     UserModel.update_date <= request.update_date)
             ))
         else:
-            return PikaResponse.failed(code=SysCodeEnum.VAR_ERROR,
+            return PikaResponse.failed(code=ExcCodeEnum.VAR_ERROR,
                                        detail=f"query_type值不对，仅可传0：全部数据，1：条件查询")
 
     @staticmethod
@@ -545,7 +563,7 @@ class UserDao(object):
         if dynamic_code in PikaGlobalVarEnum.VERIFY_CODE_WHITE_LIST or has_key:
             return await async_redis.delete(redis_dynamic_code_)
         else:
-            raise AuthException(code=SysCodeEnum.DYNAMIC_ERROR, detail="验证码已过期或不存在")
+            raise AuthException(code=ExcCodeEnum.DYNAMIC_ERROR, detail="验证码已过期或不存在")
 
     @staticmethod
     async def has_mail_verify_code(verify_code, model=1, emp_no=None):
@@ -569,7 +587,7 @@ class UserDao(object):
         if verify_code in PikaGlobalVarEnum.VERIFY_CODE_WHITE_LIST or has_key == verify_code:
             return await async_redis.delete(redis_verify_code_)
         else:
-            raise AuthException(code=SysCodeEnum.DYNAMIC_ERROR, detail="验证码已过期或不存在")
+            raise AuthException(code=ExcCodeEnum.DYNAMIC_ERROR, detail="验证码已过期或不存在")
 
     @staticmethod
     async def get_verifycode(request, user_info):
@@ -585,7 +603,7 @@ class UserDao(object):
         if request.model == 2:
             async with async_db_session() as session:
                 async with session.begin():
-                    sel_sql = select(SysUserModel).where(SysUserModel.email == request.email)
+                    sel_sql = select(UserModel).where(UserModel.email == request.email)
                     sel_res = await session.execute(sel_sql)
                     exists_users = sel_res.scalars().first()
                     if not exists_users:
@@ -625,7 +643,7 @@ class UserDao(object):
                 if user_admin:
                     await UserDao.update_pwd(new_password=new_password, emp_no=emp_no)
                 else:
-                    raise AuthException(code=SysCodeEnum.PASSWORD_ERROR, detail="请检查旧密码是否正确")
+                    raise AuthException(code=ExcCodeEnum.PASSWORD_ERROR, detail="请检查旧密码是否正确")
 
     @staticmethod
     async def add_security(**kwargs):
@@ -642,7 +660,7 @@ class UserDao(object):
                     PikaSecurityRelIssues.emp_no == emp_no)
                 execute_select = await session.execute(sql)
                 if execute_select.scalars().first() != 0:
-                    return PikaResponse.failed(code=SysCodeEnum.VAR_ERROR, detail="密保问题已设置，无需添加")
+                    return PikaResponse.failed(code=ExcCodeEnum.VAR_ERROR, detail="密保问题已设置，无需添加")
                 await session.execute(PikaSecurityRelIssues.__table__.insert(), pending_begin)
                 return PikaResponse.success()
 
@@ -699,7 +717,7 @@ class UserDao(object):
                     msg = "修改失败"
                 else:
                     msg = "部分修改成功"
-                return PikaResponse.success(code=SysCodeEnum.MYSQL_ERROR,
+                return PikaResponse.success(code=ExcCodeEnum.MYSQL_ERROR,
                                             message=f'{msg},详情请查阅返回值！',
                                             data={"success": success, "failed": failed,
                                                   "not_funded": not_funded})
@@ -714,8 +732,8 @@ class UserDao(object):
     async def query_all_users():
         try:
             async with async_session() as session:
-                query_sql = select(SysUserModel)\
-                    .outerjoin(SysUserAdminModel, SysUserModel.id == SysUserAdminModel.uid)
+                query_sql = select(UserModel) \
+                    .outerjoin(SysUserAdminModel, UserModel.id == SysUserAdminModel.uid)
                 query_result = await session.execute(query_sql)
                 return query_result.scalars().all()
         except Exception as e:
@@ -726,7 +744,7 @@ class UserDao(object):
     @RedisHelper.cache("user_detail", 3600)
     async def query_user(id: int):
         async with async_session() as session:
-            query = await session.execute(select(SysUserModel).where(SysUserModel.id == id))
+            query = await session.execute(select(UserModel).where(UserModel.id == id))
             return query.scalars().first()
 
     @staticmethod
@@ -737,7 +755,7 @@ class UserDao(object):
                 return []
             async with async_session() as session:
                 query_user = await session.execute(
-                    select(SysUserModel).where(SysUserModel.id.in_(user)))
+                    select(UserModel).where(UserModel.id.in_(user)))
                 return [{"email": quser.email, "phone": quser.phone} for quser in
                         query_user.scalars().all()]
         except Exception as e:

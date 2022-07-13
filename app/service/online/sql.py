@@ -13,13 +13,13 @@ from fastapi import APIRouter
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud.online.database import DbConfigDao
-from app.schema.online import OnlineSQLForm
+from app.schema.online import OnlineSqlSchema
 
 router = APIRouter()
 
 
 @router.post("/sql/command", summary="执行sql")
-async def execute_sql(data: OnlineSQLForm):
+async def execute_sql(data: OnlineSqlSchema):
     try:
         result = await DbConfigDao.online_sql(data.id, data.sql)
         columns, result = PikaResponse.parse_sql_result(result)

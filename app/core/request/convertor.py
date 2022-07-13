@@ -12,11 +12,11 @@
 
 from typing import List
 
-from app.schema.request import RequestInfo
+from app.schema.request import RequestInfoSchema
 
 
 class Convertor(object):
 
     @staticmethod
-    def convert(file, regex: str = None) -> List[RequestInfo]:
+    def convert(file, regex: str = None) -> List[RequestInfoSchema]:
         raise NotImplementedError

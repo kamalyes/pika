@@ -5,7 +5,7 @@ from app.crud.rbac.user import UserDao
 from app.crud.system.minioss import PikaOssDao
 from app.enums.RbacEnum import RoleEnum
 from app.middleware.oss import OssClient
-from app.models import get_async_session
+from app.models import async_db_session
 from app.models.minioss import OssFileModel
 from app.service import Permission
 
@@ -23,7 +23,7 @@ async def create_oss_file(filepath: str, file: UploadFile = File(...),
         # 本地数据也要备份一份
         model = OssFileModel(user_info['emp_no'], filepath, file_url,
                              OssFileModel.get_size(file_size))
-        record = await PikaOssDao.query_record(file_path=filepath, is_delete=0)
+        record = await PikaOssDao.query_record(file_path=filepath, delete_flag=False)
         if record is not None:
             record.file_path = filepath
             record.view_url = file_url
@@ -63,10 +63,10 @@ async def list_oss_file(filepath: str = '', _=Depends(Permission(RoleEnum.MANAGE
 
 @router.get("/delete", summary="删除文件")
 async def delete_oss_file(filepath: str, user_info=Depends(Permission(RoleEnum.MANAGER)),
-                          session=Depends(get_async_session)):
+                          session=Depends(async_db_session)):
     try:
         # 先获取到本地的记录，拿到sha值
-        record = await PikaOssDao.query_record(file_path=filepath, is_delete=0)
+        record = await PikaOssDao.query_record(file_path=filepath, delete_flag=False)
         if record is None:
             raise Exception("文件不存在或已被删除")
         await PikaOssDao.delete_record_by_id(session, user_info["emp_no"], record.id, log=True)

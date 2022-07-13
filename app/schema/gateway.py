@@ -15,7 +15,7 @@ from app.excpetions.business.ParamsException import VariablesNullError
 from app.schema.base import PikaBaseModel
 
 
-class PikaGatewayForm(BaseModel):
+class PikaGatewaySchema(BaseModel):
     id: int = 0
     env: int = None
     name: str = ''

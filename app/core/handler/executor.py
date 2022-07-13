@@ -200,7 +200,7 @@ class Executor(object):
 
     async def execute_constructor(self, env, index, path, params, req_params,
                                   constructor: ConstructorModel):
-        if not constructor.is_usable:
+        if not constructor.enabled_flag:
             self.append(f"当前路径: {path}, 构造方法: {constructor.name} 已关闭, 不继续执行")
             return False
         construct = Executor.get_constructor_type(constructor)

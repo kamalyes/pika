@@ -19,7 +19,7 @@ from app.crud import PikaMapper
 from app.models import async_session, DatabaseHelper
 from app.models.api_test_case import ApiTestCaseModel
 from app.models.constructor import ConstructorModel
-from app.schema.constructor import ConstructorForm, ConstructorIndex
+from app.schema.constructor import ConstructorSchema, ConstructorIndexSchema
 from app.utils.decorator import dao
 
 
@@ -39,7 +39,7 @@ class ConstructorDao(PikaMapper):
         try:
             async with async_session() as session:
                 sql = select(ConstructorModel).where(ConstructorModel.case_id == case_id,
-                                                     ConstructorModel.is_delete == 0) \
+                                                     ConstructorModel.delete_flag == False) \
                     .order_by(ConstructorModel.index, ConstructorModel.update_date)
                 result = await session.execute(sql)
                 return result.scalars().all()
@@ -48,13 +48,13 @@ class ConstructorDao(PikaMapper):
             raise Exception(f"获取初始化数据失败, {e}")
 
     @staticmethod
-    async def insert_constructor(data: ConstructorForm, operator_emp_no: str) -> None:
+    async def insert_constructor(data: ConstructorSchema, operator_emp_no: str) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():
                     sql = select(ConstructorModel).where(ConstructorModel.case_id == data.case_id,
                                                          ConstructorModel.name == data.name,
-                                                         ConstructorModel.is_delete == 0)
+                                                         ConstructorModel.delete_flag == False)
                     result = await session.execute(sql)
                     if result.scalars().first() is not None:
                         raise Exception(f"{data.name}已存在")
@@ -66,7 +66,7 @@ class ConstructorDao(PikaMapper):
             raise Exception(f"新增前/后置条件失败, {e}")
 
     @staticmethod
-    async def update_constructor(data: ConstructorForm, operator_emp_no: str) -> None:
+    async def update_constructor(data: ConstructorSchema, operator_emp_no: str) -> None:
         """
         更新前后置条件
         Args:
@@ -114,7 +114,7 @@ class ConstructorDao(PikaMapper):
             raise Exception(f"删除前后置条件失败, {e}")
 
     @classmethod
-    async def update_constructor_index(cls, data: List[ConstructorIndex]) -> None:
+    async def update_constructor_index(cls, data: List[ConstructorIndexSchema]) -> None:
         """
         更改前后置条件顺序
         Args:
@@ -140,7 +140,7 @@ class ConstructorDao(PikaMapper):
             async with async_session() as session:
                 # 获取所有构造参数
                 search = [ConstructorModel.public is True, ConstructorModel.suffix == suffix,
-                          ConstructorModel.is_delete == 0]
+                          ConstructorModel.delete_flag == False]
                 if name:
                     search.append(ConstructorModel.name.like("%{}%".format(name)))
                 query = await session.execute(select(ConstructorModel).where(*search))
@@ -184,7 +184,7 @@ class ConstructorDao(PikaMapper):
         async with async_session() as session:
             query = await session.execute(
                 select(ConstructorModel).where(ConstructorModel.id == id_,
-                                               ConstructorModel.is_delete == 0))
+                                               ConstructorModel.delete_flag == False))
             data = query.scalars().first()
             if data is None:
                 raise Exception("前后置条件不存在")
@@ -211,7 +211,7 @@ class ConstructorDao(PikaMapper):
                     ConstructorModel.suffix == suffix,
                     ConstructorModel.type == constructor_type,
                     ConstructorModel.public is True,
-                    ConstructorModel.is_delete == 0))
+                    ConstructorModel.delete_flag == False))
             # 并把这些前置条件放到constructors里面
             for q in query.scalars().all():
                 constructors[q.case_id].append({
@@ -226,7 +226,7 @@ class ConstructorDao(PikaMapper):
             # 二次查询，查出有前置条件的case
             query = await session.execute(
                 select(ApiTestCaseModel).where(ApiTestCaseModel.id.in_(constructors.keys()),
-                                               ApiTestCaseModel.is_delete == 0))
+                                               ApiTestCaseModel.delete_flag == False))
             # 构造树，要知道children已经构建好了，就在constructors里面
             for q in query.scalars().all():
                 # 把用例id放入cs_list，这里就不用原生join了

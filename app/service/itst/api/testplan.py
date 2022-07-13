@@ -18,8 +18,8 @@ from app.core.handler.executor import Executor
 from app.core.handler.jsonres import PikaResponse
 from app.crud.project.testplan import ApiTestPlanDao
 from app.enums.RbacEnum import RoleEnum
-from app.models import get_async_session
-from app.schema.api_testplan import ApiTestPlanForm
+from app.models import async_db_session
+from app.schema.api_testplan import ApiTestPlanSchema
 from app.service import Permission
 from app.utils.scheduler import Scheduler
 
@@ -47,7 +47,7 @@ async def list_test_plan(page: int, size: int, project_id: int = None, name: str
 
 
 @router.post("/insert", summary="添加定时任务&测试计划")
-async def insert_test_plan(form: ApiTestPlanForm, user_info=Depends(Permission(RoleEnum.MANAGER))):
+async def insert_test_plan(form: ApiTestPlanSchema, user_info=Depends(Permission(RoleEnum.MANAGER))):
     try:
         plan = await ApiTestPlanDao.insert_test_plan(form, user_info['emp_no'])
         # 添加定时任务
@@ -58,7 +58,7 @@ async def insert_test_plan(form: ApiTestPlanForm, user_info=Depends(Permission(R
 
 
 @router.post("/update", summary="更新定时任务&测试计划")
-async def update_test_plan(form: ApiTestPlanForm, user_info=Depends(Permission(RoleEnum.MANAGER))):
+async def update_test_plan(form: ApiTestPlanSchema, user_info=Depends(Permission(RoleEnum.MANAGER))):
     try:
         await ApiTestPlanDao.update_test_plan(form, user_info['emp_no'], True)
         Scheduler.edit_test_plan(form.id, form.name, form.cron)
@@ -69,7 +69,7 @@ async def update_test_plan(form: ApiTestPlanForm, user_info=Depends(Permission(R
 
 @router.get("/delete", summary="删除定时任务&测试计划")
 async def delete_test_plan(id: int, user_info=Depends(Permission(RoleEnum.MANAGER)),
-                           session=Depends(get_async_session)):
+                           session=Depends(async_db_session)):
     try:
         await ApiTestPlanDao.delete_record_by_id(session, user_info['emp_no'], id)
         Scheduler.remove(id)

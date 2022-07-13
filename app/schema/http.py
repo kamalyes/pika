@@ -15,7 +15,7 @@ from pydantic import BaseModel, validator
 from app.excpetions.business.ParamsException import VariablesNullError
 
 
-class HttpRequestForm(BaseModel):
+class HttpRequestSchema(BaseModel):
     method: str
     url: str
     body: str = None

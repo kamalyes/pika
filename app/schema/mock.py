@@ -13,10 +13,10 @@ from typing import Optional
 
 from fastapi import Body
 
-from app.schema.base import PikaQueryModel, PikaQueryTypeModel, PikaDeleteModel, PikaLargeEditModel
+from app.schema.base import BaseQuerySchema, BaseQueryTypeSchema, BaseBatchDelIdsSchema, BaseLargeEditSchema
 
 
-class MockGlobalModel(PikaLargeEditModel):
+class MockGlobalSchema(BaseLargeEditSchema):
     project_id: Optional[str] = Body('0', title="项目id")
     url: Optional[str] = Body(None, title="url")
     method: Optional[str] = Body('GET', title="请求方式")
@@ -27,17 +27,17 @@ class MockGlobalModel(PikaLargeEditModel):
     status_code: Optional[str] = Body('200', title='http 响应状态码：200（默认）')
 
 
-class EditMockModel(MockGlobalModel):
+class EditMockSchema(MockGlobalSchema):
     pass
 
 
-class DelMockModel(PikaDeleteModel):
+class DelMockSchema(BaseBatchDelIdsSchema):
     pass
 
 
-class QueryMockInModel(PikaQueryModel, PikaQueryTypeModel, MockGlobalModel):
+class QueryMockInSchema(BaseQuerySchema, BaseQueryTypeSchema, MockGlobalSchema):
     pass
 
 
-class QueryMockOutModel(PikaQueryModel):
+class QueryMockOutSchema(BaseQuerySchema):
     pass

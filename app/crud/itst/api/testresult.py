@@ -54,7 +54,7 @@ class ApiTestResultDao(object):
                     ApiTestCaseModel,
                     ApiTestCaseModel.id == ApiTestResultModel.case_id). \
                     where(ApiTestResultModel.report_id == report_id,
-                          ApiTestResultModel.is_delete == 0).order_by(
+                          ApiTestResultModel.delete_flag == False).order_by(
                     asc(ApiTestResultModel.case_id), asc(ApiTestResultModel.start_at))
                 data = await session.execute(sql)
                 ans = []

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python 3.9.11
 """
-@File    :  SysCodeEnum.py
+@File    :  ExcCodeEnum.py
 @Time    :  2022/7/7 15:21 PM
 @Author  :  YuYanQing
 @Version :  1.0
@@ -11,7 +11,7 @@
 """
 
 
-class SysCodeEnum:
+class ExcCodeEnum:
     # Index_Code 1000~2000
     DF_NOT_FOUND_ERROR = 1001  # 默认未找到
     USER_NOT_FOUND_ERROR = 1002  # 未找到用户

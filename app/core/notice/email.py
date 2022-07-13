@@ -19,7 +19,7 @@ from hutools.time import Moment
 from jinja2 import Environment, FileSystemLoader
 
 from app.core.handler.execres import ThirdException, ValidException
-from app.enums.SysCodeEnum import SysCodeEnum
+from app.enums.SysCodeEnum import ExcCodeEnum
 from app.enums.SysvarEnum import PikaGlobalVarEnum
 from config import PikaAppConfig
 
@@ -261,7 +261,7 @@ class EmailManger:
                 # 开启 DEBUG
                 # email_cursor.set_debuglevel(1)
             except Exception as e:
-                raise ThirdException(code=SysCodeEnum.SEND_EMAIL_ERROR, detail=f"发送邮件失败，错误原因：{e}")
+                raise ThirdException(code=ExcCodeEnum.SEND_EMAIL_ERROR, detail=f"发送邮件失败，错误原因：{e}")
             else:
                 return True
             finally:
@@ -269,8 +269,8 @@ class EmailManger:
                     email_cursor.quit()
                 except Exception as e:
                     raise ThirdException(
-                        code=SysCodeEnum.EMAIL_CURSOR_ERROR,
+                        code=ExcCodeEnum.EMAIL_CURSOR_ERROR,
                         detail=f"关闭邮件游标失败，错误原因{e}",
                     )
         else:
-            raise ValidException(code=SysCodeEnum.FIELD_TYPE_ERROR, detail="邮箱地址格式不正确")
+            raise ValidException(code=ExcCodeEnum.FIELD_TYPE_ERROR, detail="邮箱地址格式不正确")

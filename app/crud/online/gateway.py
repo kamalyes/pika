@@ -25,7 +25,7 @@ class GatewayDao(PikaMapper):
     @staticmethod
     async def query_gateway(env, name):
         async with async_session() as session:
-            query_sql = select(GatewayModel).where(GatewayModel.is_delete == 0,
+            query_sql = select(GatewayModel).where(GatewayModel.delete_flag == False,
                                                    GatewayModel.env == env,
                                                    GatewayModel.name == name)
             query_result = await session.execute(query_sql)
