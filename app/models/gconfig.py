@@ -25,6 +25,7 @@ class GConfigModel(LargeBaseModel):
 
     __table_args__ = (
         UniqueConstraint('env', 'key'),
+        {"comment": "全局变量配置表"}
     )
 
     def __init__(self, env, key, value, key_type, operator, enabled_flag, id=None):

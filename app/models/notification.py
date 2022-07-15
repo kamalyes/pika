@@ -1,3 +1,14 @@
+# -*- coding:utf-8 -*-
+# !/usr/bin/env python 3.9.11
+"""
+@File    :  notification.py
+@Time    :  2021/10/18 2:28 AM
+@Author  :  YuYanQing
+@Version :  1.0
+@Contact :  mryu168@163.com
+@License :  (C)Copyright 2022-2026
+@Desc    :  消息通知表
+"""
 from sqlalchemy import SMALLINT, Column, VARCHAR, INT
 
 from app.enums.SysvarEnum import PikaGlobalVarEnum
@@ -6,6 +17,7 @@ from app.models.basic import LargeBaseModel
 
 class NotificationModel(LargeBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_notification'
+    __table_args__ = {"comment": "消息通知表"}
     msg_type = Column(SMALLINT, comment="消息类型 1: 系统消息 2: 其他消息")
     msg_title = Column(VARCHAR(32), comment="消息标题", nullable=False)
     msg_content = Column(VARCHAR(200), comment="消息内容", nullable=True)

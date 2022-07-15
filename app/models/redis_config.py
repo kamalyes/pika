@@ -20,22 +20,18 @@ class RedisModel(LargeBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_redis_info"
     __table_args__ = (
         UniqueConstraint('env', 'name'),
+        {"comment": "Redis配置"}
     )
-    env = Column(INT, nullable=False)  # 对应环境id
-    name = Column(String(ByteSizeEnum.LENGTH_24), nullable=False)  # redis描述名称
-    addr = Column(String(ByteSizeEnum.LENGTH_128), nullable=False)
-    username = Column(String(ByteSizeEnum.LENGTH_50), nullable=False)
-    password = Column(String(ByteSizeEnum.LENGTH_200), nullable=False)
-    db = Column(INT, nullable=False)
-    # 是否是集群，默认为false，集群可不输入用户密码
-    cluster = Column(Boolean, default=False, nullable=False)
-    __tag__ = "Redis配置"
-    __fields__ = (name, env, addr, username, password, db, cluster)
-    __alias__ = dict(name="连接名称", env="环境", addr="连接地址", username="用户名",
-                     password="用户密码", db="库号", cluster="集群")
+    env = Column(INT, nullable=False, comment="对应环境id")
+    name = Column(String(ByteSizeEnum.LENGTH_24), nullable=False, comment="redis描述名称")
+    addr = Column(String(ByteSizeEnum.LENGTH_128), nullable=False, comment="连接地址")
+    username = Column(String(ByteSizeEnum.LENGTH_50), nullable=False, comment="用户名")
+    password = Column(String(ByteSizeEnum.LENGTH_200), nullable=False, comment="用户密码")
+    db = Column(INT, nullable=False, comment="库号")
+    cluster = Column(Boolean, default=False, nullable=False, comment="是否是集群，默认为false，集群可不输入用户密码")
 
     def __init__(self, env, name, addr, cluster, operator, username='', password='', db=0, id=None):
-        super().__init__(operator, id=id)
+        super().__init__(operator, id)
         self.env = env
         self.name = name
         self.addr = addr

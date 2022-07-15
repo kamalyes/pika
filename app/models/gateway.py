@@ -20,7 +20,7 @@ from app.models.basic import LargeBaseModel
 class GatewayModel(LargeBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_gateway'
     __table_args__ = (
-        UniqueConstraint('env', 'name'),
+        UniqueConstraint('env', 'name'), {"comment": "请求网关地址表"}
     )
     env = Column(INT, comment='对应环境id')
     name = Column(String(ByteSizeEnum.LENGTH_50), comment="网关名称")

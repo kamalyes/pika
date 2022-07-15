@@ -7,7 +7,7 @@
 @Version :  1.0
 @Contact :  mryu168@163.com
 @License :  (C)Copyright 2022-2026
-@Desc    :  None
+@Desc    :  数据库配置表
 """
 from sqlalchemy import UniqueConstraint, Column, INT, String
 
@@ -18,7 +18,7 @@ from app.models.basic import LargeBaseModel
 
 class DatabaseModel(LargeBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_database_info"
-    __table_args__ = (UniqueConstraint('env', 'name'),)
+    __table_args__ = (UniqueConstraint('env', 'name'), {"comment": "数据库配置表"})
     env = Column(INT, nullable=False, comment="对应环境id")
     name = Column(String(ByteSizeEnum.LENGTH_30), nullable=False, comment="名称")
     host = Column(String(ByteSizeEnum.LENGTH_128), nullable=False, comment="host")

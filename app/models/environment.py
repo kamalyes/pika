@@ -7,7 +7,7 @@
 @Version :  1.0
 @Contact :  mryu168@163.com
 @License :  (C)Copyright 2022-2026
-@Desc    :  None
+@Desc    :  环境配置表
 """
 from sqlalchemy import Column, String, UniqueConstraint
 
@@ -19,13 +19,8 @@ from app.models.basic import LargeBaseModel
 class EnvironmentModel(LargeBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_environment'
     name = Column(String(ByteSizeEnum.LENGTH_50))
+    __table_args__ = (UniqueConstraint('name'), {"comment": "环境配置"})
 
-    __table_args__ = (UniqueConstraint('name'),)
-
-    __fields__ = [name]
-    __tag__ = "环境配置"
-    __alias__ = dict(name="名称")
-
-    def __init__(self, name, operator, description=None, id=0):
+    def __init__(self, name, operator, description=None, id=None):
         super().__init__(operator, description, id)
         self.name = name

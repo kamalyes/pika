@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python 3.9.11
 """
-@File    :  OssEnum.py
+@File    :  minioss.py
 @Time    :  2021/10/18 2:28 AM
 @Author  :  YuYanQing
 @Version :  1.0
@@ -27,12 +27,9 @@ class OssFileModel(LargeBaseModel):
     file_size = Column(String(ByteSizeEnum.LENGTH_16), comment="文件大小")
 
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_oss_file"
-    __fields__ = (file_path, view_url, file_size)
-    __tag__ = "oss"
-    __alias__ = dict(file_path="文件路径", view_url="地址", file_size="文件大小")
-    __show__ = 1
     __table_args__ = (
         UniqueConstraint('file_path'),
+        {"comment": "oss文件映射表"}
     )
 
     def __init__(self, user, file_path, view_url, file_size, id=None):

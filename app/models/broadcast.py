@@ -19,6 +19,7 @@ from app.models import Base
 
 class BroadcastReadUserModel(Base):
     __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_broadcast_read_user'
+    __table_args__ = {"comment": "消息已读表"}
     id = Column(BIGINT, primary_key=True)
     notification_id = Column(INT, comment="对应消息id", index=True)
     read_user = Column(INT, comment="已读用户id")
