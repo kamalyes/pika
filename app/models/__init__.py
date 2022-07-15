@@ -33,7 +33,8 @@ engine = create_engine(PikaAppConfig.SQLALCHEMY_DATABASE_URI, pool_recycle=1500)
 sync_session = sessionmaker(engine, autocommit=False)
 
 # 异步engine
-async_engine = create_async_engine(PikaAppConfig.ASYNC_SQLALCHEMY_URI, pool_recycle=1500)
+# async_engine = create_async_engine(PikaAppConfig.ASYNC_SQLALCHEMY_URI, pool_recycle=1500)
+async_engine = create_async_engine(PikaAppConfig.ASYNC_SQLALCHEMY_URI, pool_recycle=1500, echo=True)
 async_session = scoped_session(
     sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession))
 

@@ -25,7 +25,6 @@ from app.core.handler.execres import AuthException, \
 from app.core.handler.jsonres import PikaResponse
 from app.core.handler.logger import PikaLogger
 from app.crud.rbac import regex_register_str, client_ip
-from app.crud.rbac.menu import MenuDao
 from app.crud.system import Email
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.OperationEnum import VerifyCodeEnum
@@ -38,10 +37,7 @@ from app.middleware.xredis import RedisHelper
 from app.models import async_db_session, async_redis, async_session
 from app.models.admin import SysUserAdminModel
 from app.models.kerberos import PikaSecurityRelIssues
-from app.models.menu import MenuModel
-from app.models.role import RoleModel
 from app.models.user import UserModel
-from app.schema.menu import QueryMenuInSchema
 from config import PikaAppConfig
 
 
@@ -265,19 +261,19 @@ class UserDao(object):
                 # 屏蔽字段
                 dislodge = ["open_id", "private_key", "open_id", "password", "description", "id"]
                 result = {key: val for key, val in user_infos.items() if key not in dislodge}
-                # 菜单权限
-                roles = RoleModel.get_roles_by_ids(user['roles'])
-                menu_ids = []
-                if roles:
-                    for i in roles:
-                        menu_ids += list(map(int, i.menus.split(',')))
-                # 前端角色报错只保存子节点数据，所有这里要做处理，把父级菜单也返回给前端
-                parent_ids = MenuModel.get_parent_id_by_ids(set(menu_ids))
-                menu_ids += [i.parent_id for i in parent_ids]
-                all_menu = QueryMenuInSchema().dump(MenuModel.get_menu_by_ids(set(menu_ids)), many=True)
-                parent_menu = [menu for menu in all_menu if menu['parent_id'] == 0]
-                result['menus'] = await MenuDao.menu_assembly(parent_menu, all_menu) if menu_ids else []
-                result['roles'] = ['all']
+                # # 菜单权限
+                # roles = RoleModel.get_roles_by_ids(user['roles'])
+                # menu_ids = []
+                # if roles:
+                #     for i in roles:
+                #         menu_ids += list(map(int, i.menus.split(',')))
+                # # 前端角色报错只保存子节点数据，所有这里要做处理，把父级菜单也返回给前端
+                # parent_ids = MenuModel.get_parent_id_by_ids(set(menu_ids))
+                # menu_ids += [i.parent_id for i in parent_ids]
+                # all_menu = QueryMenuInSchema().dump(MenuModel.get_menu_by_ids(set(menu_ids)), many=True)
+                # parent_menu = [menu for menu in all_menu if menu['parent_id'] == 0]
+                # result['menus'] = await MenuDao.menu_assembly(parent_menu, all_menu) if menu_ids else []
+                # result['roles'] = ['all']
             else:
                 raise AuthException(detail="用户信息不存在！")
         # 更新在线用户信息

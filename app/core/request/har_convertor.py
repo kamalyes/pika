@@ -46,15 +46,15 @@ class HarConvertor(Convertor):
                         # 由于不符合预期的url，所以过滤掉
                         continue
                     info = RequestInfoSchema(url=url, response_data=entry.get("response"),
-                                       body=HarConvertor.get_body(request_data),
-                                       status_code=response_data.get("status"),
-                                       request_method=request_data.get("method"),
-                                       request_headers=HarConvertor.get_kv(request_data),
-                                       response_headers=HarConvertor.get_kv(response_data),
-                                       cookies=HarConvertor.get_kv(response_data, "cookies"),
-                                       request_cookies=HarConvertor.get_kv(request_data, "cookies"),
-                                       response_content=response_data.get("content", {}).get("text")
-                                       )
+                                             body=HarConvertor.get_body(request_data),
+                                             status_code=response_data.get("status"),
+                                             request_method=request_data.get("method"),
+                                             request_headers=HarConvertor.get_kv(request_data),
+                                             response_headers=HarConvertor.get_kv(response_data),
+                                             cookies=HarConvertor.get_kv(response_data, "cookies"),
+                                             request_cookies=HarConvertor.get_kv(request_data, "cookies"),
+                                             response_content=response_data.get("content", {}).get("text")
+                                             )
                     ans.append(info)
             return ans
         except HarConvertException as e:

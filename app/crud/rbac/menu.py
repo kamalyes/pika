@@ -40,31 +40,57 @@ class MenuDao:
         return await AsyncDbSession.query(db, do_sql)
 
     @staticmethod
-    async def save_or_update_menus(request: Any, operator_emp_no, parent_id=0) -> "MenuModel":
+    async def insert_menu(request: Any, operator_emp_no: str, is_parent=False) -> "MenuModel":
         menu_id = request.id
-        menu_children = request.children
         menu_name = request.name
         menu_title = request.title
-        if len(menu_children) > 0:
-            for index in menu_children:
-                await MenuDao.save_or_update_menus(request=index, operator_emp_no=operator_emp_no,
-                                                   parent_id=index.parent_id)
+        menu_parent_id = request.parent_id
+        try:
+            delattr(request, "children")
+        except AttributeError as e:
+            pass
+        if menu_parent_id == 0 and not is_parent:
+            raise ValueError('父菜单id不存在！')
         async with async_db_session() as session:
             async with session.begin():
-                query_by_id_menu = select(MenuModel).where(MenuModel.name == menu_name)
-                query_execute = await session.execute(query_by_id_menu)
-                ex_menu_info = query_execute.scalars().all()
-                if ex_menu_info:
-                    if ex_menu_info.title != menu_title:
-                        if MenuModel.get_menu_by_name(menu_title):
+                query_by_id_sql = select(MenuModel.id, MenuModel.title, MenuModel.name, MenuModel.parent_id).where(
+                    or_(MenuModel.id == menu_id,
+                        MenuModel.name == menu_name,
+                        MenuModel.title == menu_title))
+                query_id_execute = await session.execute(query_by_id_sql)
+                ex_menu_info = query_id_execute.all()
+                ex_parent_ids = []
+                for ex_menu_index in ex_menu_info:
+                    ex_parent_ids.append(ex_menu_index.id)
+                    if menu_parent_id not in ex_parent_ids and not is_parent:
+                        raise ValueError('父菜单id不存在！')
+                    if menu_id != ex_menu_index.id:
+                        if ex_menu_index.name == menu_name:
                             raise ValueError('菜单名已存在！')
-                parent_id = parent_id if parent_id != 0 else request.parent_id
-                del request.children
-                update_role_info_sql = update(MenuModel) \
-                    .where(MenuModel.id == menu_id).values(**request.dict(),
-                                                           operator=operator_emp_no, parent_id=parent_id)
-                await session.execute(update_role_info_sql)
-        return ex_menu_info
+                        elif ex_menu_index.title == menu_title:
+                            raise ValueError("title已存在！")
+                        result = MenuModel(**request.dict(), operator=operator_emp_no)
+                        session.add(result)
+                        await session.flush()
+                    else:
+                        delattr(request, "id")
+                        update_sql = update(MenuModel).where(MenuModel.id == menu_id). \
+                            values(**request.dict(), operator=str(operator_emp_no))
+                        await session.execute(update_sql)
+
+    @staticmethod
+    async def save_or_update_menus(request: Any, operator_emp_no: str):
+        menu_parent_id = request.id
+        try:
+            menu_children = request.children
+        except AttributeError:
+            menu_children = []
+        if menu_parent_id in (0, None) and len(menu_children) > 0:
+            raise ValueError(f"数据格式错误、有children、但父id=={menu_parent_id}")
+        await MenuDao.insert_menu(request, operator_emp_no, True)
+        if len(menu_children) > 0:
+            for index in menu_children:
+                await MenuDao.insert_menu(index, operator_emp_no)
 
     @staticmethod
     async def deleted(id: int):

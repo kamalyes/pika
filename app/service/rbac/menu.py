@@ -15,6 +15,7 @@ from fastapi import APIRouter, Depends
 from hutools.pagination import add_pagination, LimitOffsetPage
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.handler.jsonres import PikaResponse
 from app.crud.rbac.menu import MenuDao
 from app.models import pagination_db
 from app.schema.base import BaseBatchDelIdsSchema
@@ -36,7 +37,11 @@ async def list_menu(request: QueryMenuInSchema = Depends(),
 async def save_or_update_menus(request: EditMenuSchema,
                                # user_info=Depends(Permission())
                                ):
-    return await MenuDao.save_or_update_menus(request=request, operator_emp_no="1558")
+    try:
+        await MenuDao.save_or_update_menus(request=request, operator_emp_no="ha758P")
+    except Exception as exc:
+        return PikaResponse.failed(detail=f"{exc}")
+    return PikaResponse.success()
 
 
 @router.delete('/menu/delete', summary="删除菜单")

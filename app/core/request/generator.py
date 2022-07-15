@@ -67,20 +67,20 @@ class CaseGenerator(object):
                 body_type=CaseGenerator.get_body_type(requests[r].request_headers),
             ), ensure_ascii=False)
             c = ConstructorSchema(name=name, value=f"http_res_{r + 1}",
-                                constructor_json=constructor_json,
-                                enabled_flag=True, public=True, suffix=False, index=r + 1,
-                                type=ConstructorTypeEnum.http.value)
+                                  constructor_json=constructor_json,
+                                  enabled_flag=True, public=True, suffix=False, index=r + 1,
+                                  type=ConstructorTypeEnum.http.value)
             constructors.append(c)
         return constructors
 
     @staticmethod
     def generate_case(directory_id: int, name: str, last: RequestInfoSchema) -> TestCaseSchema:
         return TestCaseSchema(directory_id=directory_id, name=name, url=last.url,
-                            request_type=RequestType.http.value, body=last.body,
-                            request_method=last.request_method,
-                            body_type=CaseGenerator.get_body_type(last.request_headers).value,
-                            request_headers=json.dumps(last.request_headers, ensure_ascii=False),
-                            case_type=0, status=CaseStatus.debugging.value, priority="P3")
+                              request_type=RequestType.http.value, body=last.body,
+                              request_method=last.request_method,
+                              body_type=CaseGenerator.get_body_type(last.request_headers).value,
+                              request_headers=json.dumps(last.request_headers, ensure_ascii=False),
+                              case_type=0, status=CaseStatus.debugging.value, priority="P3")
 
     @staticmethod
     def extract_field(requests: List[RequestInfoSchema]) -> List[str]:

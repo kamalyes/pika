@@ -27,6 +27,7 @@ class MenuSchema(BaseOnlyIdSchema):
     icon: Optional[str]
     parent_id: Optional[int]
     redirect: Optional[str]
+    roles: Optional[str]
     sort: Optional[int]
     menu_type: Optional[int]
     active_menu: Optional[str]
@@ -34,8 +35,7 @@ class MenuSchema(BaseOnlyIdSchema):
 
 
 class EditMenuSchema(MenuSchema):
-    roles: Optional[str]
-    children: List[MenuSchema]
+    children: List[MenuSchema] = []
 
     class Config:
         orm_mode = True
