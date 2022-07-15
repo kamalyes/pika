@@ -44,7 +44,8 @@ class LargeBaseModel(Base):
     __alias__ = dict(name="名称")
     __show__ = 1
 
-    def __init__(self, operator=None, description=None, delete_date=None, enabled_flag=True, delete_flag=False, id=0):
+    def __init__(self, id=None, operator=None, description=None, delete_date=None, enabled_flag=True,
+                 delete_flag=False):
         self.id = id
         self.create_emp_no = operator
         self.update_emp_no = operator
@@ -78,7 +79,7 @@ class NormBaseModel(Base):
     __alias__ = dict(name="名称")
     __show__ = 1
 
-    def __init__(self, description=None, id=0, operator=None):
+    def __init__(self, id=None, description=None, operator=None):
         self.id = id
         self.create_emp_no = operator
         self.update_emp_no = operator
@@ -106,7 +107,7 @@ class TimestampBaseModel(Base):
     __alias__ = dict(name="名称")
     __show__ = 1
 
-    def __init__(self, description=None, id=0, operator=None):
+    def __init__(self, id=None, description=None, operator=None):
         self.id = id
         self.create_emp_no = operator
         self.update_emp_no = operator
@@ -129,7 +130,7 @@ class MinBaseModel(Base):
     __alias__ = {}
     __show__ = 1
 
-    def __init__(self, description=None, id=0, operator=None, operator_date=None):
+    def __init__(self, id=None, description=None, operator=None, operator_date=None):
         self.id = id
         self.operator = operator
         self.description = description
