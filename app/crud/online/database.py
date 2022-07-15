@@ -42,7 +42,7 @@ class DbConfigDao(object):
         """
         try:
             async with async_session() as session:
-                query = [DatabaseModel.delete_flag == False]
+                query = [DatabaseModel.delete_flag is False]
                 if name:
                     query.append(DatabaseModel.name.like(f'%{name}%'))
                 if database:
@@ -62,7 +62,7 @@ class DbConfigDao(object):
                 async with session.begin():
                     result = await session.execute(
                         select(DatabaseModel).where(DatabaseModel.name == data.name,
-                                                    DatabaseModel.delete_flag == False,
+                                                    DatabaseModel.delete_flag is False,
                                                     DatabaseModel.env == data.env))
                     query = result.scalars().first()
                     if query is not None:
@@ -96,7 +96,7 @@ class DbConfigDao(object):
                 async with session.begin():
                     result = await session.execute(
                         select(DatabaseModel).where(id == DatabaseModel.id,
-                                                    DatabaseModel.delete_flag == False))
+                                                    DatabaseModel.delete_flag is False))
                     query = result.scalars().first()
                     if query is None:
                         raise Exception("数据库配置不存在或已删除")
@@ -112,7 +112,7 @@ class DbConfigDao(object):
             async with async_session() as session:
                 result = await session.execute(
                     select(DatabaseModel).where(DatabaseModel.id == id,
-                                                DatabaseModel.delete_flag == False))
+                                                DatabaseModel.delete_flag is False))
                 return result.scalars().first()
         except Exception as e:
             DbConfigDao.log.error(f"获取数据库配置失败, error: {e}")
@@ -125,7 +125,7 @@ class DbConfigDao(object):
                 result = await session.execute(
                     select(DatabaseModel).where(DatabaseModel.env == env,
                                                 DatabaseModel.name == name,
-                                                DatabaseModel.delete_flag == False))
+                                                DatabaseModel.delete_flag is False))
                 return result.scalars().first()
         except Exception as e:
             DbConfigDao.log.error(f"获取数据库配置失败, error: {e}")
@@ -149,7 +149,7 @@ class DbConfigDao(object):
             table_map = defaultdict(set)
             async with async_session() as session:
                 query = await session.execute(
-                    select(DatabaseModel).where(DatabaseModel.delete_flag == False))
+                    select(DatabaseModel).where(DatabaseModel.delete_flag is False))
                 data = query.scalars().all()
                 for d in data:
                     name = env_map[d.env]

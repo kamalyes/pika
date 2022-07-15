@@ -45,7 +45,7 @@ class ConstructorModel(LargeBaseModel):
     @staticmethod
     async def get_index(session, case_id, suffix=False):
         sql = select(ConstructorModel).where(
-            ConstructorModel.delete_flag == False, ConstructorModel.case_id == case_id,
+            ConstructorModel.delete_flag is False, ConstructorModel.case_id == case_id,
             ConstructorModel.suffix == suffix,
         ).order_by(desc(ConstructorModel.index))
         data = await session.execute(sql)

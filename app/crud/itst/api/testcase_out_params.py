@@ -57,7 +57,7 @@ class ApiTestCaseOutParametersDao(PikaMapper):
                 async with session.begin():
                     source = await session.execute(select(ApiTestCaseOutParametersModel).where(
                         ApiTestCaseOutParametersModel.case_id == case_id,
-                        ApiTestCaseOutParametersModel.delete_flag == False,
+                        ApiTestCaseOutParametersModel.delete_flag is False,
                     ))
                     before = source.scalars().all()
                     should_remove = await cls.should_remove(before, data)

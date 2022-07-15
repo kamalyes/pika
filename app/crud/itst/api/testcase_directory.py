@@ -30,7 +30,7 @@ class ApiTestCaseDirectoryDao(object):
             async with async_session() as session:
                 sql = select(ApiTestCaseDirectoryModel).where(
                     ApiTestCaseDirectoryModel.id == directory_id,
-                    ApiTestCaseDirectoryModel.delete_flag == False)
+                    ApiTestCaseDirectoryModel.delete_flag is False)
                 result = await session.execute(sql)
                 return result.scalars().first()
         except Exception as e:
@@ -42,7 +42,7 @@ class ApiTestCaseDirectoryDao(object):
         try:
             async with async_session() as session:
                 sql = select(ApiTestCaseDirectoryModel) \
-                    .where(ApiTestCaseDirectoryModel.delete_flag == False,
+                    .where(ApiTestCaseDirectoryModel.delete_flag is False,
                            ApiTestCaseDirectoryModel.project_id == project_id) \
                     .order_by(asc(ApiTestCaseDirectoryModel.name))
                 result = await session.execute(sql)
@@ -57,7 +57,7 @@ class ApiTestCaseDirectoryDao(object):
             async with async_session() as session:
                 async with session.begin():
                     sql = select(ApiTestCaseDirectoryModel).where(
-                        ApiTestCaseDirectoryModel.delete_flag == False,
+                        ApiTestCaseDirectoryModel.delete_flag is False,
                         ApiTestCaseDirectoryModel.name == form.name,
                         ApiTestCaseDirectoryModel.parent == form.parent,
                         ApiTestCaseDirectoryModel.id == form.project_id)
@@ -76,7 +76,7 @@ class ApiTestCaseDirectoryDao(object):
                 async with session.begin():
                     sql = select(ApiTestCaseDirectoryModel).where(
                         ApiTestCaseDirectoryModel.id == form.id,
-                        ApiTestCaseDirectoryModel.delete_flag == False)
+                        ApiTestCaseDirectoryModel.delete_flag is False)
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
@@ -95,7 +95,7 @@ class ApiTestCaseDirectoryDao(object):
                 async with session.begin():
                     sql = select(ApiTestCaseDirectoryModel).where(
                         ApiTestCaseDirectoryModel.id == id,
-                        ApiTestCaseDirectoryModel.delete_flag == False)
+                        ApiTestCaseDirectoryModel.delete_flag is False)
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
@@ -178,7 +178,7 @@ class ApiTestCaseDirectoryDao(object):
             ans = [directory_id]
             # 找出父类为directory_id或者非根的目录
             sql = select(ApiTestCaseDirectoryModel) \
-                .where(ApiTestCaseDirectoryModel.delete_flag == False,
+                .where(ApiTestCaseDirectoryModel.delete_flag is False,
                        or_(ApiTestCaseDirectoryModel.parent == directory_id,
                            ApiTestCaseDirectoryModel.parent is not None)) \
                 .order_by(asc(ApiTestCaseDirectoryModel.name))

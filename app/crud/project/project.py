@@ -47,7 +47,7 @@ class ProjectDao(PikaMapper):
 
         """
         try:
-            search = [ProjectModel.delete_flag == False]
+            search = [ProjectModel.delete_flag is False]
             async with async_session() as session:
                 if operator_identity != RoleEnum.ADMIN:
                     project_list = await ProjectRoleDao.list_project_by_user(operator_emp_no)
@@ -84,7 +84,7 @@ class ProjectDao(PikaMapper):
         # 找到未删除的项目
         sel_not_del_dt = select(ProjectModel.id).where(
             or_(ProjectModel.private is False, ProjectModel.owner == operator_emp_no),
-            ProjectModel.delete_flag == False)
+            ProjectModel.delete_flag is False)
         roles = await session.execute(sel_not_del_dt)
         for r in roles.all():
             ans.add(r[0])
@@ -103,7 +103,7 @@ class ProjectDao(PikaMapper):
             async with session.begin():
                 data = await session.execute(
                     select(ProjectModel).where(ProjectModel.name == name,
-                                               ProjectModel.delete_flag == False))
+                                               ProjectModel.delete_flag is False))
                 if data.scalars().first() is not None:
                     err = f"新增项目: {name}失败, 失败原因：项目已存在"
                     cls.log.error(err)
@@ -119,7 +119,7 @@ class ProjectDao(PikaMapper):
                 async with session.begin():
                     query = await session.execute(
                         select(ProjectModel).where(ProjectModel.id == project_id,
-                                                   ProjectModel.delete_flag == False))
+                                                   ProjectModel.delete_flag is False))
                     data = query.scalars().first()
                     if data is None:
                         raise Exception("项目不存在")
@@ -160,7 +160,7 @@ class ProjectDao(PikaMapper):
                 async with session.begin():
                     query = await session.execute(
                         select(ProjectModel).where(ProjectModel.id == id,
-                                                   ProjectModel.delete_flag == False))
+                                                   ProjectModel.delete_flag is False))
                     data = query.scalars().first()
                     if data is None:
                         raise Exception("项目不存在")
@@ -186,7 +186,7 @@ class ProjectDao(PikaMapper):
             async with async_session() as session:
                 query = await session.execute(
                     select(ProjectModel).where(ProjectModel.id == project_id,
-                                               ProjectModel.delete_flag == False))
+                                               ProjectModel.delete_flag is False))
                 data = query.scalars().first()
                 if data is None:
                     raise Exception("项目不存在")
@@ -210,7 +210,7 @@ class ProjectDao(PikaMapper):
         async with async_session() as session:
             async with session.begin():
                 # 先选出未被删除的用户
-                project_sql = select(ProjectModel).where(ProjectModel.delete_flag == False)
+                project_sql = select(ProjectModel).where(ProjectModel.delete_flag is False)
                 projects = await session.execute(project_sql)
                 project_list = []
                 # 将数据放入列表，把owner等于该用户的放入列表
@@ -221,7 +221,7 @@ class ProjectDao(PikaMapper):
                 # 接着查询项目角色表有该用户的角色，把角色的项目id放入列表
                 # 由于是set，所以不会重复
                 query = await session.execute(
-                    select(ProjectRoleModel).where(ProjectRoleModel.delete_flag == False,
+                    select(ProjectRoleModel).where(ProjectRoleModel.delete_flag is False,
                                                    ProjectRoleModel.emp_no == emp_no))
                 for q in query.scalars().all():
                     ans.add(q.project_id)
@@ -245,7 +245,7 @@ class ProjectRoleDao(PikaMapper):
             async with async_session() as session:
                 data = await session.execute(
                     select(ProjectRoleModel.project_id).where(ProjectRoleModel.emp_no == emp_no,
-                                                              ProjectRoleModel.delete_flag == False))
+                                                              ProjectRoleModel.delete_flag is False))
                 return data.scalars().all()
         except Exception as e:
             cls.log.error(f"查询用户: {emp_no}项目失败, {e}")
@@ -257,7 +257,7 @@ class ProjectRoleDao(PikaMapper):
             async with async_session() as session:
                 query = await session.execute(
                     select(ProjectRoleModel).where(ProjectRoleModel.project_id == project_id,
-                                                   ProjectRoleModel.delete_flag == False))
+                                                   ProjectRoleModel.delete_flag is False))
                 return query.scalars().all()
         except Exception as e:
             ProjectRoleDao.log.error(f"查询项目: {project_id}角色列表失败, {e}")
@@ -289,7 +289,7 @@ class ProjectRoleDao(PikaMapper):
             query = await session.execute(select(ProjectRoleModel)
                                           .where(ProjectRoleModel.emp_no == emp_no,
                                                  ProjectRoleModel.project_id == project_id,
-                                                 ProjectRoleModel.delete_flag == False))
+                                                 ProjectRoleModel.delete_flag is False))
             updater_role = query.scalars().first()
             if updater_role is None or updater_role.project_role == RoleEnum.MANAGER:
                 raise Exception("对不起，你没有权限")
@@ -320,7 +320,7 @@ class ProjectRoleDao(PikaMapper):
         async with async_session() as session:
             query = await session.execute(
                 select(ProjectModel).where(ProjectModel.id == project_id,
-                                           ProjectModel.delete_flag == False))
+                                           ProjectModel.delete_flag is False))
             project = query.scalars().first()
             if project is None:
                 raise Exception("项目不存在")
@@ -328,7 +328,7 @@ class ProjectRoleDao(PikaMapper):
                 query = await session.execute(
                     select(ProjectRoleModel).where(ProjectRoleModel.emp_no == operator_emp_no,
                                                    ProjectRoleModel.project_id == project_id,
-                                                   ProjectRoleModel.delete_flag == False))
+                                                   ProjectRoleModel.delete_flag is False))
                 role = query.scalars().first()
                 if role is None:
                     raise AuthException(detail="没有权限访问项目")
