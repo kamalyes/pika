@@ -75,7 +75,7 @@ class MenuDao:
                     else:
                         delattr(request, "id")
                         update_sql = update(MenuModel).where(MenuModel.id == menu_id). \
-                            values(**request.dict(), operator=str(operator_emp_no))
+                            values(**request.dict(), create_emp_no=str(operator_emp_no))
                         await session.execute(update_sql)
 
     @staticmethod
