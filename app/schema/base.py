@@ -81,8 +81,8 @@ class BaseOnlyOperatorSchema(BaseModel):
 
 
 class BaseOnlyDateSchema(BaseModel):
-    create_date: Optional[datetime] = Query(Moment.skew_date(days=-3), title="创建时间")
-    update_date: Optional[datetime] = Query(Moment.skew_date(minutes=15), title="更新时间")
+    create_date: Optional[datetime] = Query(Moment.skew_date(days=-3), title="创建日期")
+    update_date: Optional[datetime] = Query(Moment.skew_date(minutes=15), title="更新日期")
 
 
 class BaseQuerySchema(BaseOnlyIdSchema, BaseOnlyEnabledFlagSchema, BaseOnlyOperatorSchema, BaseOnlyDateSchema):

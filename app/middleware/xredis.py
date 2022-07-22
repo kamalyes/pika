@@ -249,7 +249,7 @@ class RedisHelper(object):
     @awaitable
     def list_record_data(address: str):
         """
-        停止录制任务
+        查询录制任务
         Args:
             address:
 

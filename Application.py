@@ -333,7 +333,7 @@ class PikaFastApi:
         pika.include_router(notice_router, prefix="/notification", tags=["消息通知"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
-        pika.include_router(operation_log_router, prefix="/system", tags=["操作"],
+        pika.include_router(operation_log_router, prefix="/operation", tags=["操作"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
         pika.include_router(mini_oss_router, prefix="/oss", tags=["Oss"],

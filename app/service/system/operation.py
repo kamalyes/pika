@@ -7,7 +7,7 @@ from app.models.system import OperationLogModel
 from app.schema.operation_log import OperationSchema
 from app.service import Permission
 
-router = APIRouter(prefix="/operation")
+router = APIRouter()
 
 
 @router.get("/list", summary="获取用户操作记录")

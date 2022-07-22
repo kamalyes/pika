@@ -18,7 +18,7 @@ from app.schema.online import OnlineRedisSchema
 router = APIRouter()
 
 
-@router.post("/redis/command")
+@router.post("/redis/command", summary="执行redis")
 async def test_redis_command(form: OnlineRedisSchema):
     try:
         res = await PikaRedisConfigDao.execute_command(form.command, id=form.id)

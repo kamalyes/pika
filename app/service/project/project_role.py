@@ -20,7 +20,7 @@ from app.service import Permission
 router = APIRouter()
 
 
-@router.post("/role/insert")
+@router.post("/role/insert", summary="添加项目成员")
 async def insert_project_role(role: ProjectRoleSchema, escarole=Depends(Permission())):
     try:
         operator_emp_no, operator_identity = escarole
@@ -38,14 +38,14 @@ async def insert_project_role(role: ProjectRoleSchema, escarole=Depends(Permissi
     return PikaResponse.success()
 
 
-@router.post("/role/update")
+@router.post("/role/update", summary="更新项目成员")
 async def update_project_role(prole: ProjectRoleEditSchema, escarole=Depends(Permission())):
     operator_emp_no, operator_identity = escarole
     await ProjectRoleDao.update_project_role(prole, operator_emp_no, operator_identity)
     return PikaResponse.success()
 
 
-@router.post("/role/delete")
+@router.post("/role/delete", summary="删除项目成员")
 async def delete_project_role(prole: ProjectDelSchema, escarole=Depends(Permission(escarole=True))):
     operator_emp_no, operator_identity = escarole
     await ProjectRoleDao.delete_project_role(prole.id, operator_emp_no, operator_identity)

@@ -28,7 +28,7 @@ class LargeBaseModel(Base):
         DATETIME,
         nullable=False,
         server_default=text("CURRENT_TIMESTAMP"),
-        comment="创建时间",
+        comment="创建日期",
     )
     update_date = Column(
         DATETIME,
@@ -65,7 +65,7 @@ class NormBaseModel(Base):
         DATETIME,
         nullable=False,
         server_default=text("CURRENT_TIMESTAMP"),
-        comment="创建时间",
+        comment="创建日期",
     )
     update_date = Column(
         DATETIME,
@@ -93,7 +93,7 @@ class TimestampBaseModel(Base):
         DATETIME,
         nullable=False,
         server_default=text("CURRENT_TIMESTAMP"),
-        comment="创建时间",
+        comment="创建日期",
     )
     update_date = Column(
         DATETIME,
@@ -122,7 +122,7 @@ class MinBaseModel(Base):
         DATETIME,
         nullable=False,
         server_default=text("CURRENT_TIMESTAMP"),
-        comment="创建时间",
+        comment="创建日期",
     )
     __abstract__ = True
     __fields__: Tuple[Column] = [id]

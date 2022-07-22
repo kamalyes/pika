@@ -23,7 +23,7 @@ router = APIRouter()
 CERT_URL = "http://mitm.it/cert/"
 
 
-@router.post("/request/http")
+@router.post("/request/http", summary="发起http请求")
 async def http_request(data: HttpRequestSchema, _=Depends(Permission())):
     try:
         r = await AsyncRequest.client(data.url, data.body_type, headers=data.headers,
@@ -36,7 +36,7 @@ async def http_request(data: HttpRequestSchema, _=Depends(Permission())):
         return PikaResponse.failed(detail=str(e))
 
 
-@router.get("/request/cert")
+@router.get("/request/cert", summary="下载proxy证书")
 async def http_request(cert: CertType):
     try:
         suffix = cert.get_suffix()
@@ -52,7 +52,7 @@ async def http_request(cert: CertType):
         return PikaResponse.failed(detail=str(e))
 
 
-@router.get("/request/run")
+@router.get("/request/run", summary="执行用例")
 async def execute_case(env: int, case_id: int, _=Depends(Permission())):
     try:
         executor = Executor()
@@ -88,7 +88,7 @@ async def re_run_case(env: int, case_id: int, data_id: int = 0, _=Depends(Permis
         return PikaResponse.failed(detail="测试数据不为合法的JSON")
 
 
-@router.post("/request/run/async")
+@router.post("/request/run/async", summary="异步执行用例")
 async def execute_case(env: int, case_id: List[int], user_info=Depends(Permission())):
     data = dict()
     # s = time.perf_counter()
@@ -98,7 +98,7 @@ async def execute_case(env: int, case_id: List[int], user_info=Depends(Permissio
     return PikaResponse.success()
 
 
-@router.post("/request/run/sync")
+@router.post("/request/run/sync", summary="同步执行用例")
 async def execute_case(env: int, case_id: List[int], user_info=Depends(Permission())):
     data = dict()
     task_id = uuid.uuid5(uuid.NAMESPACE_URL, "task")
@@ -112,7 +112,7 @@ async def execute_case(env: int, case_id: List[int], user_info=Depends(Permissio
     return PikaResponse.success(data)
 
 
-@router.post("/request/run/multiple")
+@router.post("/request/run/multiple", summary="作为报告执行")
 async def execute_as_report(env: int, case_id: List[int], user_info=Depends(Permission())):
     report_id = await Executor.run_multiple(user_info['emp_no'], env, case_id)
     return PikaResponse.success(report_id)

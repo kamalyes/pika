@@ -28,8 +28,8 @@ CREATE TABLE `user_role_config`
     `enabled_flag`   int(11) DEFAULT '1' COMMENT '禁用/启用 1：启用、0：禁用',
     `create_user_no` varchar(20)           DEFAULT NULL COMMENT '创建者用户编号',
     `update_user_no` varchar(20)           DEFAULT NULL COMMENT '修改者用户编号',
-    `create_time`    datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`    datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `create_date`    datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
+    `update_date`    datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日期',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COMMENT='角色配置表';
 

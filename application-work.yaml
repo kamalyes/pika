@@ -42,8 +42,9 @@ email:
   password: "gzekixviowwvbhha"
   # 邮箱host
   host: "smtp.qq.com"
-  # to
-  "to": ""
+  # port
+  "port": 465
+
 
 jwt:
   secret_key: "cvaEjaD2qcMgAtX9uLLHQnZHaD7pxt9wS3nmCcrCfXVwz6csBQn27Y8S5Q9"

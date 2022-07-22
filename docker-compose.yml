@@ -1,0 +1,12 @@
+version: "3.3"
+services:
+  pika:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command:
+      - /bin/bash
+      - -c
+      - |
+        alembic upgrade head
+        uvicorn app.Application:app --host 0.0.0.0 --port 7780 --reload
