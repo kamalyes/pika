@@ -9,20 +9,21 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
+from typing import Optional
 
-from pydantic import BaseModel
+from fastapi import Body
 
+from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.schema.base import BaseQuerySchema, BaseQueryTypeSchema, BaseBatchDelIdsSchema, BaseLargeEditSchema
 
 
 # 敏感词
-class SensitiveWordGlobalSchema(BaseModel):
+class SensitiveWordGlobalSchema(BaseLargeEditSchema):
+    name: Optional[str] = Body(..., max_length=ByteSizeEnum.LENGTH_64, title="名词")
+    genre: Optional[int] = Body(0,  title="类型")
+
     class Config:
         orm_mode = True
-
-
-class SensitiveWordGlobalSchema(SensitiveWordGlobalSchema):
-    pass
 
 
 class DelSensitiveWordSchema(BaseBatchDelIdsSchema):

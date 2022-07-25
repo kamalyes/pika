@@ -368,7 +368,7 @@ async def record_requests(request: Request, _=Depends(Permission())):
     return PikaResponse.success(message="停止成功，快去生成用例吧~")
 
 
-@router.get("/record/list", summary="获取录制数据")
+@router.get("/record/list", summary="获取录制数据列表")
 async def list_record_data(request: Request, _=Depends(Permission())):
     record = await RedisHelper.get_address_record(request.client.host)
     status = False
