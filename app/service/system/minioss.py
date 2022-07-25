@@ -21,8 +21,8 @@ async def create_oss_file(filepath: str, file: UploadFile = File(...),
         # oss上传 WARNING: 可能存在数据不同步的问题，oss成功本地失败
         file_url, file_size = await client.create_file(filepath, file_content)
         # 本地数据也要备份一份
-        model = OssFileModel(user_info['emp_no'], filepath, file_url,
-                             OssFileModel.get_size(file_size))
+        model = OssFileModel(operator=user_info['emp_no'], file_path=filepath, view_url=file_url,
+                             file_size=OssFileModel.get_size(file_size))
         record = await PikaOssDao.query_record(file_path=filepath, delete_flag=False)
         if record is not None:
             record.file_path = filepath

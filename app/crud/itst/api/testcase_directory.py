@@ -52,7 +52,7 @@ class ApiTestCaseDirectoryDao(object):
             raise Exception(f"获取用例目录失败, error: {e}")
 
     @staticmethod
-    async def insert_directory(form: ApiTestCaseDirectorySchema, operator_emp_no: int):
+    async def insert_directory(form: ApiTestCaseDirectorySchema, operator: int):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -64,13 +64,13 @@ class ApiTestCaseDirectoryDao(object):
                     result = await session.execute(sql)
                     if result.scalars().first() is not None:
                         raise Exception("目录已存在")
-                    session.add(ApiTestCaseDirectoryModel(form, operator_emp_no))
+                    session.add(ApiTestCaseDirectoryModel(form, operator))
         except Exception as e:
             ApiTestCaseDirectoryDao.log.error(f"创建目录失败, error: {e}")
             raise Exception(f"创建目录失败: {e}")
 
     @staticmethod
-    async def update_directory(form: ApiTestCaseDirectorySchema, operator_emp_no: int):
+    async def update_directory(form: ApiTestCaseDirectorySchema, operator: int):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -82,14 +82,14 @@ class ApiTestCaseDirectoryDao(object):
                     if query is None:
                         raise Exception("目录不存在")
                     query.name = form.name
-                    query.update_user = operator_emp_no
+                    query.update_user = operator
                     query.update_date = datetime.now()
         except Exception as e:
             ApiTestCaseDirectoryDao.log.error(f"更新目录失败, error: {e}")
             raise Exception(f"更新目录失败: {e}")
 
     @staticmethod
-    async def delete_directory(id: int, operator_emp_no: int):
+    async def delete_directory(id: int, operator: int):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -102,7 +102,7 @@ class ApiTestCaseDirectoryDao(object):
                         raise Exception("目录不存在")
                     query.delete_date = Moment.get_now_time()
                     query.delete_flag = 1
-                    query.update_emp_no = operator_emp_no
+                    query.update_emp_no = operator
         except Exception as e:
             ApiTestCaseDirectoryDao.log.error(f"删除目录失败, error: {e}")
             raise Exception(f"删除目录失败: {e}")

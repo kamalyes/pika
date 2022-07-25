@@ -32,13 +32,12 @@ async def list_test_plan(page: int, size: int, project_id: int = None, name: str
                          operator: str = None, follow: bool = None,
                          escarole=Depends(Permission(escarole=True))):
     try:
-        operator_emp_no, operator_identity = escarole
+        operator, operator_identity = escarole
         data, total = await ApiTestPlanDao.list_test_plan(page, size, project_id=project_id,
                                                           name=name,
                                                           follow=follow, priority=priority,
                                                           operator_identity=operator_identity,
-                                                          operator=operator,
-                                                          operator_emp_no=operator_emp_no)
+                                                          operator=operator)
 
         ans = Scheduler.list_test_plan(data)
         return PikaResponse.success_with_size(data=ans, total=total)
@@ -71,7 +70,7 @@ async def update_test_plan(form: ApiTestPlanSchema, user_info=Depends(Permission
 async def delete_test_plan(id: int, user_info=Depends(Permission(RoleEnum.MANAGER)),
                            session=Depends(async_db_session)):
     try:
-        await ApiTestPlanDao.delete_record_by_id(session, user_info['emp_no'], id)
+        await ApiTestPlanDao.delete_record_by_id(session=session, operator=user_info['emp_no'], value=id)
         Scheduler.remove(id)
     except JobLookupError:
         # 说明没找到job

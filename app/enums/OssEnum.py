@@ -9,9 +9,10 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
+from enum import Enum
 
 
-class MiniOssTypeEnum:
+class MiniOssTypeEnum(Enum):
     ALIYUN = "aliyun"
     GITEE = "gitee"
     QINIU = "qiniu"

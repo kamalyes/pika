@@ -38,7 +38,7 @@ async def save_or_update_menus(request: EditMenuSchema,
                                # user_info=Depends(Permission())
                                ):
     try:
-        await MenuDao.save_or_update_menus(request=request, operator_emp_no="ha758P")
+        await MenuDao.save_or_update_menus(request=request, operator="ha758P")
     except Exception as exc:
         return PikaResponse.failed(detail=f"{exc}")
     return PikaResponse.success()

@@ -90,26 +90,26 @@ class ApiTestCaseDao(PikaMapper):
         return len(data)
 
     @staticmethod
-    async def _insert(session, case_id: int, operator_emp_no: str, form: TestCaseInfo, **fields: tuple):
+    async def _insert(session, case_id: int, operator: str, form: TestCaseInfo, **fields: tuple):
         for field, model_info in fields.items():
             md, model = model_info
             field_data = getattr(form, field)
             for f in field_data:
                 if hasattr(f, "case_id"):
                     setattr(f, "case_id", case_id)
-                    data = model(**f.dict(), operator=operator_emp_no)
+                    data = model(**f.dict(), operator=operator)
                 else:
-                    data = model(**f.dict(), operator=operator_emp_no, case_id=case_id)
+                    data = model(**f.dict(), operator=operator, case_id=case_id)
                 await md.insert_record(data, ss=session)
 
     @staticmethod
-    async def insert_test_case(session, data: TestCaseInfo, operator_emp_no: str) -> ApiTestCaseModel:
+    async def insert_test_case(session, data: TestCaseInfo, operator: str) -> ApiTestCaseModel:
         """
         测试数据和用户id
         Args:
             data: 测试用例数据
             session: 异步session
-            operator_emp_no: 创建人
+            operator: 创建人
 
         Returns:
 
@@ -120,12 +120,12 @@ class ApiTestCaseDao(PikaMapper):
                                            ApiTestCaseModel.delete_flag is False))
         if query.scalars().first() is not None:
             raise Exception("用例名称已存在")
-        cs = ApiTestCaseModel(**data.case.dict(), operator=operator_emp_no)
+        cs = ApiTestCaseModel(**data.case.dict(), operator=operator)
         # 添加case，之后添加其他数据
         session.add(cs)
         await session.flush()
         session.expunge(cs)
-        await ApiTestCaseDao._insert(session, cs.id, operator_emp_no, data,
+        await ApiTestCaseDao._insert(session, cs.id, operator, data,
                                      constructor=(ConstructorDao, ConstructorModel),
                                      asserts=(ApiTestCaseAssertsDao, ApiTestCaseAssertsModel),
                                      out_parameters=(
@@ -135,12 +135,12 @@ class ApiTestCaseDao(PikaMapper):
         return cs
 
     @classmethod
-    async def update_test_case(cls, test_case: TestCaseSchema, operator_emp_no: str) -> ApiTestCaseModel:
+    async def update_test_case(cls, test_case: TestCaseSchema, operator: str) -> ApiTestCaseModel:
         """
         更新测试用例
         Args:
             test_case: 测试用例
-            operator_emp_no:    修改者员工编号
+            operator:    修改者员工编号
 
         Returns:
 
@@ -154,7 +154,7 @@ class ApiTestCaseDao(PikaMapper):
                     data = query.scalars().first()
                     if data is None:
                         raise Exception("用例不存在")
-                    DatabaseHelper.update_model(data, test_case, operator_emp_no)
+                    DatabaseHelper.update_model(data, test_case, operator)
                     await session.flush()
                     # 释放你的sql数据
                     session.expunge(data)
@@ -441,14 +441,14 @@ class ApiTestCaseDao(PikaMapper):
         return ans
 
     @staticmethod
-    async def query_weekly_user_case(operator_emp_no: str, start_time: datetime,
+    async def query_weekly_user_case(operator: str, start_time: datetime,
                                      end_time: datetime) -> List:
         ans = dict()
         async with async_session() as session:
             async with session.begin():
                 # date_ = func.date_format(ApiTestCaseModel.create_date, "%Y-%m-%d")
                 sql = select(ApiTestCaseModel.create_date, func.count(ApiTestCaseModel.id)).where(
-                    ApiTestCaseModel.create_emp_no == operator_emp_no,
+                    ApiTestCaseModel.create_emp_no == operator,
                     ApiTestCaseModel.delete_flag is False,
                     ApiTestCaseModel.create_date.between(start_time, end_time)).group_by(
                     ApiTestCaseModel.create_date).order_by(asc(ApiTestCaseModel.create_date))

@@ -60,7 +60,7 @@ class ApiTestCaseAssertsDao(PikaMapper):
             raise Exception(f"获取用例断言失败: {str(e)}")
 
     @staticmethod
-    async def insert_test_case_asserts(form: TestCaseAssertsForm, operator_emp_no: str):
+    async def insert_test_case_asserts(form: TestCaseAssertsForm, operator: str):
         try:
             ans = None
             async with async_session() as session:
@@ -73,7 +73,7 @@ class ApiTestCaseAssertsDao(PikaMapper):
                     data = result.scalars().first()
                     if data is not None:
                         raise Exception("断言信息已存在, 请检查")
-                    new_assert = ApiTestCaseAssertsModel(**form.dict(), operator=operator_emp_no)
+                    new_assert = ApiTestCaseAssertsModel(**form.dict(), operator=operator)
                     session.add(new_assert)
                     # TODO bug：Could not refresh instance '<ApiTestCaseAssertsModel at 0x155e8af9be0>
                     await session.flush()
@@ -87,12 +87,12 @@ class ApiTestCaseAssertsDao(PikaMapper):
 
     @classmethod
     async def update_test_case_asserts(cls, form: TestCaseAssertsForm,
-                                       operator_emp_no: str) -> ApiTestCaseAssertsModel:
+                                       operator: str) -> ApiTestCaseAssertsModel:
         """
         更新用例断言
         Args:
             form:
-            operator_emp_no:
+            operator:
 
         Returns:
 
@@ -107,7 +107,7 @@ class ApiTestCaseAssertsDao(PikaMapper):
                     data = result.scalars().first()
                     if data is None:
                         raise Exception("断言信息不存在, 请检查")
-                    DatabaseHelper.update_model(data, form, operator_emp_no)
+                    DatabaseHelper.update_model(data, form, operator)
                     await session.flush()
                     session.expunge(data)
                     return data
@@ -116,7 +116,7 @@ class ApiTestCaseAssertsDao(PikaMapper):
             raise Exception(f"编辑用例断言失败, {e}")
 
     @classmethod
-    async def delete_test_case_asserts(cls, id: int, operator_emp_no: str) -> None:
+    async def delete_test_case_asserts(cls, id: int, operator: str) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -126,7 +126,7 @@ class ApiTestCaseAssertsDao(PikaMapper):
                     data = result.scalars().first()
                     if data is None:
                         raise Exception("断言信息不存在, 请检查")
-                    DatabaseHelper.delete_model(data, operator_emp_no)
+                    DatabaseHelper.delete_model(data, operator)
         except Exception as e:
             cls.log.error(f"编辑用例断言失败, error: {e}")
             raise Exception(f"编辑用例断言失败, {e}")

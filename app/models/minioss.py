@@ -21,19 +21,18 @@ units = (
 
 
 class OssFileModel(LargeBaseModel):
-    # 因为没有目录的概念，都是目录+文件名
-    file_path = Column(String(ByteSizeEnum.LENGTH_64), nullable=False, index=True, comment="文件路径")
-    view_url = Column(String(ByteSizeEnum.LENGTH_256), nullable=False, comment="文件预览url")
-    file_size = Column(String(ByteSizeEnum.LENGTH_16), comment="文件大小")
-
     __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_oss_file"
     __table_args__ = (
         UniqueConstraint('file_path'),
         {"comment": "oss文件映射表"}
     )
+    # 因为没有目录的概念，都是目录+文件名
+    file_path = Column(String(ByteSizeEnum.LENGTH_64), nullable=False, index=True, comment="文件路径")
+    view_url = Column(String(ByteSizeEnum.LENGTH_256), nullable=False, comment="文件预览url")
+    file_size = Column(String(ByteSizeEnum.LENGTH_16), comment="文件大小")
 
-    def __init__(self, user, file_path, view_url, file_size, id=None):
-        super().__init__(user, id)
+    def __init__(self, operator, file_path, view_url, file_size, id=None):
+        super().__init__(id, operator)
         self.file_path = file_path
         self.view_url = view_url
         self.file_size = file_size

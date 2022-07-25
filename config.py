@@ -67,11 +67,7 @@ class PikaAppConfig(object):
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     RELATION = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_relation"
-    ALIAS = "__alias__"
     TABLE_TAG = "__table_args__"
-    # 数据库表展示的变更字段
-    FIELD = "__fields__"
-    SHOW_FIELD = "__show__"
     IGNORE_FIELDS = (
         "create_date",
         "update_date",

@@ -41,7 +41,7 @@ class RoleDao:
         return await AsyncDbSession.query(db, do_sql)
 
     @staticmethod
-    async def save_or_update(request: Any, operator_emp_no) -> "RoleModel":
+    async def save_or_update(request: Any, operator) -> "RoleModel":
         try:
             id = request.id
             name = request.name
@@ -56,7 +56,7 @@ class RoleDao:
                     if menus:
                         request.menus = ','.join(list(map(str, menus)))
                     update_role_info_sql = update(RoleModel) \
-                        .where(RoleModel.id == id).values(**request.__dict__, operator=operator_emp_no)
+                        .where(RoleModel.id == id).values(**request.__dict__, operator=operator)
                     await session.execute(update_role_info_sql)
         except ValueError as err:
             err_msg = f"更新/写入失败，错误原因：{err}"

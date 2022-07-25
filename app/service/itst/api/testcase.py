@@ -73,16 +73,15 @@ async def update_testcase(form: TestCaseSchema, user_info=Depends(Permission()))
 @router.delete("/delete", summary="删除测试用例")
 async def delete_testcase(id_list: List[int], user_info=Depends(Permission()),
                           session=Depends(async_db_session)):
+    operator = user_info['emp_no']
     try:
-        # 删除case
         async with session.begin():
-            await ApiTestCaseDao.delete_records(session, user_info['emp_no'], id_list)
-            # 删除断言
-            await ApiTestCaseAssertsDao.delete_records(session, user_info['emp_no'], id_list,
-                                                       column="case_id")
-            # 删除测试数据
-            await ApiTestCaseDataDao.delete_records(session, user_info['emp_no'], id_list,
-                                                    column="case_id")
+            await ApiTestCaseDao.delete_records(session, user_info['emp_no'], id_list, title="删除case")
+            await ApiTestCaseAssertsDao.delete_records(session=session, operator=operator,
+                                                       id_list=id_list,
+                                                       column="case_id", title="删除断言")
+            await ApiTestCaseDataDao.delete_records(session=session, operator=operator, id_list=id_list,
+                                                    column="case_id", title="删除测试数据")
             return PikaResponse.success()
     except Exception as e:
         return PikaResponse.failed(detail=str(e))
@@ -100,7 +99,7 @@ async def query_testcase(caseId: int, _=Depends(Permission())):
 @router.post("/asserts/insert", summary="增加用例断言")
 async def insert_testcase_asserts(data: TestCaseAssertsForm, user_info=Depends(Permission())):
     try:
-        new_assert = await ApiTestCaseAssertsDao.insert_test_case_asserts(data, operator_emp_no=user_info["emp_no"])
+        new_assert = await ApiTestCaseAssertsDao.insert_test_case_asserts(data, operator=user_info["emp_no"])
         return PikaResponse.success(data=new_assert)
     except Exception as e:
         return PikaResponse.failed(detail=str(e))
@@ -109,7 +108,7 @@ async def insert_testcase_asserts(data: TestCaseAssertsForm, user_info=Depends(P
 @router.post("/asserts/update", summary="更新用例断言")
 async def insert_testcase_asserts(data: TestCaseAssertsForm, user_info=Depends(Permission())):
     try:
-        updated = await ApiTestCaseAssertsDao.update_test_case_asserts(data, operator_emp_no=user_info["emp_no"])
+        updated = await ApiTestCaseAssertsDao.update_test_case_asserts(data, operator=user_info["emp_no"])
         return PikaResponse.success(data=updated)
     except Exception as e:
         return PikaResponse.failed(detail=str(e))
@@ -117,25 +116,25 @@ async def insert_testcase_asserts(data: TestCaseAssertsForm, user_info=Depends(P
 
 @router.get("/asserts/delete", summary="删除用例断言")
 async def delete_test_case_asserts(id: int, user_info=Depends(Permission())):
-    await ApiTestCaseAssertsDao.delete_test_case_asserts(id, operator_emp_no=user_info["emp_no"])
+    await ApiTestCaseAssertsDao.delete_test_case_asserts(id, operator=user_info["emp_no"])
     return PikaResponse.success()
 
 
 @router.post("/constructor/insert", summary="增加前置条件")
 async def insert_constructor(data: ConstructorSchema, user_info=Depends(Permission())):
-    await ConstructorDao.insert_constructor(data, operator_emp_no=user_info["emp_no"])
+    await ConstructorDao.insert_constructor(data, operator=user_info["emp_no"])
     return PikaResponse.success()
 
 
 @router.post("/constructor/update", summary="更新前置条件")
 async def update_constructor(data: ConstructorSchema, user_info=Depends(Permission())):
-    await ConstructorDao.update_constructor(data, operator_emp_no=user_info["emp_no"])
+    await ConstructorDao.update_constructor(data, operator=user_info["emp_no"])
     return PikaResponse.success()
 
 
 @router.get("/constructor/delete", summary="删除前置条件")
 async def update_constructor(id: int, user_info=Depends(Permission())):
-    await ConstructorDao.delete_constructor(id, operator_emp_no=user_info["emp_no"])
+    await ConstructorDao.delete_constructor(id, operator=user_info["emp_no"])
     return PikaResponse.success()
 
 
@@ -240,10 +239,10 @@ async def get_directory_and_case(project_id: int, user_info=Depends(Permission()
 
 @router.get("/directory/query", summary="查询测试用例类目")
 async def query_testcase_directory(directory_id: int, escarole=Depends(Permission(escarole=True))):
-    operator_emp_no, operator_identity = escarole
+    operator, operator_identity = escarole
     try:
         data = await ApiTestCaseDirectoryDao.query_directory(directory_id)
-        await ProjectRoleDao.read_permission(data.project_id, operator_emp_no, operator_identity)
+        await ProjectRoleDao.read_permission(data.project_id, operator, operator_identity)
         return PikaResponse.success(data=data)
     except AuthException:
         return PikaResponse.forbidden()
@@ -311,9 +310,9 @@ async def delete_testcase_data(id: int, user_info=Depends(Permission())):
 async def move_testcase(form: MoveApiTestCaseSchema, escarole=Depends(Permission(escarole=True))):
     try:
         # 判断是否有移动case的权限
-        operator_emp_no, operator_identity = escarole
-        await ProjectRoleDao.read_permission(form.project_id, operator_emp_no, operator_identity)
-        await ApiTestCaseDao.update_by_map(operator_emp_no,
+        operator, operator_identity = escarole
+        await ProjectRoleDao.read_permission(form.project_id, operator, operator_identity)
+        await ApiTestCaseDao.update_by_map(operator,
                                            ApiTestCaseModel.id.in_(form.id_list),
                                            directory_id=form.directory_id)
         return PikaResponse.success()
@@ -345,14 +344,15 @@ async def update_batch_testcase_out_parameters(case_id: int,
 @router.post("/parameters/update", summary="更新出参数据")
 async def update_testcase_out_parameters(form: ApiTestCaseOutParametersSchema,
                                          user_info=Depends(Permission())):
-    data = await ApiTestCaseOutParametersDao.update_record_by_id(user_info['emp_no'], form)
+    data = await ApiTestCaseOutParametersDao.update_record_by_id(operator=user_info['emp_no'], model=form)
     return PikaResponse.success(data=data)
 
 
 @router.get("/parameters/delete", summary="删除出参数据")
 async def delete_testcase_out_parameters(id: int, user_info=Depends(Permission()),
                                          session=Depends(async_db_session)):
-    await ApiTestCaseOutParametersDao.delete_record_by_id(session, user_info['emp_no'], id, log=False)
+    await ApiTestCaseOutParametersDao.delete_record_by_id(session=session, operator=user_info['emp_no'],
+                                                          value=id, log=False)
     return PikaResponse.success()
 
 

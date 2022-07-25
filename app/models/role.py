@@ -26,7 +26,7 @@ class RoleModel(TimestampBaseModel):
     status = Column(Integer, server_default='10', nullable=True, comment='状态 10 启用 20 禁用')
     description = Column(String(ByteSizeEnum.LENGTH_600), default=None, comment="备注信息")
 
-    def __init__(self, id=0, name=None, role_type=None, menus=None, status=None, description=None, operator=None):
+    def __init__(self, id=None, name=None, role_type=None, menus=None, status=None, description=None, operator=None):
         super().__init__(operator)
         self.id = id
         self.name = name

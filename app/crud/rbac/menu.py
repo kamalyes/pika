@@ -40,7 +40,7 @@ class MenuDao:
         return await AsyncDbSession.query(db, do_sql)
 
     @staticmethod
-    async def insert_menu(request: Any, operator_emp_no: str, is_parent=False) -> "MenuModel":
+    async def insert_menu(request: Any, operator: str, is_parent=False) -> "MenuModel":
         menu_id = request.id
         menu_name = request.name
         menu_title = request.title
@@ -69,17 +69,17 @@ class MenuDao:
                             raise ValueError('菜单名已存在！')
                         elif ex_menu_index.title == menu_title:
                             raise ValueError("title已存在！")
-                        result = MenuModel(**request.dict(), operator=operator_emp_no)
+                        result = MenuModel(**request.dict(), operator=operator)
                         session.add(result)
                         await session.flush()
                     else:
                         delattr(request, "id")
                         update_sql = update(MenuModel).where(MenuModel.id == menu_id). \
-                            values(**request.dict(), create_emp_no=str(operator_emp_no))
+                            values(**request.dict(), create_emp_no=str(operator))
                         await session.execute(update_sql)
 
     @staticmethod
-    async def save_or_update_menus(request: Any, operator_emp_no: str):
+    async def save_or_update_menus(request: Any, operator: str):
         menu_parent_id = request.id
         try:
             menu_children = request.children
@@ -87,10 +87,10 @@ class MenuDao:
             menu_children = []
         if menu_parent_id in (0, None) and len(menu_children) > 0:
             raise ValueError(f"数据格式错误、有children、但父id=={menu_parent_id}")
-        await MenuDao.insert_menu(request, operator_emp_no, True)
+        await MenuDao.insert_menu(request, operator, True)
         if len(menu_children) > 0:
             for index in menu_children:
-                await MenuDao.insert_menu(index, operator_emp_no)
+                await MenuDao.insert_menu(index, operator)
 
     @staticmethod
     async def deleted(id: int):

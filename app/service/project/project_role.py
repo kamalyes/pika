@@ -23,15 +23,15 @@ router = APIRouter()
 @router.post("/role/insert", summary="添加项目成员")
 async def insert_project_role(role: ProjectRoleSchema, escarole=Depends(Permission())):
     try:
-        operator_emp_no, operator_identity = escarole
+        operator, operator_identity = escarole
         query = await ProjectRoleDao.query_record(emp_no=role.emp_no, project_id=role.project_id)
         if query is not None:
             raise Exception("该用户已存在")
         await ProjectRoleDao.has_permission(project_id=role.project_id,
                                             project_role=role.project_role,
-                                            operator_emp_no=operator_emp_no,
+                                            operator=operator,
                                             operator_identity=operator_identity)
-        model = ProjectRoleModel(**role.dict(), operator=operator_emp_no)
+        model = ProjectRoleModel(**role.dict(), operator=operator)
         await ProjectRoleDao.insert_record(model, True)
     except Exception as e:
         return PikaResponse.failed(detail=str(e))
@@ -40,13 +40,13 @@ async def insert_project_role(role: ProjectRoleSchema, escarole=Depends(Permissi
 
 @router.post("/role/update", summary="更新项目成员")
 async def update_project_role(prole: ProjectRoleEditSchema, escarole=Depends(Permission())):
-    operator_emp_no, operator_identity = escarole
-    await ProjectRoleDao.update_project_role(prole, operator_emp_no, operator_identity)
+    operator, operator_identity = escarole
+    await ProjectRoleDao.update_project_role(prole, operator, operator_identity)
     return PikaResponse.success()
 
 
 @router.post("/role/delete", summary="删除项目成员")
 async def delete_project_role(prole: ProjectDelSchema, escarole=Depends(Permission(escarole=True))):
-    operator_emp_no, operator_identity = escarole
-    await ProjectRoleDao.delete_project_role(prole.id, operator_emp_no, operator_identity)
+    operator, operator_identity = escarole
+    await ProjectRoleDao.delete_project_role(prole.id, operator, operator_identity)
     return PikaResponse.success()

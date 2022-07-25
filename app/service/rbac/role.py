@@ -35,7 +35,7 @@ async def query_encrypt_issue(request: QueryRoleInSchema = Depends(),
 @router.post('/role/edit', summary="新增或更新角色")
 async def save_or_update(request: EditRoleSchema, user_info=Depends(Permission())):
     try:
-        await RoleDao.save_or_update(request=request, operator_emp_no=user_info["emp_no"])
+        await RoleDao.save_or_update(request=request, operator=user_info["emp_no"])
     except Exception as err:
         return PikaResponse.failed(detail=str(err))
     return PikaResponse.success()

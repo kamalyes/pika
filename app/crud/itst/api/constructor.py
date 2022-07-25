@@ -48,7 +48,7 @@ class ConstructorDao(PikaMapper):
             raise Exception(f"获取初始化数据失败, {e}")
 
     @staticmethod
-    async def insert_constructor(data: ConstructorSchema, operator_emp_no: str) -> None:
+    async def insert_constructor(data: ConstructorSchema, operator: str) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -58,7 +58,7 @@ class ConstructorDao(PikaMapper):
                     result = await session.execute(sql)
                     if result.scalars().first() is not None:
                         raise Exception(f"{data.name}已存在")
-                    constructor = ConstructorModel(**data.dict(), operator=operator_emp_no)
+                    constructor = ConstructorModel(**data.dict(), operator=operator)
                     constructor.index = await constructor.get_index(session, data.case_id)
                     session.add(constructor)
         except Exception as e:
@@ -66,12 +66,12 @@ class ConstructorDao(PikaMapper):
             raise Exception(f"新增前/后置条件失败, {e}")
 
     @staticmethod
-    async def update_constructor(data: ConstructorSchema, operator_emp_no: str) -> None:
+    async def update_constructor(data: ConstructorSchema, operator: str) -> None:
         """
         更新前后置条件
         Args:
             data:
-            operator_emp_no:
+            operator:
 
         Returns:
 
@@ -84,18 +84,18 @@ class ConstructorDao(PikaMapper):
                     query = result.scalars().first()
                     if query is None:
                         raise Exception(f"{data.name}不存在")
-                    DatabaseHelper.update_model(query, data, operator_emp_no)
+                    DatabaseHelper.update_model(query, data, operator)
         except Exception as e:
             ConstructorDao.log.error(f"编辑前后置条件: {data.name}失败, {e}")
             raise Exception(f"编辑前后置条件失败, {e}")
 
     @classmethod
-    async def delete_constructor(cls, id: int, operator_emp_no: str) -> None:
+    async def delete_constructor(cls, id: int, operator: str) -> None:
         """
         删除前后置条件
         Args:
             id:
-            operator_emp_no:
+            operator:
 
         Returns:
 
@@ -108,7 +108,7 @@ class ConstructorDao(PikaMapper):
                     query = result.scalars().first()
                     if query is None:
                         raise Exception(f"前后置条件{id}不存在")
-                    DatabaseHelper.delete_model(query, operator_emp_no)
+                    DatabaseHelper.delete_model(query, operator)
         except Exception as e:
             cls.log.error(f"删除前后置条件: {id}失败, {e}")
             raise Exception(f"删除前后置条件失败, {e}")

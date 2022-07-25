@@ -32,13 +32,17 @@ async def insert_gateway(form: PikaGatewaySchema, user_info=Depends(Permission(R
 @router.delete("/gateway/delete", summary="删除请求地址")
 async def delete_gateway(id: int, user_info=Depends(Permission(RoleEnum.MANAGER)),
                          session=Depends(async_db_session)):
-    await GatewayDao.delete_record_by_id(session, user_info['emp_no'], id)
+    await GatewayDao.delete_record_by_id(session=session,
+                                         operator=user_info['emp_no'],
+                                         value=id)
     return PikaResponse.success()
 
 
 @router.post("/gateway/update", summary="编辑请求地址")
 async def insert_gateway(form: PikaGatewaySchema, user_info=Depends(Permission(RoleEnum.MANAGER))):
-    model = await GatewayDao.update_record_by_id(user_info['emp_no'], form, True, log=True)
+    model = await GatewayDao.update_record_by_id(operator=user_info['emp_no'],
+                                                 model=form, not_null=True,
+                                                 log=True)
     return PikaResponse.success(data=model)
 
 

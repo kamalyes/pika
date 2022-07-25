@@ -25,23 +25,24 @@ router = APIRouter()
 
 @router.post("/insert", summary="增加项目")
 async def insert_project(data: ProjectSchema, escarole=Depends(Permission(RoleEnum.MANAGER, True))):
-    operator_emp_no, operator_identity = escarole
-    await ProjectDao.add_project(operator_emp_no=operator_emp_no, **data.dict())
+    operator, operator_identity = escarole
+    await ProjectDao.add_project(operator=operator, **data.dict())
     return PikaResponse.success()
 
 
 @router.delete("/delete", summary="删除项目")
 async def query_project(project_id: int, escarole=Depends(Permission(RoleEnum.MANAGER, True)),
                         session=Depends(async_db_session)):
-    operator_emp_no, operator_identity = escarole
+    operator, operator_identity = escarole
     try:
         async with session.begin():
             # 事务开始
-            owner = await ProjectDao.is_project_admin(session, project_id, operator_emp_no)
+            owner = await ProjectDao.is_project_admin(session, project_id, operator)
             if not owner and operator_identity != RoleEnum.ADMIN:
                 return PikaResponse.forbidden()
-            await ProjectDao.delete_record_by_id(session, operator_emp_no, project_id, session_begin=True)
-            await ApiTestPlanDao.delete_record_by_id(session, operator_emp_no, project_id,
+            await ProjectDao.delete_record_by_id(session, operator, project_id, session_begin=True)
+            await ApiTestPlanDao.delete_record_by_id(session=session, operator=operator,
+                                                     project_id=project_id,
                                                      key="project_id",
                                                      exists=False, session_begin=True)
         return PikaResponse.success()
@@ -51,18 +52,20 @@ async def query_project(project_id: int, escarole=Depends(Permission(RoleEnum.MA
 
 @router.post("/update", summary="更新项目")
 async def update_project(data: ProjectEditSchema, escarole=Depends(Permission(escarole=True))):
-    operator_emp_no, operator_identity = escarole
-    await ProjectDao.update_project(operator_emp_no=operator_emp_no, operator_identity=operator_identity, **data.dict())
+    operator, operator_identity = escarole
+    await ProjectDao.update_project(operator=operator,
+                                    operator_identity=operator_identity,
+                                    **data.dict())
     return PikaResponse.success()
 
 
 @router.get("/query", summary="查询项目")
 async def query_project(project_id: int, escarole=Depends(Permission(escarole=True))):
     try:
-        operator_emp_no, operator_identity = escarole
+        operator, operator_identity = escarole
         result = dict()
         data, roles = await ProjectDao.query_project(project_id)
-        await ProjectRoleDao.access(operator_emp_no, operator_identity, roles, data)
+        await ProjectRoleDao.access(operator, operator_identity, roles, data)
         result.update({"project": data, "roles": roles})
         return PikaResponse.success(data=result)
     except Exception as e:
@@ -72,8 +75,8 @@ async def query_project(project_id: int, escarole=Depends(Permission(escarole=Tr
 @router.get("/list", summary="查询/获取项目列表")
 async def list_project(page: int = 1, size: int = 8, name: str = "",
                        escarole=Depends(Permission(escarole=True))):
-    operator_emp_no, operator_identity = escarole
-    result, total = await ProjectDao.list_project(operator_emp_no, operator_identity, page, size, name)
+    operator, operator_identity = escarole
+    result, total = await ProjectDao.list_project(operator, operator_identity, page, size, name)
     return PikaResponse.success_with_size(data=result, total=total)
 
 
@@ -81,13 +84,13 @@ async def list_project(page: int = 1, size: int = 8, name: str = "",
 async def update_project_avatar(project_id: int, file: UploadFile = File(...),
                                 escarole=Depends(Permission(escarole=True))):
     try:
-        operator_emp_no, operator_identity = escarole
+        operator, operator_identity = escarole
         file_content = await file.read()
         suffix = file.filename.split(".")[-1]
         filepath = f"project_{project_id}.{suffix}"
         client = OssClient.get_oss_client()
         file_url, _ = await client.create_file(filepath, file_content, base_path="avatar")
-        await ProjectDao.update_avatar(project_id, operator_emp_no, operator_identity, file_url)
+        await ProjectDao.update_avatar(project_id, operator, operator_identity, file_url)
         return PikaResponse.success(data=file_url)
     except Exception as e:
         return PikaResponse.failed(detail=str(e))

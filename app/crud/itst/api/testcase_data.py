@@ -26,7 +26,7 @@ from app.utils.decorator import dao
 class ApiTestCaseDataDao(PikaMapper):
 
     @classmethod
-    async def insert_testcase_data(cls, form: ApiTestCaseDataSchema, operator_emp_no: str):
+    async def insert_testcase_data(cls, form: ApiTestCaseDataSchema, operator: str):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -39,7 +39,7 @@ class ApiTestCaseDataDao(PikaMapper):
                     query = result.scalars().first()
                     if query is not None:
                         raise Exception("该数据已存在, 请重新编辑")
-                    data = ApiTestCaseDataModel(**form.dict(), operator=operator_emp_no)
+                    data = ApiTestCaseDataModel(**form.dict(), operator=operator)
                     session.add(data)
                     await session.flush()
                     await session.refresh(data)
@@ -50,7 +50,7 @@ class ApiTestCaseDataDao(PikaMapper):
             raise Exception(f"新增测试数据失败, {str(e)}")
 
     @classmethod
-    async def update_testcase_data(cls, form: ApiTestCaseDataSchema, operator_emp_no: int):
+    async def update_testcase_data(cls, form: ApiTestCaseDataSchema, operator: int):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -60,7 +60,7 @@ class ApiTestCaseDataDao(PikaMapper):
                     query = result.scalars().first()
                     if query is None:
                         raise Exception("测试数据不存在")
-                    DatabaseHelper.update_model(query, form, operator_emp_no)
+                    DatabaseHelper.update_model(query, form, operator)
                     await session.flush()
                     session.expunge(query)
                     return query
@@ -69,7 +69,7 @@ class ApiTestCaseDataDao(PikaMapper):
             raise Exception(f"编辑测试数据失败, {str(e)}")
 
     @classmethod
-    async def delete_testcase_data(cls, id: int, operator_emp_no: int):
+    async def delete_testcase_data(cls, id: int, operator: int):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -79,7 +79,7 @@ class ApiTestCaseDataDao(PikaMapper):
                     query = result.scalars().first()
                     if query is None:
                         raise Exception("测试数据不存在")
-                    DatabaseHelper.delete_model(query, operator_emp_no)
+                    DatabaseHelper.delete_model(query, operator)
         except Exception as e:
             cls.log.error(f"删除测试数据失败, error: {str(e)}")
             raise Exception(f"删除测试数据失败, {str(e)}")

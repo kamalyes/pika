@@ -9,7 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  公共基础字段
 """
-
+from datetime import datetime
 from typing import Tuple
 
 from sqlalchemy import INT, DATETIME, Column, String, BOOLEAN, text
@@ -20,7 +20,7 @@ from app.models import Base
 
 class LargeBaseModel(Base):
     id = Column(INT, primary_key=True, autoincrement=True, comment="id")
-    enabled_flag = Column(BOOLEAN, server_default="0", comment="启用标识 1：启用，0：禁用")
+    enabled_flag = Column(BOOLEAN, server_default="1", comment="启用标识 1：启用，0：禁用")
     delete_flag = Column(BOOLEAN, server_default="0", comment="删除标识 1：已删除，0：未删除")
     create_emp_no = Column(String(ByteSizeEnum.LENGTH_16), comment="创建者emp_no")
     update_emp_no = Column(String(ByteSizeEnum.LENGTH_16), comment="修改者emp_no")
@@ -39,10 +39,6 @@ class LargeBaseModel(Base):
     delete_date = Column(DATETIME, nullable=True, comment="删除时间")
     description = Column(String(ByteSizeEnum.LENGTH_600), default=None, comment="备注信息")
     __abstract__ = True
-    __fields__: Tuple[Column] = [id]
-    __tag__ = "未定义"
-    __alias__ = dict(name="名称")
-    __show__ = 1
 
     def __init__(self, id=None, operator=None, description=None, delete_date=None, enabled_flag=True,
                  delete_flag=False):
@@ -74,10 +70,6 @@ class NormBaseModel(Base):
         comment="修改时间",
     )
     __abstract__ = True
-    __fields__: Tuple[Column] = [id]
-    __tag__ = "未定义"
-    __alias__ = dict(name="名称")
-    __show__ = 1
 
     def __init__(self, id=None, description=None, operator=None):
         self.id = id
@@ -102,10 +94,6 @@ class TimestampBaseModel(Base):
         comment="修改时间",
     )
     __abstract__ = True
-    __fields__: Tuple[Column] = [id]
-    __tag__ = "未定义"
-    __alias__ = dict(name="名称")
-    __show__ = 1
 
     def __init__(self, id=None, description=None, operator=None):
         self.id = id
@@ -120,24 +108,13 @@ class MinBaseModel(Base):
     operator = Column(String(ByteSizeEnum.LENGTH_16), comment="操作者emp_no")
     operator_date = Column(
         DATETIME,
-        nullable=False,
+        nullable=True,
         server_default=text("CURRENT_TIMESTAMP"),
         comment="创建日期",
     )
     __abstract__ = True
-    __fields__: Tuple[Column] = [id]
-    __tag__ = "未定义"
-    __alias__ = {}
-    __show__ = 1
 
-    def __init__(self, id=None, description=None, operator=None, operator_date=None):
+    def __init__(self, id=0, operator=None, description=None):
         self.id = id
         self.operator = operator
         self.description = description
-        self.operator_date = operator_date
-
-
-class RelationFieldModel(object):
-    def __init__(self, field, foreign=None):
-        self.field = field
-        self.foreign = foreign

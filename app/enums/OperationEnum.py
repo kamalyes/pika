@@ -20,6 +20,8 @@ class SqlOperationTypeEnum(IntEnum):
     ONLY_SELECT = 5
     ONLY_SELECT_AND_INSERT = 6
     ONLY_SELECT_AND_UPDATE = 7
+    ONLY_EXECUTE = 8
+    ONLY_STOP = 9
 
 
 class VerifyCodeEnum(IntEnum):

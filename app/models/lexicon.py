@@ -22,7 +22,7 @@ class SensitiveWordModel(NormBaseModel):
     name = Column(String(ByteSizeEnum.LENGTH_64), comment="名词", nullable=False)
     genre = Column(INT, server_default=0, comment="类型", nullable=False)
 
-    def __init__(self, name, operator=None, genre=0):
+    def __init__(self, name, operator, genre=0):
         super().__init__(operator)
         self.name = name
         self.genre = genre
