@@ -37,6 +37,14 @@ class CaseGenerator(object):
 
     @staticmethod
     def ignore(key: str):
+        """
+        忽略值
+        Args:
+            key:
+
+        Returns:
+
+        """
         for ig in CaseGenerator.ignored:
             if key.lower().endswith(ig.lower()):
                 return True
@@ -44,6 +52,14 @@ class CaseGenerator(object):
 
     @staticmethod
     def get_body_type(headers):
+        """
+        获取body类型
+        Args:
+            headers:
+
+        Returns:
+
+        """
         content_type = headers.get("Content-Type", "").lower()
         if "json" in content_type:
             return ReqBodyTypeEnum.json
@@ -55,6 +71,14 @@ class CaseGenerator(object):
 
     @staticmethod
     def generate_constructors(requests: List[RequestInfoSchema]) -> List[ConstructorSchema]:
+        """
+        生成构建器
+        Args:
+            requests:
+
+        Returns:
+
+        """
         constructors = []
         for r in range(len(requests) - 1):
             name = f"http请求_{r + 1}"
@@ -75,6 +99,16 @@ class CaseGenerator(object):
 
     @staticmethod
     def generate_case(directory_id: int, name: str, last: RequestInfoSchema) -> TestCaseSchema:
+        """
+        生成用例
+        Args:
+            directory_id:
+            name:
+            last:
+
+        Returns:
+
+        """
         return TestCaseSchema(directory_id=directory_id, name=name, url=last.url,
                               request_type=RequestType.http.value, body=last.body,
                               request_method=last.request_method,
@@ -108,17 +142,48 @@ class CaseGenerator(object):
 
     @staticmethod
     def replace_vars(request: RequestInfoSchema, ans: dict, replaced: list):
+        """
+        替换变量
+        Args:
+            request:
+            ans:
+            replaced:
+
+        Returns:
+
+        """
         CaseGenerator.replace_url(request, ans, replaced)
         CaseGenerator.replace_headers(request, ans, replaced)
         CaseGenerator.replace_body(request, ans, replaced)
 
     @staticmethod
     def record_vars(request: RequestInfoSchema, ans: dict, var_name: str):
-        CaseGenerator.split_headers(request, ans, f"{var_name}.response_headers")
-        CaseGenerator.split_body(request, ans, f"{var_name}.response")
+        """
+        记录变量
+        Args:
+            request:
+            ans:
+            var_name:
+
+        Returns:
+
+        """
+        CaseGenerator.analysis_headers(request, ans, f"{var_name}.response_headers")
+        CaseGenerator.analysis_body(request, ans, f"{var_name}.response")
 
     @staticmethod
     def dfs(body, path: str, ans: dict, headers: bool = False):
+        """
+
+        Args:
+            body:
+            path:
+            ans:
+            headers:
+
+        Returns:
+
+        """
         if isinstance(body, list):
             for i in range(len(body)):
                 c_path = f"{path}.{i}"
@@ -137,7 +202,17 @@ class CaseGenerator(object):
                         ans[body].append(path)
 
     @staticmethod
-    def split_body(request: RequestInfoSchema, ans: dict, var_name: str = ''):
+    def analysis_body(request: RequestInfoSchema, ans: dict, var_name: str = ''):
+        """
+        解析body
+        Args:
+            request:
+            ans:
+            var_name:
+
+        Returns:
+
+        """
         if request.body:
             try:
                 body = json.loads(request.response_content)
@@ -149,7 +224,17 @@ class CaseGenerator(object):
                 raise GenerateException(f"解析接口body变量出错: {e}")
 
     @staticmethod
-    def split_headers(request: RequestInfoSchema, ans: dict, var_name: str = ""):
+    def analysis_headers(request: RequestInfoSchema, ans: dict, var_name: str = ""):
+        """
+        解析headers
+        Args:
+            request:
+            ans:
+            var_name:
+
+        Returns:
+
+        """
         try:
             CaseGenerator.dfs(request.response_headers, var_name, ans, True)
         except Exception as e:
@@ -157,6 +242,16 @@ class CaseGenerator(object):
 
     @staticmethod
     def replace_headers(request: RequestInfoSchema, ans: dict, replaced: list):
+        """
+        替换headers
+        Args:
+            request:
+            ans:
+            replaced:
+
+        Returns:
+
+        """
         for k, v in request.request_headers.items():
             if ans.get(v):
                 request.request_headers[k] = "${%s}" % ans.get(v)[0]
@@ -164,6 +259,16 @@ class CaseGenerator(object):
 
     @staticmethod
     def replace_body(request: RequestInfoSchema, ans: dict, replaced: list):
+        """
+        替换body
+        Args:
+            request:
+            ans:
+            replaced:
+
+        Returns:
+
+        """
         if request.body:
             try:
                 data = json.loads(request.body)
@@ -180,6 +285,17 @@ class CaseGenerator(object):
 
     @staticmethod
     def dfs_replace(body, ans: dict, var_type: list, replaced: list):
+        """
+
+        Args:
+            body:
+            ans:
+            var_type:
+            replaced:
+
+        Returns:
+
+        """
         if isinstance(body, dict):
             for k, v in body.items():
                 string, value = CaseGenerator.dfs_replace(v, ans, var_type, replaced)
@@ -209,7 +325,13 @@ class CaseGenerator(object):
     def replace_url(request: RequestInfoSchema, ans: dict, replaced: list):
         """
         拆解url，将url里面的路由path和query参数
-        :return:
+        Args:
+            request:
+            ans:
+            replaced:
+
+        Returns:
+
         """
         # 获取前缀和后缀
         url_query = request.url.split("?")

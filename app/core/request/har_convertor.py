@@ -26,6 +26,15 @@ class HarConvertor(Convertor):
 
     @staticmethod
     def _convert(f, regex: str = None):
+        """
+        转换
+        Args:
+            f:
+            regex:
+
+        Returns:
+
+        """
         try:
             flag = None
             if regex is not None:

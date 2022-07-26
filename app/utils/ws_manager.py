@@ -36,6 +36,12 @@ class ConnectionManager:
     async def pusher(sender: WebSocket, message: MsgType) -> None:
         """
         根据不同的消息类型，调用不同方法发送消息
+        Args:
+            sender:
+            message:
+
+        Returns:
+
         """
         msg_mapping: dict = {
             str: sender.send_text,
@@ -51,6 +57,12 @@ class ConnectionManager:
     async def send_personal_message(self, operator: str, message: MsgType) -> None:
         """
         发送个人信息
+        Args:
+            operator:
+            message:
+
+        Returns:
+
         """
         conn = self.active_connections.get(operator)
         if conn:
@@ -59,6 +71,11 @@ class ConnectionManager:
     async def broadcast(self, message: MsgType) -> None:
         """
         广播
+        Args:
+            message:
+
+        Returns:
+
         """
         for connection in self.active_connections.values():
             await self.pusher(sender=connection, message=message)

@@ -24,7 +24,7 @@ from app.enums.SysvarEnum import PikaGlobalVarEnum
 from config import PikaAppConfig
 
 
-class EmailManger:
+class EmailManger(object):
     @staticmethod
     def sub_template(file_name, target_dict):
         """

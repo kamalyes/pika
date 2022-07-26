@@ -26,9 +26,9 @@ class PikaLogger(object):
 
     def __init__(self, name=PikaGlobalVarEnum.APP_NAME):  # Logger标识默认为app
         """
-        业务名称
+
         Args:
-            name:
+            name: 业务名称
         """
         # 如果目录不存在则创建
         if not os.path.exists(PikaAppConfig.LOG_GENERAL_DIR):

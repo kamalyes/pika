@@ -42,6 +42,15 @@ class PikaResponse:
 
     @staticmethod
     def model_to_dict(obj, *ignore: str):
+        """
+        将orm模型转换为dict
+        Args:
+            obj:
+            *ignore:
+
+        Returns:
+
+        """
         if getattr(obj, '__table__', None) is None:
             return obj
         result = dict()
@@ -58,6 +67,14 @@ class PikaResponse:
 
     @staticmethod
     def json_serialize(obj):
+        """
+        json序列化
+        Args:
+            obj:
+
+        Returns:
+
+        """
         ans = dict()
         for k, o in dict(obj).items():
             if isinstance(o, set):

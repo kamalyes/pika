@@ -5,3 +5,4 @@ __pycache__
 debug_*.py
 Virtual
 application-ignore.yaml
+.qiniu_pythonsdk_hostscache.json

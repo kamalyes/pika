@@ -7,7 +7,7 @@
 @Version :  1.0
 @Contact :  mryu168@163.com
 @License :  (C)Copyright 2022-2026
-@Desc    :  jsonpath parser
+@Desc    :  None
 """
 import re
 from typing import Any

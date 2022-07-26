@@ -1,3 +1,14 @@
+# -*- coding:utf-8 -*-
+# !/usr/bin/env python 3.9.11
+"""
+@File    :  sql_constructor.py
+@Time    :  2022/6/10 6:53 PM
+@Author  :  YuYanQing
+@Version :  1.0
+@Contact :  mryu168@163.com
+@License :  (C)Copyright 2022-2026
+@Desc    :  None
+"""
 import asyncio
 import json
 import re
@@ -90,13 +101,27 @@ class Executor(object):
     async def parse_gconfig(self, data, type_, env, *fields):
         """
         解析全局变量
+        Args:
+            data:
+            type_:
+            env:
+            *fields:
+
+        Returns:
+
         """
         for f in fields:
             await self.parse_field(data, f, GConfigTypeEnum.text(type_), env)
 
     @case_log
     def get_parser(self, key_type):
-        """获取变量解析器
+        """
+        获取变量解析器
+        Args:
+            key_type:
+
+        Returns:
+
         """
         if key_type == GConfigParserEnum.string:
             return StringGConfigParser.parse
@@ -109,6 +134,14 @@ class Executor(object):
     async def parse_field(self, data, field, name, env):
         """
         解析字段
+        Args:
+            data:
+            field:
+            name:
+            env:
+
+        Returns:
+
         """
         try:
             self.append("获取{}: [{}]字段: [{}]中的el表达式".format(name, data, field))
@@ -132,6 +165,16 @@ class Executor(object):
             raise Exception(f"查询全局变量失败, error: {str(e)}")
 
     def replace_params(self, field_name, field_origin, params: dict):
+        """
+
+        Args:
+            field_name:
+            field_origin:
+            params:
+
+        Returns:
+
+        """
         new_data = dict()
         if not isinstance(field_origin, str):
             return new_data
@@ -167,6 +210,15 @@ class Executor(object):
         return new_data
 
     async def parse_params(self, data: ApiTestCaseModel, params: dict):
+        """
+
+        Args:
+            data:
+            params:
+
+        Returns:
+
+        """
         self.append("正在替换变量")
         try:
             for c in data.__table__.columns:
@@ -182,13 +234,34 @@ class Executor(object):
 
     @case_log
     async def get_constructor(self, case_id):
-        """获取构造数据"""
+        """
+        获取构造数据
+        Args:
+            case_id:
+
+        Returns:
+
+        """
         return await ApiTestCaseDao.async_select_constructor(case_id)
 
     async def execute_constructors(self, env: int, path, case_info, params, req_params,
                                    constructors: List[ConstructorModel],
                                    asserts, suffix=False):
-        """开始构造数据"""
+        """
+        开始构造数据
+        Args:
+            env:
+            path:
+            case_info:
+            params:
+            req_params:
+            constructors:
+            asserts:
+            suffix:
+
+        Returns:
+
+        """
         if len(constructors) == 0:
             self.append("前后置条件为空, 跳出该环节")
         current = 0
@@ -200,6 +273,19 @@ class Executor(object):
 
     async def execute_constructor(self, env, index, path, params, req_params,
                                   constructor: ConstructorModel):
+        """
+        执行构造方法
+        Args:
+            env:
+            index:
+            path:
+            params:
+            req_params:
+            constructor:
+
+        Returns:
+
+        """
         if not constructor.enabled_flag:
             self.append(f"当前路径: {path}, 构造方法: {constructor.name} 已关闭, 不继续执行")
             return False
@@ -228,7 +314,15 @@ class Executor(object):
 
     @case_log
     def extract_out_parameters(self, response_info, data: List[ApiTestCaseOutParametersModel]):
-        """提取出参数据"""
+        """
+        提取出参数据
+        Args:
+            response_info:
+            data:
+
+        Returns:
+
+        """
         result = dict()
         for d in data:
             p = ParametersParser(d.source)
@@ -239,6 +333,15 @@ class Executor(object):
                   request_param: dict = None, path="主case"):
         """
         开始执行测试用例
+        Args:
+            env:
+            case_id:
+            params_pool:
+            request_param:
+            path:
+
+        Returns:
+
         """
         response_info = dict()
 
@@ -367,21 +470,56 @@ class Executor(object):
 
     def replace_args(self, params, data: ApiTestCaseModel, constructors: List[ConstructorModel],
                      asserts: List[ApiTestCaseAssertsModel]):
+        """
+        替换参数
+        Args:
+            params:
+            data:
+            constructors:
+            asserts:
+
+        Returns:
+
+        """
         self.replace_testcase(params, data)
         self.replace_constructors(params, constructors)
         self.replace_asserts(params, asserts)
 
     def replace_testcase(self, params: dict, data: ApiTestCaseModel):
-        """替换测试用例中的参数"""
+        """
+        替换测试用例中的参数
+        Args:
+            params:
+            data:
+
+        Returns:
+
+        """
         self.replace_cls(params, data, "request_headers", "body", "url")
 
     def replace_constructors(self, params: dict, constructors: List[ConstructorModel]):
-        """替换数据构造器中的参数"""
+        """
+        替换数据构造器中的参数
+        Args:
+            params:
+            constructors:
+
+        Returns:
+
+        """
         for c in constructors:
             self.replace_cls(params, c, "constructor_json")
 
     def replace_asserts(self, params, asserts: List[ApiTestCaseAssertsModel]):
-        """替换断言中的参数"""
+        """
+        替换断言中的参数
+        Args:
+            params:
+            asserts:
+
+        Returns:
+
+        """
         for a in asserts:
             self.replace_cls(params, a, "expected", "actually")
 
@@ -390,6 +528,23 @@ class Executor(object):
                                  request_param: dict = None,
                                  path='主case', name: str = "", data_id: int = None,
                                  retry_minutes: int = 0):
+        """
+
+        Args:
+            env:
+            data:
+            report_id:
+            case_id:
+            params_pool:
+            request_param:
+            path:
+            name:
+            data_id:
+            retry_minutes:
+
+        Returns:
+
+        """
         retry_times = PikaAppConfig.RETRY_TIMES if retry_minutes > 0 else 0
         for i in range(retry_times + 1):
             start_at = datetime.now()
@@ -428,6 +583,20 @@ class Executor(object):
     @staticmethod
     async def run_single(env: int, data, report_id, case_id, params_pool: dict = None, path="主case",
                          retry_minutes=0):
+        """
+
+        Args:
+            env:
+            data:
+            report_id:
+            case_id:
+            params_pool:
+            path:
+            retry_minutes:
+
+        Returns:
+
+        """
         test_data = await ApiTestCaseDataDao.list_testcase_data_by_env(env, case_id)
         if not test_data:
             await Executor.run_with_test_data(env, data, report_id, case_id, params_pool, dict(),
@@ -442,7 +611,16 @@ class Executor(object):
 
     @case_log
     def replace_body(self, req_params, body, body_type=1):
-        """根据传入的构造参数进行参数替换"""
+        """
+        根据传入的构造参数进行参数替换
+        Args:
+            req_params:
+            body:
+            body_type:
+
+        Returns:
+
+        """
         if body_type != ReqBodyTypeEnum.json:
             self.append("当前请求数据不为json, 跳过替换")
             return body
@@ -459,14 +637,16 @@ class Executor(object):
             self.append(f"替换请求body失败, {e}")
         return body
 
-    @staticmethod
-    def get_time():
-        return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
     @case_log
     def my_assert(self, asserts: List, json_format: bool) -> [str, bool]:
         """
         断言验证
+        Args:
+            asserts:
+            json_format:
+
+        Returns:
+
         """
         result = dict()
         ok = True
@@ -492,6 +672,13 @@ class Executor(object):
     def ops(self, assert_type: str, exp, act) -> (bool, str):
         """
         通过断言类型进行校验
+        Args:
+            assert_type:
+            exp:
+            act:
+
+        Returns:
+
         """
         if assert_type == "equal":
             if exp == act:
@@ -565,7 +752,13 @@ class Executor(object):
 
     # noinspection PyMethodMayBeStatic
     def get_el_expression(self, string: str):
-        """获取字符串中的el表达式
+        """
+        获取字符串中的el表达式
+        Args:
+            string:
+
+        Returns:
+
         """
         if string is None:
             return []
@@ -575,6 +768,11 @@ class Executor(object):
     def translate(self, data):
         """
         反序列化为Python对象
+        Args:
+            data:
+
+        Returns:
+
         """
         return json.loads(data)
 
@@ -597,6 +795,13 @@ class Executor(object):
     def parse_variable(self, response_info, string: str, params=None):
         """
         解析返回response中的变量
+        Args:
+            response_info:
+            string:
+            params:
+
+        Returns:
+
         """
         exp = self.get_el_expression(string)
         if len(exp) == 0:
