@@ -16,16 +16,15 @@ from typing import List
 from sqlalchemy import select, update
 
 from app.core.handler.logger import PikaLogger
-from app.crud import PikaMapper
+from app.crud import PikaWrapper, PikaMdWrapper
 from app.middleware.xredis import RedisHelper
 from app.models import async_session
 from app.models.api_testcase_out_parameters import ApiTestCaseOutParametersModel
 from app.schema.api_testcase_out_parameters import ApiTestCaseOutParametersSchema
-from app.utils.decorator import dao
 
 
-@dao(ApiTestCaseOutParametersModel, PikaLogger("ApiTestCaseOutParametersDao"))
-class ApiTestCaseOutParametersDao(PikaMapper):
+@PikaMdWrapper(ApiTestCaseOutParametersModel)
+class ApiTestCaseOutParametersDao(PikaWrapper):
 
     @classmethod
     async def should_remove(cls, before, after):
@@ -63,9 +62,7 @@ class ApiTestCaseOutParametersDao(PikaMapper):
                     should_remove = await cls.should_remove(before, data)
                     for item in data:
                         if item.id is None:
-                            # add
-                            temp = ApiTestCaseOutParametersModel(**item.dict(), case_id=case_id,
-                                                                 operator=operator)
+                            temp = ApiTestCaseOutParametersModel(**item.dict(), case_id=case_id, operator=operator)
                             session.add(temp)
                         else:
                             query = await session.execute(
@@ -96,5 +93,5 @@ class ApiTestCaseOutParametersDao(PikaMapper):
                                 delete_flag=int(time.time() * 1000)))
             return result
         except Exception as e:
-            cls.log.error(f"批量更新出参数据失败: {e}")
+            cls.__log__.error(f"批量更新出参数据失败: {e}")
             raise Exception(f"批量更新出参数据失败: {e}")

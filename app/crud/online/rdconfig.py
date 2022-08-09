@@ -9,20 +9,18 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from app.core.handler.logger import PikaLogger
-from app.crud import PikaMapper
+from app.crud import PikaWrapper, PikaMdWrapper
 from app.middleware.xredis import RedisHelper, PikaRedisManager
 from app.models.redis_config import RedisModel
-from app.utils.decorator import dao
 
 
-@dao(RedisModel, PikaLogger("RedisConfigConfigDao"))
-class PikaRedisConfigDao(PikaMapper):
+@PikaMdWrapper(RedisModel)
+class PikaRedisConfigDao(PikaWrapper):
 
-    @staticmethod
-    async def execute_command(command: str, **kwargs):
+    @classmethod
+    async def execute_command(cls, command: str, **kwargs):
         try:
-            redis_config = await PikaRedisConfigDao.query_record(**kwargs)
+            redis_config = await PikaRedisConfigDao.query(**kwargs)
             if redis_config is None:
                 raise Exception("Redis配置不存在")
             if not redis_config.cluster:

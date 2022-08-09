@@ -2,7 +2,6 @@ import asyncio
 import json
 import random
 import uuid
-from collections import deque
 from json import JSONDecodeError
 from typing import List, Dict
 
@@ -15,7 +14,6 @@ from app.middleware.async_ask import AsyncRequest
 from app.schema.http import HttpRequestSchema
 from app.service import Permission
 
-deque
 from app.enums.CertEnum import CertType
 
 router = APIRouter()
@@ -80,7 +78,7 @@ async def re_run_case(env: int, case_id: int, data_id: int = 0, _=Depends(Permis
         params = dict()
         if data_id != 0:
             # if data_id not exists, use original params (empty dict)
-            test_data = await ApiTestCaseDataDao.query_record(id=data_id)
+            test_data = await ApiTestCaseDataDao.query(id=data_id)
             params = json.loads(test_data.json_data)
         result, _ = await executor.run(env, case_id, request_param=params)
         return PikaResponse.success(result)

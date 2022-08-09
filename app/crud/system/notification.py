@@ -14,17 +14,15 @@ from typing import List
 
 from sqlalchemy import select, and_, or_, update
 
-from app.core.handler.logger import PikaLogger
-from app.crud import PikaMapper
+from app.crud import PikaWrapper, PikaMdWrapper
 from app.enums.MessageEnum import MessageTypeEnum, MessageStateEnum
 from app.models import async_session
 from app.models.broadcast import BroadcastReadUserModel
 from app.models.notification import NotificationModel
-from app.utils.decorator import dao
 
 
-@dao(NotificationModel, PikaLogger("PikaNotificationDao"))
-class PikaNotificationDao(PikaMapper):
+@PikaMdWrapper(NotificationModel)
+class PikaNotificationDao(PikaWrapper):
 
     @classmethod
     async def list_messages(cls, msg_type: int, msg_status: int, receiver: str):
@@ -41,7 +39,7 @@ class PikaNotificationDao(PikaMapper):
         ninety_days = datetime.now() - timedelta(days=90)
         # 1. 当消息类型不为广播类型时，正常查询
         if msg_type == MessageTypeEnum.others:
-            ans = await cls.list_record(msg_status=msg_status, receiver=receiver, msg_type=msg_type,
+            ans = await cls.select_list(msg_status=msg_status, receiver=receiver, msg_type=msg_type,
                                         condition=[NotificationModel.create_date > ninety_days])
         else:
             # 否则需要根据是否已读进行查询 只支持90天内数据

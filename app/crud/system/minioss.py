@@ -1,10 +1,8 @@
 from abc import ABC
-from app.core.handler.logger import PikaLogger
-from app.crud import PikaMapper
+from app.crud import PikaWrapper, PikaMdWrapper
 from app.models.minioss import OssFileModel
-from app.utils.decorator import dao
 
 
-@dao(OssFileModel, PikaLogger("PikaOssDao"))
-class PikaOssDao(PikaMapper, ABC):
+@PikaMdWrapper(OssFileModel)
+class PikaOssDao(PikaWrapper, ABC):
     pass

@@ -73,7 +73,7 @@ def get_str(args, kwargs):
     result = []
     # 这里从1索引开始，是因为args[0]是self, 也就注定了case_log只能在Executor方法下使用
     for i, a in enumerate(args[1:], start=1):
-        if type(a).__name__ == "function":
+        if callable(a):
             result.append(a.__doc__ if a.__doc__ else a.__name__)
         else:
             result.append(f"\n参数{i}:\n{str(a)}")
@@ -88,29 +88,11 @@ def get_str(args, kwargs):
 def get_returns(obj):
     if not obj:
         return ""
-    if type(obj).__name__ == "function":
+    if callable(obj):
         return obj.__doc__ if obj.__doc__ else obj.__name__
     if isinstance(obj, object):
         return str(obj)
     return f"返回值: {obj}"
-
-
-def dao(model, log):
-    def wrapper(cls):
-        """
-        测试过，不同dao包裹的cls，地址不一致，可放心使用，并非单例
-        Args:
-            cls:
-
-        Returns:
-
-        """
-        # 设置model和log
-        setattr(cls, "model", model)
-        setattr(cls, "log", log)
-        return cls
-
-    return wrapper
 
 
 def lock(key):

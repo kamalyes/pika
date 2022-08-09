@@ -18,18 +18,16 @@ from sqlalchemy import or_, select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.handler.execres import AuthException, OperationException
-from app.core.handler.logger import PikaLogger
-from app.crud import PikaMapper
+from app.crud import PikaWrapper, PikaMdWrapper
 from app.enums.OperationEnum import SqlOperationTypeEnum
 from app.enums.RbacEnum import RoleEnum
-from app.models import async_session, DatabaseHelper
+from app.models import async_session
 from app.models.project import ProjectModel, ProjectRoleModel
 from app.schema.project import ProjectRoleEditSchema
-from app.utils.decorator import dao
 
 
-@dao(ProjectModel, PikaLogger("ProjectDao"))
-class ProjectDao(PikaMapper):
+@PikaMdWrapper(ProjectModel)
+class ProjectDao(PikaWrapper):
 
     @classmethod
     async def list_project(cls, operator: str, operator_identity: int, page: int,
@@ -64,7 +62,7 @@ class ProjectDao(PikaMapper):
                 data = await session.execute(sql)
                 return data.scalars().all(), total
         except Exception as e:
-            cls.log.error(f"获取用户: {operator}项目列表失败, {e}")
+            cls.__log__.error(f"获取用户: {operator}项目列表失败, {e}")
             raise Exception(f"获取用户: {operator}项目列表失败")
 
     @classmethod
@@ -106,7 +104,7 @@ class ProjectDao(PikaMapper):
                                                ProjectModel.delete_flag is False))
                 if data.scalars().first() is not None:
                     err = f"新增项目: {name}失败, 失败原因：项目已存在"
-                    cls.log.error(err)
+                    cls.__log__.error(err)
                     raise OperationException(detail=err)
                 pr = ProjectModel(name, app, owner, operator, description, private, dingtalk_url,
                                   qy_wx_url)
@@ -130,7 +128,7 @@ class ProjectDao(PikaMapper):
                     data.update_date = datetime.now()
                     data.update_user = operator
         except Exception as e:
-            cls.log.error(f"修改项目头像失败, 项目: {project_id}, error: {e}")
+            cls.__log__.error(f"修改项目头像失败, 项目: {project_id}, error: {e}")
             raise Exception(e)
 
     @classmethod
@@ -177,7 +175,7 @@ class ProjectDao(PikaMapper):
                     data.dingtalk_url = dingtalk_url
                     data.qy_wx_url = qy_wx_url
         except Exception as e:
-            cls.log.error(f"编辑项目: {name}失败, {e}")
+            cls.__log__.error(f"编辑项目: {name}失败, {e}")
             raise Exception(f"编辑项目: {name}失败, {e}")
 
     @classmethod
@@ -193,7 +191,7 @@ class ProjectDao(PikaMapper):
                 roles = await ProjectRoleDao.list_role(project_id)
                 return data, roles
         except Exception as e:
-            cls.log.error(f"查询项目: {project_id}失败, {e}")
+            cls.__log__.error(f"查询项目: {project_id}失败, {e}")
             raise Exception(f"查询项目: {project_id}失败, {e}")
 
     @staticmethod
@@ -228,8 +226,8 @@ class ProjectDao(PikaMapper):
         return len(ans)
 
 
-@dao(ProjectRoleModel, PikaLogger("ProjectRoleDao"))
-class ProjectRoleDao(PikaMapper):
+@PikaMdWrapper(ProjectRoleModel)
+class ProjectRoleDao(PikaWrapper):
 
     @classmethod
     async def list_project_by_user(cls, emp_no: int) -> List[int]:
@@ -248,11 +246,11 @@ class ProjectRoleDao(PikaMapper):
                                                               ProjectRoleModel.delete_flag is False))
                 return data.scalars().all()
         except Exception as e:
-            cls.log.error(f"查询用户: {emp_no}项目失败, {e}")
+            cls.__log__.error(f"查询用户: {emp_no}项目失败, {e}")
             raise Exception("获取项目失败")
 
-    @staticmethod
-    async def list_role(project_id: int) -> List[ProjectRoleModel]:
+    @classmethod
+    async def list_role(cls, project_id: int) -> List[ProjectRoleModel]:
         try:
             async with async_session() as session:
                 query = await session.execute(
@@ -260,11 +258,11 @@ class ProjectRoleDao(PikaMapper):
                                                    ProjectRoleModel.delete_flag is False))
                 return query.scalars().all()
         except Exception as e:
-            ProjectRoleDao.log.error(f"查询项目: {project_id}角色列表失败, {e}")
+            cls.__log__.error(f"查询项目: {project_id}角色列表失败, {e}")
             raise Exception(f"获取项目角色列表失败")
 
-    @staticmethod
-    async def judge_permission(session: AsyncSession, project_id: int, emp_no: str,
+    @classmethod
+    async def judge_permission(cls, session: AsyncSession, project_id: int, emp_no: str,
                                project_role: int,
                                project_admin: bool) -> None:
         """
@@ -302,8 +300,8 @@ class ProjectRoleDao(PikaMapper):
         if not any([r.operator == operator for r in roles]):
             raise AuthException(detail="没有权限访问项目")
 
-    @staticmethod
-    async def read_permission(project_id: int, operator: str, operator_identity: str):
+    @classmethod
+    async def read_permission(cls, project_id: int, operator: str, operator_identity: str):
         """
         判断用户是否有读取项目的权限
         Args:
@@ -333,8 +331,8 @@ class ProjectRoleDao(PikaMapper):
                 if role is None:
                     raise AuthException(detail="没有权限访问项目")
 
-    @staticmethod
-    async def has_permission(project_id: int, project_role: int, operator: str, operator_identity: int,
+    @classmethod
+    async def has_permission(cls, project_id: int, project_role: int, operator: str, operator_identity: int,
                              project_admin: bool = False, session: AsyncSession = None):
         """
         判断用户是否有该项目的权限
@@ -351,11 +349,9 @@ class ProjectRoleDao(PikaMapper):
         """
         if operator_identity != RoleEnum.ADMIN:
             if session is not None:
-                await ProjectRoleDao.judge_permission(session, project_id, operator, project_role,
-                                                      project_admin)
+                await cls.judge_permission(session, project_id, operator, project_role, project_admin)
             async with async_session() as session:
-                await ProjectRoleDao.judge_permission(session, project_id, operator, project_role,
-                                                      project_admin)
+                await cls.judge_permission(session, project_id, operator, project_role, project_admin)
 
     @classmethod
     async def update_project_role(cls, prole: ProjectRoleEditSchema, operator: str, operator_identity: int):
@@ -372,29 +368,28 @@ class ProjectRoleDao(PikaMapper):
         try:
             async with async_session() as session:
                 async with session.begin():
-                    original = await ProjectRoleDao.query_record(session=session, id=prole.id,
-                                                                 delete_flag=False)
+                    original = await cls.query(session=session, id=prole.id, delete_flag=False)
                     if original is None:
                         raise Exception("该用户角色不存在")
-                    await ProjectRoleDao.has_permission(original.project_id, original.project_role,
-                                                        operator,
-                                                        operator_identity, True, session=session)
+                    await cls.has_permission(original.project_id, original.project_role,
+                                             operator,
+                                             operator_identity, True, session=session)
                     old = deepcopy(original)
-                    changed = DatabaseHelper.update_model(original, prole, operator)
+                    changed = cls.update_model(original, prole, operator)
                     await session.flush()
                     session.expunge(original)
                 async with session.begin():
                     await asyncio.create_task(
-                        ProjectRoleDao.insert_log(session=session, operator=operator,
-                                                  mode=SqlOperationTypeEnum.ONLY_UPDATE.value,
-                                                  before=old,
-                                                  changed=changed))
+                        cls.insert_log(session=session, operator=operator,
+                                       mode=SqlOperationTypeEnum.ONLY_UPDATE.value,
+                                       before=old,
+                                       changed=changed))
         except Exception as e:
-            cls.log.error(f"更新用户角色失败: {e}")
+            cls.__log__.error(f"更新用户角色失败: {e}")
             raise Exception(f"更新用户角色失败: {e}")
 
-    @staticmethod
-    async def delete_project_role(prole_id: int, operator: str, operator_identity: int) -> None:
+    @classmethod
+    async def delete_project_role(cls, prole_id: int, operator: str, operator_identity: int) -> None:
         """
         删除用户角色
         Args:
@@ -408,19 +403,19 @@ class ProjectRoleDao(PikaMapper):
         try:
             async with async_session() as session:
                 async with session.begin():
-                    role = await ProjectRoleDao.query_record(session=session, id=prole_id,
-                                                             delete_flag=False)
+                    role = await cls.query(session=session, id=prole_id,
+                                           delete_flag=False)
                     if role is None:
                         raise Exception("用户角色不存在")
-                    await ProjectRoleDao.has_permission(role.project_id, role.project_role,
-                                                        operator, operator_identity, True)
-                    DatabaseHelper.delete_model(role, operator)
+                    await cls.has_permission(role.project_id, role.project_role, operator, operator_identity, True)
+                    cls.delete_model(role, operator)
                     await session.flush()
                     session.expunge(role)
                 async with session.begin():
                     await asyncio.create_task(
-                        ProjectRoleDao.insert_log(session=session, operator=operator,
-                                                  mode=SqlOperationTypeEnum.ONLY_DELETE.value, before=role,
-                                                  key=prole_id))
+                        cls.insert_log(session=session, operator=operator,
+                                       mode=SqlOperationTypeEnum.ONLY_DELETE.value, before=role,
+                                       key=prole_id))
         except Exception as e:
+            cls.__log__.error(f"删除用户角色失败: {e}")
             raise Exception(f"删除用户角色失败: {e}")

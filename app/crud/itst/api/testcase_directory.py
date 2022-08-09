@@ -15,17 +15,17 @@ from datetime import datetime
 from hutools.time import Moment
 from sqlalchemy import select, asc, or_
 
-from app.core.handler.logger import PikaLogger
+from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
 from app.models.api_testcase_directory import ApiTestCaseDirectoryModel
 from app.schema.api_testcase_directory import ApiTestCaseDirectorySchema
 
 
-class ApiTestCaseDirectoryDao(object):
-    log = PikaLogger("ApiTestCaseDirectoryDao")
+@PikaMdWrapper(ApiTestCaseDirectoryModel)
+class ApiTestCaseDirectoryDao(PikaWrapper):
 
-    @staticmethod
-    async def query_directory(directory_id: int):
+    @classmethod
+    async def query_directory(cls, directory_id: int):
         try:
             async with async_session() as session:
                 sql = select(ApiTestCaseDirectoryModel).where(
@@ -34,11 +34,11 @@ class ApiTestCaseDirectoryDao(object):
                 result = await session.execute(sql)
                 return result.scalars().first()
         except Exception as e:
-            ApiTestCaseDirectoryDao.log.error(f"获取目录详情失败: {str(e)}")
+            cls.__log__.error(f"获取目录详情失败: {str(e)}")
             raise Exception(f"获取目录详情失败: {str(e)}")
 
-    @staticmethod
-    async def list_directory(project_id: int):
+    @classmethod
+    async def list_directory(cls, project_id: int):
         try:
             async with async_session() as session:
                 sql = select(ApiTestCaseDirectoryModel) \
@@ -48,11 +48,11 @@ class ApiTestCaseDirectoryDao(object):
                 result = await session.execute(sql)
                 return result.scalars().all()
         except Exception as e:
-            ApiTestCaseDirectoryDao.log.error(f"获取用例目录失败, error: {e}")
+            cls.__log__.error(f"获取用例目录失败, error: {e}")
             raise Exception(f"获取用例目录失败, error: {e}")
 
-    @staticmethod
-    async def insert_directory(form: ApiTestCaseDirectorySchema, operator: int):
+    @classmethod
+    async def insert_directory(cls, form: ApiTestCaseDirectorySchema, operator: int):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -66,11 +66,20 @@ class ApiTestCaseDirectoryDao(object):
                         raise Exception("目录已存在")
                     session.add(ApiTestCaseDirectoryModel(form, operator))
         except Exception as e:
-            ApiTestCaseDirectoryDao.log.error(f"创建目录失败, error: {e}")
+            cls.__log__.error(f"创建目录失败, error: {e}")
             raise Exception(f"创建目录失败: {e}")
 
-    @staticmethod
-    async def update_directory(form: ApiTestCaseDirectorySchema, operator: int):
+    @classmethod
+    async def update_directory(cls, form: ApiTestCaseDirectorySchema, operator: int):
+        """
+        更新用例目录
+        Args:
+            form:
+            operator:
+
+        Returns:
+
+        """
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -85,11 +94,20 @@ class ApiTestCaseDirectoryDao(object):
                     query.update_user = operator
                     query.update_date = datetime.now()
         except Exception as e:
-            ApiTestCaseDirectoryDao.log.error(f"更新目录失败, error: {e}")
+            cls.__log__.error(f"更新目录失败, error: {e}")
             raise Exception(f"更新目录失败: {e}")
 
-    @staticmethod
-    async def delete_directory(id: int, operator: int):
+    @classmethod
+    async def delete_directory(cls, id: int, operator: int):
+        """
+        删除用例目录
+        Args:
+            id:
+            operator:
+
+        Returns:
+
+        """
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -104,12 +122,11 @@ class ApiTestCaseDirectoryDao(object):
                     query.delete_flag = 1
                     query.update_emp_no = operator
         except Exception as e:
-            ApiTestCaseDirectoryDao.log.error(f"删除目录失败, error: {e}")
+            cls.__log__.error(f"删除目录失败, error: {e}")
             raise Exception(f"删除目录失败: {e}")
 
-    @staticmethod
-    async def get_directory_tree(project_id: int, case_node=None, move: bool = False) -> (
-            list, dict):
+    @classmethod
+    async def get_directory_tree(cls, project_id: int, case_node=None, move: bool = False) -> (list, dict):
         """
         通过项目获取目录树
         Args:
@@ -120,7 +137,7 @@ class ApiTestCaseDirectoryDao(object):
         Returns:
 
         """
-        res = await ApiTestCaseDirectoryDao.list_directory(project_id)
+        res = await cls.list_directory(project_id)
         ans = list()
         ans_map = dict()
         case_map = dict()
@@ -138,15 +155,15 @@ class ApiTestCaseDirectoryDao(object):
             ans_map[directory.id] = directory
         # 获取到所有数据信息
         for r in ans:
-            await ApiTestCaseDirectoryDao.get_directory(ans_map, parent_map, r.get('key'),
-                                                        r.get('children'), case_map,
-                                                        case_node, move)
+            await cls.get_directory(ans_map, parent_map, r.get('key'),
+                                    r.get('children'), case_map,
+                                    case_node, move)
             if not move and not r.get('children'):
                 r['disabled'] = True
         return ans, case_map
 
-    @staticmethod
-    async def get_directory(ans_map: dict, parent_map, parent, children, case_map, case_node=None,
+    @classmethod
+    async def get_directory(cls, ans_map: dict, parent_map, parent, children, case_map, case_node=None,
                             move=False):
         current = parent_map.get(parent)
         if case_node is not None:
@@ -168,11 +185,10 @@ class ApiTestCaseDirectoryDao(object):
                 children=child,
                 disabled=len(child) == 0 and not move
             ))
-            await ApiTestCaseDirectoryDao.get_directory(ans_map, parent_map, temp.id, child,
-                                                        case_node, move=move)
+            await cls.get_directory(ans_map, parent_map, temp.id, child, case_node, move=move)
 
-    @staticmethod
-    async def get_directory_son(directory_id: int):
+    @classmethod
+    async def get_directory_son(cls, directory_id: int):
         parent_map = defaultdict(list)
         async with async_session() as session:
             ans = [directory_id]
@@ -187,11 +203,11 @@ class ApiTestCaseDirectoryDao(object):
             for d in data:
                 parent_map[d.parent].append(d.id)
             son = parent_map.get(directory_id)
-            ApiTestCaseDirectoryDao.get_sub_son(parent_map, son, ans)
+            cls.get_sub_son(parent_map, son, ans)
             return ans
 
-    @staticmethod
-    def get_sub_son(parent_map: dict, son: list, result: list):
+    @classmethod
+    def get_sub_son(cls, parent_map: dict, son: list, result: list):
         if not son:
             return
         for s in son:
@@ -200,4 +216,4 @@ class ApiTestCaseDirectoryDao(object):
             if not sons:
                 continue
             result.extend(sons)
-            ApiTestCaseDirectoryDao.get_sub_son(parent_map, sons, result)
+            cls.get_sub_son(parent_map, sons, result)

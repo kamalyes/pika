@@ -22,7 +22,7 @@ class ApiTestPlanFollowUserRelModel(LargeBaseModel):
     emp_no = Column(INT, nullable=False, comment="员工编号")
     plan_id = Column(INT, nullable=False, comment="计划id")
 
-    def __init__(self, plan_id, emp_no, operator):
-        super().__init__(operator)
+    def __init__(self, plan_id, emp_no):
+        super().__init__(operator=emp_no)
         self.emp_no = emp_no
         self.plan_id = plan_id

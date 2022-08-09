@@ -343,7 +343,6 @@ class PikaFastApi:
         pika.include_router(workspace_router, prefix="/workspace", tags=["工作台"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
-
         # itst
         pika.include_router(project_router, prefix="/project", tags=["项目"],
                             dependencies=[Depends(PikaFastApi.request_info),

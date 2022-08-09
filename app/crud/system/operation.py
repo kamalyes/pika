@@ -14,15 +14,13 @@ from datetime import datetime
 
 from sqlalchemy import func, select
 
-from app.core.handler.logger import PikaLogger
-from app.crud import PikaMapper
+from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
 from app.models.system import OperationLogModel
-from app.utils.decorator import dao
 
 
-@dao(OperationLogModel, PikaLogger("PikaOperationDao"))
-class PikaOperationDao(PikaMapper):
+@PikaMdWrapper(OperationLogModel)
+class PikaOperationDao(PikaWrapper):
 
     @classmethod
     async def count_user_activities(cls, operator, start_time: datetime, end_time: datetime):

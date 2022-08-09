@@ -40,7 +40,7 @@ class MenuDao:
         return await AsyncDbSession.query(db, do_sql)
 
     @staticmethod
-    async def insert_menu(request: Any, operator: str, is_parent=False) -> "MenuModel":
+    async def insert_menu(request: Any, operator: str, is_parent=False) -> MenuModel:
         menu_id = request.id
         menu_name = request.name
         menu_title = request.title

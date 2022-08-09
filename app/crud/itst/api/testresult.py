@@ -16,22 +16,24 @@ from sqlalchemy import asc
 from sqlalchemy.future import select
 
 from app.core.handler.logger import PikaLogger
+from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
 from app.models.api_test_case import ApiTestCaseModel
 from app.models.api_test_result import ApiTestResultModel
 
 
-class ApiTestResultDao(object):
-    log = PikaLogger("ApiTestResultDao")
+@PikaMdWrapper(ApiTestResultModel)
+class ApiTestResultDao(PikaWrapper):
 
-    @staticmethod
-    async def insert(report_id: int, case_id: int, case_name: str, status: int,
-                     case_log: str, start_at: datetime, finished_at: datetime,
-                     url: str, body: str, request_method: str, request_headers: str, cost: str,
-                     asserts: str, response_headers: str, response: str,
-                     status_code: int, cookies: str, retry: int = None,
-                     request_params: str = '', data_name: str = '', data_id: int = None,
-                     ) -> None:
+    @classmethod
+    async def insert_report(cls, report_id: int, case_id: int, case_name: str, status: int,
+                            case_log: str, start_at: datetime, finished_at: datetime,
+                            url: str, body: str, request_method: str, request_headers: str,
+                            cost: str,
+                            asserts: str, response_headers: str, response: str,
+                            status_code: int, cookies: str, retry: int = None,
+                            request_params: str = '', data_name: str = '', data_id: int = None,
+                            ) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -43,11 +45,11 @@ class ApiTestResultDao(object):
                     session.add(result)
                     await session.flush()
         except Exception as e:
-            ApiTestResultDao.log.error(f"新增测试结果失败, error: {e}")
+            cls.__log__.error(f"新增测试结果失败, error: {e}")
             raise Exception("新增测试结果失败")
 
-    @staticmethod
-    async def list(report_id: int) -> List[ApiTestResultModel]:
+    @classmethod
+    async def list(cls, report_id: int) -> List[ApiTestResultModel]:
         try:
             async with async_session() as session:
                 sql = select(ApiTestResultModel, ApiTestCaseModel.directory_id).join(
@@ -63,5 +65,5 @@ class ApiTestResultDao(object):
                     ans.append(res)
                 return ans
         except Exception as e:
-            ApiTestResultDao.log.error(f"获取测试用例执行记录失败, error: {e}")
+            cls.__log__.error(f"获取测试用例执行记录失败, error: {e}")
             raise Exception("获取测试用例执行记录失败")

@@ -26,8 +26,8 @@ class ApiTestCaseAssertsModel(LargeBaseModel):
     expected = Column(TEXT, nullable=False, comment="预期结果")
     actually = Column(TEXT, nullable=False, comment="实际结果")
 
-    def __init__(self, name, case_id, assert_type, expected, actually, operator, id=None):
-        super().__init__(operator, id)
+    def __init__(self, name, case_id, assert_type, expected, actually, operator):
+        super().__init__(operator)
         self.name = name
         self.case_id = case_id
         self.assert_type = assert_type

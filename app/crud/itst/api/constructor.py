@@ -14,20 +14,18 @@ from typing import List
 
 from sqlalchemy import select, update
 
-from app.core.handler.logger import PikaLogger
-from app.crud import PikaMapper
+from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session, DatabaseHelper
 from app.models.api_test_case import ApiTestCaseModel
 from app.models.constructor import ConstructorModel
 from app.schema.constructor import ConstructorSchema, ConstructorIndexSchema
-from app.utils.decorator import dao
 
 
-@dao(ConstructorModel, PikaLogger("ConstructorDao"))
-class ConstructorDao(PikaMapper):
+@PikaMdWrapper(ConstructorModel)
+class ConstructorDao(PikaWrapper):
 
-    @staticmethod
-    async def list_constructor(case_id: int) -> List[ConstructorModel]:
+    @classmethod
+    async def list_constructor(cls, case_id: int) -> List[ConstructorModel]:
         """
         根据用例id获取数据构造器列表（包括前后置条件）
         Args:
@@ -44,11 +42,11 @@ class ConstructorDao(PikaMapper):
                 result = await session.execute(sql)
                 return result.scalars().all()
         except Exception as e:
-            ConstructorDao.log.error(f"获取初始化数据失败, {e}")
+            cls.__log__.error(f"获取初始化数据失败, {e}")
             raise Exception(f"获取初始化数据失败, {e}")
 
-    @staticmethod
-    async def insert_constructor(data: ConstructorSchema, operator: str) -> None:
+    @classmethod
+    async def insert_constructor(cls, data: ConstructorSchema, operator: str) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -62,11 +60,11 @@ class ConstructorDao(PikaMapper):
                     constructor.index = await constructor.get_index(session, data.case_id)
                     session.add(constructor)
         except Exception as e:
-            ConstructorDao.log.error(f"新增前/后置条件: {data.name}失败, {e}")
+            cls.__log__.error(f"新增前/后置条件: {data.name}失败, {e}")
             raise Exception(f"新增前/后置条件失败, {e}")
 
-    @staticmethod
-    async def update_constructor(data: ConstructorSchema, operator: str) -> None:
+    @classmethod
+    async def update_constructor(cls, data: ConstructorSchema, operator: str) -> None:
         """
         更新前后置条件
         Args:
@@ -84,9 +82,9 @@ class ConstructorDao(PikaMapper):
                     query = result.scalars().first()
                     if query is None:
                         raise Exception(f"{data.name}不存在")
-                    DatabaseHelper.update_model(query, data, operator)
+                    cls.update_model(query, data, operator)
         except Exception as e:
-            ConstructorDao.log.error(f"编辑前后置条件: {data.name}失败, {e}")
+            cls.__log__.error(f"编辑前后置条件: {data.name}失败, {e}")
             raise Exception(f"编辑前后置条件失败, {e}")
 
     @classmethod
@@ -108,9 +106,9 @@ class ConstructorDao(PikaMapper):
                     query = result.scalars().first()
                     if query is None:
                         raise Exception(f"前后置条件{id}不存在")
-                    DatabaseHelper.delete_model(query, operator)
+                    cls.delete_model(query, operator)
         except Exception as e:
-            cls.log.error(f"删除前后置条件: {id}失败, {e}")
+            cls.__log__.error(f"删除前后置条件: {id}失败, {e}")
             raise Exception(f"删除前后置条件失败, {e}")
 
     @classmethod
@@ -131,7 +129,7 @@ class ConstructorDao(PikaMapper):
                             update(ConstructorModel).where(ConstructorModel.id == item.id).values(
                                 index=item.index))
         except Exception as e:
-            cls.log.error(f"更新前后置条件顺序失败, {e}")
+            cls.__log__.error(f"更新前后置条件顺序失败, {e}")
             raise Exception("更新前后置条件顺序失败")
 
     @classmethod
@@ -168,7 +166,7 @@ class ConstructorDao(PikaMapper):
                     })
                 return result
         except Exception as e:
-            cls.log.error(f"获取前后置条件树失败, {e}")
+            cls.__log__.error(f"获取前后置条件树失败, {e}")
             raise Exception("获取前后置条件失败")
 
     @staticmethod

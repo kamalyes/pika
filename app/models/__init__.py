@@ -9,10 +9,8 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-import time
 from contextlib import contextmanager, asynccontextmanager
-from datetime import datetime
-from typing import AsyncGenerator, AsyncIterator, List
+from typing import AsyncGenerator, AsyncIterator
 
 import aioredis
 from sqlalchemy import create_engine
@@ -20,7 +18,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.orm import sessionmaker
 
 from app.core.handler.execres import (
     DbExecuteException)
@@ -144,102 +142,6 @@ class DatabaseHelper(object):
         key = f"{host}:{port}:{database}:{username}:{password}:{database}"
         if self.connections.get(key):
             self.connections.pop(key)
-
-    @staticmethod
-    def update_model(dist, source, operator=None, not_null=False):
-        """
-
-        Args:
-            dist:
-            source:
-            operator:
-            not_null:
-
-        Returns:
-
-        """
-        changed = []
-        for var, value in vars(source).items():
-            if not_null:
-                if value is None:
-                    continue
-                if isinstance(value, bool) or isinstance(value, int) or value:
-                    # 如果是bool值或者int, false和0也是可以接受的
-                    if not hasattr(dist, var):
-                        continue
-                    if getattr(dist, var) != value:
-                        changed.append(var)
-                        setattr(dist, var, value)
-            else:
-                if getattr(dist, var) != value:
-                    changed.append(var)
-                    setattr(dist, var, value)
-        if operator:
-            setattr(dist, 'update_emp_no', operator)
-        return changed
-
-    @staticmethod
-    def delete_model(dist, operator):
-        """
-        删除数据
-        Args:
-            dist:
-            operator:
-
-        Returns:
-
-        """
-        if str(dist.__class__.delete_date.property.columns[0].type) == "DATETIME":
-            dist.delete_date = datetime.now()
-        else:
-            dist.delete_date = int(time.time() * 1000)
-        dist.update_date = datetime.now()
-        dist.update_emp_no = operator
-        dist.delete_flag = 1
-
-    @classmethod
-    def where(cls, param, sentence, condition: List):
-        if param is None:
-            return cls
-        if isinstance(param, bool):
-            condition.append(sentence)
-            return cls
-        if isinstance(param, int):
-            condition.append(sentence)
-            return cls
-        if param:
-            condition.append(sentence)
-        return cls
-
-    @staticmethod
-    async def pagination(page: int, size: int, session, sql: str, scalars=True):
-        """
-        分页查询
-        Args:
-            page:
-            size:
-            session:
-            sql:
-            scalars:
-
-        Returns:
-
-        """
-        data = await session.execute(sql)
-        total = data.raw.rowcount
-        if total == 0:
-            return [], 0
-        sql = sql.offset((page - 1) * size).limit(size)
-        data = await session.execute(sql)
-        if scalars:
-            return data.scalars().all(), total
-        return data.all(), total
-
-    @staticmethod
-    def like(s: str):
-        if s:
-            return f"%{s}%"
-        return s
 
 
 db_helper = DatabaseHelper()

@@ -15,15 +15,14 @@ from typing import List
 from sqlalchemy import select
 
 from app.core.handler.logger import PikaLogger
-from app.crud import PikaMapper
+from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session, DatabaseHelper
 from app.models.api_testcase_data import ApiTestCaseDataModel
 from app.schema.api_testcase_data import ApiTestCaseDataSchema
-from app.utils.decorator import dao
 
 
-@dao(ApiTestCaseDataModel, PikaLogger("ApiTestCaseDataDao"))
-class ApiTestCaseDataDao(PikaMapper):
+@PikaMdWrapper(ApiTestCaseDataModel)
+class ApiTestCaseDataDao(PikaWrapper):
 
     @classmethod
     async def insert_testcase_data(cls, form: ApiTestCaseDataSchema, operator: str):
@@ -46,7 +45,7 @@ class ApiTestCaseDataDao(PikaMapper):
                     session.expunge(data)
                     return data
         except Exception as e:
-            cls.log.error(f"新增测试数据失败, error: {str(e)}")
+            cls.__log__.error(f"新增测试数据失败, error: {str(e)}")
             raise Exception(f"新增测试数据失败, {str(e)}")
 
     @classmethod
@@ -60,12 +59,12 @@ class ApiTestCaseDataDao(PikaMapper):
                     query = result.scalars().first()
                     if query is None:
                         raise Exception("测试数据不存在")
-                    DatabaseHelper.update_model(query, form, operator)
+                    cls.update_model(query, form, operator)
                     await session.flush()
                     session.expunge(query)
                     return query
         except Exception as e:
-            cls.log.error(f"编辑测试数据失败, error: {str(e)}")
+            cls.__log__.error(f"编辑测试数据失败, error: {str(e)}")
             raise Exception(f"编辑测试数据失败, {str(e)}")
 
     @classmethod
@@ -79,9 +78,9 @@ class ApiTestCaseDataDao(PikaMapper):
                     query = result.scalars().first()
                     if query is None:
                         raise Exception("测试数据不存在")
-                    DatabaseHelper.delete_model(query, operator)
+                    cls.delete_model(query, operator)
         except Exception as e:
-            cls.log.error(f"删除测试数据失败, error: {str(e)}")
+            cls.__log__.error(f"删除测试数据失败, error: {str(e)}")
             raise Exception(f"删除测试数据失败, {str(e)}")
 
     @classmethod
@@ -97,7 +96,7 @@ class ApiTestCaseDataDao(PikaMapper):
                     ans[q.env].append(q)
                 return ans
         except Exception as e:
-            cls.log.error(f"查询测试数据失败, error: {str(e)}")
+            cls.__log__.error(f"查询测试数据失败, error: {str(e)}")
             raise Exception(f"查询测试数据失败, {str(e)}")
 
     @classmethod
@@ -110,5 +109,5 @@ class ApiTestCaseDataDao(PikaMapper):
                 result = await session.execute(sql)
                 return result.scalars().all()
         except Exception as e:
-            cls.log.error(f"查询测试数据失败, error: {str(e)}")
+            cls.__log__.error(f"查询测试数据失败, error: {str(e)}")
             raise Exception(f"查询测试数据失败, {str(e)}")

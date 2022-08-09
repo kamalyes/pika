@@ -13,19 +13,17 @@
 from sqlalchemy import select, desc
 
 from app.core.handler.execres import ValidException
-from app.core.handler.logger import PikaLogger
-from app.crud import PikaMapper
+from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
 from app.models.environment import EnvironmentModel
 from app.schema.environment import EnvironmentSchema
-from app.utils.decorator import dao
 
 
-@dao(EnvironmentModel, PikaLogger("EnvironmentDao"))
-class EnvironmentDao(PikaMapper):
+@PikaMdWrapper(EnvironmentModel)
+class EnvironmentDao(PikaWrapper):
 
-    @staticmethod
-    async def query_env(id: int):
+    @classmethod
+    async def query_env(cls, id: int):
         """
         环境id
         Args:
@@ -74,5 +72,5 @@ class EnvironmentDao(PikaMapper):
                 return data.scalars().all(), total
         except Exception as e:
             err = f"获取环境数据失败，失败原因： {str(e)}"
-            cls.log.error(err)
+            cls.__log__.error(err)
             raise Exception(err)

@@ -16,13 +16,14 @@ from sqlalchemy import select, distinct, delete, update, or_, and_
 from app.core.handler.asyncsql import AsyncDbSession
 from app.core.handler.jsonres import PikaResponse
 from app.core.handler.logger import PikaLogger
+from app.crud import PikaWrapper
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysCodeEnum import ExcCodeEnum
 from app.models import async_db_session
 from app.models.kerberos import SecurityNominateIssueModel
 
 
-class KerberosDao(object):
+class KerberosDao(PikaWrapper):
     log = PikaLogger("KerberosDao")
 
     @staticmethod
@@ -53,7 +54,7 @@ class KerberosDao(object):
                 elif len(exists_question) > 0 and len(new_questions_list):
                     return PikaResponse.failed(code=ExcCodeEnum.VAR_ERROR,
                                                detail=f"部分添加成功！",
-                                               result={"exists_question": exists_question})
+                                               data={"exists_question": exists_question})
 
     @staticmethod
     async def delete_encrypt_issue(**kwargs):

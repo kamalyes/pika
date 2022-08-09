@@ -16,7 +16,7 @@ from app.core.handler.jsonres import PikaResponse
 from app.crud.online.rdconfig import PikaRedisConfigDao
 from app.enums.RbacEnum import RoleEnum
 from app.middleware.xredis import PikaRedisManager
-from app.models import DatabaseHelper, async_db_session
+from app.models import async_db_session
 from app.models.redis_config import RedisModel
 from app.schema.redis_config import RedisConfigSchema
 from app.service import Permission
@@ -28,11 +28,11 @@ router = APIRouter()
 async def insert_redis_config(form: RedisConfigSchema,
                               user_info=Depends(Permission(RoleEnum.ADMIN))):
     try:
-        query = await PikaRedisConfigDao.query_record(name=form.name, env=form.env)
+        query = await PikaRedisConfigDao.query(name=form.name, env=form.env)
         if query is not None:
             raise Exception("数据已存在, 请勿重复添加")
         data = RedisModel(**form.dict(), operator=user_info['emp_no'])
-        result = await PikaRedisConfigDao.insert_record(data, log=True)
+        result = await PikaRedisConfigDao.insert(data, log=True)
         return PikaResponse.success(data=result)
     except Exception as err:
         return PikaResponse.failed(detail=str(err))
@@ -73,8 +73,8 @@ async def list_redis_config(name: str = '', addr: str = '', env: int = None,
                             cluster: bool = None,
                             user_info=Depends(Permission(RoleEnum.MANAGER))):
     try:
-        data = await PikaRedisConfigDao.list_record(
-            name=DatabaseHelper.like(name), addr=DatabaseHelper.like(addr),
+        data = await PikaRedisConfigDao.select_list(
+            name=PikaRedisConfigDao.like(name), addr=PikaRedisConfigDao.like(addr),
             env=env, cluster=cluster
         )
         return PikaResponse.success(data=data)

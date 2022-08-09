@@ -11,9 +11,10 @@
 """
 
 from app.core.handler.logger import PikaLogger
+from app.crud import PikaWrapper
 
 
-class MockDao(object):
+class MockDao(PikaWrapper):
     log = PikaLogger("MockDao")
 
     @staticmethod

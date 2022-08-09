@@ -112,7 +112,7 @@ class ConnectionManager:
                     await self.send_personal_message(emp_no, WebSocketMessage.msg_count())
             # 判断是否要落入推送表
             if notice is not None:
-                await PikaNotificationDao.insert_record(notice)
+                await PikaNotificationDao.insert(notice)
         except Exception as e:
             ConnectionManager.logger.error(f"发送消息失败, {e}")
 

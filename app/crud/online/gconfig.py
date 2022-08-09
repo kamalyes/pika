@@ -12,17 +12,15 @@
 
 from sqlalchemy import select
 
-from app.core.handler.logger import PikaLogger
-from app.crud import PikaMapper
+from app.crud import PikaWrapper, PikaMdWrapper
 from app.middleware.xredis import RedisHelper
 from app.models import async_session
 from app.models.gconfig import GConfigModel
 from app.schema.gconfig import GConfigFormSchema
-from app.utils.decorator import dao
 
 
-@dao(GConfigModel, PikaLogger("GConfigDao"))
-class GConfigDao(PikaMapper):
+@PikaMdWrapper(GConfigModel)
+class GConfigDao(PikaWrapper):
 
     @classmethod
     @RedisHelper.up_cache("dao")
@@ -40,7 +38,7 @@ class GConfigDao(PikaMapper):
                     config = GConfigModel(**form.dict(), operator=operator)
                     session.add(config)
         except Exception as e:
-            cls.log.error(f"新增变量: {form.key}失败, {e}")
+            cls.__log__.error(f"新增变量: {form.key}失败, {e}")
             raise Exception(f"新增变量: {form.key}失败")
 
     @staticmethod

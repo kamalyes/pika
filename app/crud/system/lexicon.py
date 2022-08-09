@@ -10,9 +10,10 @@
 @Desc    : 　词库
 """
 from app.core.handler.logger import PikaLogger
+from app.crud import PikaWrapper
 
 
-class SensitiveWordDao(object):
+class SensitiveWordDao(PikaWrapper):
     log = PikaLogger("SensitiveWordDao")
 
     @staticmethod
@@ -32,7 +33,7 @@ class SensitiveWordDao(object):
         pass
 
 
-class AliasWordDao(object):
+class AliasWordDao(PikaWrapper):
     log = PikaLogger("AliasWordDao")
 
     @staticmethod

@@ -13,18 +13,18 @@ from datetime import datetime
 
 from sqlalchemy import select, desc
 
-from app.core.handler.logger import PikaLogger
+from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.itst.api.testresult import ApiTestResultDao
 from app.models import async_session
 from app.models.api_test_report import ApiTestReportModel
 from app.models.api_testplan import ApiTestPlanModel
 
 
-class ApiTestReportDao(object):
-    log = PikaLogger("ApiTestReportDao")
+@PikaMdWrapper(ApiTestReportModel)
+class ApiTestReportDao(PikaWrapper):
 
-    @staticmethod
-    async def start(executor: int, env: int, mode: int = 0, plan_id: int = None) -> int:
+    @classmethod
+    async def start(cls, executor: int, env: int, mode: int = 0, plan_id: int = None) -> int:
         """
         生成buildId，开始执行任务，任务完成后通过回调方法更新报告
         :return: 返回report_id
@@ -36,11 +36,11 @@ class ApiTestReportDao(object):
                     session.add(report)
                     return report.id
         except Exception as e:
-            ApiTestReportDao.log.error(f"新增报告失败, error: {e}")
+            cls.__log__.error(f"新增报告失败, error: {e}")
             raise Exception("新增报告失败")
 
-    @staticmethod
-    async def update(report_id: int, status) -> None:
+    @classmethod
+    async def update(cls, report_id: int, status) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -51,11 +51,11 @@ class ApiTestReportDao(object):
                         raise Exception("更新报告失败")
                     report.status = status
         except Exception as e:
-            ApiTestReportDao.log.error(f"更新报告失败, error: {e}")
+            cls.__log__.error(f"更新报告失败, error: {e}")
             raise Exception("更新报告失败")
 
-    @staticmethod
-    async def end(report_id: int, success_count: int, failed_count: int,
+    @classmethod
+    async def end(cls, report_id: int, success_count: int, failed_count: int,
                   error_count: int, skipped_count: int, status: int,
                   cost: str) -> ApiTestReportModel:
         try:
@@ -77,11 +77,11 @@ class ApiTestReportDao(object):
                     session.expunge(report)
                     return report
         except Exception as e:
-            ApiTestReportDao.log.error(f"更新报告失败, error: {e}")
+            cls.__log__.error(f"更新报告失败, error: {e}")
             raise Exception("更新报告失败")
 
-    @staticmethod
-    async def query(report_id: int):
+    @classmethod
+    async def query(cls, report_id: int):
         """
         根据报告id查询报告
         Args:
@@ -103,11 +103,11 @@ class ApiTestReportDao(object):
                 test_data = await ApiTestResultDao.list(report_id)
                 return report, test_data, plan_name
         except Exception as e:
-            ApiTestReportDao.log.error(f"查询报告失败: {e}")
+            cls.__log__.error(f"查询报告失败: {e}")
             raise Exception(f"查询报告失败: {e}")
 
-    @staticmethod
-    async def list_report(page: int, size: int, start_time: datetime, end_time: datetime,
+    @classmethod
+    async def list_report(cls, page: int, size: int, start_time: datetime, end_time: datetime,
                           executor: int = None):
         """
         获取报告列表
@@ -136,5 +136,5 @@ class ApiTestReportDao(object):
                 data = await session.execute(sql)
                 return data.scalars().all(), total
         except Exception as e:
-            ApiTestReportDao.log.error(f"查询构建记录失败: {e}")
+            cls.__log__.error(f"查询构建记录失败: {e}")
             raise Exception(f"查询构建记录失败: {e}")

@@ -15,7 +15,7 @@ async def list_user_operation(request: OperationSchema = Depends(),
                               escarole=Depends(Permission(escarole=True))):
     operator, operator_role = escarole
     try:
-        records = await PikaOperationDao.list_record(operator=operator, tag=request.tag, condition=[
+        records = await PikaOperationDao.select_list(operator=operator, tag=request.tag, condition=[
             OperationLogModel.operator_date.between(request.start_time, request.end_time)],
                                                      _sort=[desc(OperationLogModel.operator_date)])
         return PikaResponse.records(records)

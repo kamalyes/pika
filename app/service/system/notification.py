@@ -49,7 +49,7 @@ async def read_msg(form: NotificationSchema, user_info=Depends(Permission())):
             operator = user_info['emp_no']
             for f in form.broadcast:
                 model = BroadcastReadUserModel(f, operator)
-                await BroadcastReadDao.insert_record(model)
+                await BroadcastReadDao.insert(model)
         return PikaResponse.success()
     except Exception as e:
         return PikaResponse.failed(detail=str(e))

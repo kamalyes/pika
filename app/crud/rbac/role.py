@@ -14,15 +14,14 @@ from typing import Dict, Any, Text
 from sqlalchemy import select, delete, update, and_, or_
 
 from app.core.handler.asyncsql import AsyncDbSession
-from app.core.handler.logger import PikaLogger
+from app.crud import PikaMdWrapper
 from app.models import async_db_session
 from app.models.role import RoleModel
 from app.models.user import UserModel
 
 
+@PikaMdWrapper(RoleModel)
 class RoleDao:
-    log = PikaLogger("RoleDao")
-    """角色类"""
 
     @staticmethod
     async def list(db, request: Any) -> Dict[Text, Any]:
@@ -40,8 +39,8 @@ class RoleDao:
         do_sql = all_do_sql if request.query_type == 0 else dim_do_sql
         return await AsyncDbSession.query(db, do_sql)
 
-    @staticmethod
-    async def save_or_update(request: Any, operator) -> "RoleModel":
+    @classmethod
+    async def save_or_update(cls, request: Any, operator) -> RoleModel:
         try:
             id = request.id
             name = request.name
@@ -60,11 +59,11 @@ class RoleDao:
                     await session.execute(update_role_info_sql)
         except ValueError as err:
             err_msg = f"更新/写入失败，错误原因：{err}"
-            RoleDao.log.error(err_msg)
+            cls.__log__.error(err_msg)
             raise Exception(err_msg)
 
-    @staticmethod
-    async def delete(id: int):
+    @classmethod
+    async def delete(cls, id: int):
         try:
             async with async_db_session() as session:
                 async with session.begin():
@@ -77,5 +76,5 @@ class RoleDao:
                     del_role_sql = delete(RoleModel).where(RoleModel.id == id)
                     await session.execute(del_role_sql)
         except Exception as e:
-            RoleDao.log.error(f"获取数据库配置失败, error: {e}")
+            cls.__log__.error(f"获取数据库配置失败, error: {e}")
             raise Exception("获取数据库配置失败")

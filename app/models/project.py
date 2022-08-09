@@ -1,4 +1,16 @@
-from sqlalchemy import INT, Column, String, BOOLEAN, ForeignKey
+# -*- coding:utf-8 -*-
+# !/usr/bin/env python 3.9.11
+"""
+@File    :  project.py
+@Time    :  2022/7/7 15:21 PM
+@Author  :  YuYanQing
+@Version :  1.0
+@Contact :  mryu168@163.com
+@License :  (C)Copyright 2022-2026
+@Desc    :  项目
+"""
+
+from sqlalchemy import INT, Column, String, BOOLEAN, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship, backref
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
@@ -9,7 +21,7 @@ from app.models.user import UserModel
 
 class ProjectModel(LargeBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_project'
-    __table_args__ = {"comment": "项目管理表"}
+    __table_args__ = (UniqueConstraint('name', 'delete_date'), {"comment": "项目管理表"})
     name = Column(String(ByteSizeEnum.LENGTH_16), unique=True, index=True, comment="项目名称")
     owner = Column(
         String(ByteSizeEnum.LENGTH_16),

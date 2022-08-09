@@ -15,31 +15,29 @@ from copy import deepcopy
 
 from sqlalchemy import select, and_, or_, null
 
-from app.core.handler.logger import PikaLogger
-from app.crud import PikaMapper
+from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.project.project import ProjectDao
 from app.enums.OperationEnum import SqlOperationTypeEnum
-from app.models import async_session, DatabaseHelper
+from app.models import async_session
 from app.models.api_test_report import ApiTestReportModel
 from app.models.api_testplan import ApiTestPlanModel
 from app.models.testplan_follow_user import ApiTestPlanFollowUserRelModel
 from app.schema.api_testplan import ApiTestPlanSchema
-from app.utils.decorator import dao
 
 
-@dao(ApiTestPlanModel, PikaLogger("ApiTestPlanDao"))
-class ApiTestPlanDao(PikaMapper):
+@PikaMdWrapper(ApiTestPlanModel)
+class ApiTestPlanDao(PikaWrapper):
 
-    @staticmethod
-    async def list_test_plan(page: int, size: int, project_id: int = None, name: str = '',
+    @classmethod
+    async def list_test_plan(cls, page: int, size: int, project_id: int = None, name: str = '',
                              priority: str = '',
                              operator_identity: str = None, operator: str = None, follow: bool = None):
         try:
             async with async_session() as session:
                 conditions = [ApiTestPlanModel.delete_flag is False]
                 if project_id:
-                    DatabaseHelper.where(project_id, ApiTestPlanModel.project_id == project_id,
-                                         conditions)
+                    ApiTestPlanModel.where(project_id, ApiTestPlanModel.project_id == project_id,
+                                           conditions)
                 else:
                     # 找出用户能看到的项目
                     projects = await ProjectDao.list_project_id_by_user(session, operator, operator_identity)
@@ -47,9 +45,8 @@ class ApiTestPlanDao(PikaMapper):
                         # 说明用户一个项目都没有，不需要继续查询了
                         return [], 0
                     if len(projects) > 0:
-                        DatabaseHelper.where(projects, ApiTestPlanModel.project_id.in_(projects),
-                                             conditions)
-                DatabaseHelper.where(name, ApiTestPlanModel.name.like(f"%{name}%"), conditions) \
+                        cls.where(projects, ApiTestPlanModel.project_id.in_(projects), conditions)
+                cls.where(name, ApiTestPlanModel.name.like(f"%{name}%"), conditions) \
                     .where(priority, ApiTestPlanModel.priority == priority, conditions) \
                     .where(operator, ApiTestPlanModel.create_emp_no == operator, conditions)
                 if follow is None:
@@ -73,10 +70,10 @@ class ApiTestPlanDao(PikaMapper):
                                    ApiTestPlanFollowUserRelModel.plan_id == ApiTestPlanModel.id).where(
                         *conditions, or_(ApiTestPlanFollowUserRelModel.id is None,
                                          ApiTestPlanFollowUserRelModel.delete_date != 0))
-                result, total = await DatabaseHelper.pagination(page, size, session, sql, False)
+                result, total = await cls.pagination(page, size, session, sql, False)
                 return result, total
         except Exception as e:
-            ApiTestPlanDao.log.error(f"获取测试计划失败: {str(e)}")
+            cls.__log__.error(f"获取测试计划失败: {str(e)}")
             raise Exception(f"获取测试计划失败: {str(e)}")
 
     @staticmethod
@@ -98,7 +95,7 @@ class ApiTestPlanDao(PikaMapper):
                     session.expunge(test_plan)
                     return test_plan
         except Exception as e:
-            ApiTestPlanDao.log.error(f"新增测试计划失败: {str(e)}")
+            ApiTestPlanDao.__log__.error(f"新增测试计划失败: {str(e)}")
             raise Exception(f"添加失败: {str(e)}")
 
     @classmethod
@@ -117,7 +114,7 @@ class ApiTestPlanDao(PikaMapper):
                     plan.receiver = ",".join(map(str, plan.receiver))
                     plan.case_list = ",".join(map(str, plan.case_list))
                     plan.msg_type = ",".join(map(str, plan.msg_type))
-                    changed = DatabaseHelper.update_model(data, plan, user)
+                    changed = cls.update_model(data, plan, user)
                     await session.flush()
                     session.expunge(data)
                 if log:
@@ -127,8 +124,7 @@ class ApiTestPlanDao(PikaMapper):
                                            old, plan.id,
                                            changed))
         except Exception as e:
-            ApiTestPlanDao.log.exception(f"编辑测试计划失败: {str(e)}")
-            ApiTestPlanDao.log.error(f"编辑测试计划失败: {str(e)}")
+            cls.__log__.exception(f"编辑测试计划失败: {str(e)}")
             raise Exception(f"编辑失败: {str(e)}")
 
     @staticmethod
@@ -147,7 +143,7 @@ class ApiTestPlanDao(PikaMapper):
                     # session.expunge(data)
                     # return data
         except Exception as e:
-            ApiTestPlanDao.log.error(f"编辑测试计划失败: {str(e)}")
+            ApiTestPlanDao.__log__.error(f"编辑测试计划失败: {str(e)}")
             raise Exception(f"编辑失败: {str(e)}")
 
     @staticmethod
@@ -159,11 +155,11 @@ class ApiTestPlanDao(PikaMapper):
                 data = await session.execute(sql)
                 return data.scalars().first()
         except Exception as e:
-            ApiTestPlanDao.log.error(f"获取测试计划失败: {str(e)}")
+            ApiTestPlanDao.__log__.error(f"获取测试计划失败: {str(e)}")
             raise Exception(f"获取测试计划失败: {str(e)}")
 
-    # @staticmethod
-    # async def delete_test_plan(id: int, user: int):
+    # @classmethod
+    # async def delete_test_plan(cls, id: int, user: int):
     #     try:
     #         async with async_session() as session:
     #             async with session.begin():
@@ -172,9 +168,9 @@ class ApiTestPlanDao(PikaMapper):
     #                 data = query.scalars().first()
     #                 if data is None:
     #                     raise Exception("测试计划不存在")
-    #                 DatabaseHelper.delete_model(data, user)
+    #                 cls.delete_model(data, user)
     #     except Exception as e:
-    #         ApiTestPlanDao.log.error(f"删除测试计划失败: {str(e)}")
+    #         cls.__log__.error(f"删除测试计划失败: {str(e)}")
     #         raise Exception(f"删除失败: {str(e)}")
 
     @staticmethod
@@ -198,7 +194,7 @@ class ApiTestPlanDao(PikaMapper):
                 ans = data.scalars().first()
                 if ans is not None:
                     raise Exception("已关注过此测试计划")
-                model = ApiTestPlanFollowUserRelModel(plan_id, operator, operator)
+                model = ApiTestPlanFollowUserRelModel(plan_id, operator)
                 session.add(model)
 
     @staticmethod

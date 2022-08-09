@@ -18,19 +18,19 @@ from sqlalchemy import select, MetaData, text
 from sqlalchemy.exc import ResourceClosedError
 
 from app.core.handler.jsonres import PikaResponse, PikaJsonEncoder
-from app.core.handler.logger import PikaLogger
+from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.online.environment import EnvironmentDao
 from app.middleware.xredis import RedisHelper
-from app.models import async_session, DatabaseHelper, db_helper
+from app.models import async_session, db_helper
 from app.models.database import DatabaseModel
 from app.schema.database import DatabaseSchema
 
 
-class DbConfigDao(object):
-    log = PikaLogger("DbConfigDao")
+@PikaMdWrapper(DatabaseModel)
+class DbConfigDao(PikaWrapper):
 
-    @staticmethod
-    async def list_database(name: str = '', database: str = '', env: int = None):
+    @classmethod
+    async def list_database(cls, name: str = '', database: str = '', env: int = None):
         """
         通过name, database, env获取数据库配置列表
         Args:
@@ -52,11 +52,11 @@ class DbConfigDao(object):
                 result = await session.execute(select(DatabaseModel).where(*query))
                 return result.scalars().all()
         except Exception as e:
-            DbConfigDao.log.error(f"获取数据库配置失败, error: {e}")
+            cls.__log__.error(f"获取数据库配置失败, error: {e}")
             raise Exception("获取数据库配置失败")
 
-    @staticmethod
-    async def insert_database(data: DatabaseSchema, operator: str):
+    @classmethod
+    async def insert_database(cls, data: DatabaseSchema, operator: str):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -69,11 +69,11 @@ class DbConfigDao(object):
                         raise Exception("数据库配置已存在")
                     session.add(DatabaseModel(**data.dict(), operator=operator))
         except Exception as e:
-            DbConfigDao.log.error(f"新增数据库配置: {data.name}失败, {e}")
+            cls.__log__.error(f"新增数据库配置: {data.name}失败, {e}")
             raise Exception("新增数据库配置失败")
 
-    @staticmethod
-    async def update_database(data: DatabaseSchema, operator: str):
+    @classmethod
+    async def update_database(cls, data: DatabaseSchema, operator: str):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -84,13 +84,13 @@ class DbConfigDao(object):
                         raise Exception("数据库配置不存在")
                     db_helper.remove_connection(query.host, query.port, query.username,
                                                 query.password, query.database)
-                    DatabaseHelper.update_model(query, data, operator)
+                    cls.update_model(query, data, operator)
         except Exception as e:
-            DbConfigDao.log.error(f"编辑数据库配置: {data.name}失败, {e}")
+            cls.__log__.error(f"编辑数据库配置: {data.name}失败, {e}")
             raise Exception("编辑数据库配置失败")
 
-    @staticmethod
-    async def delete_database(id: int, operator: str):
+    @classmethod
+    async def delete_database(cls, id: int, operator: str):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -103,11 +103,11 @@ class DbConfigDao(object):
                     query.delete_date = datetime.now()
                     query.update_emp_no = operator
         except Exception as e:
-            DbConfigDao.log.error(f"删除数据库配置: {id}失败, {e}")
+            cls.__log__.error(f"删除数据库配置: {id}失败, {e}")
             raise Exception("删除数据库配置失败")
 
-    @staticmethod
-    async def query_database(id: int):
+    @classmethod
+    async def query_database(cls, id: int):
         try:
             async with async_session() as session:
                 result = await session.execute(
@@ -115,11 +115,11 @@ class DbConfigDao(object):
                                                 DatabaseModel.delete_flag is False))
                 return result.scalars().first()
         except Exception as e:
-            DbConfigDao.log.error(f"获取数据库配置失败, error: {e}")
+            cls.__log__.error(f"获取数据库配置失败, error: {e}")
             raise Exception("获取数据库配置失败")
 
-    @staticmethod
-    async def query_database_by_env_and_name(env: int, name: str):
+    @classmethod
+    async def query_database_by_env_and_name(cls, env: int, name: str):
         try:
             async with async_session() as session:
                 result = await session.execute(
@@ -128,12 +128,12 @@ class DbConfigDao(object):
                                                 DatabaseModel.delete_flag is False))
                 return result.scalars().first()
         except Exception as e:
-            DbConfigDao.log.error(f"获取数据库配置失败, error: {e}")
+            cls.__log__.error(f"获取数据库配置失败, error: {e}")
             raise Exception("获取数据库配置失败")
 
-    @staticmethod
+    @classmethod
     @RedisHelper.cache("database:cache", expired_time=3600 * 3)
-    async def query_database_and_tables():
+    async def query_database_and_tables(cls):
         """
         方法会查询所有数据库表配置的信息
         Returns:
@@ -158,14 +158,14 @@ class DbConfigDao(object):
                         result.append(dict(title=name, key=f"env_{name}", children=list()))
                         idx = len(result) - 1
                         env_index[name] = idx
-                    await DbConfigDao.get_tables(table_map, d, result[idx]['children'])
+                    await cls.get_tables(table_map, d, result[idx]['children'])
                 return result, table_map
         except Exception as err:
-            DbConfigDao.log.error(f"获取数据库配置详情失败, error: {err}")
+            cls.__log__.error(f"获取数据库配置详情失败, error: {err}")
             raise Exception(f"获取数据库配置详情失败: {err}")
 
-    @staticmethod
-    async def get_tables(table_map: dict, data: DatabaseModel, children: List):
+    @classmethod
+    async def get_tables(cls, table_map: dict, data: DatabaseModel, children: List):
         conn = await db_helper.get_connection(data.sql_type, data.host, data.port, data.username,
                                               data.password,
                                               data.database)
@@ -174,11 +174,10 @@ class DbConfigDao(object):
                    children=database_child, sql_type=data.sql_type)
         eng = conn.get('engine')
         async with eng.connect() as conn:
-            await conn.run_sync(DbConfigDao.load_table, table_map, data, database_child, children,
-                                dbs)
+            await conn.run_sync(DbConfigDao.load_table, table_map, data, database_child, children, dbs)
 
-    @staticmethod
-    def load_table(conn, table_map, data, database_child, children, dbs):
+    @classmethod
+    def load_table(cls, conn, table_map, data, database_child, children, dbs):
         """
         异步加载table及字段
         Args:
@@ -208,8 +207,8 @@ class DbConfigDao(object):
                 ))
         children.append(dbs)
 
-    @staticmethod
-    async def online_sql(id: int, sql: str):
+    @classmethod
+    async def online_sql(cls, id: int, sql: str):
         try:
             query = await DbConfigDao.query_database(id)
             if query is None:
@@ -219,11 +218,11 @@ class DbConfigDao(object):
                                                   query.password, query.database)
             return await DbConfigDao.execute(data, sql)
         except Exception as e:
-            DbConfigDao.log.error(f"查询数据库配置失败, error: {e}")
+            cls.__log__.error(f"查询数据库配置失败, error: {e}")
             raise Exception(f"执行SQL失败: {e}")
 
-    @staticmethod
-    async def execute(conn, sql):
+    @classmethod
+    async def execute(cls, conn, sql):
         row_count = 0
         session = conn.get("session")
         async with session() as s:
@@ -237,22 +236,22 @@ class DbConfigDao(object):
                     # 说明是update或其他语句
                     return [{"rowCount": row_count}]
                 except Exception as e:
-                    DbConfigDao.log.error(f"查询数据库配置失败, error: {e}")
+                    cls.__log__.error(f"查询数据库配置失败, error: {e}")
                     raise Exception(f"执行sql失败: {e}")
 
-    @staticmethod
-    async def execute_sql(env: int, name: str, sql: str):
+    @classmethod
+    async def execute_sql(cls, env: int, name: str, sql: str):
         try:
-            query = await DbConfigDao.query_database_by_env_and_name(env, name)
+            query = await cls.query_database_by_env_and_name(env, name)
             if query is None:
                 raise Exception("未找到对应的数据库配置")
             data = await db_helper.get_connection(query.sql_type, query.host, query.port,
                                                   query.username,
                                                   query.password,
                                                   query.database)
-            result = await DbConfigDao.execute(data, sql)
+            result = await cls.execute(data, sql)
             _, result = PikaResponse.parse_sql_result(result)
             return json.dumps(result, cls=PikaJsonEncoder, ensure_ascii=False)
         except Exception as e:
-            DbConfigDao.log.error(f"查询数据库配置失败, error: {e}")
+            cls.__log__.error(f"查询数据库配置失败, error: {e}")
             raise Exception(f"执行SQL失败: {e}")

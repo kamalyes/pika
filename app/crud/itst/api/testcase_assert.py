@@ -13,16 +13,14 @@ from typing import List
 
 from sqlalchemy import asc, select
 
-from app.core.handler.logger import PikaLogger
-from app.crud import PikaMapper
+from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session, DatabaseHelper
 from app.models.api_testcase_asserts import ApiTestCaseAssertsModel
 from app.schema.api_testcase import TestCaseAssertsForm
-from app.utils.decorator import dao
 
 
-@dao(ApiTestCaseAssertsModel, PikaLogger("ApiTestCaseAssertsDao"))
-class ApiTestCaseAssertsDao(PikaMapper):
+@PikaMdWrapper(ApiTestCaseAssertsModel)
+class ApiTestCaseAssertsDao(PikaWrapper):
 
     @classmethod
     async def list_test_case_asserts(cls, case_id: int) -> List[ApiTestCaseAssertsModel]:
@@ -42,7 +40,7 @@ class ApiTestCaseAssertsDao(PikaMapper):
                     asc(ApiTestCaseAssertsModel.name))
                 return query.scalars().all()
         except Exception as e:
-            cls.log.error(f"获取用例断言失败: {str(e)}")
+            cls.__log__.error(f"获取用例断言失败: {str(e)}")
             raise Exception("获取用例断言失败")
 
     @classmethod
@@ -56,7 +54,7 @@ class ApiTestCaseAssertsDao(PikaMapper):
                 case_list = await session.execute(sql)
                 return case_list.scalars().all()
         except Exception as e:
-            cls.log.error(f"获取用例断言失败: {str(e)}")
+            cls.__log__.error(f"获取用例断言失败: {str(e)}")
             raise Exception(f"获取用例断言失败: {str(e)}")
 
     @staticmethod
@@ -78,11 +76,11 @@ class ApiTestCaseAssertsDao(PikaMapper):
                     # TODO bug：Could not refresh instance '<ApiTestCaseAssertsModel at 0x155e8af9be0>
                     await session.flush()
                     await session.refresh(new_assert)
-                    # session.expunge(new_assert)
-                    # return new_assert
+                    session.expunge(new_assert)
+                    return new_assert
             return ans
         except Exception as e:
-            ApiTestCaseAssertsDao.log.error(f"新增用例断言失败, error: {e}")
+            ApiTestCaseAssertsDao.__log__.error(f"新增用例断言失败, error: {e}")
             raise Exception(f"新增用例断言失败, {e}")
 
     @classmethod
@@ -107,12 +105,12 @@ class ApiTestCaseAssertsDao(PikaMapper):
                     data = result.scalars().first()
                     if data is None:
                         raise Exception("断言信息不存在, 请检查")
-                    DatabaseHelper.update_model(data, form, operator)
+                    cls.update_model(data, form, operator)
                     await session.flush()
                     session.expunge(data)
                     return data
         except Exception as e:
-            cls.log.error(f"编辑用例断言失败, error: {e}")
+            cls.__log__.error(f"编辑用例断言失败, error: {e}")
             raise Exception(f"编辑用例断言失败, {e}")
 
     @classmethod
@@ -126,7 +124,7 @@ class ApiTestCaseAssertsDao(PikaMapper):
                     data = result.scalars().first()
                     if data is None:
                         raise Exception("断言信息不存在, 请检查")
-                    DatabaseHelper.delete_model(data, operator)
+                    cls.delete_model(data, operator)
         except Exception as e:
-            cls.log.error(f"编辑用例断言失败, error: {e}")
-            raise Exception(f"编辑用例断言失败, {e}")
+            cls.__log__.error(f"删除用例断言失败, error: {e}")
+            raise Exception(f"删除用例断言失败, {e}")

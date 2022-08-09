@@ -9,12 +9,10 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from app.core.handler.logger import PikaLogger
-from app.crud import PikaMapper
+from app.crud import PikaWrapper, PikaMdWrapper
 from app.models.broadcast import BroadcastReadUserModel
-from app.utils.decorator import dao
 
 
-@dao(BroadcastReadUserModel, PikaLogger("BroadcastReadDao"))
-class BroadcastReadDao(PikaMapper):
+@PikaMdWrapper(BroadcastReadUserModel)
+class BroadcastReadDao(PikaWrapper):
     pass

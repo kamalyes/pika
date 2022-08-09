@@ -379,7 +379,7 @@ class Executor(object):
             asserts = await ApiTestCaseAssertsDao.async_list_test_case_asserts(case_id)
 
             # 获取出参信息
-            out_parameters = await ApiTestCaseOutParametersDao.list_record(case_id=case_id)
+            out_parameters = await ApiTestCaseOutParametersDao.select_list(case_id=case_id)
 
             for ast in asserts:
                 await self.parse_gconfig(ast, GConfigTypeEnum.asserts, env, "expected", "actually")
@@ -573,11 +573,11 @@ class Executor(object):
             cookies = result.get("cookies")
             req = json.dumps(request_param, ensure_ascii=False)
             data[case_id].append(status)
-            await ApiTestResultDao.insert(report_id, case_id, case_name, status,
-                                          case_logs, start_at, finished_at,
-                                          url, body, request_method, request_headers, cost,
-                                          asserts, response_headers, response,
-                                          status_code, cookies, 0, req, name, data_id)
+            await ApiTestResultDao.insert_report(report_id, case_id, case_name, status,
+                                                 case_logs, start_at, finished_at,
+                                                 url, body, request_method, request_headers, cost,
+                                                 asserts, response_headers, response,
+                                                 status_code, cookies, 0, req, name, data_id)
             break
 
     @staticmethod
