@@ -483,8 +483,8 @@ async def websocket_endpoint(websocket: WebSocket, emp_no: str):
 if __name__ == "__main__":
     uvicorn.run(
         app="Application:pika",
-        host="localhost",
-        port=7780,
+        host=PikaAppConfig.SERVER_HOST,
+        port=PikaAppConfig.SERVER_PORT,
         reload=True,
         debug=True,
         log_config="uvicorn_config.json",

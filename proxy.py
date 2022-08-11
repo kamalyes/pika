@@ -12,5 +12,5 @@ if PikaAppConfig.MOCK_OPEN:
     asyncio.run(start_proxy(logger))
 
 if __name__ == "__main__":
-    uvicorn.run("proxy:mock", host="0.0.0.0", port=PikaAppConfig.PROXY_PORT,
+    uvicorn.run("proxy:mock", host=PikaAppConfig.SERVER_HOST, port=PikaAppConfig.PROXY_PORT,
                 reload=False, forwarded_allow_ips="*", workers=1)
