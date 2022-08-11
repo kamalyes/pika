@@ -10,22 +10,23 @@
 @Desc    :  None
 """
 
-from datetime import datetime, timedelta
 
-from fastapi import Depends
+from fastapi import Depends, APIRouter
+from hutools.time import Moment
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud.itst.api.testcase import ApiTestCaseDao
 from app.crud.statistics.dashboard import DashboardDao
 from app.service import Permission
-from app.service.workspace.workspace import router
 from app.utils.ws_manager import ws_manage
+
+router = APIRouter()
 
 
 @router.get("/statistics", description="获取统计数据", summary="获取平台统计数据")
 async def query_follow_testplan(_=Depends(Permission())):
-    end = datetime.today()
-    start = datetime.today() - timedelta(days=6)
+    start = Moment.skew_date(days=-6)
+    end = Moment.skew_date()
     rank = await ApiTestCaseDao.query_user_case_rank()
     count, data = await DashboardDao.get_statistics_data(start, end)
     report_data = await DashboardDao.get_report_statistics(start, end)

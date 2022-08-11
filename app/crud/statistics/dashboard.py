@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud import db_connect, PikaWrapper
 from app.middleware.xredis import RedisHelper
+from app.models.admin import SysUserAdminModel
 from app.models.api_test_case import ApiTestCaseModel
 from app.models.api_testplan import ApiTestPlanModel
 from app.models.project import ProjectModel
@@ -38,7 +39,7 @@ class DashboardDao(PikaWrapper):
                                                   Item("project", ProjectModel),
                                                   Item("testcase", ApiTestCaseModel),
                                                   Item("testplan", ApiTestPlanModel),
-                                                  Item("user", UserModel))
+                                                  Item("useradmin", SysUserAdminModel))
 
     @classmethod
     @RedisHelper.cache("report_statistics")
@@ -46,7 +47,7 @@ class DashboardDao(PikaWrapper):
     async def get_report_statistics(cls, start: datetime, end: datetime,
                                     session: AsyncSession = None):
         result, idx = await cls.get_date_data(start, end)
-        sql = cls.create_sql(ApiTestPlanModel, start, end, field="start_at")
+        sql = cls.create_sql(ApiTestPlanModel, start, end, field="create_date")
         data = await session.execute(sql)
         count, success, failed, skip, error, total, total_pass = 0, 0, 0, 0, 0, 0, 0
         for item in data.scalars().all():
@@ -82,7 +83,7 @@ class DashboardDao(PikaWrapper):
             query = await session.execute(cls.create_sql(n.model, start, end))
             # 找到未删除的所有项目数据
             counts = await session.execute(
-                select(func.count(n.model.id)).where(n.model.is_deleted is False))
+                select(func.count(n.model.id)).where(n.model.delete_flag is False))
             for r in query.scalars().all():
                 date = r.create_date.strftime("%Y-%m-%d")
                 if result[idx[date]].get(n.name) is None:

@@ -64,6 +64,7 @@ from app.service.system import mini_oss_router
 from app.service.system import notice_router
 from app.service.system import operation_log_router
 from app.service.workspace import workspace_router
+from app.service.workspace import statistics_router
 from app.utils.ws_manager import ws_manage
 from config import InterceptHandler, PikaAppConfig
 
@@ -343,6 +344,10 @@ class PikaFastApi:
         pika.include_router(workspace_router, prefix="/workspace", tags=["工作台"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
+        pika.include_router(statistics_router, prefix="/workspace", tags=["视图"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+
         # itst
         pika.include_router(project_router, prefix="/project", tags=["项目"],
                             dependencies=[Depends(PikaFastApi.request_info),

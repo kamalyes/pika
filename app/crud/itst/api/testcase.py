@@ -41,10 +41,10 @@ class ApiTestCaseDao(PikaWrapper):
 
     @classmethod
     async def generate_sql(cls):
-        return select(ApiTestCaseModel.create_user, func.count(ApiTestCaseModel.id)) \
-            .outerjoin(SysUserAdminModel, and_(SysUserAdminModel.is_deleted is False,
+        return select(ApiTestCaseModel.create_emp_no, func.count(ApiTestCaseModel.id)) \
+            .outerjoin(SysUserAdminModel, and_(SysUserAdminModel.delete_flag is False,
                                                ApiTestCaseModel.create_emp_no == SysUserAdminModel.emp_no)).where(
-            ApiTestCaseModel.is_deleted is False).group_by(ApiTestCaseModel.create_user).order_by(
+            ApiTestCaseModel.delete_flag is False).group_by(ApiTestCaseModel.create_emp_no).order_by(
             desc(func.count(ApiTestCaseModel.id)))
 
     @classmethod

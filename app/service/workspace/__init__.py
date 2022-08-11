@@ -10,3 +10,4 @@
 @Desc    :  None
 """
 from app.service.workspace.workspace import router as workspace_router
+from app.service.workspace.statistics import router as statistics_router
