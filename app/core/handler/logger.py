@@ -24,7 +24,7 @@ from config import PikaAppConfig
 class PikaLogger(object):
     business = None
 
-    def __init__(self, name=PikaGlobalVarEnum.APP_NAME):  # Logger标识默认为app
+    def __init__(self, name=PikaGlobalVarEnum.BIG_HUMP_APP_NAME):  # Logger标识默认为app
         """
 
         Args:

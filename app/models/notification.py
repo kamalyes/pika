@@ -16,7 +16,7 @@ from app.models.basic import LargeBaseModel
 
 
 class NotificationModel(LargeBaseModel):
-    __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_notification'
+    __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_notification'
     __table_args__ = {"comment": "消息通知表"}
     msg_type = Column(SMALLINT, comment="消息类型 1: 系统消息 2: 其他消息")
     msg_title = Column(VARCHAR(32), comment="消息标题", nullable=False)

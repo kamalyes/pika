@@ -21,13 +21,13 @@ from app.models.user import UserModel
 
 
 class ActionControlModel(NormBaseModel):
-    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_sys_action"
+    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_sys_action"
     __table_args__ = {"comment": "权限控制配置表"}
     action_name = Column(String(ByteSizeEnum.LENGTH_128), nullable=False, comment="权限名称")
 
 
 class RoleAction(NormBaseModel):
-    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_user_action_relation"
+    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_user_action_relation"
     __table_args__ = {"comment": "角色活动表"}
     emp_no = Column(
         String(ByteSizeEnum.LENGTH_20),

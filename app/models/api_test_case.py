@@ -9,7 +9,7 @@ from app.models.basic import LargeBaseModel
 
 
 class ApiTestCaseModel(LargeBaseModel):
-    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_testcase"
+    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_testcase"
     # 调整联合唯一索引
     __table_args__ = (UniqueConstraint('directory_id', 'name'), {"comment": "测试用例表"})
     name = Column(String(ByteSizeEnum.LENGTH_32), index=True, comment="名称")

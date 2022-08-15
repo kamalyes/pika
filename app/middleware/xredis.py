@@ -24,6 +24,7 @@ from redis import ConnectionPool, StrictRedis
 # noinspection PyPackageRequirements
 from rediscluster import RedisCluster, ClusterConnectionPool
 
+from app.enums.SysvarEnum import PikaGlobalVarEnum
 from app.excpetions.thirdparty.RedisException import RedisException
 from config import PikaAppConfig
 
@@ -151,7 +152,7 @@ class PikaRedisManager(object):
 
 
 class RedisHelper(object):
-    prefix = f"{PikaAppConfig.APP_NAME}"
+    prefix = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}"
     pika_redis_client = PikaRedisManager().client
 
     @staticmethod

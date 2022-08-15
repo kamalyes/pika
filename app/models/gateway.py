@@ -18,7 +18,7 @@ from app.models.basic import LargeBaseModel
 
 
 class GatewayModel(LargeBaseModel):
-    __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_gateway'
+    __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_gateway'
     __table_args__ = (
         UniqueConstraint('env', 'name'), {"comment": "请求网关地址表"}
     )

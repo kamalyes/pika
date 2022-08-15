@@ -13,7 +13,7 @@ _notice_type = {
 
 
 class ApiTestPlanModel(LargeBaseModel):
-    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_test_plan"
+    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_test_plan"
     __table_args__ = {"comment": "测试计划表"}
     project_id = Column(INT, nullable=False, comment="测试计划执行环境, 可以多选")
     env = Column(String(ByteSizeEnum.LENGTH_64), nullable=False, comment="测试计划名称")

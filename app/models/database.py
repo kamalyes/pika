@@ -17,7 +17,7 @@ from app.models.basic import LargeBaseModel
 
 
 class DatabaseModel(LargeBaseModel):
-    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_database_info"
+    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_database_info"
     __table_args__ = (UniqueConstraint('env', 'name'), {"comment": "数据库配置表"})
     env = Column(INT, nullable=False, comment="对应环境id")
     name = Column(String(ByteSizeEnum.LENGTH_30), nullable=False, comment="名称")

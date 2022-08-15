@@ -20,7 +20,7 @@ from app.schema.api_testcase_directory import ApiTestCaseDirectorySchema
 
 
 class ApiTestCaseDirectoryModel(LargeBaseModel):
-    __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_testcase_directory'
+    __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_testcase_directory'
     __table_args__ = (UniqueConstraint('project_id', 'name', 'parent'), {"comment": "用例目录表"})
     name = Column(String(ByteSizeEnum.LENGTH_18), nullable=False, comment="目录名称")
     id = Column(INT, primary_key=True, comment="用例id")

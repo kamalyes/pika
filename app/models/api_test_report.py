@@ -9,7 +9,7 @@ from app.models import Base
 
 
 class ApiTestReportModel(Base):
-    __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_test_report'
+    __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_test_report'
     __table_args__ = {"comment": "测试报告表"}
     id = Column(INT, primary_key=True)
     executor = Column(String(ByteSizeEnum.LENGTH_16), server_default="0", index=True, comment="执行人 0则为CPU")

@@ -25,9 +25,9 @@ class PikaGlobalVarEnum:
             \/_/    \/_/\/_/\/_/\/__/\/_/
         """
     EMP_NO_START = "PK_"
-    APP_NAME = "Pika"
+    BIG_HUMP_APP_NAME = "Pika"
     DEFAULT_PASSWORD = "1235678"
-    APP_NAME_LOWER = APP_NAME.lower()
+    LOWER_HUMP_APP_NAME = BIG_HUMP_APP_NAME.lower()
     PL_EMAIL = "mryu168@163.com"
     AGREE_MENT = "2022~2026"
     VERIFY_CODE_WHITE_LIST = ("888888", "Sweet")

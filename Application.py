@@ -63,17 +63,15 @@ from app.service.system import lexicon_router
 from app.service.system import mini_oss_router
 from app.service.system import notice_router
 from app.service.system import operation_log_router
-from app.service.workspace import workspace_router
 from app.service.workspace import statistics_router
+from app.service.workspace import workspace_router
 from app.utils.ws_manager import ws_manage
-from config import InterceptHandler, PikaAppConfig
+from config import PikaAppConfig, InterceptHandler
 
 logger = InterceptHandler.init_logging()
 
 
 class PikaFastApi:
-    def __init__(self):
-        pass
 
     @staticmethod
     async def request_info(request: Request):
@@ -259,7 +257,7 @@ class PikaFastApi:
 
     # noinspection PyShadowingNames
     @staticmethod
-    def create_app(app_name=None, origins=None, title=f"{PikaGlobalVarEnum.APP_NAME}测试平台",
+    def create_app(app_name=None, origins=None, title=f"{PikaGlobalVarEnum.BIG_HUMP_APP_NAME}测试平台",
                    requirements=None):
         """
         初始化app、配置路由及swagger
@@ -405,6 +403,17 @@ pika = PikaFastApi.create_app()
 
 
 @pika.on_event("startup")
+async def init_env():
+    """
+        初始化init_env
+    Returns:
+
+    """
+    logger.bind(name=None).opt(ansi=True).success(f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME} is running at <red>{PikaAppConfig.ENVIRONMENT}</red>")
+    logger.bind(name=None).success(f"{PikaGlobalVarEnum.BANNER}")
+
+
+@pika.on_event("startup")
 async def init_database():
     """
         初始化数据库，建表
@@ -486,6 +495,5 @@ if __name__ == "__main__":
         host=PikaAppConfig.SERVER_HOST,
         port=PikaAppConfig.SERVER_PORT,
         reload=True,
-        debug=True,
-        log_config="uvicorn_config.json",
+        debug=True
     )

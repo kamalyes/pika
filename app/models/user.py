@@ -17,7 +17,7 @@ from app.models.basic import NormBaseModel
 
 
 class UserModel(NormBaseModel):
-    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_sys_user"
+    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_sys_user"
     __table_args__ = (UniqueConstraint("emp_no", "email", "mobile"), {"comment": "用户表"})
     emp_no = Column(String(ByteSizeEnum.LENGTH_16), comment="员工编号")
     username = Column(String(ByteSizeEnum.LENGTH_16), comment="正式名称（登录使用）")

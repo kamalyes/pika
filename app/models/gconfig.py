@@ -17,7 +17,7 @@ from app.models.basic import LargeBaseModel
 
 
 class GConfigModel(LargeBaseModel):
-    __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_gconfig'
+    __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_gconfig'
     env = Column(INT, comment="环境")
     key = Column(String(ByteSizeEnum.LENGTH_56), comment="key")
     value = Column(TEXT, comment="变量")

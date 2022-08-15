@@ -874,7 +874,7 @@ class Executor(object):
                             Executor.log.debug("项目未配置钉钉通知机器人")
                             continue
                         ding = DingTalk(project.dingtalk_url)
-                        await ding.send_msg(f"{PikaGlobalVarEnum.APP_NAME_LOWER}测试报告",
+                        await ding.send_msg(f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}测试报告",
                                             render_markdown, None, users)
 
     @staticmethod

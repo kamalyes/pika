@@ -27,7 +27,7 @@ class Email(object):
 
     @staticmethod
     async def register_succeed(emp_no: str, username: str, addressee: List, pwd_valid_date,
-                               app_name=PikaGlobalVarEnum.APP_NAME):
+                               app_name=PikaGlobalVarEnum.BIG_HUMP_APP_NAME):
         """
 
         Args:
@@ -58,7 +58,7 @@ class Email(object):
 
     @staticmethod
     async def rand_mail_code(emp_no: str = None, username: str = None, addressee: List = None,
-                             app_name=PikaGlobalVarEnum.APP_NAME, model=1):
+                             app_name=PikaGlobalVarEnum.BIG_HUMP_APP_NAME, model=1):
         auth_code_ = MockHelper.rand_sample(length=6)
         redis_now_time = await async_redis.time()
         auth_code_valid_time = ValidTimeEnum.AUTH_CODE_VALID_TIME

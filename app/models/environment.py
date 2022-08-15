@@ -17,7 +17,7 @@ from app.models.basic import LargeBaseModel
 
 
 class EnvironmentModel(LargeBaseModel):
-    __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_environment'
+    __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_environment'
     name = Column(String(ByteSizeEnum.LENGTH_50))
     __table_args__ = (UniqueConstraint('name'), {"comment": "环境配置"})
 

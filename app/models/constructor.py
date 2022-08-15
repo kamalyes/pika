@@ -17,7 +17,7 @@ from app.models.basic import LargeBaseModel
 
 
 class ConstructorModel(LargeBaseModel):
-    __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_constructor'
+    __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_constructor'
     __table_args__ = (UniqueConstraint('case_id', 'suffix', 'name'), {"comment": "数据构造器表"})
     type = Column(INT, default=0, comment="0: testcase 1: sqlscript 2: redis 3: py脚本 4: 其它")
     name = Column(String(ByteSizeEnum.LENGTH_64), comment="数据初始化描述")

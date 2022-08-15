@@ -67,7 +67,7 @@ class PikaAppConfig(object):
         f"mysql+aiomysql://{MYSQL_USER}:{MYSQL_PWD}@{MYSQL_HOST}:{MYSQL_PORT}/{DBNAME}?{MYSQL_TIME_ZONE}"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    RELATION = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_relation"
+    RELATION = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_relation"
     TABLE_TAG = "__table_args__"
     IGNORE_FIELDS = (
         "create_date",
@@ -147,9 +147,8 @@ class PikaAppConfig(object):
     # 日志相关
     LOGS_DIR_NAME = time.strftime("%Y-%m-%d", time.localtime(time.time()))
     LOG_GENERAL_DIR = os.path.join(LOGS_PATH, LOGS_DIR_NAME)
-    APP_NAME = PikaGlobalVarEnum.APP_NAME.lower()
-    INFO_LOG_FILE = os.path.join(LOG_GENERAL_DIR, f"{APP_NAME}-info.log")
-    ERROR_LOG_FILE = os.path.join(LOG_GENERAL_DIR, f"{APP_NAME}-error.log")
+    INFO_LOG_FILE = os.path.join(LOG_GENERAL_DIR, f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-info.log")
+    ERROR_LOG_FILE = os.path.join(LOG_GENERAL_DIR, f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-error.log")
     # 配置日志格式
     INFO_FORMAT = (
         "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> "

@@ -21,7 +21,7 @@ units = (
 
 
 class OssFileModel(LargeBaseModel):
-    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_oss_file"
+    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_oss_file"
     __table_args__ = (
         UniqueConstraint('file_path'),
         {"comment": "oss文件映射表"}

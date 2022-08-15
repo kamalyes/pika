@@ -19,13 +19,13 @@ from app.models.user import UserModel
 
 
 class SecurityNominateIssueModel(NormBaseModel):
-    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_security_issue"
+    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_security_issue"
     __table_args__ = (UniqueConstraint("question"), {"comment": "密保问题推荐表"})
     question = Column(String(ByteSizeEnum.LENGTH_255), nullable=False, comment="密保问题")
 
 
 class PikaSecurityRelIssues(NormBaseModel):
-    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_user_security"
+    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_user_security"
     __table_args__ = {"comment": "用户密保问题表"}
     uid = Column(
         INT,

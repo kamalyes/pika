@@ -19,7 +19,7 @@ from app.models.basic import NormBaseModel, MinBaseModel
 
 
 class SysRecordModel(NormBaseModel):
-    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_sys_record"
+    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_sys_record"
     remote_addr = Column(String(ByteSizeEnum.LENGTH_255), nullable=False, comment='用户名称')
     real_ip = Column(String(ByteSizeEnum.LENGTH_255), nullable=False, comment='request_ip')
     request = Column(Text, nullable=False, comment='request')
@@ -36,7 +36,7 @@ class SysRecordModel(NormBaseModel):
 
 
 class OperationLogModel(MinBaseModel):
-    __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_operation_log'
+    __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_operation_log'
     title = Column(String(ByteSizeEnum.LENGTH_128), nullable=True, comment="操作title")
     tag = Column(String(ByteSizeEnum.LENGTH_1000), comment="操作tag")
     mode = Column(SMALLINT, comment="操作类型")

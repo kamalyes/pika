@@ -61,7 +61,7 @@ class EmailManger(object):
             "email": email,
             "valid_time": valid_time,
             "agreement": PikaGlobalVarEnum.AGREE_MENT,
-            "form": PikaGlobalVarEnum.APP_NAME,
+            "form": PikaGlobalVarEnum.BIG_HUMP_APP_NAME,
             "send_time": send_time,
             "root_email": PikaGlobalVarEnum.PL_EMAIL,
         }
@@ -98,7 +98,7 @@ class EmailManger(object):
             "emp_no": emp_no,
             "event_content": event_content,
             "agreement": PikaGlobalVarEnum.AGREE_MENT,
-            "form": PikaGlobalVarEnum.APP_NAME,
+            "form": PikaGlobalVarEnum.BIG_HUMP_APP_NAME,
             "send_time": send_time,
         }
         return EmailManger.sub_template("event.html", target_dict)
@@ -121,7 +121,7 @@ class EmailManger(object):
             "email": email,
             "auth_code": auth_code,
             "agreement": PikaGlobalVarEnum.AGREE_MENT,
-            "form": PikaGlobalVarEnum.APP_NAME,
+            "form": PikaGlobalVarEnum.BIG_HUMP_APP_NAME,
             "valid_time": valid_time,
             "send_time": redis_time,
         }
@@ -147,7 +147,7 @@ class EmailManger(object):
             "emp_no": emp_no,
             "auth_code": auth_code,
             "agreement": PikaGlobalVarEnum.AGREE_MENT,
-            "form": PikaGlobalVarEnum.APP_NAME,
+            "form": PikaGlobalVarEnum.BIG_HUMP_APP_NAME,
             "valid_time": valid_time,
             "send_time": redis_time,
         }
@@ -175,7 +175,7 @@ class EmailManger(object):
             "new_password": new_password,
             "valid_time": valid_time,
             "agreement": PikaGlobalVarEnum.AGREE_MENT,
-            "form": PikaGlobalVarEnum.APP_NAME,
+            "form": PikaGlobalVarEnum.BIG_HUMP_APP_NAME,
             "send_time": send_time,
             "root_email": PikaGlobalVarEnum.PL_EMAIL,
         }
@@ -208,7 +208,7 @@ class EmailManger(object):
             "encrypted_answers": encrypted_answers,
             "valid_time": valid_time,
             "agreement": PikaGlobalVarEnum.AGREE_MENT,
-            "form": PikaGlobalVarEnum.APP_NAME,
+            "form": PikaGlobalVarEnum.BIG_HUMP_APP_NAME,
             "send_time": send_time,
             "root_email": PikaGlobalVarEnum.PL_EMAIL,
         }
@@ -229,7 +229,7 @@ class EmailManger(object):
             content,
             subject="",
             send_type="html",
-            title=PikaGlobalVarEnum.APP_NAME,
+            title=PikaGlobalVarEnum.BIG_HUMP_APP_NAME,
             addressee: list = [],
     ):
         """

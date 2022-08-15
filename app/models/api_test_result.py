@@ -21,7 +21,7 @@ from app.models import Base
 
 
 class ApiTestResultModel(Base):
-    __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_test_result'
+    __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_test_result'
     __table_args__ = {"comment": "测试结果表"}
     id = Column(INT, primary_key=True)
     directory_id = None

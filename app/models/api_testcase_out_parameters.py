@@ -6,7 +6,7 @@ from app.models.basic import LargeBaseModel
 
 
 class ApiTestCaseOutParametersModel(LargeBaseModel):
-    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_testcase_out_parameters"
+    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_testcase_out_parameters"
     __table_args__ = (UniqueConstraint('case_id', 'name'), {"comment": "用例出参数据表，与用例绑定"})
     case_id = Column(INT, nullable=False, comment="用例id")
     name = Column(String(ByteSizeEnum.LENGTH_24), nullable=False, comment="参数名")

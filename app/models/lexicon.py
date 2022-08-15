@@ -17,7 +17,7 @@ from app.models.basic import NormBaseModel, LargeBaseModel
 
 
 class SensitiveWordModel(NormBaseModel):
-    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_sys_sensitive_word"
+    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_sys_sensitive_word"
     __table_args__ = {"comment": "敏感词库"}
     name = Column(String(ByteSizeEnum.LENGTH_64), comment="名词", nullable=False)
     genre = Column(INT, server_default=0, comment="类型", nullable=False)
@@ -29,7 +29,7 @@ class SensitiveWordModel(NormBaseModel):
 
 
 class UserAlias(LargeBaseModel):
-    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_user_alias"
+    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_user_alias"
     __table_args__ = (UniqueConstraint("english_alias"), {"comment": "化名词库"})
     english_alias = Column(String(ByteSizeEnum.LENGTH_16), comment="英文花名")
     chinese_transliteration = Column(String(ByteSizeEnum.LENGTH_64), comment="中文音译")

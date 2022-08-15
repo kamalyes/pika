@@ -17,7 +17,7 @@ from app.models.basic import LargeBaseModel
 
 
 class ApiTestCaseAssertsModel(LargeBaseModel):
-    __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_testcase_asserts'
+    __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_testcase_asserts'
     __table_args__ = {"comment": "断言表"}
     name = Column(String(ByteSizeEnum.LENGTH_32), nullable=False, comment="名称")
     case_id = Column(INT, index=True, comment="用例id")

@@ -17,7 +17,7 @@ from app.models.basic import LargeBaseModel
 
 
 class RedisModel(LargeBaseModel):
-    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_redis_info"
+    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_redis_info"
     __table_args__ = (
         UniqueConstraint('env', 'name'),
         {"comment": "Redis配置"}

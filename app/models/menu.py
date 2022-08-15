@@ -18,7 +18,7 @@ from app.models.basic import LargeBaseModel
 
 
 class MenuModel(LargeBaseModel):
-    __tablename__ = f'{PikaGlobalVarEnum.APP_NAME_LOWER}_menu'
+    __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_menu'
     __table_args__ = {"comment": "菜单表"}
     path = Column(String(ByteSizeEnum.LENGTH_255), nullable=True, comment='菜单路径')
     name = Column(String(ByteSizeEnum.LENGTH_255), nullable=True, comment='菜单名称', index=True)

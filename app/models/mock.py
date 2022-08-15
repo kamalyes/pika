@@ -17,7 +17,7 @@ from app.models.basic import LargeBaseModel
 
 
 class MockModel(LargeBaseModel):
-    __tablename__ = f"{PikaGlobalVarEnum.APP_NAME_LOWER}_mock_config"
+    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_mock_config"
     __table_args__ = {"comment": "mock配置表"}
     project_id = Column(Integer, nullable=False, comment='项目id')
     url = Column(String(ByteSizeEnum.LENGTH_600), index=True, nullable=False, comment='url地址')
