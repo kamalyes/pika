@@ -32,7 +32,7 @@ class OssFileModel(LargeBaseModel):
     file_size = Column(String(ByteSizeEnum.LENGTH_16), comment="文件大小")
 
     def __init__(self, operator, file_path, view_url, file_size, id=None):
-        super().__init__(id, operator)
+        super().__init__(id=id, operator=operator)
         self.file_path = file_path
         self.view_url = view_url
         self.file_size = file_size

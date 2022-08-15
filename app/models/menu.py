@@ -39,7 +39,7 @@ class MenuModel(LargeBaseModel):
 
     def __init__(self, id, path, name, component, title, isLink, isHide, isKeepAlive, isAffix, isIframe,
                  roles, icon, parent_id, redirect, sort, menu_type, active_menu, enabled_flag, operator):
-        super().__init__(id, operator, enabled_flag)
+        super().__init__(id=id, operator=operator, enabled_flag=enabled_flag)
         self.path = path
         self.name = name
         self.component = component

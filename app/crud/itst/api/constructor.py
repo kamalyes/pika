@@ -37,7 +37,7 @@ class ConstructorDao(PikaWrapper):
         try:
             async with async_session() as session:
                 sql = select(ConstructorModel).where(ConstructorModel.case_id == case_id,
-                                                     ConstructorModel.delete_flag is False) \
+                                                     ConstructorModel.delete_flag == 0) \
                     .order_by(ConstructorModel.index, ConstructorModel.update_date)
                 result = await session.execute(sql)
                 return result.scalars().all()
@@ -52,7 +52,7 @@ class ConstructorDao(PikaWrapper):
                 async with session.begin():
                     sql = select(ConstructorModel).where(ConstructorModel.case_id == data.case_id,
                                                          ConstructorModel.name == data.name,
-                                                         ConstructorModel.delete_flag is False)
+                                                         ConstructorModel.delete_flag == 0)
                     result = await session.execute(sql)
                     if result.scalars().first() is not None:
                         raise Exception(f"{data.name}已存在")
@@ -138,7 +138,7 @@ class ConstructorDao(PikaWrapper):
             async with async_session() as session:
                 # 获取所有构造参数
                 search = [ConstructorModel.public is True, ConstructorModel.suffix == suffix,
-                          ConstructorModel.delete_flag is False]
+                          ConstructorModel.delete_flag == 0]
                 if name:
                     search.append(ConstructorModel.name.like("%{}%".format(name)))
                 query = await session.execute(select(ConstructorModel).where(*search))
@@ -182,7 +182,7 @@ class ConstructorDao(PikaWrapper):
         async with async_session() as session:
             query = await session.execute(
                 select(ConstructorModel).where(ConstructorModel.id == id_,
-                                               ConstructorModel.delete_flag is False))
+                                               ConstructorModel.delete_flag == 0))
             data = query.scalars().first()
             if data is None:
                 raise Exception("前后置条件不存在")
@@ -209,7 +209,7 @@ class ConstructorDao(PikaWrapper):
                     ConstructorModel.suffix == suffix,
                     ConstructorModel.type == constructor_type,
                     ConstructorModel.public is True,
-                    ConstructorModel.delete_flag is False))
+                    ConstructorModel.delete_flag == 0))
             # 并把这些前置条件放到constructors里面
             for q in query.scalars().all():
                 constructors[q.case_id].append({
@@ -224,7 +224,7 @@ class ConstructorDao(PikaWrapper):
             # 二次查询，查出有前置条件的case
             query = await session.execute(
                 select(ApiTestCaseModel).where(ApiTestCaseModel.id.in_(constructors.keys()),
-                                               ApiTestCaseModel.delete_flag is False))
+                                               ApiTestCaseModel.delete_flag == 0))
             # 构造树，要知道children已经构建好了，就在constructors里面
             for q in query.scalars().all():
                 # 把用例id放入cs_list，这里就不用原生join了

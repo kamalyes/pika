@@ -30,7 +30,7 @@ class DatabaseModel(LargeBaseModel):
 
     def __init__(self, env, name, host, port, username, password, database, sql_type, operator,
                  id=None):
-        super().__init__(operator, id)
+        super().__init__(id=id, operator=operator)
         self.env = env
         self.name = name
         self.host = host

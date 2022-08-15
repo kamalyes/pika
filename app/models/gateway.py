@@ -27,7 +27,7 @@ class GatewayModel(LargeBaseModel):
     gateway = Column(String(ByteSizeEnum.LENGTH_128), comment="网关地址")
 
     def __init__(self, env, name, gateway, operator, id=None):
-        super().__init__(operator, id)
+        super().__init__(id=id, operator=operator)
         self.name = name
         self.env = env
         self.gateway = gateway

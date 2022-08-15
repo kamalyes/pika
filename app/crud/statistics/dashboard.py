@@ -83,7 +83,7 @@ class DashboardDao(PikaWrapper):
             query = await session.execute(cls.create_sql(n.model, start, end))
             # 找到未删除的所有项目数据
             counts = await session.execute(
-                select(func.count(n.model.id)).where(n.model.delete_flag is False))
+                select(func.count(n.model.id)).where(n.model.delete_flag == 0))
             for r in query.scalars().all():
                 date = r.create_date.strftime("%Y-%m-%d")
                 if result[idx[date]].get(n.name) is None:

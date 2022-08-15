@@ -33,7 +33,7 @@ class ApiTestCaseDataDao(PikaWrapper):
                         ApiTestCaseDataModel.case_id == form.case_id,
                         ApiTestCaseDataModel.env == form.env,
                         ApiTestCaseDataModel.name == form.name,
-                        ApiTestCaseDataModel.delete_flag is False)
+                        ApiTestCaseDataModel.delete_flag == 0)
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is not None:
@@ -54,7 +54,7 @@ class ApiTestCaseDataDao(PikaWrapper):
             async with async_session() as session:
                 async with session.begin():
                     sql = select(ApiTestCaseDataModel).where(ApiTestCaseDataModel.id == form.id,
-                                                             ApiTestCaseDataModel.delete_flag is False)
+                                                             ApiTestCaseDataModel.delete_flag == 0)
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
@@ -73,7 +73,7 @@ class ApiTestCaseDataDao(PikaWrapper):
             async with async_session() as session:
                 async with session.begin():
                     sql = select(ApiTestCaseDataModel).where(ApiTestCaseDataModel.id == id,
-                                                             ApiTestCaseDataModel.delete_flag is False)
+                                                             ApiTestCaseDataModel.delete_flag == 0)
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
@@ -89,7 +89,7 @@ class ApiTestCaseDataDao(PikaWrapper):
         try:
             async with async_session() as session:
                 sql = select(ApiTestCaseDataModel).where(ApiTestCaseDataModel.case_id == case_id,
-                                                         ApiTestCaseDataModel.delete_flag is False)
+                                                         ApiTestCaseDataModel.delete_flag == 0)
                 result = await session.execute(sql)
                 query = result.scalars().all()
                 for q in query:
@@ -105,7 +105,7 @@ class ApiTestCaseDataDao(PikaWrapper):
             async with async_session() as session:
                 sql = select(ApiTestCaseDataModel).where(ApiTestCaseDataModel.case_id == case_id,
                                                          ApiTestCaseDataModel.env == env,
-                                                         ApiTestCaseDataModel.delete_flag is False)
+                                                         ApiTestCaseDataModel.delete_flag == 0)
                 result = await session.execute(sql)
                 return result.scalars().all()
         except Exception as e:

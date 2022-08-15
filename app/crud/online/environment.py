@@ -35,7 +35,7 @@ class EnvironmentDao(PikaWrapper):
         async with async_session() as session:
             ans = await session.execute(
                 select(EnvironmentModel).where(EnvironmentModel.id == id,
-                                               EnvironmentModel.delete_flag is False))
+                                               EnvironmentModel.delete_flag == 0))
             if ans is None:
                 raise ValidException(detail=f"环境: {id}不存在")
             return ans.scalars().first()
@@ -46,7 +46,7 @@ class EnvironmentDao(PikaWrapper):
             async with session.begin():
                 query = await session.execute(
                     select(EnvironmentModel).where(EnvironmentModel.name == data.name,
-                                                   EnvironmentModel.delete_flag is False))
+                                                   EnvironmentModel.delete_flag == 0))
                 if query.scalars().first() is not None:
                     raise ValidException(detail=f"添加失败，环境名称：{data.name}已存在")
                 env = EnvironmentModel(**data.dict(), operator=emp_no)
@@ -55,7 +55,7 @@ class EnvironmentDao(PikaWrapper):
     @classmethod
     async def list_env(cls, page, size, name=None, exactly=False):
         try:
-            search = [EnvironmentModel.delete_flag is False]
+            search = [EnvironmentModel.delete_flag == 0]
             async with async_session() as session:
                 if name:
                     search.append(EnvironmentModel.name.like("%{}%".format(name)))

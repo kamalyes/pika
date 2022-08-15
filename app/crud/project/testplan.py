@@ -34,7 +34,7 @@ class ApiTestPlanDao(PikaWrapper):
                              operator_identity: str = None, operator: str = None, follow: bool = None):
         try:
             async with async_session() as session:
-                conditions = [ApiTestPlanModel.delete_flag is False]
+                conditions = [ApiTestPlanModel.delete_flag == 0]
                 if project_id:
                     ApiTestPlanModel.where(project_id, ApiTestPlanModel.project_id == project_id,
                                            conditions)
@@ -54,7 +54,7 @@ class ApiTestPlanDao(PikaWrapper):
                         .outerjoin(ApiTestPlanFollowUserRelModel,
                                    and_(
                                        ApiTestPlanFollowUserRelModel.emp_no == operator,
-                                       ApiTestPlanFollowUserRelModel.delete_flag is False,
+                                       ApiTestPlanFollowUserRelModel.delete_flag == 0,
                                        ApiTestPlanFollowUserRelModel.plan_id == ApiTestPlanModel.id)) \
                         .where(*conditions)
                 elif follow:
@@ -63,7 +63,7 @@ class ApiTestPlanDao(PikaWrapper):
                                    ApiTestPlanFollowUserRelModel.plan_id == ApiTestPlanModel.id,
                                    ).where(
                         *conditions, ApiTestPlanFollowUserRelModel.emp_no == operator,
-                                     ApiTestPlanFollowUserRelModel.delete_flag is False)
+                                     ApiTestPlanFollowUserRelModel.delete_flag == 0)
                 else:
                     sql = select(ApiTestPlanModel, null().label('null_bar')) \
                         .outerjoin(ApiTestPlanFollowUserRelModel,
@@ -85,7 +85,7 @@ class ApiTestPlanDao(PikaWrapper):
                         select(ApiTestPlanModel).where(
                             ApiTestPlanModel.project_id == plan.project_id,
                             ApiTestPlanModel.name == plan.name,
-                            ApiTestPlanModel.delete_flag is False))
+                            ApiTestPlanModel.delete_flag == 0))
                     if query.scalars().first() is not None:
                         raise Exception("测试计划已存在")
                     test_plan = ApiTestPlanModel(**plan.dict(), operator=operator)
@@ -105,7 +105,7 @@ class ApiTestPlanDao(PikaWrapper):
                 async with session.begin():
                     query = await session.execute(
                         select(ApiTestPlanModel).where(ApiTestPlanModel.id == plan.id,
-                                                       ApiTestPlanModel.delete_flag is False))
+                                                       ApiTestPlanModel.delete_flag == 0))
                     data = query.scalars().first()
                     if data is None:
                         raise Exception("测试计划不存在")
@@ -134,7 +134,7 @@ class ApiTestPlanDao(PikaWrapper):
                 async with session.begin():
                     query = await session.execute(
                         select(ApiTestPlanModel).where(ApiTestPlanModel.id == id,
-                                                       ApiTestPlanModel.delete_flag is False))
+                                                       ApiTestPlanModel.delete_flag == 0))
                     data = query.scalars().first()
                     if data is None:
                         raise Exception("测试计划不存在")
@@ -150,7 +150,7 @@ class ApiTestPlanDao(PikaWrapper):
     async def query_test_plan(id: int) -> ApiTestPlanModel:
         try:
             async with async_session() as session:
-                sql = select(ApiTestPlanModel).where(ApiTestPlanModel.delete_flag is False,
+                sql = select(ApiTestPlanModel).where(ApiTestPlanModel.delete_flag == 0,
                                                      ApiTestPlanModel.id == id)
                 data = await session.execute(sql)
                 return data.scalars().first()
@@ -164,7 +164,7 @@ class ApiTestPlanDao(PikaWrapper):
     #         async with async_session() as session:
     #             async with session.begin():
     #                 query = await session.execute(
-    #                     select(ApiTestPlanModel).where(ApiTestPlanModel.id == id, ApiTestPlanModel.delete_flag is False))
+    #                     select(ApiTestPlanModel).where(ApiTestPlanModel.id == id, ApiTestPlanModel.delete_flag == 0))
     #                 data = query.scalars().first()
     #                 if data is None:
     #                     raise Exception("测试计划不存在")
@@ -187,7 +187,7 @@ class ApiTestPlanDao(PikaWrapper):
         async with async_session() as session:
             async with session.begin():
                 sql = select(ApiTestPlanFollowUserRelModel).where(
-                    ApiTestPlanFollowUserRelModel.delete_flag is False,
+                    ApiTestPlanFollowUserRelModel.delete_flag == 0,
                     ApiTestPlanFollowUserRelModel.plan_id == plan_id,
                     ApiTestPlanFollowUserRelModel.operator == operator)
                 data = await session.execute(sql)
@@ -211,7 +211,7 @@ class ApiTestPlanDao(PikaWrapper):
         async with async_session() as session:
             async with session.begin():
                 sql = select(ApiTestPlanFollowUserRelModel).where(
-                    ApiTestPlanFollowUserRelModel.delete_flag is False,
+                    ApiTestPlanFollowUserRelModel.delete_flag == 0,
                     ApiTestPlanFollowUserRelModel.plan_id == plan_id,
                     ApiTestPlanFollowUserRelModel.operator == operator)
                 data = await session.execute(sql)
@@ -238,8 +238,8 @@ class ApiTestPlanDao(PikaWrapper):
                            ApiTestPlanFollowUserRelModel.plan_id == ApiTestPlanModel.id,
                            ).where(
                 ApiTestPlanFollowUserRelModel.emp_no == operator,
-                ApiTestPlanFollowUserRelModel.delete_flag is False,
-                ApiTestPlanModel.delete_flag is False)
+                ApiTestPlanFollowUserRelModel.delete_flag == 0,
+                ApiTestPlanModel.delete_flag == 0)
             data = await session.execute(sql)
             for d in data.scalars().all():
                 reports = list()

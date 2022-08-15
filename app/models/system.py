@@ -44,7 +44,7 @@ class OperationLogModel(MinBaseModel):
 
     def __init__(self, operator, mode: SqlOperationTypeEnum, title, tag, description=None, key=None,
                  id=0):
-        super().__init__(id, operator, description)
+        super().__init__(id=id, operator=operator, description=description)
         self.title = title
         self.tag = tag
         self.mode = mode.value

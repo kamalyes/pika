@@ -35,7 +35,7 @@ class ApiTestCaseModel(LargeBaseModel):
                  body_type=1, base_path=None, out_parameters=None,
                  tag=None, request_headers=None, case_type=0, body=None, request_method=None,
                  id=None):
-        super().__init__(operator, id)
+        super().__init__(id=id, operator=operator)
         self.name = name
         self.request_type = request_type
         self.url = url

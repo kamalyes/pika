@@ -22,5 +22,5 @@ class EnvironmentModel(LargeBaseModel):
     __table_args__ = (UniqueConstraint('name'), {"comment": "环境配置"})
 
     def __init__(self, name, operator, description=None, id=None):
-        super().__init__(operator, description, id)
+        super().__init__(id=id, operator=operator, description=description)
         self.name = name

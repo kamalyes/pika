@@ -31,7 +31,7 @@ class ApiTestPlanModel(LargeBaseModel):
     def __init__(self, project_id, env, case_list, name, priority, cron, ordered, pass_rate,
                  receiver, msg_type,
                  operator, state=0, retry_minutes=0, id=None):
-        super().__init__(operator, id)
+        super().__init__(id=id, operator=operator)
         self.env = ",".join(map(str, env))
         self.case_list = ",".join(map(str, case_list))
         self.name = name

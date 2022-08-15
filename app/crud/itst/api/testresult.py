@@ -56,7 +56,7 @@ class ApiTestResultDao(PikaWrapper):
                     ApiTestCaseModel,
                     ApiTestCaseModel.id == ApiTestResultModel.case_id). \
                     where(ApiTestResultModel.report_id == report_id,
-                          ApiTestResultModel.delete_flag is False).order_by(
+                          ApiTestResultModel.delete_flag == 0).order_by(
                     asc(ApiTestResultModel.case_id), asc(ApiTestResultModel.start_at))
                 data = await session.execute(sql)
                 ans = []

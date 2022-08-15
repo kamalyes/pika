@@ -31,7 +31,7 @@ class GConfigDao(PikaWrapper):
                     query = await session.execute(
                         select(GConfigModel).where(GConfigModel.env == form.env,
                                                    GConfigModel.key == form.key,
-                                                   GConfigModel.delete_flag is False))
+                                                   GConfigModel.delete_flag == 0))
                     data = query.scalars().first()
                     if data is not None:
                         raise Exception(f"变量: {data.key}已存在")
@@ -45,7 +45,7 @@ class GConfigDao(PikaWrapper):
     @RedisHelper.cache("dao", 1800, True)
     async def async_get_gconfig_by_key(key: str, env: int) -> GConfigModel:
         try:
-            filters = [GConfigModel.key == key, GConfigModel.delete_flag is False,
+            filters = [GConfigModel.key == key, GConfigModel.delete_flag == 0,
                        GConfigModel.enabled_flag is True,
                        GConfigModel.env == env]
             async with async_session() as session:

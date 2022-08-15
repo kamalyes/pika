@@ -39,7 +39,7 @@ class ProjectModel(LargeBaseModel):
 
     def __init__(self, name, app, owner, operator, description="",
                  private=False, avatar=None, dingtalk_url='', qy_wx_url=''):
-        super().__init__(operator)
+        super().__init__(operator=operator)
         self.name = name
         self.app = app
         self.owner = owner
@@ -63,7 +63,7 @@ class ProjectRoleModel(LargeBaseModel):
     relationship(UserModel, backref=backref("children", cascade="all, delete"))
 
     def __init__(self, emp_no, project_id, project_role, operator):
-        super().__init__(operator)
+        super().__init__(operator=operator)
         self.emp_no = emp_no
         self.project_id = project_id
         self.project_role = project_role

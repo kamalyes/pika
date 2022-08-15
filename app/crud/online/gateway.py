@@ -24,7 +24,7 @@ class GatewayDao(PikaWrapper):
     @classmethod
     async def query_gateway(cls, env, name):
         async with async_session() as session:
-            query_sql = select(GatewayModel).where(GatewayModel.delete_flag is False,
+            query_sql = select(GatewayModel).where(GatewayModel.delete_flag == 0,
                                                    GatewayModel.env == env,
                                                    GatewayModel.name == name)
             query_result = await session.execute(query_sql)

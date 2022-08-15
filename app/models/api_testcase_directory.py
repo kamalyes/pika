@@ -28,7 +28,7 @@ class ApiTestCaseDirectoryModel(LargeBaseModel):
     parent = Column(INT, comment="目录上级目录，如果没有则为None")
 
     def __init__(self, form: ApiTestCaseDirectorySchema, operator):
-        super().__init__(operator)
+        super().__init__(operator=operator)
         self.project_id = form.project_id
         self.name = form.name
         self.parent = form.parent

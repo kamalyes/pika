@@ -29,7 +29,7 @@ class GConfigModel(LargeBaseModel):
     )
 
     def __init__(self, env, key, value, key_type, operator, enabled_flag, id=None):
-        super().__init__(operator, enabled_flag, id)
+        super().__init__(id=id, operator=operator, enabled_flag=enabled_flag)
         self.env = env
         self.key = key
         self.value = value

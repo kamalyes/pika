@@ -16,7 +16,7 @@ class ApiTestCaseOutParametersModel(LargeBaseModel):
     match_index = Column(String(ByteSizeEnum.LENGTH_16), comment="获取结果索引, 可以是random，也可以是all，还可以是数字")
 
     def __init__(self, name, source, case_id, operator, expression=None, match_index=None, id=None):
-        super().__init__(operator, id)
+        super().__init__(id=id, operator=operator)
         self.name = name
         self.case_id = case_id
         self.expression = expression

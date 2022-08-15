@@ -31,7 +31,7 @@ class ConstructorModel(LargeBaseModel):
 
     def __init__(self, type, name, enabled_flag, constructor_json, case_id, public,
                  operator, value="", suffix=False, id=None, index=0):
-        super().__init__(operator, id)
+        super().__init__(id=id, operator=operator)
         self.type = type
         self.name = name
         self.enabled_flag = enabled_flag
@@ -45,7 +45,7 @@ class ConstructorModel(LargeBaseModel):
     @staticmethod
     async def get_index(session, case_id, suffix=False):
         sql = select(ConstructorModel).where(
-            ConstructorModel.delete_flag is False, ConstructorModel.case_id == case_id,
+            ConstructorModel.delete_flag == 0, ConstructorModel.case_id == case_id,
             ConstructorModel.suffix == suffix,
         ).order_by(desc(ConstructorModel.index))
         data = await session.execute(sql)

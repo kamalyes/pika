@@ -23,7 +23,7 @@ class SensitiveWordModel(NormBaseModel):
     genre = Column(INT, server_default=0, comment="类型", nullable=False)
 
     def __init__(self, name, operator, genre=0):
-        super().__init__(operator)
+        super().__init__(operator=operator)
         self.name = name
         self.genre = genre
 
@@ -37,7 +37,7 @@ class UserAlias(LargeBaseModel):
     gender_bias = Column(INT, server_default="0", comment="性别倾向：0-未填写，1-男，2-女")
 
     def __init__(self, english_alias, operator=None, chinese_transliteration=None, moral=None, gender_bias=0):
-        super().__init__(operator)
+        super().__init__(operator=operator)
         self.english_alias = english_alias
         self.chinese_transliteration = chinese_transliteration
         self.moral = moral

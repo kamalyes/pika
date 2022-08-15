@@ -31,7 +31,7 @@ class RedisModel(LargeBaseModel):
     cluster = Column(Boolean, default=False, nullable=False, comment="是否是集群，默认为false，集群可不输入用户密码")
 
     def __init__(self, env, name, addr, cluster, operator, username='', password='', db=0, id=None):
-        super().__init__(operator, id)
+        super().__init__(id=id, operator=operator)
         self.env = env
         self.name = name
         self.addr = addr

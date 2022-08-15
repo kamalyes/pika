@@ -42,7 +42,7 @@ class DbConfigDao(PikaWrapper):
         """
         try:
             async with async_session() as session:
-                query = [DatabaseModel.delete_flag is False]
+                query = [DatabaseModel.delete_flag == 0]
                 if name:
                     query.append(DatabaseModel.name.like(f'%{name}%'))
                 if database:
@@ -62,7 +62,7 @@ class DbConfigDao(PikaWrapper):
                 async with session.begin():
                     result = await session.execute(
                         select(DatabaseModel).where(DatabaseModel.name == data.name,
-                                                    DatabaseModel.delete_flag is False,
+                                                    DatabaseModel.delete_flag == 0,
                                                     DatabaseModel.env == data.env))
                     query = result.scalars().first()
                     if query is not None:
@@ -96,7 +96,7 @@ class DbConfigDao(PikaWrapper):
                 async with session.begin():
                     result = await session.execute(
                         select(DatabaseModel).where(id == DatabaseModel.id,
-                                                    DatabaseModel.delete_flag is False))
+                                                    DatabaseModel.delete_flag == 0))
                     query = result.scalars().first()
                     if query is None:
                         raise Exception("数据库配置不存在或已删除")
@@ -112,7 +112,7 @@ class DbConfigDao(PikaWrapper):
             async with async_session() as session:
                 result = await session.execute(
                     select(DatabaseModel).where(DatabaseModel.id == id,
-                                                DatabaseModel.delete_flag is False))
+                                                DatabaseModel.delete_flag == 0))
                 return result.scalars().first()
         except Exception as e:
             cls.__log__.error(f"获取数据库配置失败, error: {e}")
@@ -125,7 +125,7 @@ class DbConfigDao(PikaWrapper):
                 result = await session.execute(
                     select(DatabaseModel).where(DatabaseModel.env == env,
                                                 DatabaseModel.name == name,
-                                                DatabaseModel.delete_flag is False))
+                                                DatabaseModel.delete_flag == 0))
                 return result.scalars().first()
         except Exception as e:
             cls.__log__.error(f"获取数据库配置失败, error: {e}")
@@ -149,7 +149,7 @@ class DbConfigDao(PikaWrapper):
             table_map = defaultdict(set)
             async with async_session() as session:
                 query = await session.execute(
-                    select(DatabaseModel).where(DatabaseModel.delete_flag is False))
+                    select(DatabaseModel).where(DatabaseModel.delete_flag == 0))
                 data = query.scalars().all()
                 for d in data:
                     name = env_map[d.env]

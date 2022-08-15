@@ -18,7 +18,7 @@ from app.crud.itst.api.testreport import ApiTestReportDao
 from app.crud.project.project import ProjectRoleDao
 from app.enums.ConvertorEnum import CaseConvertorTypeEnum
 from app.middleware.xredis import RedisHelper
-from app.models import async_db_session
+from app.models import async_db_session, async_session
 from app.models.api_test_case import ApiTestCaseModel
 from app.models.api_testcase_out_parameters import ApiTestCaseOutParametersModel
 from app.schema.api_testcase import TestCaseAssertsForm, TestCaseSchema, TestCaseInfo, \
@@ -53,7 +53,7 @@ async def insert_testcase(data: TestCaseSchema, user_info=Depends(Permission()))
 
 @router.post("/create", summary="v2版本创建用例接口")
 async def create_testcase(data: TestCaseInfo, user_info=Depends(Permission()),
-                          session=Depends(async_db_session)):
+                          session=Depends(async_session)):
     async with session.begin():
         await ApiTestCaseDao.insert_test_case(session, data, user_info['emp_no'])
     return PikaResponse.success()

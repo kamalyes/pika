@@ -28,7 +28,7 @@ class ApiTestCaseDataModel(LargeBaseModel):
     json_data = Column(TEXT, nullable=False, comment="json")
 
     def __init__(self, env, case_id, name, json_data, operator, id=None):
-        super().__init__(operator, id)
+        super().__init__(id=id, operator=operator)
         self.env = env
         self.case_id = case_id
         self.name = name
