@@ -10,6 +10,7 @@
 @Desc    :  None
 """
 import json
+import time
 from collections import defaultdict
 from datetime import datetime
 from typing import List
@@ -23,6 +24,7 @@ from app.crud.online.environment import EnvironmentDao
 from app.middleware.xredis import RedisHelper
 from app.models import async_session, db_helper
 from app.models.database import DatabaseModel
+from app.models.sql_log import SQLHistoryModel
 from app.schema.database import DatabaseSchema
 
 
@@ -228,10 +230,12 @@ class DbConfigDao(PikaWrapper):
         async with session() as s:
             async with s.begin():
                 try:
+                    start = time.perf_counter()
                     result = await s.execute(text(sql))
+                    cost = time.perf_counter() - start
                     row_count = result.rowcount
                     ans = result.mappings().all()
-                    return ans
+                    return ans, int(cost * 1000)
                 except ResourceClosedError:
                     # 说明是update或其他语句
                     return [{"rowCount": row_count}]
@@ -255,3 +259,8 @@ class DbConfigDao(PikaWrapper):
         except Exception as e:
             cls.__log__.error(f"查询数据库配置失败, error: {e}")
             raise Exception(f"执行SQL失败: {e}")
+
+
+@PikaMdWrapper(SQLHistoryModel)
+class SQLHistoryDao(PikaWrapper):
+    pass

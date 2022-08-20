@@ -11,6 +11,7 @@
 """
 
 from pydantic import BaseModel, validator
+from app.enums.RequestBodyEnum import ReqBodyTypeEnum
 
 from app.excpetions.business.ParamsException import VariablesNullError
 
@@ -19,7 +20,7 @@ class HttpRequestSchema(BaseModel):
     method: str
     url: str
     body: str = None
-    body_type: int = 0
+    body_type: ReqBodyTypeEnum = ReqBodyTypeEnum.none
     headers: dict = {}
 
     # noinspection PyMethodParameters

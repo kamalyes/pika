@@ -106,7 +106,7 @@ class ApiTestCaseDao(PikaWrapper):
                     data = model(**f.dict(), operator=operator)
                 else:
                     data = model(**f.dict(), operator=operator, case_id=case_id)
-                await md.insert(data, ss=session)
+                await md.insert(model=data, session=session, not_begin=True)
 
     @classmethod
     async def insert_test_case(cls, session, data: TestCaseInfo, operator: str) -> ApiTestCaseModel:

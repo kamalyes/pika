@@ -80,14 +80,14 @@ def db_connect(transaction: Transaction = False):
         async def wrapper(cls, *args, **kwargs):
             try:
                 session: AsyncSession = kwargs.pop("session", None)
-                begin = kwargs.get("begin")
+                nb = kwargs.get("not_begin")
                 if session is not None:
-                    if transaction and begin:
+                    if transaction and nb:
                         async with session.begin():
                             return await func(cls, *args, session=session, **kwargs)
                     return await func(cls, *args[1:], session=session, **kwargs)
                 async with async_session() as ss:
-                    if transaction and begin:
+                    if transaction and nb:
                         async with ss.begin():
                             return await func(cls, *args, session=ss, **kwargs)
                     return await func(cls, *args, session=ss, **kwargs)
@@ -142,7 +142,7 @@ class PikaWrapper(object):
         return s
 
     @staticmethod
-    async def pagination(page: int, size: int, session, sql: str, scalars=True):
+    async def pagination(page: int, size: int, session, sql: str, scalars=True, **kwargs):
         """
         分页查询
         Args:
@@ -161,7 +161,7 @@ class PikaWrapper(object):
             return [], 0
         sql = sql.offset((page - 1) * size).limit(size)
         data = await session.execute(sql)
-        if scalars:
+        if scalars and kwargs.get("_join") is None:
             return data.scalars().all(), total
         return data.all(), total
 
@@ -217,7 +217,7 @@ class PikaWrapper(object):
     @classmethod
     @RedisHelper.cache("dao")
     @db_connect
-    async def list_record_with_pagination(cls, page, size, /, *, session=None, **kwargs):
+    async def list_with_pagination(cls, page, size, /, *, session=None, **kwargs):
         """
         通过分页获取数据
         Args:
@@ -229,7 +229,7 @@ class PikaWrapper(object):
         Returns:
 
         """
-        return await cls.pagination(page, size, session, cls.query_wrapper(**kwargs))
+        return await cls.pagination(page, size, session, cls.query_wrapper(**kwargs), **kwargs)
 
     @classmethod
     def where(cls, param: Any, sentence, condition: list):
@@ -270,6 +270,8 @@ class PikaWrapper(object):
         if getattr(cls.__model__, "delete_flag", None):
             conditions.append(getattr(cls.__model__, "delete_flag") == 0)
         _sort = kwargs.pop("_sort", None)
+        _select = kwargs.pop("_select", list())
+        _join = kwargs.pop("_join", None)
         # 遍历参数，当参数不为None的时候传递
         for k, v in kwargs.items():
             # 判断是否是like的情况
@@ -280,14 +282,17 @@ class PikaWrapper(object):
             cls.where(v,
                       getattr(cls.__model__, k).like(v) if like else getattr(cls.__model__, k) == v,
                       conditions)
-        sql = select(cls.__model__).where(*conditions)
+        sql = select(cls.__model__, *_select)
+        if isinstance(_join, Iterable):
+            for j in _join:
+                sql = sql.outerjoin(*j)
+        where = sql.where(*conditions)
         if _sort and isinstance(_sort, Iterable):
             for d in _sort:
-                sql = getattr(sql, "order_by")(d)
-        return sql
+                where = getattr(where, "order_by")(d)
+        return where
 
     @classmethod
-    @RedisHelper.cache("dao")
     @db_connect
     async def query_record(cls, session: AsyncSession = None, **kwargs):
         sql = cls.query_wrapper(**kwargs)
@@ -297,7 +302,7 @@ class PikaWrapper(object):
     @classmethod
     @RedisHelper.up_cache("dao")
     @db_connect(transaction=True)
-    async def insert(cls, *, model: LargeBaseModel, session: AsyncSession = None, log=False, begin=True):
+    async def insert(cls, *, model: LargeBaseModel, session: AsyncSession = None, log=False, not_begin=False):
         session.add(model)
         await session.flush()
         session.expunge(model)
@@ -342,6 +347,7 @@ class PikaWrapper(object):
                                mode=SqlOperationTypeEnum.ONLY_UPDATE, before=old,
                                changed=changed,
                                key=model.id, title=title))
+        return now
 
     @classmethod
     async def _inner_delete(cls, session, operator, value, log, key, exists, title=None):

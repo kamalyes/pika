@@ -14,6 +14,7 @@ from sqlalchemy import UniqueConstraint, Column, INT, String
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysvarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
+from app.models.environment import EnvironmentModel
 
 
 class DatabaseModel(LargeBaseModel):
@@ -27,6 +28,7 @@ class DatabaseModel(LargeBaseModel):
     password = Column(String(ByteSizeEnum.LENGTH_64), nullable=False, comment="登录密码")
     database = Column(String(ByteSizeEnum.LENGTH_36), nullable=False, comment="连接数据库名称")
     sql_type = Column(INT, nullable=False, comment="0: mysql 1: postgresql 2: mongo")
+    env_data: EnvironmentModel
 
     def __init__(self, env, name, host, port, username, password, database, sql_type, operator,
                  id=None):
