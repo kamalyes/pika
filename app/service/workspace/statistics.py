@@ -9,7 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-
+from datetime import datetime, timedelta
 
 from fastapi import Depends, APIRouter
 from hutools.time import Moment
@@ -25,8 +25,8 @@ router = APIRouter()
 
 @router.get("/statistics", description="获取统计数据", summary="获取平台统计数据")
 async def query_follow_testplan(_=Depends(Permission())):
-    start = Moment.skew_date(days=-6)
-    end = Moment.skew_date()
+    end = datetime.today()
+    start = datetime.today() - timedelta(days=6)
     rank = await ApiTestCaseDao.query_user_case_rank()
     count, data = await DashboardDao.get_statistics_data(start, end)
     report_data = await DashboardDao.get_report_statistics(start, end)

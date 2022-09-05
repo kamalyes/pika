@@ -14,7 +14,7 @@ import functools
 import json
 from copy import deepcopy
 from datetime import datetime
-from typing import List, TypeVar, Callable, Any, Iterable
+from typing import List, TypeVar, Callable, Any, Iterable, Optional
 
 from dictdiffer import diff, swap
 from hutools.time import Moment

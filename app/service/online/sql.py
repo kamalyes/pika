@@ -16,6 +16,7 @@ from app.crud.online.database import DbConfigDao, SQLHistoryDao
 from app.models.database import DatabaseModel
 from app.models.environment import EnvironmentModel
 from app.models.sql_log import SQLHistoryModel
+from app.schema.database import DatabaseSchema
 from app.schema.online import OnlineSqlSchema
 from app.service import Permission
 
@@ -23,7 +24,7 @@ router = APIRouter()
 
 
 @router.post("/sql/command", summary="执行sql")
-async def execute_sql(data: OnlineSqlSchema, escarole=Depends(Permission(True))):
+async def execute_sql(data: OnlineSqlSchema, escarole=Depends(Permission(escarole=True))):
     operator, operator_identity = escarole
     try:
         result, elapsed = await DbConfigDao.online_sql(data.id, data.sql)
@@ -34,10 +35,10 @@ async def execute_sql(data: OnlineSqlSchema, escarole=Depends(Permission(True)))
         return PikaResponse.failed(detail=str(err))
 
 
-@router.get("/history/query", summary="获取sql执行历史记录")
+@router.get("/sql/history/query", summary="获取sql执行历史记录")
 async def query_sql_history(page: int = 1, size: int = 4, _=Depends(Permission())):
     data, total = await SQLHistoryDao.list_with_pagination(page, size,
-                                                           _sort=[SQLHistoryModel.created_at.desc()],
+                                                           _sort=[SQLHistoryModel.create_date.desc()],
                                                            _select=[DatabaseModel, EnvironmentModel],
                                                            _join=[(DatabaseModel,
                                                                    DatabaseModel.id == SQLHistoryModel.database_id),
@@ -49,13 +50,22 @@ async def query_sql_history(page: int = 1, size: int = 4, _=Depends(Permission()
         database.env_info = env
         history.database = database
         ans.append(history)
-    return PityResponse.success(dict(data=ans, total=total))
+    return PikaResponse.success(dict(data=ans, total=total))
 
 
-@router.get("/sql/showtables", summary="获取数据库及表结构")
-async def list_tables():
+@router.get("/sql/database/list")
+async def list_databases(_=Depends(Permission())):
     try:
-        result, table_map = await DbConfigDao.query_database_and_tables()
-        return PikaResponse.success(data=dict(database=result, tables=table_map))
+        result = await DbConfigDao.query_database_tree()
+        return PikaResponse.success(result)
     except Exception as err:
-        return PikaResponse.failed(detail=str(err))
+        return PikaResponse.failed(err)
+
+
+@router.post("/sql/tables/list", summary="获取数据库表和字段")
+async def list_tables(form: DatabaseSchema, _=Depends(Permission())):
+    try:
+        children, tables = await DbConfigDao.get_tables(form)
+        return PikaResponse.success(dict(children=children, tables=tables))
+    except Exception as err:
+        return PikaResponse.failed(err)

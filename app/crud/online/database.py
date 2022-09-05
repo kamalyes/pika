@@ -11,14 +11,13 @@
 """
 import json
 import time
-from collections import defaultdict
 from datetime import datetime
-from typing import List
 
-from sqlalchemy import select, MetaData, text
+from hutools.json import JsonEncoder
+from sqlalchemy import select, MetaData, text, and_
 from sqlalchemy.exc import ResourceClosedError
 
-from app.core.handler.jsonres import PikaResponse, PikaJsonEncoder
+from app.core.handler.jsonres import PikaResponse
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.online.environment import EnvironmentDao
 from app.middleware.xredis import RedisHelper
@@ -103,6 +102,7 @@ class DbConfigDao(PikaWrapper):
                     if query is None:
                         raise Exception("数据库配置不存在或已删除")
                     query.delete_date = datetime.now()
+                    query.delete_flag = 1
                     query.update_emp_no = operator
         except Exception as e:
             cls.__log__.error(f"删除数据库配置: {id}失败, {e}")
@@ -113,8 +113,7 @@ class DbConfigDao(PikaWrapper):
         try:
             async with async_session() as session:
                 result = await session.execute(
-                    select(DatabaseModel).where(DatabaseModel.id == id,
-                                                DatabaseModel.delete_flag == 0))
+                    select(DatabaseModel).where(DatabaseModel.id == id, DatabaseModel.delete_flag == 0))
                 return result.scalars().first()
         except Exception as e:
             cls.__log__.error(f"获取数据库配置失败, error: {e}")
@@ -135,11 +134,10 @@ class DbConfigDao(PikaWrapper):
 
     @classmethod
     @RedisHelper.cache("database:cache", expired_time=3600 * 3)
-    async def query_database_and_tables(cls):
+    async def query_database_tree(cls):
         """
-        方法会查询所有数据库表配置的信息
-        Returns:
-
+        方法会查询所有数据库表配置的信息, 不包括表信息
+        :return:
         """
         try:
             # 返回树图, 最外层是环境
@@ -148,10 +146,9 @@ class DbConfigDao(PikaWrapper):
             env_data, _ = await EnvironmentDao.list_env(1, 1, exactly=True)
             env_map = {env.id: env.name for env in env_data}
             # 获取数据库相关的信息
-            table_map = defaultdict(set)
             async with async_session() as session:
                 query = await session.execute(
-                    select(DatabaseModel).where(DatabaseModel.delete_flag == 0))
+                    select(DatabaseModel).where(and_(DatabaseModel.enabled_flag == 1, DatabaseModel.delete_flag == 0)))
                 data = query.scalars().all()
                 for d in data:
                     name = env_map[d.env]
@@ -160,54 +157,52 @@ class DbConfigDao(PikaWrapper):
                         result.append(dict(title=name, key=f"env_{name}", children=list()))
                         idx = len(result) - 1
                         env_index[name] = idx
-                    await cls.get_tables(table_map, d, result[idx]['children'])
-                return result, table_map
+                    result[env_index[name]]['children'].append(
+                        dict(title=f"{d.database}（{d.host}:{d.port}）", key=f"database_{d.id}",
+                             children=list(), sql_type=d.sql_type, data=d)
+                    )
+                return result
         except Exception as err:
             cls.__log__.error(f"获取数据库配置详情失败, error: {err}")
             raise Exception(f"获取数据库配置详情失败: {err}")
 
-    @classmethod
-    async def get_tables(cls, table_map: dict, data: DatabaseModel, children: List):
-        conn = await db_helper.get_connection(data.sql_type, data.host, data.port, data.username,
-                                              data.password,
+    @staticmethod
+    @RedisHelper.cache("database:table:cache", expired_time=1800)
+    async def get_tables(data: DatabaseSchema):
+        conn = await db_helper.get_connection(data.sql_type, data.host, data.port, data.username, data.password,
                                               data.database)
         database_child = list()
-        dbs = dict(title=f"{data.database}（{data.host}:{data.port}）", key=f"database_{data.id}",
-                   children=database_child, sql_type=data.sql_type)
         eng = conn.get('engine')
+        table_set = set()
         async with eng.connect() as conn:
-            await conn.run_sync(DbConfigDao.load_table, table_map, data, database_child, children, dbs)
+            await conn.run_sync(DbConfigDao.load_table, table_set, data, database_child)
+        return database_child, table_set
 
-    @classmethod
-    def load_table(cls, conn, table_map, data, database_child, children, dbs):
+    @staticmethod
+    def load_table(conn, table_map, data, database_child):
         """
         异步加载table及字段
-        Args:
-            conn:
-            table_map:
-            data:
-            database_child:
-            children:
-            dbs:
-
-        Returns:
-
+        :param conn:
+        :param table_map:
+        :param data:
+        :param database_child:
+        :return:
         """
         meta = MetaData(bind=conn)
         meta.reflect()
         for t in meta.sorted_tables:
-            table_map[data.id].add(str(t))
+            table_map.add(str(t))
             temp = []
             database_child.append(dict(title=str(t), key=f"table_{data.id}_{t}", children=temp))
             for k, v in t.c.items():
-                table_map[data.id].add(k)
+                table_map.add(k)
                 temp.append(dict(
                     title=k,
                     primary_key=v.primary_key,
                     type={str(v.type)},
+                    isLeaf=True,
                     key=f"column_{t}_{data.id}_{k}",
                 ))
-        children.append(dbs)
 
     @classmethod
     async def online_sql(cls, id: int, sql: str):
@@ -215,8 +210,7 @@ class DbConfigDao(PikaWrapper):
             query = await DbConfigDao.query_database(id)
             if query is None:
                 raise Exception("未找到对应的数据库配置")
-            data = await db_helper.get_connection(query.sql_type, query.host, query.port,
-                                                  query.username,
+            data = await db_helper.get_connection(query.sql_type, query.host, query.port, query.username,
                                                   query.password, query.database)
             return await DbConfigDao.execute(data, sql)
         except Exception as e:
@@ -246,16 +240,15 @@ class DbConfigDao(PikaWrapper):
     @classmethod
     async def execute_sql(cls, env: int, name: str, sql: str):
         try:
-            query = await cls.query_database_by_env_and_name(env, name)
+            query = await DbConfigDao.query_database_by_env_and_name(env, name)
             if query is None:
                 raise Exception("未找到对应的数据库配置")
-            data = await db_helper.get_connection(query.sql_type, query.host, query.port,
-                                                  query.username,
+            data = await db_helper.get_connection(query.sql_type, query.host, query.port, query.username,
                                                   query.password,
                                                   query.database)
-            result = await cls.execute(data, sql)
+            result = await DbConfigDao.execute(data, sql)
             _, result = PikaResponse.parse_sql_result(result)
-            return json.dumps(result, cls=PikaJsonEncoder, ensure_ascii=False)
+            return json.dumps(result, cls=JsonEncoder, ensure_ascii=False)
         except Exception as e:
             cls.__log__.error(f"查询数据库配置失败, error: {e}")
             raise Exception(f"执行SQL失败: {e}")

@@ -26,7 +26,7 @@ class DatabaseModel(LargeBaseModel):
     port = Column(INT, nullable=False, comment="端口")
     username = Column(String(ByteSizeEnum.LENGTH_36), nullable=False, comment="登录用户名")
     password = Column(String(ByteSizeEnum.LENGTH_64), nullable=False, comment="登录密码")
-    database = Column(String(ByteSizeEnum.LENGTH_36), nullable=False, comment="连接数据库名称")
+    database = Column(String(ByteSizeEnum.LENGTH_36), nullable=True, comment="连接数据库名称")
     sql_type = Column(INT, nullable=False, comment="0: mysql 1: postgresql 2: mongo")
     env_data: EnvironmentModel
 
