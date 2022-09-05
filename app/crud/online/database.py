@@ -199,6 +199,7 @@ class DbConfigDao(PikaWrapper):
                 temp.append(dict(
                     title=k,
                     primary_key=v.primary_key,
+                    comment={str(v.comment)},
                     type={str(v.type)},
                     isLeaf=True,
                     key=f"column_{t}_{data.id}_{k}",
