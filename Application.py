@@ -13,6 +13,8 @@ import asyncio
 import traceback
 
 import uvicorn
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI, Request, status, Depends, WebSocket, WebSocketDisconnect
 from hutools.core import System
 from hutools.limiter import Limiter, RateLimitException
@@ -37,6 +39,7 @@ from app.core.notice.wss_msg import WebSocketMessage
 from app.crud.system.notification import PikaNotificationDao
 from app.enums.MessageEnum import MessageTypeEnum, MessageStateEnum
 from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.middleware.xredis import RedisHelper
 from app.models import async_redis, async_create_table
 from app.service.ask import http_router
 from app.service.ask import mock_router
@@ -59,12 +62,14 @@ from app.service.rbac import organization_router
 from app.service.rbac import roles_router
 from app.service.rbac import user_router
 from app.service.system import history_router
+from app.service.system import msconfig_router
 from app.service.system import lexicon_router
 from app.service.system import mini_oss_router
 from app.service.system import notice_router
 from app.service.system import operation_log_router
 from app.service.workspace import statistics_router
 from app.service.workspace import workspace_router
+from app.utils.scheduler import Scheduler
 from app.utils.ws_manager import ws_manage
 from config import PikaAppConfig, InterceptHandler
 
@@ -325,6 +330,10 @@ class PikaFastApi:
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
 
+        pika.include_router(msconfig_router, prefix="/system", tags=["系统全局配置"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+
         # system
         pika.include_router(history_router, prefix="/system", tags=["访问记录"],
                             dependencies=[Depends(PikaFastApi.request_info),
@@ -409,7 +418,8 @@ async def init_env():
     Returns:
 
     """
-    logger.bind(name=None).opt(ansi=True).success(f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME} is running at <red>{PikaAppConfig.ENVIRONMENT}</red>")
+    logger.bind(name=None).opt(ansi=True).success(
+        f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME} is running at <red>{PikaAppConfig.ENVIRONMENT}</red>")
     logger.bind(name=None).success(f"{PikaGlobalVarEnum.BANNER}")
 
 
@@ -425,7 +435,7 @@ async def init_database():
         logger.bind(name=None).success("table created success.        ✔")
     except Exception as e:
         logger.bind(name=None).error(
-            f"table created failed, Please check config.py for database config.        ❌")
+            f"table created failed, Please check AppConfig for database config.        ❌")
         raise e
 
 
@@ -436,12 +446,31 @@ async def init_redis():
     :return:
     """
     try:
+        await RedisHelper.ping()
         await Limiter.init(async_redis)
         logger.bind(name=None).success("redis connected success.        ✔")
     except Exception as e:
         logger.bind(name=None).error(
-            f"Redis connect failed, Please check config.py for redis config.        ❌")
+            f"Redis connect failed, Please check AppConfig for redis config.        ❌")
         raise e
+
+
+@pika.on_event('startup')
+def init_scheduler():
+    """
+    初始化定时任务
+    :return:
+    """
+    # SQLAlchemyJobStore指定存储链接
+    job_store = {
+        'default': SQLAlchemyJobStore(url=PikaAppConfig.SQLALCHEMY_DATABASE_URI, engine_options={"pool_recycle": 1500},
+                                      pickle_protocol=3)
+    }
+    scheduler = AsyncIOScheduler()
+    Scheduler.init(scheduler)
+    Scheduler.configure(jobstores=job_store)
+    Scheduler.start()
+    logger.bind(name=None).success("ApScheduler started success.        ✔")
 
 
 @pika.on_event("shutdown")

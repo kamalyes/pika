@@ -9,24 +9,10 @@ database:
   charset: utf8mb4
   time_zone: 'Asia/Shanghai'
 
-# 数据库所在的服务器配置
-ssh_server:
-  port: 22
-  username: root
-  password: 'password'
-  # 私有密钥文件路径
-  private_key_file:
-  # 私钥密码
-  privat_passowrd:
-  # 如果使用的docker容器部署mysql服务，需要传入mysql的容器id/name
-  mysql_container: mysql8
-  # 数据库备份文件导出的本地路径, 需要保证存在该文件夹
-  sql_data_file: backup_sqls/
-
 # Redis配置
 redis:
-  host: localhost
-  enable: Ture
+  host: 'localhost'
+  enable_flag: Ture
   port: 6379
   auth: 'PassWord@Redis123'
   encoding: "utf-8"
@@ -42,16 +28,18 @@ email:
   password: "gzekixviowwvbhha"
   # 邮箱host
   host: "smtp.qq.com"
-  # port
+  # 端口号
   "port": 465
+  # to
+  "to": ""
 
 jwt:
   secret_key: "cvaEjaD2qcMgAtX9uLLHQnZHaD7pxt9wS3nmCcrCfXVwz6csBQn27Y8S5Q9"
   md5_salt: "EjZHaD7pxt9z6csBQn27Y8S5Q9"
   mpop: False
 
-minio_oss:
-  type: ""
+oss:
+  type: "aliyun"
   access_key_id: "W1Phi9Ysh7Wn3"
   access_key_secret: "Isw76Fc9Ix71X0Azb5Pc1Wcd1Pf1F39Gxs5Kjt5Bt"
   bucket_name: ""

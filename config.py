@@ -30,9 +30,8 @@ class PikaAppConfig(object):
     ENVIRONMENT = "ignore"
     # ENVIRONMENT = "dev"
     SERVER_HOST, SERVER_PORT = "0.0.0.0", 7780
-    GLOBAL_POOL_CONFIG = System.get_pool_config(
-        work_spaces_path=WORKSPACES_PATH, environment=ENVIRONMENT
-    )
+    POOL_CONFIG = System.get_pool_config(work_spaces_path=WORKSPACES_PATH, environment=ENVIRONMENT)
+    GLOBAL_POOL_CONFIG, GLOBAL_POOL_CONFIG_FILEPATH = POOL_CONFIG
     MITMPROXY = GLOBAL_POOL_CONFIG["mitmproxy"]
     CASE = GLOBAL_POOL_CONFIG["case"]
     RETRY_TIMES = CASE["retry_times"]
@@ -81,7 +80,7 @@ class PikaAppConfig(object):
     REDIS_CONFIG = GLOBAL_POOL_CONFIG["redis"]
     (
         REDIS_HOST,
-        REDIS_ENABLE,
+        REDIS_ENABLE_FLAG,
         REDIS_PORT,
         REDIS_DB,
         REDIS_PASSWORD,
@@ -91,7 +90,7 @@ class PikaAppConfig(object):
         ENCODING,
     ) = (
         REDIS_CONFIG["host"],
-        REDIS_CONFIG["enable"],
+        REDIS_CONFIG["enable_flag"],
         REDIS_CONFIG["port"],
         REDIS_CONFIG["index"],
         REDIS_CONFIG["auth"],
@@ -109,12 +108,12 @@ class PikaAppConfig(object):
         }
     ]
     # GITHUB
-    GITHUB_CONFIG = GLOBAL_POOL_CONFIG["github"]
-    GITHUB_USER_INFO_URL = GITHUB_CONFIG["user_info_url"]
-    GITHUB_ACCESS_TOKEN_URL = GITHUB_CONFIG["access_token_url"]
-    GITHUB_CLIENT_ID = GITHUB_CONFIG["client_id"]
-    GITHUB_ACCESS_KEY = GITHUB_CONFIG["access_key"]
-    GITHUB_SECRET_KEY = GITHUB_CONFIG["secret_key"]
+    # GITHUB_CONFIG = GLOBAL_POOL_CONFIG["github"]
+    # GITHUB_USER_INFO_URL = GITHUB_CONFIG["user_info_url"]
+    # GITHUB_ACCESS_TOKEN_URL = GITHUB_CONFIG["access_token_url"]
+    # GITHUB_CLIENT_ID = GITHUB_CONFIG["client_id"]
+    # GITHUB_ACCESS_KEY = GITHUB_CONFIG["access_key"]
+    # GITHUB_SECRET_KEY = GITHUB_CONFIG["secret_key"]
 
     EMAIL_CONFIG = GLOBAL_POOL_CONFIG["email"]
 
@@ -125,7 +124,7 @@ class PikaAppConfig(object):
     JWT_MPOP = JWT_CONFIG["mpop"]
 
     # Mino
-    OSS_CONFIG = GLOBAL_POOL_CONFIG["minio_oss"]
+    OSS_CONFIG = GLOBAL_POOL_CONFIG["oss"]
     OSS_TYPE = OSS_CONFIG["type"]
     OSS_ACCESS_KEY_ID = OSS_CONFIG["access_key_id"]
     OSS_ACCESS_KEY_SECRET = OSS_CONFIG["access_key_secret"]
@@ -141,7 +140,7 @@ class PikaAppConfig(object):
     YAPI_CONFIG = GLOBAL_POOL_CONFIG["yapi"]
 
     SYSTEM_CONFIG = DataHand.chain_all(
-        [{"email": EMAIL_CONFIG}, {"minio_oss": OSS_CONFIG}, {"yapi": YAPI_CONFIG}]
+        [{"email": EMAIL_CONFIG}, {"oss": OSS_CONFIG}, {"yapi": YAPI_CONFIG}]
     )
     LOCAL_DATE = time.strftime("%Y-%m-%d", time.localtime(time.time()))
     # 日志相关

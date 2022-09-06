@@ -329,7 +329,7 @@ class RedisHelper(object):
             if asyncio.iscoroutinefunction(func):
                 @functools.wraps(func)
                 async def wrapper(*args, **kwargs):
-                    if not PikaAppConfig.REDIS_ENABLE:
+                    if not PikaAppConfig.REDIS_ENABLE_FLAG:
                         return await func(*args, **kwargs)
                     cls_name = \
                         inspect.getframeinfo(inspect.currentframe().f_back)[3][0].split(".")[
@@ -351,7 +351,7 @@ class RedisHelper(object):
             else:
                 @functools.wraps(func)
                 def wrapper(*args, **kwargs):
-                    if not PikaAppConfig.REDIS_ENABLE:
+                    if not PikaAppConfig.REDIS_ENABLE_FLAG:
                         return func(*args, **kwargs)
                     cls_name = \
                         inspect.getframeinfo(inspect.currentframe().f_back)[3][0].split(".")[
@@ -392,7 +392,7 @@ class RedisHelper(object):
                 @functools.wraps(func)
                 async def wrapper(*args, **kwargs):
                     new_data = await func(*args, **kwargs)
-                    if not PikaAppConfig.REDIS_ENABLE:
+                    if not PikaAppConfig.REDIS_ENABLE_FLAG:
                         return new_data
                     cls_name = \
                         inspect.getframeinfo(inspect.currentframe().f_back)[3][0].split(".")[
@@ -414,7 +414,7 @@ class RedisHelper(object):
                 @functools.wraps(func)
                 def wrapper(*args, **kwargs):
                     new_data = func(*args, **kwargs)
-                    if not PikaAppConfig.REDIS_ENABLE:
+                    if not PikaAppConfig.REDIS_ENABLE_FLAG:
                         return new_data
                     cls_name = \
                         inspect.getframeinfo(inspect.currentframe().f_back)[3][0].split(".")[

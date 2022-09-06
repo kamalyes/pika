@@ -43,3 +43,4 @@ class ValidTimeEnum(IntEnum):
     AUTH_VALID_TIME = 60 * 60 * 24 * 15  # AUTH有效期：默认是15天
     DYNAMIC_CODE_VALID_TIME = 2 * 60  # 前端动态码有效期（登录时防爬虫机制）
     AUTH_CODE_VALID_TIME = 5 * 60  # 鉴权验证码有效期（修改资料、密码等操作使用）
+    SYSTEM_CONFIG_VALID_TIME = 24 * 3600
