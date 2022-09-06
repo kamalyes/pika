@@ -8,7 +8,7 @@ from app.middleware.proxy import start_proxy
 from config import PikaAppConfig
 
 mock = FastAPI()
-if PikaAppConfig.MOCK_OPEN:
+if PikaAppConfig.MOCK_ENABLE_FLAG:
     asyncio.run(start_proxy(logger))
 
 if __name__ == "__main__":

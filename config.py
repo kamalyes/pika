@@ -27,15 +27,15 @@ from app.enums.SysvarEnum import PikaGlobalVarEnum
 class PikaAppConfig(object):
     # system
     WORKSPACES_PATH = os.path.dirname(os.path.abspath(__file__))
-    ENVIRONMENT = "ignore"
-    # ENVIRONMENT = "dev"
+    # ENVIRONMENT = "ignore"
+    ENVIRONMENT = "dev"
     SERVER_HOST, SERVER_PORT = "0.0.0.0", 7780
     POOL_CONFIG = System.get_pool_config(work_spaces_path=WORKSPACES_PATH, environment=ENVIRONMENT)
     GLOBAL_POOL_CONFIG, GLOBAL_POOL_CONFIG_FILEPATH = POOL_CONFIG
     MITMPROXY = GLOBAL_POOL_CONFIG["mitmproxy"]
     CASE = GLOBAL_POOL_CONFIG["case"]
     RETRY_TIMES = CASE["retry_times"]
-    PROXY_PORT, MOCK_OPEN = MITMPROXY["port"], MITMPROXY["open"]
+    PROXY_PORT, MOCK_ENABLE_FLAG = MITMPROXY["port"], MITMPROXY["enable_flag"]
     SERVER_REPORT = "http://localhost:8000/#/record/report/"
     TEMPLATE_PATH = f"{WORKSPACES_PATH}/templates"
     MARKDOWN_PATH = f"{WORKSPACES_PATH}/templates/markdown/test_report.md"

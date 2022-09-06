@@ -38,6 +38,7 @@ jwt:
   md5_salt: "EjZHaD7pxt9z6csBQn27Y8S5Q9"
   mpop: False
 
+
 oss:
   type: "aliyun"
   access_key_id: "W1Phi9Ysh7Wn3"
@@ -62,7 +63,7 @@ github:
 
 mitmproxy:
   port: 7781
-  open: True
+  enable_flag: True
 
 case:
   retry_times: 1

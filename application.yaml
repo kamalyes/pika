@@ -62,7 +62,7 @@ github:
 
 mitmproxy:
   port: 7781
-  open: True
+  enable_flag: True
 
 case:
   retry_times: 1

@@ -29,7 +29,7 @@ async def start_proxy(log):
 
     addons = [PikaRecorder()]
     try:
-        if PikaAppConfig.MOCK_OPEN:
+        if PikaAppConfig.MOCK_ENABLE_FLAG:
             addons.append(MockModel())
         opts = options.Options(listen_host='0.0.0.0', listen_port=PikaAppConfig.PROXY_PORT)
         m = DumpMaster(opts, False, False)
