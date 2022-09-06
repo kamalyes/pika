@@ -122,7 +122,7 @@ class PikaAppConfig(object):
     JWT_CONFIG = GLOBAL_POOL_CONFIG["jwt"]
     JWT_SECRET_KEY = JWT_CONFIG["secret_key"]
     JWT_MD5_SALT = JWT_CONFIG["md5_salt"]
-    JWT_SINGLE_LOGIN = JWT_CONFIG["single_login"]
+    JWT_MPOP = JWT_CONFIG["mpop"]
 
     # Mino
     OSS_CONFIG = GLOBAL_POOL_CONFIG["minio_oss"]

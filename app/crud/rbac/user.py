@@ -320,7 +320,7 @@ class UserDao(PikaWrapper):
                         await cls.pwd_mistake_limit(uid=user.id)
                     old_token = await async_redis.get(
                         f'{RedisKeyEnum.AUTH_TOKEN}:{user_admin.emp_no}')
-                    if old_token and PikaAppConfig.JWT_SINGLE_LOGIN:
+                    if old_token and PikaAppConfig.JWT_MPOP:
                         uuid_jwt = old_token
                     else:
                         # 生成uuid_jwt并同步至redis
@@ -376,7 +376,7 @@ class UserDao(PikaWrapper):
                         await cls.pwd_mistake_limit(uid=user.id)
                     old_token = await async_redis.get(
                         f'{RedisKeyEnum.AUTH_TOKEN}:{user_admin.emp_no}')
-                    if old_token and PikaAppConfig.JWT_SINGLE_LOGIN:
+                    if old_token and PikaAppConfig.JWT_MPOP:
                         uuid_jwt = old_token
                     else:
                         # 生成uuid_jwt并同步至redis
