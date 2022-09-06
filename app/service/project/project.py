@@ -16,7 +16,7 @@ from app.crud.project.project import ProjectDao, ProjectRoleDao
 from app.crud.project.testplan import ApiTestPlanDao
 from app.enums.RbacEnum import RoleEnum
 from app.middleware.oss import OssClient
-from app.models import async_db_session
+from app.models import async_db_session_generator, async_db_session_iterator
 from app.schema.project import ProjectEditSchema, ProjectSchema
 from app.service import Permission
 
@@ -32,7 +32,7 @@ async def insert_project(data: ProjectSchema, escarole=Depends(Permission(RoleEn
 
 @router.delete("/delete", summary="删除项目")
 async def query_project(project_id: int, escarole=Depends(Permission(RoleEnum.MANAGER, True)),
-                        session=Depends(async_db_session)):
+                        session=Depends(async_db_session_iterator)):
     operator, operator_identity = escarole
     try:
         async with session.begin():

@@ -17,7 +17,7 @@ from hutools.pagination import LimitOffsetPage, add_pagination
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.itst.api.mock import MockDao
-from app.models import pagination_db
+from app.models import async_db_session_iterator
 from app.schema.base import BaseOnlyIdSchema
 from app.schema.mock import (EditMockSchema, DelMockSchema,
                              QueryMockOutSchema, QueryMockInSchema)
@@ -48,7 +48,7 @@ async def update_mock_deploy(request: EditMockSchema,
 @router.get("/mock/list", summary="分页获取mock配置", response_model=LimitOffsetPage[QueryMockOutSchema])
 async def list_mock_deploy(request: QueryMockInSchema = Depends(),
                            escarole=Depends(Permission(escarole=True)),
-                           db: AsyncSession = Depends(pagination_db)) -> Any:
+                           db: AsyncSession = Depends(async_db_session_iterator)) -> Any:
     return await MockDao.list_mock_deploy(db, request)
 
 

@@ -17,7 +17,7 @@ from hutools.pagination.async_sqlalchemy import paginate
 from app.core.handler.execres import ValidException
 from app.core.handler.jsonres import PikaResponse
 from app.enums.SysCodeEnum import ExcCodeEnum
-from app.models import async_db_session
+from app.models import async_db_session_generator
 
 
 class AsyncDbSession:
@@ -66,7 +66,7 @@ class AsyncDbSession:
         if len(error_ids) > 0:
             return PikaResponse.failed(code=ExcCodeEnum.VAR_ERROR, detail="参数错误，请检查格式是否为,进行分割！",
                                        data={"error_values": error_ids})
-        async with async_db_session() as session:
+        async with async_db_session_generator() as session:
             async with session.begin():
                 await session.execute(do_sql)
         return PikaResponse.success(message=f"删除{message}成功！")

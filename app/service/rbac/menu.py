@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud.rbac.menu import MenuDao
-from app.models import pagination_db
+from app.models import async_db_session_iterator
 from app.schema.base import BaseBatchDelIdsSchema
 from app.schema.menu import QueryMenuInSchema, QueryMenuOutSchema, EditMenuSchema
 from app.service import Permission
@@ -29,7 +29,7 @@ router = APIRouter()
              response_model=LimitOffsetPage[QueryMenuOutSchema])
 async def list_menu(request: QueryMenuInSchema = Depends(),
                     # user_info=Depends(Permission()),
-                    db: AsyncSession = Depends(pagination_db)) -> Any:
+                    db: AsyncSession = Depends(async_db_session_iterator)) -> Any:
     return await MenuDao.list_menu(db, request)
 
 

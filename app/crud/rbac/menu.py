@@ -14,7 +14,7 @@ from typing import Any, List
 from sqlalchemy import select, or_, and_, update
 
 from app.core.handler.asyncsql import AsyncDbSession
-from app.models import async_db_session
+from app.models import async_db_session_generator
 from app.models.menu import MenuModel
 
 
@@ -51,7 +51,7 @@ class MenuDao:
             pass
         if menu_parent_id == 0 and not is_parent:
             raise ValueError('父菜单id不存在！')
-        async with async_db_session() as session:
+        async with async_db_session_generator() as session:
             async with session.begin():
                 query_by_id_sql = select(MenuModel.id, MenuModel.title, MenuModel.name, MenuModel.parent_id).where(
                     or_(MenuModel.id == menu_id,

@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends
 from app.core.handler.jsonres import PikaResponse
 from app.crud.online.environment import EnvironmentDao
 from app.enums.RbacEnum import RoleEnum
-from app.models import async_db_session
+from app.models import async_db_session_generator, async_db_session_iterator
 from app.schema.environment import EnvironmentSchema
 from app.service import Permission
 
@@ -29,7 +29,7 @@ async def insert_environment(data: EnvironmentSchema, user_info=Depends(Permissi
 
 @router.delete("/environment/delete", summary="删除环境配置")
 async def delete_environment(id: int, user_info=Depends(Permission(RoleEnum.ADMIN)),
-                             session=Depends(async_db_session)):
+                             session=Depends(async_db_session_iterator)):
     await EnvironmentDao.delete_record_by_id(session=session, operator=user_info['emp_no'],
                                              value=id)
     return PikaResponse.success()

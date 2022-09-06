@@ -17,7 +17,7 @@ from fastapi import APIRouter, Depends
 from hutools.pagination import LimitOffsetPage, add_pagination
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import pagination_db
+from app.models import async_db_session_iterator
 from app.schema.functest import EditFuncCaseSchema, DelFuncCaseSchema, QueryFuncCaseInSchema, \
     QueryFuncCaseOutSchema
 from app.service import Permission
@@ -49,7 +49,7 @@ async def update_funccase(request: EditFuncCaseSchema,
             response_model=LimitOffsetPage[QueryFuncCaseOutSchema])
 async def list_funccase(request: QueryFuncCaseInSchema = Depends(),
                         escarole=Depends(Permission(escarole=True)),
-                        db: AsyncSession = Depends(pagination_db)) -> Any:
+                        db: AsyncSession = Depends(async_db_session_iterator)) -> Any:
     return await FuncCaseDao.list_funccase(db, request)
 
 

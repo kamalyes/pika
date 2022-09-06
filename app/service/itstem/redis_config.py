@@ -16,7 +16,7 @@ from app.core.handler.jsonres import PikaResponse
 from app.crud.online.rdconfig import PikaRedisConfigDao
 from app.enums.RbacEnum import RoleEnum
 from app.middleware.xredis import PikaRedisManager
-from app.models import async_db_session
+from app.models import async_db_session_generator, async_db_session_iterator
 from app.models.redis_config import RedisModel
 from app.schema.redis_config import RedisConfigSchema
 from app.service import Permission
@@ -41,7 +41,7 @@ async def insert_redis_config(form: RedisConfigSchema,
 @router.delete("/redis/delete", summary="删除redis配置")
 async def delete_redis_config(id: int, background_tasks: BackgroundTasks,
                               user_info=Depends(Permission(RoleEnum.ADMIN)),
-                              session=Depends(async_db_session)):
+                              session=Depends(async_db_session_iterator)):
     try:
         ans = await PikaRedisConfigDao.delete_record_by_id(session, user_info['emp_no'], id)
         # 更新缓存

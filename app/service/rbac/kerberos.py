@@ -16,7 +16,7 @@ from hutools.pagination import LimitOffsetPage, add_pagination
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.rbac.kerberos import KerberosDao
-from app.models import pagination_db
+from app.models import async_db_session_iterator
 from app.schema.kerberos import EditKerberosItemSchema, DelKerberosSchema, \
     QueryKerberosOutSchema, QueryKerberosInSchema
 from app.service import Permission
@@ -46,7 +46,7 @@ async def update_encrypt_issue(security: EditKerberosItemSchema = Depends(),
             response_model=LimitOffsetPage[QueryKerberosOutSchema])
 async def query_encrypt_issue(request: QueryKerberosInSchema = Depends(),
                               user_info=Depends(Permission()),
-                              db: AsyncSession = Depends(pagination_db)) -> Any:
+                              db: AsyncSession = Depends(async_db_session_iterator)) -> Any:
     return await KerberosDao.query_encrypt_issue(db, request)
 
 

@@ -18,7 +18,7 @@ from app.crud.itst.api.testreport import ApiTestReportDao
 from app.crud.project.project import ProjectRoleDao
 from app.enums.ConvertorEnum import CaseConvertorTypeEnum
 from app.middleware.xredis import RedisHelper
-from app.models import async_db_session, async_session
+from app.models import async_db_session_generator, async_session, async_db_session_iterator
 from app.models.api_test_case import ApiTestCaseModel
 from app.models.api_testcase_out_parameters import ApiTestCaseOutParametersModel
 from app.schema.api_testcase import TestCaseAssertsForm, TestCaseSchema, TestCaseInfo, \
@@ -72,7 +72,7 @@ async def update_testcase(form: TestCaseSchema, user_info=Depends(Permission()))
 
 @router.delete("/delete", summary="删除测试用例")
 async def delete_testcase(id_list: List[int], user_info=Depends(Permission()),
-                          session=Depends(async_db_session)):
+                          session=Depends(async_db_session_iterator)):
     operator = user_info['emp_no']
     try:
         async with session.begin():
@@ -350,7 +350,7 @@ async def update_testcase_out_parameters(form: ApiTestCaseOutParametersSchema,
 
 @router.get("/parameters/delete", summary="删除出参数据")
 async def delete_testcase_out_parameters(id: int, user_info=Depends(Permission()),
-                                         session=Depends(async_db_session)):
+                                         session=Depends(async_db_session_iterator)):
     await ApiTestCaseOutParametersDao.delete_record_by_id(session=session, operator=user_info['emp_no'],
                                                           value=id, log=False)
     return PikaResponse.success()
@@ -389,7 +389,7 @@ async def remove_record(index: int, request: Request, _=Depends(Permission())):
 
 @router.post("/generate", summary="生成用例")
 async def generate_case(form: TestCaseGeneratorForm, user_info=Depends(Permission()),
-                        session=Depends(async_db_session)):
+                        session=Depends(async_db_session_iterator)):
     if len(form.requests) == 0:
         return PikaResponse.failed(detail="无http请求，请检查参数")
     CaseGenerator.extract_field(form.requests)

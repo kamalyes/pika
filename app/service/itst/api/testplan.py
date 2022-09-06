@@ -18,7 +18,7 @@ from app.core.handler.executor import Executor
 from app.core.handler.jsonres import PikaResponse
 from app.crud.project.testplan import ApiTestPlanDao
 from app.enums.RbacEnum import RoleEnum
-from app.models import async_db_session
+from app.models import async_db_session_generator, async_db_session_iterator
 from app.schema.api_testplan import ApiTestPlanSchema
 from app.service import Permission
 from app.utils.scheduler import Scheduler
@@ -68,7 +68,7 @@ async def update_test_plan(form: ApiTestPlanSchema, user_info=Depends(Permission
 
 @router.get("/delete", summary="删除定时任务&测试计划")
 async def delete_test_plan(id: int, user_info=Depends(Permission(RoleEnum.MANAGER)),
-                           session=Depends(async_db_session)):
+                           session=Depends(async_db_session_iterator)):
     try:
         await ApiTestPlanDao.delete_record_by_id(session=session, operator=user_info['emp_no'], value=id)
         Scheduler.remove(id)

@@ -16,7 +16,7 @@ from hutools.pagination import LimitOffsetPage, add_pagination
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.system.lexicon import SensitiveWordDao, AliasWordDao
-from app.models import pagination_db
+from app.models import async_db_session_iterator
 from app.schema.lexicon import SensitiveWordGlobalSchema, DelSensitiveWordSchema, \
     QuerySensitiveWordOutSchema, \
     QuerySensitiveWordInSchema, EditAliasWordSchema, QueryAliasWordOutSchema, QueryAliasWordInSchema, \
@@ -51,7 +51,7 @@ async def update_sensitive_word(request: SensitiveWordGlobalSchema,
             response_model=LimitOffsetPage[QuerySensitiveWordOutSchema])
 async def query_sensitive_word(request: QuerySensitiveWordInSchema = Depends(),
                                escarole=Depends(Permission(escarole=True)),
-                               db: AsyncSession = Depends(pagination_db)) -> Any:
+                               db: AsyncSession = Depends(async_db_session_iterator)) -> Any:
     emp_no, role = escarole
     return await SensitiveWordDao.query_sensitive_word(db, request)
 
@@ -81,7 +81,7 @@ async def update_alias_word(request: EditAliasWordSchema,
             response_model=LimitOffsetPage[QueryAliasWordOutSchema])
 async def query_alias_word(request: QueryAliasWordInSchema = Depends(),
                            escarole=Depends(Permission(escarole=True)),
-                           db: AsyncSession = Depends(pagination_db)) -> Any:
+                           db: AsyncSession = Depends(async_db_session_iterator)) -> Any:
     return await AliasWordDao.query_alias_word(db, request)
 
 

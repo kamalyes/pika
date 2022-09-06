@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud.rbac.role import RoleDao
-from app.models import pagination_db
+from app.models import async_db_session_iterator
 from app.schema.base import BaseOnlyIdSchema
 from app.schema.role import QueryRoleOutSchema, QueryRoleInSchema, EditRoleSchema
 from app.service import Permission
@@ -28,7 +28,7 @@ router = APIRouter()
 @router.get("/role/list", summary="分页获取角色数据", response_model=LimitOffsetPage[QueryRoleOutSchema])
 async def query_encrypt_issue(request: QueryRoleInSchema = Depends(),
                               user_info=Depends(Permission()),
-                              db: AsyncSession = Depends(pagination_db)) -> Any:
+                              db: AsyncSession = Depends(async_db_session_iterator)) -> Any:
     return await RoleDao.list(db, request=request)
 
 

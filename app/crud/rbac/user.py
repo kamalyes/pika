@@ -34,7 +34,7 @@ from app.enums.RedisEnum import RedisKeyEnum
 from app.enums.SysCodeEnum import ExcCodeEnum
 from app.enums.SysvarEnum import PikaGlobalVarEnum, ValidTimeEnum
 from app.middleware.xredis import RedisHelper
-from app.models import async_db_session, async_redis, async_session
+from app.models import async_db_session_generator, async_redis, async_session
 from app.models.admin import SysUserAdminModel
 from app.models.kerberos import PikaSecurityRelIssues
 from app.models.user import UserModel
@@ -90,7 +90,7 @@ class UserDao(PikaWrapper):
         """
         user_ip = await client_ip(request)
         await regex_register_str(email=register_model.email)
-        async with async_db_session() as session:
+        async with async_db_session_generator() as session:
             async with session.begin():
                 users = await session.execute(select(UserModel).where(
                     or_(UserModel.username == register_model.username,
@@ -140,7 +140,7 @@ class UserDao(PikaWrapper):
 
     @staticmethod
     async def pwd_mistake_limit(**kwargs):
-        async with async_db_session() as session:
+        async with async_db_session_generator() as session:
             async with session.begin():
                 err_pwd_counts = await session.execute(
                     select(SysUserAdminModel.err_pwd_count).where(SysUserAdminModel.uid == kwargs["uid"]))
@@ -216,7 +216,7 @@ class UserDao(PikaWrapper):
     @classmethod
     async def update_last_login_field(cls, **kwargs):
         uid, emp_no = kwargs.get("uid", None), kwargs.get("emp_no", None)
-        async with async_db_session() as session:
+        async with async_db_session_generator() as session:
             async with session.begin():
                 sql = update(SysUserAdminModel).where(
                     or_(SysUserAdminModel.id == uid, SysUserAdminModel.emp_no == emp_no)).values(
@@ -228,7 +228,7 @@ class UserDao(PikaWrapper):
     async def update_last_logout_field(cls, **kwargs):
         uid, emp_no, last_logout_ip = kwargs.get("uid", None), kwargs.get("emp_no", None), kwargs[
             "last_logout_ip"]
-        async with async_db_session() as session:
+        async with async_db_session_generator() as session:
             async with session.begin():
                 sql = update(SysUserAdminModel).where(
                     or_(SysUserAdminModel.id == uid, SysUserAdminModel.emp_no == emp_no)).values(
@@ -238,7 +238,7 @@ class UserDao(PikaWrapper):
 
     @classmethod
     async def update_avatar(cls, emp_no, avatar):
-        async with async_db_session() as session:
+        async with async_db_session_generator() as session:
             async with session.begin():
                 sql = update(UserModel).where(UserModel.emp_no == emp_no).values(
                     {"avatar": avatar})
@@ -247,7 +247,7 @@ class UserDao(PikaWrapper):
     @classmethod
     async def query_user_info(cls, **kwargs):
         uid, emp_no = kwargs.get("uid", None), kwargs.get("emp_no", None)
-        async with async_db_session() as session:
+        async with async_db_session_generator() as session:
             users = await session.execute(
                 select(UserModel).where(
                     or_(UserModel.id == uid, UserModel.emp_no == emp_no)))
@@ -295,7 +295,7 @@ class UserDao(PikaWrapper):
         # if oauth2_login.dynamic_code is None:
         #     raise ValidException(detail="dynamic_code不能为空")
         # await cls.has_dynamic_code(oauth2_login.dynamic_code)
-        async with async_db_session() as session:
+        async with async_db_session_generator() as session:
             async with session.begin():
                 sql = select(UserModel).where(or_(UserModel.username == oauth2_login.username,
                                                   UserModel.emp_no == oauth2_login.emp_no))
@@ -353,7 +353,7 @@ class UserDao(PikaWrapper):
         user_ip = await client_ip(request)
         if oauth2_login.email is None:
             raise ValidException(detail="字段：email不能为空")
-        async with async_db_session() as session:
+        async with async_db_session_generator() as session:
             async with session.begin():
                 sql = select(UserModel).where(UserModel.email == oauth2_login.email)
                 users = await session.execute(sql)
@@ -392,7 +392,7 @@ class UserDao(PikaWrapper):
                     raise AuthException(code=ExcCodeEnum.EMAIL_NOT_REGISTER,
                                         detail="该邮箱暂未被注册，请使用正常的账户登录！")
         await cls.update_last_login_field(uid=user.id, last_login_ip=user_ip)
-        async with async_db_session as session:
+        async with async_db_session_generator as session:
             async with session.begin():
                 sql = update(SysUserAdminModel).where(
                     or_(SysUserAdminModel.emp_no == user.emp_no)).values({"err_pwd_count": 0})
@@ -451,7 +451,7 @@ class UserDao(PikaWrapper):
         Returns:
         """
         await regex_register_str(email=request.email)
-        async with async_db_session() as session:
+        async with async_db_session_generator() as session:
             async with session.begin():
                 users = await session.execute(select(UserModel).where(
                     or_(UserModel.username == request.username,
@@ -491,7 +491,7 @@ class UserDao(PikaWrapper):
                        'user_alias': modify_user_info.user_alias,
                        'username': modify_user_info.username}
 
-        async with async_db_session() as session:
+        async with async_db_session_generator() as session:
             async with session.begin():
                 sel_sql = select(UserModel).where(
                     and_(or_(UserModel.email == modify_user_info.email,
@@ -597,7 +597,7 @@ class UserDao(PikaWrapper):
     @staticmethod
     async def send_email_verify_code(request):
         if request.model == 2:
-            async with async_db_session() as session:
+            async with async_db_session_generator() as session:
                 async with session.begin():
                     sel_sql = select(UserModel).where(UserModel.email == request.email)
                     sel_res = await session.execute(sel_sql)
@@ -619,7 +619,7 @@ class UserDao(PikaWrapper):
         pwd = Kerberos.md5_encode(decode_msg=new_password)
         pwd_valid_date = PikaGlobalVarEnum.PWD_VALID_DATE
         update_info = {'password': pwd, 'pwd_valid_date': pwd_valid_date}
-        async with async_db_session() as session:
+        async with async_db_session_generator() as session:
             async with session.begin():
                 sql = update(SysUserAdminModel).where(SysUserAdminModel.emp_no == emp_no).values(
                     update_info)
@@ -629,7 +629,7 @@ class UserDao(PikaWrapper):
     async def old_value_update_pwd(cls, **kwargs):
         emp_no = kwargs["emp_no"]
         old_password, new_password = kwargs["old_password"], kwargs["new_password"]
-        async with async_db_session() as session:
+        async with async_db_session_generator() as session:
             async with session.begin():
                 user_admins = await session.execute(
                     select(SysUserAdminModel).where(
@@ -650,7 +650,7 @@ class UserDao(PikaWrapper):
         await AsyncDbSession.begin_lock(pending_begin_number=len(pending_begin),
                                         min_begin_number=min_begin_number,
                                         max_begin_number=max_begin_number)
-        async with async_db_session() as session:
+        async with async_db_session_generator() as session:
             async with session.begin():
                 sql = select(func.count(PikaSecurityRelIssues.id)).where(
                     PikaSecurityRelIssues.emp_no == emp_no)
@@ -663,7 +663,7 @@ class UserDao(PikaWrapper):
     @staticmethod
     async def empty_security(**kwargs):
         ids, emp_no = kwargs["request"].ids.split(","), kwargs["emp_no"]
-        async with async_db_session() as session:
+        async with async_db_session_generator() as session:
             sel_res = await session.execute(select(PikaSecurityRelIssues.id).where(
                 and_(PikaSecurityRelIssues.id.in_(ids), PikaSecurityRelIssues.emp_no == emp_no)))
             sel_res_ids = sel_res.scalars().all()
@@ -685,7 +685,7 @@ class UserDao(PikaWrapper):
         pending_begin = kwargs["request"].security
         success, failed, not_funded = [], [], []
         await AsyncDbSession.begin_lock(pending_begin_number=len(pending_begin))
-        async with async_db_session() as session:
+        async with async_db_session_generator() as session:
             async with session.begin():
                 sql = select(distinct(PikaSecurityRelIssues.id)).where(
                     and_(PikaSecurityRelIssues.id.in_([index.id for index in pending_begin]),

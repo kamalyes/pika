@@ -73,7 +73,7 @@ def sync_db_session():
 
 
 @asynccontextmanager
-async def async_db_session() -> AsyncGenerator:
+async def async_db_session_generator() -> AsyncGenerator:
     """
     异步db
     Returns:
@@ -92,7 +92,7 @@ async def async_db_session() -> AsyncGenerator:
         await session.close()
 
 
-async def pagination_db() -> AsyncIterator[AsyncSession]:
+async def async_db_session_iterator() -> AsyncIterator[AsyncSession]:
     async with async_session() as session:
         yield session
 

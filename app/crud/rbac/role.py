@@ -15,7 +15,7 @@ from sqlalchemy import select, delete, update, and_, or_
 
 from app.core.handler.asyncsql import AsyncDbSession
 from app.crud import PikaMdWrapper
-from app.models import async_db_session
+from app.models import async_db_session_generator
 from app.models.role import RoleModel
 from app.models.user import UserModel
 
@@ -45,7 +45,7 @@ class RoleDao:
             id = request.id
             name = request.name
             menus = request.menus
-            async with async_db_session() as session:
+            async with async_db_session_generator() as session:
                 async with session.begin():
                     query_ex_sql = select(RoleModel).where(RoleModel.name == f'{name}')
                     query_ex_role_result = await session.execute(query_ex_sql)
@@ -65,7 +65,7 @@ class RoleDao:
     @classmethod
     async def delete(cls, id: int):
         try:
-            async with async_db_session() as session:
+            async with async_db_session_generator() as session:
                 async with session.begin():
                     query_us_role_sql = select(UserModel) \
                         .where(UserModel.roles == id)

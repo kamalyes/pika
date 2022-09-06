@@ -14,7 +14,7 @@ from fastapi import Depends, APIRouter
 from app.core.handler.jsonres import PikaResponse
 from app.crud.online.gconfig import GConfigDao
 from app.enums.RbacEnum import RoleEnum
-from app.models import async_db_session
+from app.models import async_db_session_iterator
 from app.schema.gconfig import GConfigFormSchema
 from app.service import Permission
 
@@ -29,7 +29,7 @@ async def insert_gconfig(data: GConfigFormSchema, user_info=Depends(Permission(R
 
 @router.delete("/gconfig/delete", summary="删除全局配置")
 async def delete_gconfig(id: int, user_info=Depends(Permission(RoleEnum.ADMIN)),
-                         session=Depends(async_db_session)):
+                         session=Depends(async_db_session_iterator)):
     await GConfigDao.delete_record_by_id(session, user_info['emp_no'], id, log=True)
     return PikaResponse.success()
 

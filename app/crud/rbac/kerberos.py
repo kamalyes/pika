@@ -19,7 +19,7 @@ from app.core.handler.logger import PikaLogger
 from app.crud import PikaWrapper
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysCodeEnum import ExcCodeEnum
-from app.models import async_db_session
+from app.models import async_db_session_generator
 from app.models.kerberos import SecurityNominateIssueModel
 
 
@@ -33,7 +33,7 @@ class KerberosDao(PikaWrapper):
         await AsyncDbSession.begin_lock(pending_begin_number=len(pending_begin),
                                         max_begin_number=100)
         new_begin_key, new_questions_list = [index["question"] for index in pending_begin], []
-        async with async_db_session() as session:
+        async with async_db_session_generator() as session:
             async with session.begin():
                 sql = select(distinct(SecurityNominateIssueModel.question)).where(
                     SecurityNominateIssueModel.question.in_(new_begin_key))
@@ -71,7 +71,7 @@ class KerberosDao(PikaWrapper):
                                         max_begin_number=ByteSizeEnum.LENGTH_100)
         floor_count = math.floor(len(pending_begin) / dispose_index)
         pending_count = 1 if floor_count < 1 else floor_count
-        async with async_db_session() as session:
+        async with async_db_session_generator() as session:
             async with session.begin():
                 for index in range(pending_count):
                     pending_begin_ = pending_begin[pending_index:dispose_index]

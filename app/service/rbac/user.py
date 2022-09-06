@@ -19,7 +19,7 @@ from app.core.handler.execres import ValidException
 from app.core.handler.jsonres import PikaResponse
 from app.crud.rbac.user import UserDao
 from app.enums.RbacEnum import RoleEnum
-from app.models import pagination_db
+from app.models import async_db_session_iterator
 from app.schema.user import RegisterUserSchema, OAuth2LoginSchema, \
     ForgetPwdSchema, OAuth2TokenSchema, AddUserSchema, \
     ModifyUserInfoSchema, QueryUserInSchema, QueryUserOutSchema, \
@@ -80,7 +80,7 @@ async def query_all_users(user_info=Depends(Permission())):
 @router.get("/list", summary="查询用户列表", response_model=LimitOffsetPage[QueryUserOutSchema])
 async def query_user_list(request: QueryUserInSchema = Depends(),
                           user_info=Depends(Permission(RoleEnum.ADMIN.value)),
-                          db: AsyncSession = Depends(pagination_db)) -> Any:
+                          db: AsyncSession = Depends(async_db_session_iterator)) -> Any:
     return await UserDao.query_user_info_list(db, request)
 
 
@@ -144,7 +144,7 @@ async def update_security(request: EditSecuritySchema = Depends(), user_info=Dep
 @router.get("/security/info", summary="查询用户自己设置过的密保信息",
             response_model=LimitOffsetPage[QuerySecuritySchema])
 async def query_security(user_info=Depends(Permission()),
-                         db: AsyncSession = Depends(pagination_db)) -> Any:
+                         db: AsyncSession = Depends(async_db_session_iterator)) -> Any:
     return await UserDao.query_security(db=db, emp_no=user_info["emp_no"])
 
 

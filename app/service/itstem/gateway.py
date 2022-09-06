@@ -14,7 +14,7 @@ from fastapi import Depends, APIRouter
 from app.core.handler.jsonres import PikaResponse
 from app.crud.online.gateway import GatewayDao
 from app.enums.RbacEnum import RoleEnum
-from app.models import async_db_session
+from app.models import async_db_session_generator, async_db_session_iterator
 from app.models.gateway import GatewayModel
 from app.schema.gateway import PikaGatewaySchema
 from app.service import Permission
@@ -31,7 +31,7 @@ async def insert_gateway(form: PikaGatewaySchema, user_info=Depends(Permission(R
 
 @router.delete("/gateway/delete", summary="删除请求地址")
 async def delete_gateway(id: int, user_info=Depends(Permission(RoleEnum.MANAGER)),
-                         session=Depends(async_db_session)):
+                         session=Depends(async_db_session_iterator)):
     await GatewayDao.delete_record_by_id(session=session,
                                          operator=user_info['emp_no'],
                                          value=id)
