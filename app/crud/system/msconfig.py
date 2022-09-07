@@ -29,7 +29,7 @@ class MsConfigDao(object):
 
     @classmethod
     @RedisHelper.up_cache("msconfig")
-    def update_config(cls, config):
+    async def update_config(cls, config):
         try:
             filepath = PikaAppConfig.GLOBAL_POOL_CONFIG_FILEPATH
             new_config, old_config = config.dict(), cls.get_config()

@@ -27,6 +27,6 @@ def get_system_config(user_info=Depends(Permission(RoleEnum.ADMIN))):
 
 
 @router.post("/config/update", summary="更新系统配置")
-def get_system_config(config: MsConfigSchema, user_info=Depends(Permission(RoleEnum.ADMIN))):
-    MsConfigDao.update_config(config)
+async def get_system_config(config: MsConfigSchema, user_info=Depends(Permission(RoleEnum.ADMIN))):
+    await MsConfigDao.update_config(config)
     return PikaResponse.success()
