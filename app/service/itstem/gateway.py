@@ -25,7 +25,7 @@ router = APIRouter()
 @router.post("/gateway/insert", summary="添加请求地址")
 async def insert_gateway(form: PikaGatewaySchema, user_info=Depends(Permission(RoleEnum.MANAGER))):
     model = GatewayModel(**form.dict(), operator=user_info['emp_no'])
-    model = await GatewayDao.insert(model=model, log=False)
+    model = await GatewayDao.insert(model=model, log=True)
     return PikaResponse.success(data=model)
 
 

@@ -52,7 +52,7 @@ async def upload_avatar(file: UploadFile = File(...),
 
 
 @router.get("/list", summary="查询文件")
-async def list_oss_file(filepath: str = '', _=Depends(Permission(RoleEnum.MANAGER))):
+async def list_oss_file(filepath: str = '', user_info=Depends(Permission(RoleEnum.MANAGER))):
     try:
         records = await PikaOssDao.select_list(
             condition=[OssFileModel.file_path.like(f'%{filepath}%')])

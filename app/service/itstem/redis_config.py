@@ -28,7 +28,7 @@ router = APIRouter()
 async def insert_redis_config(form: RedisConfigSchema,
                               user_info=Depends(Permission(RoleEnum.ADMIN))):
     try:
-        query = await PikaRedisConfigDao.query(name=form.name, env=form.env)
+        query = await PikaRedisConfigDao.query_record(name=form.name, env=form.env)
         if query is not None:
             raise Exception("数据已存在, 请勿重复添加")
         data = RedisModel(**form.dict(), operator=user_info['emp_no'])

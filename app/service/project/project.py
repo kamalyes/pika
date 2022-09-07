@@ -44,7 +44,7 @@ async def query_project(project_id: int, escarole=Depends(Permission(RoleEnum.MA
             await ApiTestPlanDao.delete_record_by_id(session=session, operator=operator,
                                                      project_id=project_id,
                                                      key="project_id",
-                                                     exists=False, session_begin=True)
+                                                     session_begin=True)
         return PikaResponse.success()
     except Exception as e:
         return PikaResponse.failed(detail=str(e))

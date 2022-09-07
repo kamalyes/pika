@@ -30,13 +30,13 @@ async def insert_environment(data: EnvironmentSchema, user_info=Depends(Permissi
 @router.delete("/environment/delete", summary="删除环境配置")
 async def delete_environment(id: int, user_info=Depends(Permission(RoleEnum.ADMIN)),
                              session=Depends(async_db_session_iterator)):
-    await EnvironmentDao.delete_record_by_id(session=session, operator=user_info['emp_no'],
-                                             value=id)
+    await EnvironmentDao.delete_record_by_id(session=session, operator=user_info['emp_no'], value=id, log=True)
     return PikaResponse.success()
 
 
 @router.post("/environment/update", summary="更新环境配置")
-async def update_environment(data: EnvironmentSchema, user_info=Depends(Permission(RoleEnum.ADMIN))):
+async def update_environment(data: EnvironmentSchema, user_info=Depends(Permission(RoleEnum.ADMIN)),
+                             session=Depends(async_db_session_iterator)):
     ans = await EnvironmentDao.update_record_by_id(operator=user_info['emp_no'], model=data, not_null=True, log=True)
     return PikaResponse.success(data=ans)
 

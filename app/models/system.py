@@ -38,14 +38,15 @@ class SysRecordModel(NormBaseModel):
 class OperationLogModel(MinBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_operation_log'
     title = Column(String(ByteSizeEnum.LENGTH_128), nullable=True, comment="操作title")
+    diff_data = Column(String(ByteSizeEnum.LENGTH_1000), nullable=True, comment="diff_data")
     tag = Column(String(ByteSizeEnum.LENGTH_1000), comment="操作tag")
     mode = Column(SMALLINT, comment="操作类型")
     key = Column(INT, nullable=True, comment="关键id，可能是目录id，case_id或者其他id")
 
-    def __init__(self, operator, mode: SqlOperationTypeEnum, title, tag, description=None, key=None,
-                 id=0):
-        super().__init__(id=id, operator=operator, description=description)
+    def __init__(self, operator, mode: SqlOperationTypeEnum, title, tag, diff_data, description=None, key=None):
+        super().__init__(operator=operator, description=description)
         self.title = title
         self.tag = tag
+        self.diff_data = diff_data
         self.mode = mode.value
         self.key = key

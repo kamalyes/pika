@@ -12,21 +12,20 @@
 import asyncio
 import functools
 import json
-from copy import deepcopy
 from datetime import datetime
 from typing import List, TypeVar, Callable, Any, Iterable
 
-from dictdiffer import diff, swap
+from dictdiffer import diff
 from hutools.time import Moment
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.handler.execres import ValidException
+from app.core.handler.jsonres import PikaResponse
 from app.core.handler.logger import PikaLogger
 from app.enums.OperationEnum import SqlOperationTypeEnum
 from app.excpetions.thirdparty.DbException import DbException
 from app.middleware.xredis import RedisHelper
-from app.models import async_session
+from app.models import async_session, async_db_session_generator
 from app.models.basic import LargeBaseModel
 from app.models.system import OperationLogModel
 from config import PikaAppConfig
@@ -63,10 +62,10 @@ def db_connect(transaction: Transaction = False):
         @functools.wraps(transaction)
         async def wrap(cls, *args, **kwargs):
             try:
-                session = kwargs.get("session", None)
+                session: AsyncSession = kwargs.pop("session", None)
                 if session is not None:
                     return await transaction(cls, *args, session=session, **kwargs)
-                async with async_session() as session_:
+                async with async_db_session_generator() as session_:
                     return await transaction(cls, *args, session=session_, **kwargs)
             except Exception as e:
                 # 这边调用cls本身的log参数，写入日志+抛出异常
@@ -86,11 +85,11 @@ def db_connect(transaction: Transaction = False):
                         async with session.begin():
                             return await func(cls, *args, session=session, **kwargs)
                     return await func(cls, *args[1:], session=session, **kwargs)
-                async with async_session() as ss:
+                async with async_db_session_generator() as session_generator:
                     if transaction and nb:
-                        async with ss.begin():
-                            return await func(cls, *args, session=ss, **kwargs)
-                    return await func(cls, *args, session=ss, **kwargs)
+                        async with session_generator.begin():
+                            return await func(cls, *args, session=session_generator, **kwargs)
+                    return await func(cls, *args, session=session_generator, **kwargs)
             except Exception as e:
                 cls.__log__.error(f"操作Model: {cls.__model__.__name__}失败: {e}")
                 raise DbException(f"操作数据失败: {e}")
@@ -212,6 +211,7 @@ class PikaWrapper(object):
         else:
             dist.delete_date = Moment.get_now_time("13timestamp")
         dist.update_date = datetime.now()
+        dist.delete_flag = 1
         dist.update_emp_no = operator
 
     @classmethod
@@ -302,15 +302,14 @@ class PikaWrapper(object):
     @classmethod
     @RedisHelper.up_cache("dao")
     @db_connect(transaction=True)
-    async def insert(cls, *, model: LargeBaseModel, session: AsyncSession = None, log=False, not_begin=False):
+    async def insert(cls, *, model: LargeBaseModel, session: AsyncSession = None, log=False):
         session.add(model)
         await session.flush()
         session.expunge(model)
         if log:
             await asyncio.create_task(
-                cls.insert_log(session, model.create_emp_no, SqlOperationTypeEnum.ONLY_INSERT,
-                               model,
-                               key=model.id))
+                cls.insert_log(session=session, operator=model.create_emp_no, mode=SqlOperationTypeEnum.ONLY_INSERT,
+                               before={}, changed=model, key=model.id))
         return model
 
     @classmethod
@@ -319,59 +318,80 @@ class PikaWrapper(object):
         try:
             async with async_session() as session:
                 async with session.begin():
-                    sql = update(cls.__model__).where(*condition).values(**kwargs,
-                                                                         update_date=datetime.now(),
-                                                                         update_emp_no=operator)
+                    sql = update(cls.__model__).where(*condition) \
+                        .values(**kwargs,
+                                update_date=datetime.now(),
+                                update_emp_no=operator)
                     await session.execute(sql)
         except Exception as e:
             cls.__log__.error(f"更新数据失败: {e}")
-            raise Exception("更新数据失败")
+            raise DbException("更新数据失败")
 
     @classmethod
     @RedisHelper.up_cache("dao")
     @db_connect(transaction=True)
     async def update_record_by_id(cls, operator: str, model, not_null=False, log=False, title=None,
                                   session=None):
-        query = cls.query_wrapper(id=model.id)
-        result = await session.execute(query)
-        now = result.scalars().first()
-        if now is None:
-            raise Exception("数据不存在")
-        old = deepcopy(now)
-        changed = cls.update_model(now, model, operator, not_null)
-        await session.flush()
-        session.expunge_all()
-        if log:
-            await asyncio.create_task(
-                cls.insert_log(session=session, operator=operator,
-                               mode=SqlOperationTypeEnum.ONLY_UPDATE, before=old,
-                               changed=changed,
-                               key=model.id, title=title))
-        return now
+        try:
+            query = cls.query_wrapper(id=model.id)
+            result = await session.execute(query)
+            now = result.scalars().first()
+            if now is None:
+                raise DbException("数据不存在")
+            cls.update_model(now, model, operator, not_null)
+            await session.flush()
+            session.expunge_all()
+            if log:
+                before, changed = PikaResponse.model_to_dict(now), dict(model)
+                await asyncio.create_task(
+                    cls.insert_log(session=session, operator=operator,
+                                   mode=SqlOperationTypeEnum.ONLY_UPDATE, before=before,
+                                   changed=changed,
+                                   key=model.id, title=title))
+            return now
+        except Exception as e:
+            cls.__log__.exception(f"删除{cls.__model__.__name__}记录失败: \n{e}")
+            raise DbException(f"删除失败,\n{e}")
 
     @classmethod
-    async def _inner_delete(cls, session, operator, value, log, key, exists, title=None):
-        query = cls.query_wrapper(**{key: value})
-        result = await session.execute(query)
-        original = result.scalars().first()
-        if original is None:
-            if exists:
-                raise ValidException(detail="记录不存在")
-            return None
-        cls.delete_model(original, operator)
-        await session.flush()
-        session.expunge(original)
-        if log:
-            await asyncio.create_task(
-                cls.insert_log(session=session, operator=operator,
-                               mode=SqlOperationTypeEnum.ONLY_DELETE, before=original, changed={},
-                               key=value, title=title))
-            return original
+    async def _inner_delete(cls, *, session, operator, value, key, log=False, title=None):
+        """
+
+        Args:
+            session:
+            operator:
+            value:
+            key:
+            log:
+            title:
+
+        Returns:
+
+        """
+        try:
+            query = cls.query_wrapper(**{key: value})
+            result = await session.execute(query)
+            original = result.scalars().first()
+            if original is None:
+                return None
+            cls.delete_model(original, operator)
+            await session.flush()
+            session.expunge(original)
+            if log:
+                table_args = getattr(original, PikaAppConfig.TABLE_TAG, '未设置')
+                await asyncio.create_task(
+                    cls.insert_log(session=session, operator=operator,
+                                   mode=SqlOperationTypeEnum.ONLY_DELETE, key=value, table_args=table_args,
+                                   title=title))
+                return original
+        except Exception as e:
+            cls.__log__.exception(f"删除{cls.__model__.__name__}记录失败: \n{e}")
+            raise DbException(f"删除失败,\n{e}")
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def delete_record_by_id(cls, session, operator: str, value: int, log=True, key='id',
-                                  exists=True,
+    async def delete_record_by_id(cls, session, operator: str, value: int, key='id',
+                                  log=False, title=None,
                                   session_begin=False):
         """
         逻辑删除
@@ -379,23 +399,26 @@ class PikaWrapper(object):
             session:
             operator:
             value:
-            log:
             key:
-            exists:
+            log:
+            title:
             session_begin:
 
         Returns:
 
         """
         try:
+            mode = {"session": session, "operator": operator,
+                    "value": value, "key": key,
+                    "log": log, "title": title}
             if session_begin:
                 # 说明在外面已经开启了session
-                return await cls._inner_delete(session, operator, value, log, key, exists)
+                return await cls._inner_delete(**mode)
             async with session.begin():
-                return await cls._inner_delete(session, operator, value, log, key, exists)
+                return await cls._inner_delete(**mode)
         except Exception as e:
             cls.__log__.exception(f"删除{cls.__model__.__name__}记录失败: \n{e}")
-            raise ValidException(detail=f"删除失败,\n{e}")
+            raise DbException(f"删除失败,\n{e}")
 
     @classmethod
     @RedisHelper.up_cache("dao")
@@ -408,7 +431,7 @@ class PikaWrapper(object):
                 original = result.scalars().first()
                 if original is None:
                     continue
-                    # raise Exception("记录不存在")
+                    # raise DbException("记录不存在")
                 cls.delete_model(original, operator)
                 await session.flush()
                 session.expunge(original)
@@ -420,10 +443,11 @@ class PikaWrapper(object):
                                        key=id_, title=title))
         except Exception as e:
             cls.__log__.exception(f"删除{cls.__model__}记录失败, error: {e}")
-            raise Exception(f"删除记录失败")
+            raise DbException(f"删除记录失败")
 
     @classmethod
     async def insert_log(cls, session, operator, mode, before=None, changed=None, key=None,
+                         table_args=None,
                          title=None):
         """
         根据relation插入日志
@@ -434,40 +458,33 @@ class PikaWrapper(object):
             before:
             changed:
             key:
+            table_args:
             title:
         Returns:
 
         """
-        diff = await cls.get_diff(before, changed)
-        table = before if before else changed
-        table_args = getattr(table, PikaAppConfig.TABLE_TAG, [])
-        diff_data = json.dumps(diff, ensure_ascii=False)
-        tag = [tb_arg.get("comment") for tb_arg in table_args if isinstance(tb_arg, dict)]
+        change, add, remove, tag = {}, {}, {}, ""
+        diff_result = list(diff(before, changed))
+        for index in diff_result:
+            left, middle, right = index[0], index[1], index[2]
+            if left == "change":
+                change[middle] = {"before": right[0], "changed": right[1]}
+            elif left == "add":
+                for item in right:
+                    add[item[0]] = item[1]
+            elif left == "remove":
+                for item in right:
+                    remove[item[0]] = item[1]
+        join_diff = {"change": change, "add": add, "remove": remove}
+        diff_data = json.dumps(join_diff, ensure_ascii=False)
+        if table_args:
+            if isinstance(table_args, tuple):
+                tag = [index.get("comment", None) for index in table_args if isinstance(index, dict)]
+            elif isinstance(table_args, dict):
+                tag = table_args.get("comment", None)
         model = OperationLogModel(operator=operator, mode=mode, title=title,
-                                  tag=tag[0], description=diff_data, key=key)
+                                  tag="".join(tag), diff_data="".join(diff_data), key=key)
         session.add(model)
-
-    @classmethod
-    async def get_diff(cls, before, changed):
-        """
-        根据新旧model获取2者的diff
-        Args:
-            before:
-            changed:
-
-        Returns:
-
-        """
-        result = {}
-        if before and changed:
-            result = diff(**before.__dict__, **changed.__dict__)
-        elif not before and changed:
-            result = diff({}, **changed.__dict__)
-        elif before and not changed:
-            result = diff({}, **before.__dict__)
-        swapped = swap(result)
-        print("swapped", swapped)
-        return swapped
 
     @classmethod
     @RedisHelper.up_cache("dao")
@@ -486,5 +503,5 @@ class PikaWrapper(object):
         result = await session.execute(query)
         original = result.scalars().first()
         if original is None:
-            raise Exception("记录不存在")
+            raise DbException("记录不存在")
         session.delete(original)

@@ -36,7 +36,7 @@ async def execute_sql(data: OnlineSqlSchema, escarole=Depends(Permission(escarol
 
 
 @router.get("/sql/history/query", summary="获取sql执行历史记录")
-async def query_sql_history(page: int = 1, size: int = 4, _=Depends(Permission())):
+async def query_sql_history(page: int = 1, size: int = 4, user_info=Depends(Permission())):
     data, total = await SQLHistoryDao.list_with_pagination(page, size,
                                                            _sort=[SQLHistoryModel.create_date.desc()],
                                                            _select=[DatabaseModel, EnvironmentModel],
@@ -54,18 +54,18 @@ async def query_sql_history(page: int = 1, size: int = 4, _=Depends(Permission()
 
 
 @router.get("/sql/database/list")
-async def list_databases(_=Depends(Permission())):
+async def list_databases(user_info=Depends(Permission())):
     try:
         result = await DbConfigDao.query_database_tree()
         return PikaResponse.success(result)
     except Exception as err:
-        return PikaResponse.failed(err)
+        return PikaResponse.failed(detail=str(err))
 
 
 @router.post("/sql/tables/list", summary="获取数据库表和字段")
-async def list_tables(form: DatabaseSchema, _=Depends(Permission())):
+async def list_tables(form: DatabaseSchema, user_info=Depends(Permission())):
     try:
         children, tables = await DbConfigDao.get_tables(form)
         return PikaResponse.success(dict(children=children, tables=tables))
     except Exception as err:
-        return PikaResponse.failed(err)
+        return PikaResponse.failed(detail=str(err))

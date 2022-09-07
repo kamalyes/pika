@@ -20,7 +20,7 @@ class PikaRedisConfigDao(PikaWrapper):
     @classmethod
     async def execute_command(cls, command: str, **kwargs):
         try:
-            redis_config = await PikaRedisConfigDao.query(**kwargs)
+            redis_config = await PikaRedisConfigDao.query_record(**kwargs)
             if redis_config is None:
                 raise Exception("Redis配置不存在")
             if not redis_config.cluster:

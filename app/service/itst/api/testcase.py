@@ -88,7 +88,7 @@ async def delete_testcase(id_list: List[int], user_info=Depends(Permission()),
 
 
 @router.get("/query", summary="查询测试用例")
-async def query_testcase(caseId: int, _=Depends(Permission())):
+async def query_testcase(caseId: int, user_info=Depends(Permission())):
     try:
         data = await ApiTestCaseDao.query_test_case(caseId)
         return PikaResponse.success(data=PikaResponse.dict_model_to_dict(data))
@@ -197,7 +197,7 @@ async def query_report(id: int, user_info=Depends(Permission())):
 
 @router.get("/report/list", summary="获取构建历史记录")
 async def list_report(page: int, size: int, start_time: str, end_time: str, executor: int = None,
-                      _=Depends(Permission())):
+                      user_info=Depends(Permission())):
     start = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
     end = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
     report_list, total = await ApiTestReportDao.list_report(page, size, start, end, executor)
@@ -352,7 +352,7 @@ async def update_testcase_out_parameters(form: ApiTestCaseOutParametersSchema,
 async def delete_testcase_out_parameters(id: int, user_info=Depends(Permission()),
                                          session=Depends(async_db_session_iterator)):
     await ApiTestCaseOutParametersDao.delete_record_by_id(session=session, operator=user_info['emp_no'],
-                                                          value=id, log=False)
+                                                          value=id, log=True)
     return PikaResponse.success()
 
 
@@ -363,13 +363,13 @@ async def record_requests(request: Request, regex: str, user_info=Depends(Permis
 
 
 @router.get("/record/stop", summary="停止录制接口请求")
-async def record_requests(request: Request, _=Depends(Permission())):
+async def record_requests(request: Request, user_info=Depends(Permission())):
     await RedisHelper.remove_address_record(request.client.host)
     return PikaResponse.success(message="停止成功，快去生成用例吧~")
 
 
 @router.get("/record/list", summary="获取录制数据列表")
-async def list_record_data(request: Request, _=Depends(Permission())):
+async def list_record_data(request: Request, user_info=Depends(Permission())):
     record = await RedisHelper.get_address_record(request.client.host)
     status = False
     regex = ''
@@ -382,7 +382,7 @@ async def list_record_data(request: Request, _=Depends(Permission())):
 
 
 @router.get("/record/remove", summary="删除录制接口")
-async def remove_record(index: int, request: Request, _=Depends(Permission())):
+async def remove_record(index: int, request: Request, user_info=Depends(Permission())):
     await RedisHelper.remove_record_data(request.client.host, index)
     return PikaResponse.success()
 
@@ -403,7 +403,7 @@ async def generate_case(form: TestCaseGeneratorForm, user_info=Depends(Permissio
 
 @router.post("/import", summary="导入har或其他用例数据文件")
 async def convert_case(import_type: CaseConvertorTypeEnum, file: UploadFile = File(...),
-                       _=Depends(Permission())):
+                       user_info=Depends(Permission())):
     convert, file_ext = get_convertor(import_type)
     if convert is None:
         return PikaResponse.failed(detail=f"不支持的导入数据")

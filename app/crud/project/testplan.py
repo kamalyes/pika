@@ -99,7 +99,7 @@ class ApiTestPlanDao(PikaWrapper):
             raise Exception(f"添加失败: {str(e)}")
 
     @classmethod
-    async def update_test_plan(cls, plan: ApiTestPlanSchema, user: int, log=False):
+    async def update_test_plan(cls, plan: ApiTestPlanSchema, user: int, log=True):
         try:
             async with async_session() as session:
                 async with session.begin():

@@ -21,7 +21,7 @@ CERT_URL = "http://mitm.it/cert/"
 
 
 @router.post("/request/http", summary="发起http请求")
-async def http_request(data: HttpRequestSchema, _=Depends(Permission())):
+async def http_request(data: HttpRequestSchema, user_info=Depends(Permission())):
     try:
         r = await AsyncRequest.client(data.url, data.body_type, headers=data.headers,
                                       body=data.body)
@@ -50,7 +50,7 @@ async def http_request(cert: CertType):
 
 
 @router.get("/request/run", summary="执行用例")
-async def execute_case(env: int, case_id: int, _=Depends(Permission())):
+async def execute_case(env: int, case_id: int, user_info=Depends(Permission())):
     try:
         executor = Executor()
         test_data = await ApiTestCaseDataDao.list_testcase_data_by_env(env, case_id)
@@ -71,7 +71,7 @@ async def execute_case(env: int, case_id: int, _=Depends(Permission())):
 
 
 @router.get("/request/retry", summary="根据测试数据重新运行测试用例")
-async def re_run_case(env: int, case_id: int, data_id: int = 0, _=Depends(Permission())):
+async def re_run_case(env: int, case_id: int, data_id: int = 0, user_info=Depends(Permission())):
     try:
         executor = Executor()
         params = dict()

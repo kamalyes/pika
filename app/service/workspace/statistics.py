@@ -23,7 +23,7 @@ router = APIRouter()
 
 
 @router.get("/statistics", description="获取统计数据", summary="获取平台统计数据")
-async def query_follow_testplan(_=Depends(Permission())):
+async def query_follow_testplan(user_info=Depends(Permission())):
     end = datetime.today()
     start = datetime.today() - timedelta(days=6)
     rank = await ApiTestCaseDao.query_user_case_rank()
