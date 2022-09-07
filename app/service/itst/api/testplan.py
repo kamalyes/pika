@@ -18,7 +18,7 @@ from app.core.handler.executor import Executor
 from app.core.handler.jsonres import PikaResponse
 from app.crud.project.testplan import ApiTestPlanDao
 from app.enums.RbacEnum import RoleEnum
-from app.models import async_db_session_generator, async_db_session_iterator
+from app.models import async_db_session_iterator
 from app.schema.api_testplan import ApiTestPlanSchema
 from app.service import Permission
 from app.utils.scheduler import Scheduler

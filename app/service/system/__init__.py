@@ -12,6 +12,6 @@
 from app.service.system.history import router as history_router
 from app.service.system.lexicon import router as lexicon_router
 from app.service.system.minioss import router as mini_oss_router
+from app.service.system.msconfig import router as msconfig_router
 from app.service.system.notification import router as notice_router
 from app.service.system.operation import router as operation_log_router
-from app.service.system.msconfig import router as msconfig_router

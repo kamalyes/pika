@@ -20,7 +20,7 @@ from app.schema.base import BaseQuerySchema, BaseQueryTypeSchema, BaseBatchDelId
 # 敏感词
 class SensitiveWordGlobalSchema(BaseLargeEditSchema):
     name: Optional[str] = Body(..., max_length=ByteSizeEnum.LENGTH_64, title="名词")
-    genre: Optional[int] = Body(0,  title="类型")
+    genre: Optional[int] = Body(0, title="类型")
 
     class Config:
         orm_mode = True

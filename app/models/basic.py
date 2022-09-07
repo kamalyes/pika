@@ -9,8 +9,6 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  公共基础字段
 """
-from datetime import datetime
-from typing import Tuple
 
 from sqlalchemy import INT, DATETIME, Column, String, BOOLEAN, text
 

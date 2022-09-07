@@ -16,7 +16,7 @@ from app.core.handler.jsonres import PikaResponse
 from app.crud.online.rdconfig import PikaRedisConfigDao
 from app.enums.RbacEnum import RoleEnum
 from app.middleware.xredis import PikaRedisManager
-from app.models import async_db_session_generator, async_db_session_iterator
+from app.models import async_db_session_iterator
 from app.models.redis_config import RedisModel
 from app.schema.redis_config import RedisConfigSchema
 from app.service import Permission

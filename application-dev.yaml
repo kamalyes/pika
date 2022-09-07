@@ -12,11 +12,11 @@ database:
 # Redis配置
 redis:
   host: 'localhost'
-  enable_flag: Ture
+  enable_flag: True
   port: 6379
   auth: 'PassWord@Redis123'
   encoding: "utf-8"
-  index: 0
+  index: 3
   decode_responses: True  # 获取中文数据可以直接 decode python unicode
   target_max_memory: '572978192'
   max_connections: 100

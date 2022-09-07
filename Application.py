@@ -62,9 +62,9 @@ from app.service.rbac import organization_router
 from app.service.rbac import roles_router
 from app.service.rbac import user_router
 from app.service.system import history_router
-from app.service.system import msconfig_router
 from app.service.system import lexicon_router
 from app.service.system import mini_oss_router
+from app.service.system import msconfig_router
 from app.service.system import notice_router
 from app.service.system import operation_log_router
 from app.service.workspace import statistics_router

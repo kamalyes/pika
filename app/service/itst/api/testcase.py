@@ -18,7 +18,7 @@ from app.crud.itst.api.testreport import ApiTestReportDao
 from app.crud.project.project import ProjectRoleDao
 from app.enums.ConvertorEnum import CaseConvertorTypeEnum
 from app.middleware.xredis import RedisHelper
-from app.models import async_db_session_generator, async_session, async_db_session_iterator
+from app.models import async_session, async_db_session_iterator
 from app.models.api_test_case import ApiTestCaseModel
 from app.models.api_testcase_out_parameters import ApiTestCaseOutParametersModel
 from app.schema.api_testcase import TestCaseAssertsForm, TestCaseSchema, TestCaseInfo, \

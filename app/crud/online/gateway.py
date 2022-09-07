@@ -12,7 +12,6 @@
 
 from sqlalchemy import select
 
-from app.core.handler.logger import PikaLogger
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
 from app.models.gateway import GatewayModel

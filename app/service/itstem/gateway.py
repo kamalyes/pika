@@ -14,7 +14,7 @@ from fastapi import Depends, APIRouter
 from app.core.handler.jsonres import PikaResponse
 from app.crud.online.gateway import GatewayDao
 from app.enums.RbacEnum import RoleEnum
-from app.models import async_db_session_generator, async_db_session_iterator
+from app.models import async_db_session_iterator
 from app.models.gateway import GatewayModel
 from app.schema.gateway import PikaGatewaySchema
 from app.service import Permission

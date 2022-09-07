@@ -17,7 +17,7 @@ from app.core.handler.jsonres import PikaResponse
 from app.crud.system.broadcast import BroadcastReadDao
 from app.crud.system.notification import PikaNotificationDao
 from app.enums.MessageEnum import MessageStateEnum
-from app.models import async_db_session_generator, async_db_session_iterator
+from app.models import async_db_session_iterator
 from app.models.broadcast import BroadcastReadUserModel
 from app.models.notification import NotificationModel
 from app.schema.notification import NotificationSchema

@@ -16,7 +16,7 @@ from app.crud.project.project import ProjectDao, ProjectRoleDao
 from app.crud.project.testplan import ApiTestPlanDao
 from app.enums.RbacEnum import RoleEnum
 from app.middleware.oss import OssClient
-from app.models import async_db_session_generator, async_db_session_iterator
+from app.models import async_db_session_iterator
 from app.schema.project import ProjectEditSchema, ProjectSchema
 from app.service import Permission
 

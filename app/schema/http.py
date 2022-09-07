@@ -11,8 +11,8 @@
 """
 
 from pydantic import BaseModel, validator
-from app.enums.RequestBodyEnum import ReqBodyTypeEnum
 
+from app.enums.RequestBodyEnum import ReqBodyTypeEnum
 from app.excpetions.business.ParamsException import VariablesNullError
 
 

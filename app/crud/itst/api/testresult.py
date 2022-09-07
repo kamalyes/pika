@@ -15,7 +15,6 @@ from typing import List
 from sqlalchemy import asc
 from sqlalchemy.future import select
 
-from app.core.handler.logger import PikaLogger
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
 from app.models.api_test_case import ApiTestCaseModel

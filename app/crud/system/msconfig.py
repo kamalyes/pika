@@ -9,10 +9,8 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  系统配置
 """
-import os
 
 import yaml
-from hutools.core import System
 
 from app.enums.SysvarEnum import ValidTimeEnum
 from app.middleware.xredis import RedisHelper
@@ -29,12 +27,18 @@ class MsConfigDao(object):
         except Exception as e:
             raise Exception(f"获取系统设置失败, {e}")
 
-    @staticmethod
+    @classmethod
     @RedisHelper.up_cache("msconfig")
-    def update_config(config):
+    def update_config(cls, config):
         try:
             filepath = PikaAppConfig.GLOBAL_POOL_CONFIG_FILEPATH
+            new_config, old_config = config.dict(), cls.get_config()
+            for key, value in new_config.items():
+                if value:
+                    get_old_value = old_config.get(key, None)
+                    if value != get_old_value:
+                        old_config[key] = value
             with open(filepath, "w") as output:
-                yaml.safe_dump(config, output, default_flow_style=False)
+                yaml.safe_dump(old_config, output, default_flow_style=False)
         except Exception as e:
             raise Exception(f"更新系统设置失败, {e}")

@@ -15,7 +15,7 @@ from typing import List
 from sqlalchemy import select, update
 
 from app.crud import PikaWrapper, PikaMdWrapper
-from app.models import async_session, DatabaseHelper
+from app.models import async_session
 from app.models.api_test_case import ApiTestCaseModel
 from app.models.constructor import ConstructorModel
 from app.schema.constructor import ConstructorSchema, ConstructorIndexSchema

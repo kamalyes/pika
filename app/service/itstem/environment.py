@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends
 from app.core.handler.jsonres import PikaResponse
 from app.crud.online.environment import EnvironmentDao
 from app.enums.RbacEnum import RoleEnum
-from app.models import async_db_session_generator, async_db_session_iterator
+from app.models import async_db_session_iterator
 from app.schema.environment import EnvironmentSchema
 from app.service import Permission
 

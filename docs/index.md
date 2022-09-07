@@ -26,6 +26,7 @@ Pika
 # fastapi 整合 sqlalchmey 使用上下文管理器的使用
 
 !!! note "sqlalchemy.ext.asyncio import AsyncSession (原生)"
+
 ```
 import asyncio
 from sqlalchemy import Column
@@ -111,6 +112,7 @@ asyncio.run(async_main())
 ```
 
 !!! note "sqlalchemy +databases (官网案例)"
+
 ```
 
 from typing import List import databases
@@ -178,6 +180,7 @@ return {**note.dict(), "id": last_record_id}
 ```
 
 !!! note "单独使用database异步提供的方案"
+
 ```
 
 from databases import Database database = Database('sqlite:///example.db')

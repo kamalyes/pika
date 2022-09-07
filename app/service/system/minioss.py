@@ -5,7 +5,7 @@ from app.crud.rbac.user import UserDao
 from app.crud.system.minioss import PikaOssDao
 from app.enums.RbacEnum import RoleEnum
 from app.middleware.oss import OssClient
-from app.models import async_db_session_generator, async_db_session_iterator
+from app.models import async_db_session_iterator
 from app.models.minioss import OssFileModel
 from app.service import Permission
 

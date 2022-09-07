@@ -14,6 +14,7 @@ from fastapi import Depends, APIRouter
 from app.core.handler.jsonres import PikaResponse
 from app.crud.system.msconfig import MsConfigDao
 from app.enums.RbacEnum import RoleEnum
+from app.schema.system import MsConfigSchema
 from app.service import Permission
 
 router = APIRouter()
@@ -26,6 +27,6 @@ def get_system_config(user_info=Depends(Permission(RoleEnum.ADMIN))):
 
 
 @router.post("/config/update", summary="更新系统配置")
-def get_system_config(data: dict, _=Depends(Permission(RoleEnum.ADMIN))):
-    MsConfigDao.update_config(data)
+def get_system_config(config: MsConfigSchema, user_info=Depends(Permission(RoleEnum.ADMIN))):
+    MsConfigDao.update_config(config)
     return PikaResponse.success()

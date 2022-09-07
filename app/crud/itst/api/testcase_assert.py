@@ -14,7 +14,7 @@ from typing import List
 from sqlalchemy import asc, select
 
 from app.crud import PikaWrapper, PikaMdWrapper
-from app.models import async_session, DatabaseHelper
+from app.models import async_session
 from app.models.api_testcase_asserts import ApiTestCaseAssertsModel
 from app.schema.api_testcase import TestCaseAssertsForm
 

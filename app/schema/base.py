@@ -48,7 +48,7 @@ class BaseOnlyIdSchema(BaseModel):
 
 
 class BaseOnlyNameSchema(BaseModel):
-    name: Optional[str] = Body(..., title="角色名称", min_length=2, max_length=ByteSizeEnum.LENGTH_255),
+    name: Optional[str] = Body(..., title="名称", min_length=2, max_length=ByteSizeEnum.LENGTH_255),
 
 
 class BaseOnlyIdsSchema(BaseModel):
@@ -80,12 +80,12 @@ class BaseOnlyOperatorSchema(BaseModel):
     update_emp_no: Optional[str] = Query(None, title="修改者员工编号", max_length=ByteSizeEnum.LENGTH_20)
 
 
-class BaseOnlyDateSchema(BaseModel):
+class BaseQueryDateSchema(BaseModel):
     create_date: Optional[datetime] = Query(Moment.skew_date(days=-3), title="创建日期")
     update_date: Optional[datetime] = Query(Moment.skew_date(minutes=15), title="更新日期")
 
 
-class BaseQuerySchema(BaseOnlyIdSchema, BaseOnlyEnabledFlagSchema, BaseOnlyOperatorSchema, BaseOnlyDateSchema):
+class BaseQuerySchema(BaseOnlyIdSchema, BaseOnlyEnabledFlagSchema, BaseOnlyOperatorSchema, BaseQueryDateSchema):
     pass
 
 

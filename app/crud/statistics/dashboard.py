@@ -20,7 +20,6 @@ from app.models.admin import SysUserAdminModel
 from app.models.api_test_case import ApiTestCaseModel
 from app.models.api_testplan import ApiTestPlanModel
 from app.models.project import ProjectModel
-from app.models.user import UserModel
 
 
 class Item(object):

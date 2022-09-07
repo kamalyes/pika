@@ -10,11 +10,10 @@ from fastapi import Depends, APIRouter
 from app.core.handler.executor import Executor
 from app.core.handler.jsonres import PikaResponse
 from app.crud.itst.api.testcase_data import ApiTestCaseDataDao
+from app.enums.CertEnum import CertType
 from app.middleware.async_ask import AsyncRequest
 from app.schema.http import HttpRequestSchema
 from app.service import Permission
-
-from app.enums.CertEnum import CertType
 
 router = APIRouter()
 
