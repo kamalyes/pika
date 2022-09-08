@@ -24,10 +24,11 @@ async def list_user_operation(request: OperationSchema = Depends(),
 
 
 @router.get("/count", summary="获取用户操作记录热力图以及参与的项目数量")
-async def list_user_activities(request: OperationSchema = Depends()):
+async def list_user_activities(request: OperationSchema = Depends(),
+                               escarole=Depends(Permission(escarole=True))):
     try:
-        records = await PikaOperationDao.count_user_activities(request.operator, request.start_time,
-                                                               request.end_time)
+        operator, operator_role = escarole
+        records = await PikaOperationDao.count_user_activities(operator, request.start_time, request.end_time)
         ans = list()
         for r in records:
             # 解包日期和数量

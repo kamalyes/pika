@@ -20,7 +20,6 @@ from app.schema.base import BaseQueryTypeSchema
 
 
 class OperationSchema(BaseQueryTypeSchema):
-    operator: Optional[str] = Query(None, title="操作人", max_length=ByteSizeEnum.LENGTH_20)
     start_time: Optional[datetime] = Query(Moment.skew_date(days=-3), title="开始时间")
     end_time: Optional[datetime] = Query(Moment.skew_date(hours=1), title="结束时间")
     tag: Optional[str] = None
