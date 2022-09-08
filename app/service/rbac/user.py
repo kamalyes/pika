@@ -12,6 +12,7 @@
 from typing import Any
 
 from fastapi import APIRouter, Request, Depends
+from hutools.core import DataHand
 from hutools.pagination import LimitOffsetPage, add_pagination
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -71,8 +72,8 @@ async def update_user_info(modify_user_info: ModifyUserInfoSchema,
 @router.get("/alluser", summary="查询所有用户信息")
 async def query_all_users(user_info=Depends(Permission())):
     try:
-        user = await UserDao.query_all_users()
-        return PikaResponse.success(data=user, exclude=("password",))
+        query_users = await UserDao.query_all_users()
+        return PikaResponse.success(data=query_users, exclude=("password",))
     except Exception as e:
         return PikaResponse.failed(detail=str(e))
 

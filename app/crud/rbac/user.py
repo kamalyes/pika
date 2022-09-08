@@ -9,7 +9,6 @@
 @License :  (C)Copyright 2022-2026
 @Desc    : 　None
 """
-import json
 import random
 from typing import Any
 
@@ -188,19 +187,6 @@ class UserDao(PikaWrapper):
             raise RedisException(detail=str(redis_err))
 
     @classmethod
-    async def user_info_sync_redis(cls, **kwargs):
-        """
-        user_info同步至redis
-        Args:
-            **kwargs:
-        Returns:
-        """
-        try:
-            await async_redis.hset(kwargs["name"], kwargs["key"], kwargs["value"])
-        except Exception as redis_err:
-            raise RedisException(detail=str(redis_err))
-
-    @classmethod
     async def delete_redis_token(cls, **kwargs):
         """
         删除 redis中Token
@@ -259,7 +245,7 @@ class UserDao(PikaWrapper):
                 user_infos = DataHand.chain_all([PikaResponse.model_to_dict(user),
                                                  PikaResponse.model_to_dict(user_admin)])
                 # 屏蔽字段
-                dislodge = ["open_id", "private_key", "open_id", "password", "description", "id"]
+                dislodge = ["open_id", "private_key", "password", "description", "id"]
                 result = {key: val for key, val in user_infos.items() if key not in dislodge}
                 # # 菜单权限
                 # roles = RoleModel.get_roles_by_ids(user['roles'])
@@ -276,10 +262,6 @@ class UserDao(PikaWrapper):
                 # result['roles'] = ['all']
             else:
                 raise AuthException(detail="用户信息不存在！")
-        # 更新在线用户信息
-        await cls.user_info_sync_redis(name=f'{RedisKeyEnum.ONLINE_USER}',
-                                       key=user.emp_no,
-                                       value=json.dumps(result))
         return result
 
     @classmethod
@@ -724,24 +706,40 @@ class UserDao(PikaWrapper):
             PikaSecurityRelIssues.emp_no == emp_no))
 
     @classmethod
-    @RedisHelper.cache("user_list", 3 * 3600)
+    @RedisHelper.cache("user_list", ValidTimeEnum.USER_LIST_TIME.value)
     async def query_all_users(cls):
         try:
             async with async_session() as session:
-                query_sql = select(UserModel) \
-                    .outerjoin(SysUserAdminModel, UserModel.id == SysUserAdminModel.uid)
-                query_result = await session.execute(query_sql)
-                return query_result.scalars().all()
+                # TODO 需要解构，简化下字段
+                query_sql = select(UserModel.id, UserModel.username,
+                                   UserModel.email, UserModel.emp_no,
+                                   UserModel.create_emp_no, UserModel.user_alias,
+                                   UserModel.update_date, UserModel.roles, UserModel.avatar,
+                                   UserModel.gender, UserModel.identity, UserModel.location,
+                                   UserModel.update_emp_no, UserModel.mobile, UserModel.plane,
+                                   SysUserAdminModel.delete_flag, SysUserAdminModel.enabled_flag,
+                                   SysUserAdminModel.is_activate, SysUserAdminModel.err_pwd_count,
+                                   SysUserAdminModel.last_login_date, SysUserAdminModel.last_login_ip,
+                                   SysUserAdminModel.last_login_location, SysUserAdminModel.last_logout_date,
+                                   SysUserAdminModel.last_logout_ip, SysUserAdminModel.registration_date,
+                                   SysUserAdminModel.registration_ip, SysUserAdminModel.create_date
+                                   ) \
+                    .join(SysUserAdminModel, UserModel.id == SysUserAdminModel.uid)
+                query_sql_execute = await session.execute(query_sql)
+                query_result = query_sql_execute.all()
+                return query_result
         except Exception as e:
             cls.__log__.error(f"获取用户列表失败: {str(e)}")
             raise Exception("获取用户列表失败")
 
     @classmethod
-    @RedisHelper.cache("user_detail", 3600)
+    @RedisHelper.cache("user_detail", ValidTimeEnum.USER_DETAIL_TIME.value)
     async def query_user(cls, id: int):
         async with async_session() as session:
-            query = await session.execute(select(UserModel).where(UserModel.id == id))
-            return query.scalars().first()
+            query_sql = select(UserModel) \
+                .outerjoin(SysUserAdminModel, UserModel.id == SysUserAdminModel.uid).where(UserModel.id == id)
+            query_result = await session.execute(query_sql)
+            return query_result.scalars().first()
 
     @classmethod
     @RedisHelper.cache("user_touch")

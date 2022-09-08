@@ -13,6 +13,7 @@
 from sqlalchemy import select
 
 from app.crud import PikaWrapper, PikaMdWrapper
+from app.enums.SysvarEnum import ValidTimeEnum
 from app.middleware.xredis import RedisHelper
 from app.models import async_session
 from app.models.gconfig import GConfigModel
@@ -42,7 +43,7 @@ class GConfigDao(PikaWrapper):
             raise Exception(f"新增变量: {form.key}失败")
 
     @staticmethod
-    @RedisHelper.cache("dao", 1800, True)
+    @RedisHelper.cache("dao", ValidTimeEnum.DAO_TIME.value, True)
     async def async_get_gconfig_by_key(key: str, env: int) -> GConfigModel:
         try:
             filters = [GConfigModel.key == key, GConfigModel.delete_flag == 0,

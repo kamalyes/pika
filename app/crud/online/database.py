@@ -20,6 +20,7 @@ from sqlalchemy.exc import ResourceClosedError
 from app.core.handler.jsonres import PikaResponse
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.online.environment import EnvironmentDao
+from app.enums.SysvarEnum import ValidTimeEnum
 from app.middleware.xredis import RedisHelper
 from app.models import async_session, db_helper
 from app.models.database import DatabaseModel
@@ -133,7 +134,7 @@ class DbConfigDao(PikaWrapper):
             raise Exception("获取数据库配置失败")
 
     @classmethod
-    @RedisHelper.cache("database:cache", expired_time=3600 * 3)
+    @RedisHelper.cache("database:cache", expired_time=ValidTimeEnum.QUERY_DATABASE_TREE_TIME.value)
     async def query_database_tree(cls):
         """
         方法会查询所有数据库表配置的信息, 不包括表信息
@@ -167,7 +168,7 @@ class DbConfigDao(PikaWrapper):
             raise Exception(f"获取数据库配置详情失败: {err}")
 
     @staticmethod
-    @RedisHelper.cache("database:table:cache", expired_time=1800)
+    @RedisHelper.cache("database:table:cache", expired_time=ValidTimeEnum.GET_TABLES_TIME.value)
     async def get_tables(data: DatabaseSchema):
         conn = await db_helper.get_connection(data.sql_type, data.host, data.port, data.username, data.password,
                                               data.database)
