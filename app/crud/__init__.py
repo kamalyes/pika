@@ -59,7 +59,8 @@ class PikaMdWrapper:
         dic = {}
         for field_key in dir(obj):
             field_value = getattr(obj, field_key)
-            if not field_key.startswith("__") and not callable(field_value) and not field_key.startswith("_"):
+            if not field_key.startswith("__") and not callable(
+                    field_value) and not field_key.startswith("_"):
                 dic[field_key] = field_value
         return dic
 
@@ -319,13 +320,15 @@ class PikaWrapper(object):
     @RedisHelper.up_cache("dao")
     @db_connect(transaction=True)
     async def insert(cls, *, model: LargeBaseModel, session: AsyncSession = None, log=False):
+        changed = PikaResponse.model_to_dict(model)
         session.add(model)
         await session.flush()
         session.expunge(model)
         if log:
             await asyncio.create_task(
-                cls.insert_log(session=session, operator=model.create_emp_no, mode=SqlOperationTypeEnum.ONLY_INSERT,
-                               before={}, changed=model, key=model.id))
+                cls.insert_log(session=session, operator=model.create_emp_no,
+                               mode=SqlOperationTypeEnum.ONLY_INSERT,
+                               before={}, changed=changed))
         return model
 
     @classmethod
@@ -397,7 +400,8 @@ class PikaWrapper(object):
                 table_args = getattr(original, PikaAppConfig.TABLE_TAG, '未设置')
                 await asyncio.create_task(
                     cls.insert_log(session=session, operator=operator,
-                                   mode=SqlOperationTypeEnum.ONLY_DELETE, key=value, table_args=table_args,
+                                   mode=SqlOperationTypeEnum.ONLY_DELETE, key=value,
+                                   table_args=table_args,
                                    title=title))
                 return original
         except Exception as e:
@@ -486,7 +490,8 @@ class PikaWrapper(object):
             diff_data = changed
         if table_args:
             if isinstance(table_args, tuple):
-                tag = [index.get("comment", None) for index in table_args if isinstance(index, dict)]
+                tag = [index.get("comment", None) for index in table_args if
+                       isinstance(index, dict)]
             elif isinstance(table_args, dict):
                 tag = table_args.get("comment", None)
         model = OperationLogModel(operator=operator, mode=mode, title=title,
