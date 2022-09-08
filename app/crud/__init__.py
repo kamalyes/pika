@@ -479,7 +479,32 @@ class PikaWrapper(object):
         Returns:
 
         """
-        change, add, remove, tag = {}, {}, {}, ""
+        tag, diff_data = "", ""
+        if mode == SqlOperationTypeEnum.ONLY_UPDATE:
+            diff_data = await cls.diff_data(before, changed)
+        elif mode == SqlOperationTypeEnum.ONLY_INSERT:
+            diff_data = changed
+        if table_args:
+            if isinstance(table_args, tuple):
+                tag = [index.get("comment", None) for index in table_args if isinstance(index, dict)]
+            elif isinstance(table_args, dict):
+                tag = table_args.get("comment", None)
+        model = OperationLogModel(operator=operator, mode=mode, title=title,
+                                  tag="".join(tag), diff_data="".join(diff_data), key=key)
+        session.add(model)
+
+    @classmethod
+    async def diff_data(cls, before, changed):
+        """
+        对比数据
+        Args:
+            before:
+            changed:
+
+        Returns:
+
+        """
+        change, add, remove = {}, {}, {}
         diff_result = list(diff(before, changed))
         for index in diff_result:
             left, middle, right = index[0], index[1], index[2]
@@ -493,14 +518,7 @@ class PikaWrapper(object):
                     remove[item[0]] = item[1]
         join_diff = {"change": change, "add": add, "remove": remove}
         diff_data = json.dumps(join_diff, ensure_ascii=False)
-        if table_args:
-            if isinstance(table_args, tuple):
-                tag = [index.get("comment", None) for index in table_args if isinstance(index, dict)]
-            elif isinstance(table_args, dict):
-                tag = table_args.get("comment", None)
-        model = OperationLogModel(operator=operator, mode=mode, title=title,
-                                  tag="".join(tag), diff_data="".join(diff_data), key=key)
-        session.add(model)
+        return diff_data
 
     @classmethod
     @RedisHelper.up_cache("dao")
