@@ -47,6 +47,22 @@ class PikaMdWrapper:
         setattr(cls, "__log__", self.__log__)
         return cls
 
+    @classmethod
+    def obj_to_dic(cls, obj):
+        """
+        Object转型为dict
+        Args:
+            obj:
+
+        Returns:
+        """
+        dic = {}
+        for field_key in dir(obj):
+            field_value = getattr(obj, field_key)
+            if not field_key.startswith("__") and not callable(field_value) and not field_key.startswith("_"):
+                dic[field_key] = field_value
+        return dic
+
 
 def db_connect(transaction: Transaction = False):
     """
