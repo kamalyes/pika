@@ -11,6 +11,7 @@
 """
 from contextlib import contextmanager, asynccontextmanager
 from typing import AsyncGenerator, AsyncIterator
+from urllib import parse
 
 import aioredis
 from sqlalchemy import create_engine
@@ -106,6 +107,7 @@ class DatabaseHelper(object):
     async def get_connection(self, sql_type: int, host: str, port: int, username: str,
                              password: str, database: str):
         # 拼接key
+        password = parse.quote_plus(password)
         key = f"{host}:{port}:{database}:{username}:{password}:{database}"
         connection = self.connections.get(key)
         # 先判断是否已经有connection了，如果有则直接返回
