@@ -495,7 +495,9 @@ class PikaWrapper(object):
             elif isinstance(table_args, dict):
                 tag = table_args.get("comment", None)
         model = OperationLogModel(operator=operator, mode=mode, title=title,
-                                  tag="".join(tag), diff_data="".join(diff_data), key=key)
+                                  tag="".join(tag), key=key)
+        if mode != SqlOperationTypeEnum.ONLY_DELETE:
+            model.diff_data = "".join(diff_data)
         session.add(model)
 
     @classmethod

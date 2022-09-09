@@ -13,6 +13,7 @@ import json
 
 import aiohttp
 from aiohttp import FormData
+from hutools.core import RegEx
 from hutools.time import Moment
 
 from app.enums.RequestBodyEnum import ReqBodyTypeEnum
@@ -66,8 +67,11 @@ class AsyncRequest(object):
     @staticmethod
     async def client(url: str, body_type: ReqBodyTypeEnum = ReqBodyTypeEnum.json, timeout=15,
                      **kwargs):
-        if not url.startswith(("http://", "https://")):
-            raise Exception("请输入正确的url, 记得带上http哦")
+        if url.startswith("localhost"):
+            url = f"http://{url}"
+        else:
+            if RegEx.match_url(url) is False:
+                raise Exception("请输入正确的url, 记得带上http哦")
         headers = kwargs.get("headers", {})
         if body_type == ReqBodyTypeEnum.json:
             if "Content-Type" not in headers:

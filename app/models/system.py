@@ -43,7 +43,7 @@ class OperationLogModel(MinBaseModel):
     mode = Column(SMALLINT, comment="操作类型")
     key = Column(INT, nullable=True, comment="关键id，可能是目录id，case_id或者其他id")
 
-    def __init__(self, operator, mode: SqlOperationTypeEnum, title, tag, diff_data, description=None, key=None):
+    def __init__(self, operator, mode: SqlOperationTypeEnum, title, tag, diff_data=None, description=None, key=None):
         super().__init__(operator=operator, description=description)
         self.title = title
         self.tag = tag
