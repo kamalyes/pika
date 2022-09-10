@@ -21,7 +21,6 @@ class SQLHistoryModel(LargeBaseModel):
     sql = Column(String(1024), comment="sql语句")
     elapsed = Column(INT, comment="请求耗时")
     database_id = Column(INT, comment="操作数据库id")
-    database: DatabaseModel
 
     def __init__(self, sql, elapsed, database_id, operator):
         super().__init__(operator=operator)

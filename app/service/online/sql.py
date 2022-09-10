@@ -38,8 +38,10 @@ async def execute_sql(data: OnlineSqlSchema, escarole=Depends(Permission(escarol
 @router.get("/sql/history/query", summary="获取sql执行历史记录")
 async def query_sql_history(page: int = 1, size: int = 4, user_info=Depends(Permission())):
     data, total = await SQLHistoryDao.list_with_pagination(page, size,
-                                                           _sort=[SQLHistoryModel.create_date.desc()],
-                                                           _select=[DatabaseModel, EnvironmentModel],
+                                                           _sort=[
+                                                               SQLHistoryModel.create_date.desc()],
+                                                           _select=[DatabaseModel,
+                                                                    EnvironmentModel],
                                                            _join=[(DatabaseModel,
                                                                    DatabaseModel.id == SQLHistoryModel.database_id),
                                                                   (EnvironmentModel,
@@ -47,9 +49,7 @@ async def query_sql_history(page: int = 1, size: int = 4, user_info=Depends(Perm
                                                                   ])
     ans = []
     for history, database, env in data:
-        database.env_info = env
-        history.database = database
-        ans.append(history)
+        ans.append({"history": history, "database": database, "env_info": env})
     return PikaResponse.success(dict(data=ans, total=total))
 
 
