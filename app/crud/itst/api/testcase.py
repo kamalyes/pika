@@ -96,7 +96,8 @@ class ApiTestCaseDao(PikaWrapper):
         return len(data)
 
     @classmethod
-    async def _insert(cls, session, case_id: int, operator: str, form: TestCaseInfo, **fields: tuple):
+    async def _insert(cls, session, case_id: int, operator: str, form: TestCaseInfo,
+                      **fields: tuple):
         for field, model_info in fields.items():
             md, model = model_info
             field_data = getattr(form, field)
@@ -465,9 +466,13 @@ class ApiTestCaseDao(PikaWrapper):
                     ApiTestCaseModel.create_date.between(start_date, finished_date)).group_by(
                     ApiTestCaseModel.create_date).order_by(asc(ApiTestCaseModel.create_date))
                 query = await session.execute(sql)
+                temp_count, last_date = 0, 0
                 for i, q in enumerate(query.all()):
                     date, count = q
-                    ans[date.strftime("%Y-%m-%d")] = count
+                    now_date = date.strftime("%Y-%m-%d")
+                    temp_count += count
+                    if last_date != now_date:
+                        ans[date.strftime("%Y-%m-%d")] = temp_count
         return await cls.fill_data(start_date, finished_date, ans)
 
     @classmethod
