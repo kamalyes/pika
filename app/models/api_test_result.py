@@ -29,8 +29,8 @@ class ApiTestResultModel(Base):
     case_id = Column(INT, index=True, comment="用例id")
     case_name = Column(String(ByteSizeEnum.LENGTH_32), comment="用例名称")
     status = Column(SMALLINT, comment="对应状态 0: 成功 1: 失败 2: 出错 3: 跳过")
-    start_at = Column(DATETIME, nullable=False, default=None, comment="开始时间")
-    finished_at = Column(DATETIME, nullable=False, default=None, comment="结束时间")
+    start_date = Column(DATETIME, nullable=False, default=None, comment="开始时间")
+    finished_date = Column(DATETIME, nullable=False, default=None, comment="结束时间")
     case_log = Column(TEXT, comment="测试日志")
     retry = Column(INT, default=0, comment="重试次数，预留字段")
     status_code = Column(INT, comment="http状态码")
@@ -49,7 +49,7 @@ class ApiTestResultModel(Base):
     delete_flag = Column(BOOLEAN, server_default="0", comment="删除标识 1：已删除，0：未删除")
 
     def __init__(self, report_id: int, case_id: int, case_name: str, status: int,
-                 case_log: str, start_at: datetime, finished_at: datetime,
+                 case_log: str, start_date: datetime, finished_date: datetime,
                  url: str, body: str, request_method: str, request_headers: str, cost: str,
                  asserts: str, response_headers: str, response: str,
                  status_code: int, cookies: str, retry: int = None,
@@ -60,8 +60,8 @@ class ApiTestResultModel(Base):
         self.case_name = case_name
         self.status = status
         self.case_log = case_log
-        self.start_at = start_at
-        self.finished_at = finished_at
+        self.start_date = start_date
+        self.finished_date = finished_date
         self.retry = retry
         self.status_code = status_code
         self.url = url

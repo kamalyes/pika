@@ -31,8 +31,8 @@ async def insert_project(data: ProjectSchema, escarole=Depends(Permission(RoleEn
 
 
 @router.delete("/delete", summary="删除项目")
-async def query_project(project_id: int, escarole=Depends(Permission(RoleEnum.MANAGER, True)),
-                        session=Depends(async_db_session_iterator)):
+async def delete_project(project_id: int, escarole=Depends(Permission(RoleEnum.MANAGER, True)),
+                         session=Depends(async_db_session_iterator)):
     operator, operator_identity = escarole
     try:
         async with session.begin():

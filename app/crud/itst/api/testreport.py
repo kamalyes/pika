@@ -72,7 +72,7 @@ class ApiTestReportDao(PikaWrapper):
                     report.error_count = error_count
                     report.skipped_count = skipped_count
                     report.cost = cost
-                    report.finished_at = datetime.now()
+                    report.finished_date = datetime.now()
                     await session.flush()
                     session.expunge(report)
                     return report
@@ -107,15 +107,15 @@ class ApiTestReportDao(PikaWrapper):
             raise Exception(f"查询报告失败: {e}")
 
     @classmethod
-    async def list_report(cls, page: int, size: int, start_time: datetime, end_time: datetime,
+    async def list_report(cls, page: int, size: int, start_date: datetime, finished_date: datetime,
                           executor: int = None):
         """
         获取报告列表
         Args:
             page:
             size:
-            start_time:
-            end_time:
+            start_date:
+            finished_date:
             executor:
 
         Returns:
@@ -124,8 +124,8 @@ class ApiTestReportDao(PikaWrapper):
         try:
             async with async_session() as session:
                 sql = select(ApiTestReportModel).where(
-                    ApiTestReportModel.start_at.between(start_time, end_time)).order_by(
-                    desc(ApiTestReportModel.start_at))
+                    ApiTestReportModel.start_date.between(start_date, finished_date)).order_by(
+                    desc(ApiTestReportModel.start_date))
                 if executor is not None:
                     sql = sql.where(ApiTestReportModel.executor == executor)
                 data = await session.execute(sql)

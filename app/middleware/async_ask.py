@@ -39,16 +39,16 @@ class AsyncRequest(object):
         return kwargs.get("data")
 
     async def invoke(self, method: str):
-        start_time = Moment.get_now_time("13timestamp")
+        start_date = Moment.get_now_time("13timestamp")
         async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar(unsafe=True)) as session:
             async with session.request(method, self.url, timeout=self.timeout, proxy=self.proxy,
                                        ssl=False,
                                        **self.kwargs) as resp:
                 # if resp.status != 200: # 当http状态码不为200的时候给出提示
                 #     return await self.collect(False, self.get_data(self.kwargs), resp.status, msg="http状态码不为200")
-                end_time = Moment.get_now_time("13timestamp")
-                cost = "%.0fms" % ((end_time - start_time) / 1000)
-                # print("invoke请求耗时", start_time, end_time)
+                finished_date = Moment.get_now_time("13timestamp")
+                cost = "%.0fms" % ((finished_date - start_date) / 1000)
+                # print("invoke请求耗时", start_date, finished_date)
                 response, json_format = await AsyncRequest.get_resp(resp)
                 cookie = self.get_cookie(session)
                 return await self.collect(True, self.get_data(self.kwargs), resp.status, response,

@@ -53,7 +53,7 @@ async def insert_testcase(data: TestCaseSchema, user_info=Depends(Permission()))
 
 @router.post("/create", summary="v2版本创建用例接口")
 async def create_testcase(data: TestCaseInfo, user_info=Depends(Permission()),
-                          session=Depends(async_session)):
+                          session=Depends(async_db_session_iterator)):
     async with session.begin():
         await ApiTestCaseDao.insert_test_case(session, data, user_info['emp_no'])
     return PikaResponse.success()
@@ -196,10 +196,10 @@ async def query_report(id: int, user_info=Depends(Permission())):
 
 
 @router.get("/report/list", summary="获取构建历史记录")
-async def list_report(page: int, size: int, start_time: str, end_time: str, executor: int = None,
+async def list_report(page: int, size: int, start_date: str, finished_date: str, executor: int = None,
                       user_info=Depends(Permission())):
-    start = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
-    end = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
+    start = datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
+    end = datetime.strptime(finished_date, "%Y-%m-%d %H:%M:%S")
     report_list, total = await ApiTestReportDao.list_report(page, size, start, end, executor)
     return PikaResponse.success_with_size(data=report_list, total=total)
 

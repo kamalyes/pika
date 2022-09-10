@@ -547,11 +547,11 @@ class Executor(object):
         """
         retry_times = PikaAppConfig.RETRY_TIMES if retry_minutes > 0 else 0
         for i in range(retry_times + 1):
-            start_at = datetime.now()
+            start_date = datetime.now()
             executor = Executor()
             result, err = await executor.run(env, case_id, params_pool, request_param, path)
-            finished_at = datetime.now()
-            cost = "{}s".format((finished_at - start_at).seconds)
+            finished_date = datetime.now()
+            cost = "{}s".format((finished_date - start_date).seconds)
             if err is not None:
                 status = 2
             else:
@@ -574,7 +574,7 @@ class Executor(object):
             req = json.dumps(request_param, ensure_ascii=False)
             data[case_id].append(status)
             await ApiTestResultDao.insert_report(report_id, case_id, case_name, status,
-                                                 case_logs, start_at, finished_at,
+                                                 case_logs, start_date, finished_date,
                                                  url, body, request_method, request_headers, cost,
                                                  asserts, response_headers, response,
                                                  status_code, cookies, 0, req, name, data_id)
@@ -966,8 +966,8 @@ class Executor(object):
             if report_dict is not None:
                 report_dict[env] = {
                     "report_url": f"{PikaAppConfig.SERVER_REPORT}{report_id}",
-                    "start_time": report.start_at.strftime("%Y-%m-%d %H:%M:%S"),
-                    "end_time": report.finished_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    "start_date": report.start_date.strftime("%Y-%m-%d %H:%M:%S"),
+                    "finished_date": report.finished_date.strftime("%Y-%m-%d %H:%M:%S"),
                     "success": ok,
                     "failed": fail,
                     "total": ok + fail + error + skip,

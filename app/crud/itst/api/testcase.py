@@ -424,7 +424,7 @@ class ApiTestCaseDao(PikaWrapper):
         result["children"] = children
         return result
 
-    @staticmethod
+    @classmethod
     @RedisHelper.cache("rank")
     async def query_user_case_list(cls, session: AsyncSession = None) -> Dict[str, List]:
         """
@@ -453,8 +453,8 @@ class ApiTestCaseDao(PikaWrapper):
         return ans
 
     @classmethod
-    async def query_weekly_user_case(cls, operator: str, start_time: datetime,
-                                     end_time: datetime) -> List:
+    async def query_weekly_user_case(cls, operator: str, start_date: datetime,
+                                     finished_date: datetime) -> List:
         ans = dict()
         async with async_session() as session:
             async with session.begin():
@@ -462,29 +462,29 @@ class ApiTestCaseDao(PikaWrapper):
                 sql = select(ApiTestCaseModel.create_date, func.count(ApiTestCaseModel.id)).where(
                     ApiTestCaseModel.create_emp_no == operator,
                     ApiTestCaseModel.delete_flag == 0,
-                    ApiTestCaseModel.create_date.between(start_time, end_time)).group_by(
+                    ApiTestCaseModel.create_date.between(start_date, finished_date)).group_by(
                     ApiTestCaseModel.create_date).order_by(asc(ApiTestCaseModel.create_date))
                 query = await session.execute(sql)
                 for i, q in enumerate(query.all()):
                     date, count = q
                     ans[date.strftime("%Y-%m-%d")] = count
-        return await cls.fill_data(start_time, end_time, ans)
+        return await cls.fill_data(start_date, finished_date, ans)
 
     @classmethod
-    async def fill_data(cls, start_time: datetime, end_time: datetime, data: dict):
+    async def fill_data(cls, start_date: datetime, finished_date: datetime, data: dict):
         """
         填补数据
         Args:
-            start_time:
-            end_time:
+            start_date:
+            finished_date:
             data:
 
         Returns:
 
         """
-        start = start_time
+        start = start_date
         ans = []
-        while start <= end_time:
+        while start <= finished_date:
             date = start.strftime("%Y-%m-%d")
             ans.append(dict(date=date, count=data.get(date, 0)))
             start += timedelta(days=1)

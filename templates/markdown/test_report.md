@@ -9,7 +9,7 @@
 - 成功 <font color=#67C23A>{success}</font>
 - **失败** <font color=#F56C6C>{failed}</font>
 - **出错** <font color=#E6A23C>{error}</font>
-- 开始时间: <font color=#909399>{start_time}</font>
-- 完成时间: <font color=#909399>{end_time}</font>
+- 开始时间: <font color=#909399>{start_date}</font>
+- 完成时间: <font color=#909399>{finished_date}</font>
 
 [查看具体报告]({report_url})

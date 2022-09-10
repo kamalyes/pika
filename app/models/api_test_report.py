@@ -16,8 +16,8 @@ class ApiTestReportModel(Base):
     env = Column(INT, nullable=False, comment="环境")
     cost = Column(String(ByteSizeEnum.LENGTH_08), comment="花费时间")
     plan_id = Column(INT, index=True, nullable=True, comment="测试集合id，预留字段")
-    start_at = Column(DATETIME, nullable=False, comment="开始时间")
-    finished_at = Column(DATETIME, comment="结束时间")
+    start_date = Column(DATETIME, nullable=False, comment="开始时间")
+    finished_date = Column(DATETIME, comment="结束时间")
     success_count = Column(INT, nullable=False, default=0, comment="成功数量")
     error_count = Column(INT, nullable=False, default=0, comment="错误数量")
     failed_count = Column(INT, nullable=False, default=0, comment="失败数量")
@@ -31,10 +31,10 @@ class ApiTestReportModel(Base):
 
     def __init__(self, executor: int, env: int, success_count: int = 0, failed_count: int = 0,
                  error_count: int = 0, skipped_count: int = 0, status: int = 0, mode: int = 0,
-                 plan_id: int = None, finished_at: datetime = None, cost=None):
+                 plan_id: int = None, finished_date: datetime = None, cost=None):
         self.executor = executor
         self.env = env
-        self.start_at = datetime.now()
+        self.start_date = datetime.now()
         self.success_count = success_count
         self.cost = cost
         self.failed_count = failed_count
@@ -44,5 +44,5 @@ class ApiTestReportModel(Base):
         self.mode = mode
         self.status = status
         self.plan_id = plan_id
-        self.finished_at = finished_at
+        self.finished_date = finished_date
         self.delete_flag = 0

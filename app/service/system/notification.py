@@ -56,8 +56,8 @@ async def read_msg(form: NotificationSchema, user_info=Depends(Permission())):
 
 
 @router.post("/delete", summary="用户删除消息")
-async def read_msg(msg_id: List[int], user_info=Depends(Permission()),
-                   session=Depends(async_db_session_iterator)):
+async def delete_msg(msg_id: List[int], user_info=Depends(Permission()),
+                     session=Depends(async_db_session_iterator)):
     try:
         await PikaNotificationDao.delete_message(session, msg_id, user_info['emp_no'])
         return PikaResponse.success()

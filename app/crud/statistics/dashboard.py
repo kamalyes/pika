@@ -50,7 +50,7 @@ class DashboardDao(PikaWrapper):
         data = await session.execute(sql)
         count, success, failed, skip, error, total, total_pass = 0, 0, 0, 0, 0, 0, 0
         for item in data.scalars().all():
-            date = item.start_at.strftime("%Y-%m-%d")
+            date = item.start_date.strftime("%Y-%m-%d")
             count += 1
             total_pass += item.success_count
             total += item.success_count + item.failed_count + item.error_count
@@ -104,10 +104,10 @@ class DashboardDao(PikaWrapper):
     async def get_date_data(cls, start: datetime, end: datetime):
         ans = []
         date_index = dict()
-        start_time = start.replace(hour=0, minute=0, second=0, microsecond=0)
-        while start_time <= end:
-            date = start_time.strftime("%Y-%m-%d")
+        start_date = start.replace(hour=0, minute=0, second=0, microsecond=0)
+        while start_date <= end:
+            date = start_date.strftime("%Y-%m-%d")
             ans.append({"date": date})
             date_index[date] = len(ans) - 1
-            start_time += timedelta(days=1)
+            start_date += timedelta(days=1)
         return ans, date_index

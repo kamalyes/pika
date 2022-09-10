@@ -245,7 +245,7 @@ class ApiTestPlanDao(PikaWrapper):
                 reports = list()
                 query = await session.execute(
                     select(ApiTestReportModel).where(ApiTestReportModel.plan_id == d.id).order_by(
-                        ApiTestReportModel.start_at.desc()).limit(7))
+                        ApiTestReportModel.start_date.desc()).limit(7))
                 for report in query.scalars().all():
                     reports.append(report)
                 ans.append({

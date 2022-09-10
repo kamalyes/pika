@@ -15,11 +15,10 @@ from typing import Optional
 from fastapi import Query
 from hutools.time import Moment
 
-from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.schema.base import BaseQueryTypeSchema
 
 
 class OperationSchema(BaseQueryTypeSchema):
-    start_time: Optional[datetime] = Query(Moment.skew_date(days=-3), title="开始时间")
-    end_time: Optional[datetime] = Query(Moment.skew_date(hours=1), title="结束时间")
+    start_date: Optional[datetime] = Query(Moment.skew_date(days=-3), title="开始时间")
+    finished_date: Optional[datetime] = Query(Moment.skew_date(hours=1), title="结束时间")
     tag: Optional[str] = None

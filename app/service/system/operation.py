@@ -16,7 +16,7 @@ async def list_user_operation(request: OperationSchema = Depends(),
     operator, operator_role = escarole
     try:
         records = await PikaOperationDao.select_list(operator=operator, tag=request.tag, condition=[
-            OperationLogModel.operator_date.between(request.start_time, request.end_time)],
+            OperationLogModel.operator_date.between(request.start_date, request.finished_date)],
                                                      _sort=[desc(OperationLogModel.operator_date)])
         return PikaResponse.records(records)
     except Exception as e:
@@ -28,7 +28,7 @@ async def list_user_activities(request: OperationSchema = Depends(),
                                escarole=Depends(Permission(escarole=True))):
     try:
         operator, operator_role = escarole
-        records = await PikaOperationDao.count_user_activities(operator, request.start_time, request.end_time)
+        records = await PikaOperationDao.count_user_activities(operator, request.start_date, request.finished_date)
         ans = list()
         for r in records:
             # 解包日期和数量

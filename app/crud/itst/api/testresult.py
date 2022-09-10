@@ -26,7 +26,7 @@ class ApiTestResultDao(PikaWrapper):
 
     @classmethod
     async def insert_report(cls, report_id: int, case_id: int, case_name: str, status: int,
-                            case_log: str, start_at: datetime, finished_at: datetime,
+                            case_log: str, start_date: datetime, finished_date: datetime,
                             url: str, body: str, request_method: str, request_headers: str,
                             cost: str,
                             asserts: str, response_headers: str, response: str,
@@ -37,7 +37,7 @@ class ApiTestResultDao(PikaWrapper):
             async with async_session() as session:
                 async with session.begin():
                     result = ApiTestResultModel(report_id, case_id, case_name, status,
-                                                case_log, start_at, finished_at,
+                                                case_log, start_date, finished_date,
                                                 url, body, request_method, request_headers, cost,
                                                 asserts, response_headers, response, status_code,
                                                 cookies, retry, request_params, data_name, data_id)
@@ -56,7 +56,7 @@ class ApiTestResultDao(PikaWrapper):
                     ApiTestCaseModel.id == ApiTestResultModel.case_id). \
                     where(ApiTestResultModel.report_id == report_id,
                           ApiTestResultModel.delete_flag == 0).order_by(
-                    asc(ApiTestResultModel.case_id), asc(ApiTestResultModel.start_at))
+                    asc(ApiTestResultModel.case_id), asc(ApiTestResultModel.start_date))
                 data = await session.execute(sql)
                 ans = []
                 for res, directory_id in data.all():

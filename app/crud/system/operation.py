@@ -23,13 +23,13 @@ from app.models.system import OperationLogModel
 class PikaOperationDao(PikaWrapper):
 
     @classmethod
-    async def count_user_activities(cls, operator, start_time: datetime, end_time: datetime):
+    async def count_user_activities(cls, operator, start_date: datetime, finished_date: datetime):
         """
         根据开始/结束时间 获取用户的活动日历（操作记录的数量）
         Args:
             operator:
-            start_time:
-            end_time:
+            start_date:
+            finished_date:
 
         Returns:
 
@@ -38,7 +38,7 @@ class PikaOperationDao(PikaWrapper):
             async with session.begin():
                 sql = select(OperationLogModel.operator_date,
                              func.count(OperationLogModel.id)).where(
-                    OperationLogModel.operator_date.between(start_time, end_time),
+                    OperationLogModel.operator_date.between(start_date, finished_date),
                     OperationLogModel.operator == operator) \
                     .group_by(OperationLogModel.operator_date).order_by(
                     OperationLogModel.operator_date)
