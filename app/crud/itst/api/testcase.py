@@ -107,7 +107,7 @@ class ApiTestCaseDao(PikaWrapper):
                     data = model(**f.dict(), operator=operator)
                 else:
                     data = model(**f.dict(), operator=operator, case_id=case_id)
-                await md.insert(model=data, session=session, not_begin=True)
+                await md.insert(model=data, session=session)
 
     @classmethod
     async def insert_test_case(cls, session, data: TestCaseInfo, operator: str) -> ApiTestCaseModel:
@@ -401,7 +401,7 @@ class ApiTestCaseDao(PikaWrapper):
         Returns:
 
         """
-        asserts = await cls.async_list_test_case_asserts(case_id)
+        asserts = await ApiTestCaseAssertsDao.async_list_test_case_asserts(case_id)
         for a in asserts:
             temp = dict(id=f"assert_{a.id}", label=f"{a.name}", children=list())
             parent.get("children").append(temp)

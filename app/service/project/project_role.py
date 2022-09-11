@@ -21,10 +21,10 @@ router = APIRouter()
 
 
 @router.post("/role/insert", summary="添加项目成员")
-async def insert_project_role(role: ProjectRoleSchema, escarole=Depends(Permission())):
+async def insert_project_role(role: ProjectRoleSchema, escarole=Depends(Permission(escarole=True))):
     try:
         operator, operator_identity = escarole
-        query = await ProjectRoleDao.query(emp_no=role.emp_no, project_id=role.project_id)
+        query = await ProjectRoleDao.query_record(emp_no=role.emp_no, project_id=role.project_id)
         if query is not None:
             raise Exception("该用户已存在")
         await ProjectRoleDao.has_permission(project_id=role.project_id,
@@ -32,7 +32,7 @@ async def insert_project_role(role: ProjectRoleSchema, escarole=Depends(Permissi
                                             operator=operator,
                                             operator_identity=operator_identity)
         model = ProjectRoleModel(**role.dict(), operator=operator)
-        await ProjectRoleDao.insert(model, True)
+        await ProjectRoleDao.insert(model=model, log=True)
     except Exception as e:
         return PikaResponse.failed(detail=str(e))
     return PikaResponse.success()
