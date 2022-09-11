@@ -17,6 +17,7 @@ from app.models.basic import LargeBaseModel
 
 class SQLHistoryModel(LargeBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_sql_history"
+    __table_args__ = {"comment": "sql执行历史表"}
     sql = Column(String(1024), comment="sql语句")
     elapsed = Column(INT, comment="请求耗时")
     database_id = Column(INT, comment="操作数据库id")

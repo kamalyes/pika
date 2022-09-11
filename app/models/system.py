@@ -37,6 +37,7 @@ class SysRecordModel(NormBaseModel):
 
 class OperationLogModel(MinBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_operation_log'
+    __table_args__ = {"comment": "操作记录表"}
     title = Column(String(ByteSizeEnum.LENGTH_128), nullable=True, comment="操作title")
     diff_data = Column(String(ByteSizeEnum.LENGTH_1000), nullable=True, comment="diff_data")
     tag = Column(String(ByteSizeEnum.LENGTH_1000), comment="操作tag")
