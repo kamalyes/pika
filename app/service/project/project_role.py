@@ -39,7 +39,7 @@ async def insert_project_role(role: ProjectRoleSchema, escarole=Depends(Permissi
 
 
 @router.post("/role/update", summary="更新项目成员")
-async def update_project_role(prole: ProjectRoleEditSchema, escarole=Depends(Permission())):
+async def update_project_role(prole: ProjectRoleEditSchema, escarole=Depends(Permission(escarole=True))):
     operator, operator_identity = escarole
     await ProjectRoleDao.update_project_role(prole, operator, operator_identity)
     return PikaResponse.success()
