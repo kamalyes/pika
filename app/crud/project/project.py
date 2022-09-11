@@ -14,7 +14,7 @@ from copy import deepcopy
 from datetime import datetime
 from typing import List
 
-from sqlalchemy import or_, select, desc
+from sqlalchemy import or_, select, desc, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.handler.execres import AuthException, OperationException
@@ -75,7 +75,8 @@ class ProjectDao(PikaWrapper):
             return []
         ans = set()
         # 找到包含用户的角色
-        sel_role2user = select(ProjectRoleModel.project_id).where(ProjectRoleModel.emp_no == operator)
+        sel_role2user = select(ProjectRoleModel.project_id).where(
+            ProjectRoleModel.member_no == operator)
         roles = await session.execute(sel_role2user)
         for r in roles.all():
             ans.add(r[0])
@@ -111,7 +112,8 @@ class ProjectDao(PikaWrapper):
                 session.add(pr)
 
     @classmethod
-    async def update_avatar(cls, project_id: int, operator: str, operator_identity: int, file_url: [str, int]):
+    async def update_avatar(cls, project_id: int, operator: str, operator_identity: int,
+                            file_url: [str, int]):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -220,7 +222,7 @@ class ProjectDao(PikaWrapper):
                 # 由于是set，所以不会重复
                 query = await session.execute(
                     select(ProjectRoleModel).where(ProjectRoleModel.delete_flag == 0,
-                                                   ProjectRoleModel.emp_no == emp_no))
+                                                   ProjectRoleModel.member_no == emp_no))
                 for q in query.scalars().all():
                     ans.add(q.project_id)
         return len(ans)
@@ -242,12 +244,28 @@ class ProjectRoleDao(PikaWrapper):
         try:
             async with async_session() as session:
                 data = await session.execute(
-                    select(ProjectRoleModel.project_id).where(ProjectRoleModel.emp_no == emp_no,
+                    select(ProjectRoleModel.project_id).where(ProjectRoleModel.member_no == emp_no,
                                                               ProjectRoleModel.delete_flag == 0))
                 return data.scalars().all()
         except Exception as e:
             cls.__log__.error(f"查询用户: {emp_no}项目失败, {e}")
             raise Exception("获取项目失败")
+
+    @classmethod
+    def query_number_count_by_emp_no(cls, emp_no):
+        """
+        通过emp_no查询旗下所有的用户数
+        Args:
+            emp_no:
+
+        Returns:
+
+        """
+        return select(func.count(ProjectRoleModel.member_no)) \
+            .outerjoin(ProjectModel, and_(ProjectModel.delete_flag == 0,
+                                          ProjectModel.id == ProjectRoleModel.project_id)).where(
+            or_(ProjectModel.owner == emp_no, ProjectRoleModel.member_no == emp_no)).group_by(
+            ProjectRoleModel.project_id)
 
     @classmethod
     async def list_role(cls, project_id: int) -> List[ProjectRoleModel]:
@@ -285,7 +303,7 @@ class ProjectRoleDao(PikaWrapper):
             if project_admin and project_role == RoleEnum.MANAGER:
                 raise Exception("不能修改组长的权限")
             query = await session.execute(select(ProjectRoleModel)
-                                          .where(ProjectRoleModel.emp_no == emp_no,
+                                          .where(ProjectRoleModel.member_no == emp_no,
                                                  ProjectRoleModel.project_id == project_id,
                                                  ProjectRoleModel.delete_flag == 0))
             updater_role = query.scalars().first()
@@ -324,7 +342,7 @@ class ProjectRoleDao(PikaWrapper):
                 raise Exception("项目不存在")
             if project.private and project.owner != operator:
                 query = await session.execute(
-                    select(ProjectRoleModel).where(ProjectRoleModel.emp_no == operator,
+                    select(ProjectRoleModel).where(ProjectRoleModel.member_no == operator,
                                                    ProjectRoleModel.project_id == project_id,
                                                    ProjectRoleModel.delete_flag == 0))
                 role = query.scalars().first()
@@ -332,7 +350,8 @@ class ProjectRoleDao(PikaWrapper):
                     raise AuthException(detail="没有权限访问项目")
 
     @classmethod
-    async def has_permission(cls, project_id: int, project_role: int, operator: str, operator_identity: int,
+    async def has_permission(cls, project_id: int, project_role: int, operator: str,
+                             operator_identity: int,
                              project_admin: bool = False, session: AsyncSession = None):
         """
         判断用户是否有该项目的权限
@@ -349,12 +368,15 @@ class ProjectRoleDao(PikaWrapper):
         """
         if operator_identity != RoleEnum.ADMIN:
             if session is not None:
-                await cls.judge_permission(session, project_id, operator, project_role, project_admin)
+                await cls.judge_permission(session, project_id, operator, project_role,
+                                           project_admin)
             async with async_session() as session:
-                await cls.judge_permission(session, project_id, operator, project_role, project_admin)
+                await cls.judge_permission(session, project_id, operator, project_role,
+                                           project_admin)
 
     @classmethod
-    async def update_project_role(cls, prole: ProjectRoleEditSchema, operator: str, operator_identity: int):
+    async def update_project_role(cls, prole: ProjectRoleEditSchema, operator: str,
+                                  operator_identity: int):
         """
         更改用户角色
         Args:
@@ -389,7 +411,8 @@ class ProjectRoleDao(PikaWrapper):
             raise Exception(f"更新用户角色失败: {e}")
 
     @classmethod
-    async def delete_project_role(cls, prole_id: int, operator: str, operator_identity: int) -> None:
+    async def delete_project_role(cls, prole_id: int, operator: str,
+                                  operator_identity: int) -> None:
         """
         删除用户角色
         Args:
@@ -407,7 +430,8 @@ class ProjectRoleDao(PikaWrapper):
                                            delete_flag=False)
                     if role is None:
                         raise Exception("用户角色不存在")
-                    await cls.has_permission(role.project_id, role.project_role, operator, operator_identity, True)
+                    await cls.has_permission(role.project_id, role.project_role, operator,
+                                             operator_identity, True)
                     cls.delete_model(role, operator)
                     await session.flush()
                     session.expunge(role)

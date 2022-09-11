@@ -12,7 +12,6 @@
 from typing import Any
 
 from fastapi import APIRouter, Request, Depends
-from hutools.core import DataHand
 from hutools.pagination import LimitOffsetPage, add_pagination
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -59,7 +58,8 @@ async def logout(request: Request, oauth2_logout: OAuth2TokenSchema = Depends())
 
 
 @router.post("/add", dependencies=[], name="添加用户 （管理员操作）")
-async def create_user(request: AddUserSchema, user_info=Depends(Permission(RoleEnum.MANAGER.value))):
+async def create_user(request: AddUserSchema,
+                      user_info=Depends(Permission(RoleEnum.MANAGER.value))):
     return await UserDao.add_user(request, user_info)
 
 

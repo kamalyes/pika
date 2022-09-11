@@ -53,7 +53,7 @@ class ProjectModel(LargeBaseModel):
 class ProjectRoleModel(LargeBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_project_role'
     __table_args__ = {"comment": "项目人员关联表"}
-    emp_no = Column(
+    member_no = Column(
         String(ByteSizeEnum.LENGTH_16),
         ForeignKey(UserModel.emp_no, ondelete="cascade", onupdate="cascade"),
         nullable=False,
@@ -62,8 +62,8 @@ class ProjectRoleModel(LargeBaseModel):
     project_role = Column(INT, index=True, comment="角色")
     relationship(UserModel, backref=backref("children", cascade="all, delete"))
 
-    def __init__(self, emp_no, project_id, project_role, operator):
+    def __init__(self, member_no, project_id, project_role, operator):
         super().__init__(operator=operator)
-        self.emp_no = emp_no
+        self.emp_no = member_no
         self.project_id = project_id
         self.project_role = project_role

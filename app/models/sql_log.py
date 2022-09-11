@@ -13,7 +13,6 @@ from sqlalchemy import Column, String, INT
 
 from app.enums.SysvarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
-from app.models.database import DatabaseModel
 
 
 class SQLHistoryModel(LargeBaseModel):

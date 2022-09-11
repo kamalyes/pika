@@ -46,7 +46,8 @@ async def list_test_plan(page: int, size: int, project_id: int = None, name: str
 
 
 @router.post("/insert", summary="添加定时任务&测试计划")
-async def insert_test_plan(form: ApiTestPlanSchema, user_info=Depends(Permission(RoleEnum.MANAGER))):
+async def insert_test_plan(form: ApiTestPlanSchema,
+                           user_info=Depends(Permission(RoleEnum.MANAGER))):
     try:
         plan = await ApiTestPlanDao.insert_test_plan(form, user_info['emp_no'])
         # 添加定时任务
@@ -57,7 +58,8 @@ async def insert_test_plan(form: ApiTestPlanSchema, user_info=Depends(Permission
 
 
 @router.post("/update", summary="更新定时任务&测试计划")
-async def update_test_plan(form: ApiTestPlanSchema, user_info=Depends(Permission(RoleEnum.MANAGER))):
+async def update_test_plan(form: ApiTestPlanSchema,
+                           user_info=Depends(Permission(RoleEnum.MANAGER))):
     try:
         await ApiTestPlanDao.update_test_plan(form, user_info['emp_no'], True)
         Scheduler.edit_test_plan(form.id, form.name, form.cron)
@@ -70,7 +72,8 @@ async def update_test_plan(form: ApiTestPlanSchema, user_info=Depends(Permission
 async def delete_test_plan(id: int, user_info=Depends(Permission(RoleEnum.MANAGER)),
                            session=Depends(async_db_session_iterator)):
     try:
-        await ApiTestPlanDao.delete_record_by_id(session=session, operator=user_info['emp_no'], value=id)
+        await ApiTestPlanDao.delete_record_by_id(session=session, operator=user_info['emp_no'],
+                                                 value=id)
         Scheduler.remove(id)
     except JobLookupError:
         # 说明没找到job

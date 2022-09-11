@@ -31,7 +31,8 @@ class ApiTestPlanDao(PikaWrapper):
     @classmethod
     async def list_test_plan(cls, page: int, size: int, project_id: int = None, name: str = '',
                              priority: str = '',
-                             operator_identity: str = None, operator: str = None, follow: bool = None):
+                             operator_identity: str = None, operator: str = None,
+                             follow: bool = None):
         try:
             async with async_session() as session:
                 conditions = [ApiTestPlanModel.delete_flag == 0]
