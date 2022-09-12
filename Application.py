@@ -11,6 +11,8 @@
 """
 import asyncio
 import traceback
+from mimetypes import guess_type
+from os.path import isfile
 
 import uvicorn
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
@@ -23,6 +25,8 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.responses import Response
+from starlette.staticfiles import StaticFiles
+from starlette.templating import Jinja2Templates
 
 from app.core.handler.execres import (
     ValidException,
@@ -410,6 +414,43 @@ class PikaFastApi:
 
 pika = PikaFastApi.create_app()
 
+pika.mount("/statics", StaticFiles(directory="statics"), name="statics")
+templates = Jinja2Templates(directory="statics")
+
+
+@pika.get("/")
+async def serve_spa(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+@pika.get("/{filename}")
+async def get_site(filename):
+    filename = './statics/' + filename
+
+    if not isfile(filename):
+        return Response(status_code=404)
+
+    with open(filename, mode='rb') as f:
+        content = f.read()
+
+    content_type, _ = guess_type(filename)
+    return Response(content, media_type=content_type)
+
+
+@pika.get("/static/{filename}")
+async def get_site_static(filename):
+    filename = './statics/static/' + filename
+
+    if not isfile(filename):
+        return Response(status_code=404)
+
+    with open(filename, mode='rb') as f:
+        content = f.read()
+
+    content_type, _ = guess_type(filename)
+    return Response(content, media_type=content_type)
+
+
 
 @pika.on_event("startup")
 async def init_env():
@@ -463,7 +504,8 @@ def init_scheduler():
     """
     # SQLAlchemyJobStore指定存储链接
     job_store = {
-        'default': SQLAlchemyJobStore(url=PikaAppConfig.SQLALCHEMY_DATABASE_URI, engine_options={"pool_recycle": 1500},
+        'default': SQLAlchemyJobStore(url=PikaAppConfig.SQLALCHEMY_DATABASE_URI,
+                                      engine_options={"pool_recycle": 1500},
                                       pickle_protocol=3)
     }
     scheduler = AsyncIOScheduler()
