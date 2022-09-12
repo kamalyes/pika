@@ -14,8 +14,8 @@ jsonschema~=4.0.0
 fastapi==0.76.0
 aiosqlite~=0.17.0
 aioredis~=2.0.1
-mitmproxy~=8.1.1
-uvicorn[standard] >=0.17.0,<0.18.0
+mitmproxy
+uvicorn[standard]
 supervisor~=4.2.4
 orjson >=3.2.1,<4.0.0
 ujson >=5.2.0

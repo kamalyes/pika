@@ -234,7 +234,7 @@ class PikaWrapper(object):
     @classmethod
     @RedisHelper.cache("dao")
     @db_connect
-    async def list_with_pagination(cls, page, size, /, *, session=None, **kwargs):
+    async def list_with_pagination(cls, page, size,  *, session=None, **kwargs):
         """
         通过分页获取数据
         Args:
