@@ -41,8 +41,7 @@ async def delete_gateway(id: int, user_info=Depends(Permission(RoleEnum.MANAGER)
 @router.post("/gateway/update", summary="编辑请求地址")
 async def insert_gateway(form: PikaGatewaySchema, user_info=Depends(Permission(RoleEnum.MANAGER))):
     model = await GatewayDao.update_record_by_id(operator=user_info['emp_no'],
-                                                 model=form, not_null=True,
-                                                 log=True)
+                                                 model=form, not_null=True)
     return PikaResponse.success(data=model)
 
 

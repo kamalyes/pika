@@ -390,7 +390,7 @@ class ProjectRoleDao(PikaWrapper):
         try:
             async with async_session() as session:
                 async with session.begin():
-                    original = await cls.query(session=session, id=prole.id, delete_flag=False)
+                    original = await cls.query_record(session=session, id=prole.id, delete_flag=False)
                     if original is None:
                         raise Exception("该用户角色不存在")
                     await cls.has_permission(original.project_id, original.project_role,
@@ -426,7 +426,7 @@ class ProjectRoleDao(PikaWrapper):
         try:
             async with async_session() as session:
                 async with session.begin():
-                    role = await cls.query(session=session, id=prole_id,
+                    role = await cls.query_record(session=session, id=prole_id,
                                            delete_flag=False)
                     if role is None:
                         raise Exception("用户角色不存在")

@@ -41,7 +41,7 @@ async def list_testcase(directory_id: int = None, name: str = "", operator: str 
 @router.post("/insert", summary="新增接口用例")
 async def insert_testcase(data: TestCaseSchema, user_info=Depends(Permission())):
     try:
-        record = await ApiTestCaseDao.query(name=data.name, directory_id=data.directory_id)
+        record = await ApiTestCaseDao.query_record(name=data.name, directory_id=data.directory_id)
         if record is not None:
             return PikaResponse.failed(detail="用例已存在")
         model = ApiTestCaseModel(**data.dict(), operator=user_info['emp_no'])
@@ -325,7 +325,7 @@ async def move_testcase(form: MoveApiTestCaseSchema, escarole=Depends(Permission
 @router.post("/parameters/insert", summary="新增出参数据")
 async def insert_testcase_out_parameters(form: ApiTestCaseOutParametersSchema,
                                          user_info=Depends(Permission())):
-    query = await ApiTestCaseOutParametersDao.query(name=form.name, case_id=form.case_id)
+    query = await ApiTestCaseOutParametersDao.query_record(name=form.name, case_id=form.case_id)
     if query is not None:
         return PikaResponse.failed(detail="参数名称已存在")
     data = ApiTestCaseOutParametersModel(**form.dict(), operator=user_info['emp_no'])

@@ -37,7 +37,7 @@ async def delete_environment(id: int, user_info=Depends(Permission(RoleEnum.ADMI
 @router.post("/environment/update", summary="更新环境配置")
 async def update_environment(data: EnvironmentSchema, user_info=Depends(Permission(RoleEnum.ADMIN)),
                              session=Depends(async_db_session_iterator)):
-    ans = await EnvironmentDao.update_record_by_id(operator=user_info['emp_no'], model=data, not_null=True, log=True)
+    ans = await EnvironmentDao.update_record_by_id(operator=user_info['emp_no'], model=data, not_null=True)
     return PikaResponse.success(data=ans)
 
 

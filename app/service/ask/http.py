@@ -77,7 +77,7 @@ async def re_run_case(env: int, case_id: int, data_id: int = 0, user_info=Depend
         params = dict()
         if data_id != 0:
             # if data_id not exists, use original params (empty dict)
-            test_data = await ApiTestCaseDataDao.query(id=data_id)
+            test_data = await ApiTestCaseDataDao.query_record(id=data_id)
             params = json.loads(test_data.json_data)
         result, _ = await executor.run(env, case_id, request_param=params)
         return PikaResponse.success(result)

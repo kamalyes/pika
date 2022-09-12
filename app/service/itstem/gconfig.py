@@ -36,7 +36,7 @@ async def delete_gconfig(id: int, user_info=Depends(Permission(RoleEnum.ADMIN)),
 
 @router.post("/gconfig/update", summary="更新全局配置")
 async def update_gconfig(data: GConfigFormSchema, user_info=Depends(Permission(RoleEnum.ADMIN))):
-    await GConfigDao.update_record_by_id(user_info['emp_no'], data, True, True)
+    await GConfigDao.update_record_by_id(user_info['emp_no'], data, True)
     return PikaResponse.success()
 
 

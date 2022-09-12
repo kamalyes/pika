@@ -57,7 +57,7 @@ async def update_redis_config(form: RedisConfigSchema,
                               background_tasks: BackgroundTasks,
                               user_info=Depends(Permission(RoleEnum.ADMIN))):
     try:
-        result = await PikaRedisConfigDao.update_record_by_id(user_info['emp_no'], form, log=True)
+        result = await PikaRedisConfigDao.update_record_by_id(user_info['emp_no'], form)
         if result.cluster:
             background_tasks.add_task(PikaRedisManager.refresh_redis_cluster,
                                       *(result.id, result.addr))

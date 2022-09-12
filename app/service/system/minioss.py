@@ -23,7 +23,7 @@ async def create_oss_file(filepath: str, file: UploadFile = File(...),
         # 本地数据也要备份一份
         model = OssFileModel(operator=user_info['emp_no'], file_path=filepath, view_url=file_url,
                              file_size=OssFileModel.get_size(file_size))
-        record = await PikaOssDao.query(file_path=filepath, delete_flag=False)
+        record = await PikaOssDao.query_record(file_path=filepath, delete_flag=False)
         if record is not None:
             record.file_path = filepath
             record.view_url = file_url
@@ -66,7 +66,7 @@ async def delete_oss_file(filepath: str, user_info=Depends(Permission(RoleEnum.M
                           session=Depends(async_db_session_iterator)):
     try:
         # 先获取到本地的记录，拿到sha值
-        record = await PikaOssDao.query(file_path=filepath, delete_flag=False)
+        record = await PikaOssDao.query_record(file_path=filepath, delete_flag=False)
         if record is None:
             raise Exception("文件不存在或已被删除")
         await PikaOssDao.delete_record_by_id(session, user_info["emp_no"], record.id, log=True)
