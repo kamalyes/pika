@@ -16,6 +16,7 @@ from app.crud.online.database import DbConfigDao, SQLHistoryDao
 from app.models.database import DatabaseModel
 from app.models.environment import EnvironmentModel
 from app.models.sql_log import SQLHistoryModel
+from app.schema.base import BaseOnlyPagingSchema
 from app.schema.database import DatabaseSchema
 from app.schema.online import OnlineSqlSchema
 from app.service import Permission
@@ -36,17 +37,15 @@ async def execute_sql(data: OnlineSqlSchema, escarole=Depends(Permission(escarol
 
 
 @router.get("/sql/history/query", summary="获取sql执行历史记录")
-async def query_sql_history(page: int = 1, size: int = 4, user_info=Depends(Permission())):
-    data, total = await SQLHistoryDao.list_with_pagination(page, size,
-                                                           _sort=[
-                                                               SQLHistoryModel.create_date.desc()],
-                                                           _select=[DatabaseModel,
-                                                                    EnvironmentModel],
+async def query_sql_history(paging: BaseOnlyPagingSchema = Depends(),
+                            user_info=Depends(Permission())):
+    data, total = await SQLHistoryDao.list_with_pagination(paging,
+                                                           _sort=[SQLHistoryModel.create_date.desc()],
+                                                           _select=[DatabaseModel, EnvironmentModel],
                                                            _join=[(DatabaseModel,
                                                                    DatabaseModel.id == SQLHistoryModel.database_id),
                                                                   (EnvironmentModel,
-                                                                   EnvironmentModel.id == DatabaseModel.env)
-                                                                  ])
+                                                                   EnvironmentModel.id == DatabaseModel.env)])
     ans = []
     for history, database, env in data:
         ans.append({"history": history, "database": database, "env_info": env})

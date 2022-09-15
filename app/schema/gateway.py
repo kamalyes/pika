@@ -19,7 +19,7 @@ class PikaGatewaySchema(BaseModel):
     id: int = 0
     env: int = None
     name: str = ''
-    gateway: str = ''
+    address: str = ''
 
     # noinspection PyMethodParameters
     @validator("env", 'name')
@@ -27,7 +27,7 @@ class PikaGatewaySchema(BaseModel):
         return PikaBaseModel.not_empty(v)
 
     # noinspection PyMethodParameters
-    @validator('gateway', whole=True)
+    @validator('address', whole=True)
     def prefix_match(cls, v):
         if not v.startswith(("http://", "https://", "ws://", "wss://")):
             raise VariablesNullError("前缀不为http或ws")

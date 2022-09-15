@@ -24,10 +24,10 @@ class GatewayModel(LargeBaseModel):
     )
     env = Column(INT, comment='对应环境id')
     name = Column(String(ByteSizeEnum.LENGTH_50), comment="网关名称")
-    gateway = Column(String(ByteSizeEnum.LENGTH_128), comment="网关地址")
+    address = Column(String(ByteSizeEnum.LENGTH_128), comment="网关地址")
 
-    def __init__(self, env, name, gateway, operator, id=None):
+    def __init__(self, env, name, address, operator, id=None):
         super().__init__(id=id, operator=operator)
         self.name = name
         self.env = env
-        self.gateway = gateway
+        self.address = address

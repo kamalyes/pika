@@ -30,7 +30,7 @@ async def create_oss_file(filepath: str, file: UploadFile = File(...),
             record.file_size = file_size
             await PikaOssDao.update_record_by_id(user_info['emp_no'], record)
         else:
-            await PikaOssDao.insert(model, True)
+            await PikaOssDao.insert(model=model, log=True)
         return PikaResponse.success()
     except Exception as e:
         return PikaResponse.failed(detail=f"上传失败: {e}")

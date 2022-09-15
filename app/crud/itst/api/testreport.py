@@ -92,9 +92,10 @@ class ApiTestReportDao(PikaWrapper):
         """
         try:
             async with async_session() as session:
-                sql = select(ApiTestReportModel, ApiTestPlanModel.name).outerjoin(ApiTestPlanModel,
-                                                                                  ApiTestPlanModel.id == ApiTestReportModel.plan_id
-                                                                                  ).where(
+                sql = select(ApiTestReportModel, ApiTestPlanModel.name) \
+                    .outerjoin(ApiTestPlanModel,
+                               ApiTestPlanModel.id == ApiTestReportModel.plan_id
+                               ).where(
                     ApiTestReportModel.id == report_id)
                 data = await session.execute(sql)
                 if data is None:
@@ -107,13 +108,12 @@ class ApiTestReportDao(PikaWrapper):
             raise Exception(f"查询报告失败: {e}")
 
     @classmethod
-    async def list_report(cls, page: int, size: int, start_date: datetime, finished_date: datetime,
+    async def list_report(cls, paging, start_date: datetime, finished_date: datetime,
                           executor: int = None):
         """
         获取报告列表
         Args:
-            page:
-            size:
+            paging:
             start_date:
             finished_date:
             executor:
@@ -132,7 +132,7 @@ class ApiTestReportDao(PikaWrapper):
                 total = data.raw.rowcount
                 if total == 0:
                     return [], 0
-                sql = sql.offset((page - 1) * size).limit(size)
+                sql = sql.offset((paging.page_index - 1) * paging.page_size).limit(paging.page_size)
                 data = await session.execute(sql)
                 return data.scalars().all(), total
         except Exception as e:

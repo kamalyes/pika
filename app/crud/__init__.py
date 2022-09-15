@@ -158,12 +158,12 @@ class PikaWrapper(object):
         return s
 
     @staticmethod
-    async def pagination(page: int, size: int, session, sql: str, scalars=True, **kwargs):
+    async def pagination(page_index: int, page_size: int, session, sql: str, scalars=True, **kwargs):
         """
         分页查询
         Args:
-            page:
-            size:
+            page_index:
+            page_size:
             session:
             sql:
             scalars:
@@ -175,7 +175,7 @@ class PikaWrapper(object):
         total = data.raw.rowcount
         if total == 0:
             return [], 0
-        sql = sql.offset((page - 1) * size).limit(size)
+        sql = sql.offset((page_index - 1) * page_size).limit(page_size)
         data = await session.execute(sql)
         if scalars and kwargs.get("_join") is None:
             return data.scalars().all(), total
@@ -234,19 +234,18 @@ class PikaWrapper(object):
     @classmethod
     @RedisHelper.cache("dao")
     @db_connect
-    async def list_with_pagination(cls, page, size,  *, session=None, **kwargs):
+    async def list_with_pagination(cls, paging, *, session=None, **kwargs):
         """
         通过分页获取数据
         Args:
             session:
-            page:
-            size:
+            paging:
             **kwargs:
 
         Returns:
 
         """
-        return await cls.pagination(page, size, session, cls.query_wrapper(**kwargs), **kwargs)
+        return await cls.pagination(paging.page_index, paging.page_size, session, cls.query_wrapper(**kwargs), **kwargs)
 
     @classmethod
     def where(cls, param: Any, sentence, condition: list):

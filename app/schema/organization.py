@@ -11,62 +11,18 @@
 """
 from typing import Optional
 
-from fastapi import Body, Query
-from pydantic import BaseModel
+from fastapi import Body
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.schema.base import BaseBatchDelIdsSchema, BaseQuerySchema, BaseLargeEditSchema
+from app.schema.base import BaseLargeEditSchema, BaseQuerySchema
 
 
-class EditUserGroupSchema(BaseLargeEditSchema):
-    group_id: Optional[int] = Body(0, title="用户组id")
-    group_name: Optional[str] = Body(..., title="用户组名称", min_length=2,
-                                     max_length=ByteSizeEnum.LENGTH_255)
-
-    class Config:
-        orm_mode = True
+class OrganizationFormSchema(BaseLargeEditSchema):
+    sort_id: Optional[int] = Body(0, title="排序id")
+    organization_id: Optional[int] = Body(0, title="组织id")
+    name: Optional[str] = Body(..., title="用户组名称", min_length=2,
+                               max_length=ByteSizeEnum.LENGTH_255)
 
 
-class DelUserGroupSchema(BaseBatchDelIdsSchema):
+class QueryOrganizationInSchema(OrganizationFormSchema, BaseQuerySchema):
     pass
-
-
-class EditDeptSchema(BaseModel):
-    dept_id: Optional[int] = Body(0, title="部门id")
-    group_id: Optional[int] = Body(..., title="用户组id")
-    dept_name: Optional[str] = Body(..., title="部门名称", min_length=2,
-                                    max_length=ByteSizeEnum.LENGTH_255)
-    description: Optional[str] = Body(None, title="备注信息", max_length=ByteSizeEnum.LENGTH_255)
-    enabled_flag: Optional[int] = Body(1, title="禁用/启用 1：启用、0：禁用")
-
-    class Config:
-        orm_mode = True
-
-
-class DelDeptSchema(BaseBatchDelIdsSchema):
-    pass
-
-
-class EditDeptRelSchema(BaseModel):
-    rel_id: Optional[int] = Body(0, title="应用id")
-    dept_id: Optional[int] = Body(..., title="部门id")
-    emp_no: Optional[str] = Body(..., title="员工编号", max_length=ByteSizeEnum.LENGTH_20)
-    description: Optional[str] = Body(None, title="备注信息", max_length=ByteSizeEnum.LENGTH_255)
-    create_emp_no: Optional[str] = Body(None, title="创建者员工编号", max_length=ByteSizeEnum.LENGTH_20)
-    update_emp_no: Optional[str] = Body(None, title="修改者员工编号", max_length=ByteSizeEnum.LENGTH_20)
-
-    class Config:
-        orm_mode = True
-
-
-class DelDeptRelModel(BaseBatchDelIdsSchema):
-    pass
-
-
-class QueryDeptRelModel(BaseQuerySchema):
-    rel_id: Optional[int] = Query(None, title="组织应用id")
-    dept_id: Optional[int] = Query(None, title="部门id")
-    emp_no: Optional[str] = Query(None, title="员工编号", max_length=ByteSizeEnum.LENGTH_20)
-
-    class Config:
-        orm_mode = True

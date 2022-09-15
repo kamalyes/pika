@@ -80,12 +80,22 @@ class BaseOnlyOperatorSchema(BaseModel):
     update_emp_no: Optional[str] = Query(None, title="修改者员工编号", max_length=ByteSizeEnum.LENGTH_20)
 
 
-class BaseQueryDateSchema(BaseModel):
+class BaseOnlyQueryDateSchema(BaseModel):
     create_date: Optional[datetime] = Query(Moment.skew_date(days=-3), title="创建日期")
     update_date: Optional[datetime] = Query(Moment.skew_date(minutes=15), title="更新日期")
 
 
-class BaseQuerySchema(BaseOnlyIdSchema, BaseOnlyEnabledFlagSchema, BaseOnlyOperatorSchema, BaseQueryDateSchema):
+class BaseOnlyPointDateSchema(BaseModel):
+    start_date: Optional[datetime] = Query(Moment.skew_date(days=-3), title="开始日期")
+    finished_date: Optional[datetime] = Query(Moment.skew_date(minutes=15), title="完成日期")
+
+
+class BaseOnlyPagingSchema(BaseModel):
+    page_index: Optional[int] = Body(1, title="分页下标")
+    page_size: Optional[int] = Body(10, title="分页数量")
+
+
+class BaseQuerySchema(BaseOnlyIdSchema, BaseOnlyEnabledFlagSchema, BaseOnlyOperatorSchema, BaseOnlyQueryDateSchema):
     pass
 
 

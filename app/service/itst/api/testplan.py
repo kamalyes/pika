@@ -19,7 +19,8 @@ from app.core.handler.jsonres import PikaResponse
 from app.crud.project.testplan import ApiTestPlanDao
 from app.enums.RbacEnum import RoleEnum
 from app.models import async_db_session_iterator
-from app.schema.api_testplan import ApiTestPlanSchema
+from app.schema.api_testplan import ApiTestPlanSchema, QueryApiTestPlanInSchema
+from app.schema.base import BaseOnlyPagingSchema
 from app.service import Permission
 from app.utils.scheduler import Scheduler
 
@@ -27,18 +28,17 @@ router = APIRouter()
 
 
 @router.get("/list", summary="测试计划列表查询")
-async def list_test_plan(page: int, size: int, project_id: int = None, name: str = "",
-                         priority: str = '',
-                         operator: str = None, follow: bool = None,
+async def list_test_plan(paging: BaseOnlyPagingSchema = Depends(),
+                         request: QueryApiTestPlanInSchema = Depends(),
                          escarole=Depends(Permission(escarole=True))):
     try:
         operator, operator_identity = escarole
-        data, total = await ApiTestPlanDao.list_test_plan(page, size, project_id=project_id,
-                                                          name=name,
-                                                          follow=follow, priority=priority,
+        data, total = await ApiTestPlanDao.list_test_plan(paging,
+                                                          project_id=request.project_id,
+                                                          name=request.name,
+                                                          follow=request.follow, priority=request.priority,
                                                           operator_identity=operator_identity,
                                                           operator=operator)
-
         ans = Scheduler.list_test_plan(data)
         return PikaResponse.success_with_size(data=ans, total=total)
     except Exception as e:

@@ -15,6 +15,7 @@ from app.core.handler.jsonres import PikaResponse
 from app.crud.online.environment import EnvironmentDao
 from app.enums.RbacEnum import RoleEnum
 from app.models import async_db_session_iterator
+from app.schema.base import BaseOnlyPagingSchema
 from app.schema.environment import EnvironmentSchema
 from app.service import Permission
 
@@ -42,7 +43,8 @@ async def update_environment(data: EnvironmentSchema, user_info=Depends(Permissi
 
 
 @router.get("/environment/list", summary="查询环境配置列表")
-async def list_environment(page: int = 1, size: int = 8, name: str = "", exactly=False,
+async def list_environment(paging: BaseOnlyPagingSchema = Depends(),
+                           name: str = "", exactly=False,
                            user_info=Depends(Permission())):
-    data, total = await EnvironmentDao.list_env(page, size, name, exactly)
+    data, total = await EnvironmentDao.list_env(paging, name, exactly)
     return PikaResponse.success_with_size(data=data, total=total)

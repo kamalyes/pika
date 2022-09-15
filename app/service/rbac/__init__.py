@@ -13,5 +13,6 @@ from app.service.rbac.action import router as access_router
 from app.service.rbac.kerberos import router as kerberos_router
 from app.service.rbac.menu import router as menus_router
 from app.service.rbac.organization import router as organization_router
+from app.service.rbac.department import router as department_router
 from app.service.rbac.role import router as roles_router
 from app.service.rbac.user import router as user_router

@@ -60,6 +60,7 @@ from app.service.online import sql_router
 from app.service.project import project_role_router
 from app.service.project import project_router
 from app.service.rbac import access_router
+from app.service.rbac import department_router
 from app.service.rbac import kerberos_router
 from app.service.rbac import menus_router
 from app.service.rbac import organization_router
@@ -317,28 +318,30 @@ class PikaFastApi:
         pika.include_router(kerberos_router, prefix="/kerberos", tags=["密保问题"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
-        pika.include_router(menus_router, prefix="/access", tags=["菜单配置"],
+        # rbac
+        pika.include_router(organization_router, prefix="/rbac", tags=["组织"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
-        pika.include_router(roles_router, prefix="/access", tags=["角色配置"],
+        pika.include_router(department_router, prefix="/rbac", tags=["部门"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
-        pika.include_router(access_router, prefix="/access", tags=["api活动控制"],
+        pika.include_router(menus_router, prefix="/rbac", tags=["菜单配置"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
-        pika.include_router(organization_router, prefix="/org", tags=["组织"],
+        pika.include_router(roles_router, prefix="/rbac", tags=["角色配置"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
-        # lexicon
+        pika.include_router(access_router, prefix="/rbac", tags=["api活动控制"],
+                            dependencies=[Depends(PikaFastApi.request_info),
+                                          Depends(RateLimiter(counts=20, minutes=1))])
+
         pika.include_router(lexicon_router, prefix="/lexicon", tags=["词库"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
-
+        # system
         pika.include_router(msconfig_router, prefix="/system", tags=["系统全局配置"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
-
-        # system
         pika.include_router(history_router, prefix="/system", tags=["访问记录"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
@@ -449,7 +452,6 @@ async def get_site_static(filename):
 
     content_type, _ = guess_type(filename)
     return Response(content, media_type=content_type)
-
 
 
 @pika.on_event("startup")

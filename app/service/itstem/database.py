@@ -15,6 +15,7 @@ from app.core.handler.jsonres import PikaResponse
 from app.crud.online.database import DbConfigDao
 from app.enums.RbacEnum import RoleEnum
 from app.models import DatabaseHelper, db_helper
+from app.schema.base import BaseOnlyPagingSchema
 from app.schema.database import DatabaseSchema
 from app.service import Permission
 

@@ -12,56 +12,49 @@
 
 from fastapi import APIRouter, Depends
 
-from app.schema.organization import DelUserGroupSchema, QueryDeptRelModel
+from app.core.handler.jsonres import PikaResponse
+from app.crud.rbac.organization import OrganizationDao
+from app.enums.RbacEnum import RoleEnum
+from app.models import async_db_session_iterator
+from app.schema.organization import OrganizationFormSchema, QueryOrganizationInSchema
+from app.service import Permission
 
 router = APIRouter()
 
 
-@router.post("/group/add", summary="添加集团")
-async def add_user_group():
+@router.post("/organization/insert", summary="增加全局配置")
+async def insert_organization(data: OrganizationFormSchema,
+                              user_info=Depends(Permission(RoleEnum.ADMIN))):
+    await OrganizationDao.insert_organization(data, user_info['emp_no'])
+    return PikaResponse.success()
+
+
+@router.delete("/organization/delete", summary="删除全局配置")
+async def delete_organization(id: int, user_info=Depends(Permission(RoleEnum.ADMIN)),
+                              session=Depends(async_db_session_iterator)):
+    await OrganizationDao.delete_record_by_id(session, user_info['emp_no'], id, log=True)
+    return PikaResponse.success()
+
+
+@router.post("/organization/update", summary="更新全局配置")
+async def update_organization(data: OrganizationFormSchema,
+                              user_info=Depends(Permission(RoleEnum.ADMIN))):
+    await OrganizationDao.update_record_by_id(user_info['emp_no'], data, True)
+    return PikaResponse.success()
+
+
+@router.get("/organization/list", summary="查询全局配置列表")
+async def list_organization(data: QueryOrganizationInSchema = Depends(),
+                            user_info=Depends(Permission(RoleEnum.ADMIN))):
+    data, total = await OrganizationDao.list_with_pagination(data)
+    return PikaResponse.success_with_size(data=data, total=total)
+
+
+@router.post("/organization/relation/bind", summary="建立成员与部门之间的关联")
+async def bind_organization_relation():
     pass
 
 
-@router.put("/group/update", summary="更新集团信息")
-async def update_user_group():
-    pass
-
-
-@router.delete("/group/delete", dependencies=[], name="删除集团")
-async def delete_user_group(request: DelUserGroupSchema = Depends()):
-    pass
-
-
-@router.get("/group/list", summary="查询集团信息")
-async def query_user_group():
-    pass
-
-
-@router.post("/department/add", summary="添加部门")
-async def add_department():
-    pass
-
-
-@router.put("/department/update", summary="更新部门信息")
-async def update_department():
-    pass
-
-
-@router.delete("/department/delete", dependencies=[], name="删除部门")
-async def delete_department():
-    pass
-
-
-@router.post("/department/relation/bind", summary="建立成员与部门之间的关联")
-async def bind_department_relation():
-    pass
-
-
-@router.delete("/department/relation/unbind", dependencies=[], name="解除成员与部门之间的关联")
-async def unbind_department_relation():
-    pass
-
-
-@router.get("/department/relation/list", summary="查询用户所在部门信息")
-async def query_department_relation(request: QueryDeptRelModel = Depends()):
+@router.delete("/organization/relation/unbind", dependencies=[], name="解除成员与部门之间的关联")
+async def unbind_organization_relation():
     pass

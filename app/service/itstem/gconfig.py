@@ -15,6 +15,7 @@ from app.core.handler.jsonres import PikaResponse
 from app.crud.online.gconfig import GConfigDao
 from app.enums.RbacEnum import RoleEnum
 from app.models import async_db_session_iterator
+from app.schema.base import BaseOnlyPagingSchema
 from app.schema.gconfig import GConfigFormSchema
 from app.service import Permission
 
@@ -41,7 +42,8 @@ async def update_gconfig(data: GConfigFormSchema, user_info=Depends(Permission(R
 
 
 @router.get("/gconfig/list", summary="查询全局配置列表")
-async def list_gconfig(page: int = 1, size: int = 8, env=None, key: str = "",
+async def list_gconfig(paging: BaseOnlyPagingSchema = Depends(),
+                       env=None, key: str = "",
                        user_info=Depends(Permission())):
-    data, total = await GConfigDao.list_with_pagination(page, size, env=env, key=key)
+    data, total = await GConfigDao.list_with_pagination(paging, env=env, key=key)
     return PikaResponse.success_with_size(data=data, total=total)

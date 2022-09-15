@@ -1,5 +1,4 @@
 import json
-from datetime import datetime
 from typing import List
 
 from fastapi import APIRouter, Depends, UploadFile, File, Request
@@ -26,16 +25,19 @@ from app.schema.api_testcase import TestCaseAssertsForm, TestCaseSchema, TestCas
 from app.schema.api_testcase_data import ApiTestCaseDataSchema
 from app.schema.api_testcase_directory import ApiTestCaseDirectorySchema, MoveApiTestCaseSchema
 from app.schema.api_testcase_out_parameters import ApiTestCaseOutParametersSchema
+from app.schema.base import BaseOnlyPagingSchema
 from app.schema.constructor import ConstructorSchema, ConstructorIndexSchema
+from app.schema.report import ApiTestReportSchema
 from app.service import Permission
 
 router = APIRouter()
 
 
 @router.get("/list", summary="用例列表查询")
-async def list_testcase(directory_id: int = None, name: str = "", operator: str = ''):
-    data = await ApiTestCaseDao.list_testcase(directory_id, name, operator)
-    return PikaResponse.success(data=data)
+async def list_testcase(paging: BaseOnlyPagingSchema = Depends(),
+                        directory_id: int = None, name: str = "", operator: str = ''):
+    data, total = await ApiTestCaseDao.list_testcase(paging, directory_id, name, operator)
+    return PikaResponse.success_with_size(data=data, total=total)
 
 
 @router.post("/insert", summary="新增接口用例")
@@ -45,7 +47,7 @@ async def insert_testcase(data: TestCaseSchema, user_info=Depends(Permission()))
         if record is not None:
             return PikaResponse.failed(detail="用例已存在")
         model = ApiTestCaseModel(**data.dict(), operator=user_info['emp_no'])
-        model = await ApiTestCaseDao.insert(model, True)
+        model = await ApiTestCaseDao.insert(model=model, log=True)
         return PikaResponse.success(data=model.id)
     except Exception as e:
         return PikaResponse.failed(detail=str(e))
@@ -196,11 +198,12 @@ async def query_report(id: int, user_info=Depends(Permission())):
 
 
 @router.get("/report/list", summary="获取构建历史记录")
-async def list_report(page: int, size: int, start_date: str, finished_date: str, executor: int = None,
+async def list_report(paging: BaseOnlyPagingSchema = Depends(),
+                      request: ApiTestReportSchema = Depends(),
                       user_info=Depends(Permission())):
-    start = datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
-    end = datetime.strptime(finished_date, "%Y-%m-%d %H:%M:%S")
-    report_list, total = await ApiTestReportDao.list_report(page, size, start, end, executor)
+    report_list, total = await ApiTestReportDao.list_report(paging, request.start_date,
+                                                            request.finished_date,
+                                                            request.executor)
     return PikaResponse.success_with_size(data=report_list, total=total)
 
 

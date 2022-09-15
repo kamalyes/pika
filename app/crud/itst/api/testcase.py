@@ -48,7 +48,7 @@ class ApiTestCaseDao(PikaWrapper):
             desc(func.count(ApiTestCaseModel.id)))
 
     @classmethod
-    async def list_testcase(cls, directory_id: int = None, name: str = "", operator: str = None):
+    async def list_testcase(cls, paging, directory_id: int = None, name: str = "", operator: str = None):
         try:
             filters = [ApiTestCaseModel.delete_flag == 0]
             if directory_id:
@@ -61,8 +61,8 @@ class ApiTestCaseDao(PikaWrapper):
                     filters.append(ApiTestCaseModel.create_emp_no == operator)
             async with async_session() as session:
                 sql = select(ApiTestCaseModel).where(*filters).order_by(ApiTestCaseModel.name.asc())
-                result = await session.execute(sql)
-                return result.scalars().all()
+                result, total = await cls.pagination(paging.page_index, paging.page_size, session, sql, False)
+                return result, total
         except Exception as e:
             cls.__log__.error(f"获取测试用例失败: {str(e)}")
             raise Exception(f"获取测试用例失败: {str(e)}")

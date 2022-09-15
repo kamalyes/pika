@@ -30,15 +30,14 @@ from app.schema.project import ProjectRoleEditSchema
 class ProjectDao(PikaWrapper):
 
     @classmethod
-    async def list_project(cls, operator: str, operator_identity: int, page: int,
-                           size: int, name: str = None) -> (List[ProjectModel], int):
+    async def list_project(cls, operator: str, operator_identity: int, paging,
+                           name: str = None) -> (List[ProjectModel], int):
         """
         查询/获取项目列表
         Args:
             operator:    操作者员工编号
             operator_identity:  操作者身份
-            page:   页数
-            size:   父页量
+            paging:   分页
             name:   项目名称
 
         Returns:
@@ -57,7 +56,7 @@ class ProjectDao(PikaWrapper):
                     search.append(ProjectModel.name.like("%{}%".format(name)))
                 sql = select(ProjectModel).where(*search).order_by(desc(ProjectModel.update_date))
                 data = await session.execute(sql)
-                sql = sql.offset((page - 1) * size).limit(size)
+                sql = sql.offset((paging.page_index - 1) * paging.page_size).limit(paging.page_size)
                 total = data.raw.rowcount
                 data = await session.execute(sql)
                 return data.scalars().all(), total
@@ -197,7 +196,7 @@ class ProjectDao(PikaWrapper):
             raise Exception(f"查询项目: {project_id}失败, {e}")
 
     @staticmethod
-    async def query_user_project(emp_no: int) -> int:
+    async def query_user_project(emp_no: str) -> int:
         """
         查询用户有多少项目
         Args:
@@ -232,7 +231,7 @@ class ProjectDao(PikaWrapper):
 class ProjectRoleDao(PikaWrapper):
 
     @classmethod
-    async def list_project_by_user(cls, emp_no: int) -> List[int]:
+    async def list_project_by_user(cls, emp_no: str) -> List[int]:
         """
         通过emp_no获取项目列表
         Args:
@@ -427,7 +426,7 @@ class ProjectRoleDao(PikaWrapper):
             async with async_session() as session:
                 async with session.begin():
                     role = await cls.query_record(session=session, id=prole_id,
-                                           delete_flag=False)
+                                                  delete_flag=False)
                     if role is None:
                         raise Exception("用户角色不存在")
                     await cls.has_permission(role.project_id, role.project_role, operator,

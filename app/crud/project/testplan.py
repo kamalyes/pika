@@ -23,13 +23,14 @@ from app.models.api_test_report import ApiTestReportModel
 from app.models.api_testplan import ApiTestPlanModel
 from app.models.testplan_follow_user import ApiTestPlanFollowUserRelModel
 from app.schema.api_testplan import ApiTestPlanSchema
+from app.schema.base import BaseOnlyPagingSchema
 
 
 @PikaMdWrapper(ApiTestPlanModel)
 class ApiTestPlanDao(PikaWrapper):
 
     @classmethod
-    async def list_test_plan(cls, page: int, size: int, project_id: int = None, name: str = '',
+    async def list_test_plan(cls, paging, project_id: int = None, name: str = '',
                              priority: str = '',
                              operator_identity: str = None, operator: str = None,
                              follow: bool = None):
@@ -71,7 +72,7 @@ class ApiTestPlanDao(PikaWrapper):
                                    ApiTestPlanFollowUserRelModel.plan_id == ApiTestPlanModel.id).where(
                         *conditions, or_(ApiTestPlanFollowUserRelModel.id is None,
                                          ApiTestPlanFollowUserRelModel.delete_date != 0))
-                result, total = await cls.pagination(page, size, session, sql, False)
+                result, total = await cls.pagination(paging.page_index, paging.page_size, session, sql, False)
                 return result, total
         except Exception as e:
             cls.__log__.error(f"获取测试计划失败: {str(e)}")

@@ -17,6 +17,7 @@ from app.crud.project.testplan import ApiTestPlanDao
 from app.enums.RbacEnum import RoleEnum
 from app.middleware.oss import OssClient
 from app.models import async_db_session_iterator
+from app.schema.base import BaseOnlyPagingSchema
 from app.schema.project import ProjectEditSchema, ProjectSchema
 from app.service import Permission
 
@@ -73,10 +74,10 @@ async def query_project(project_id: int, escarole=Depends(Permission(escarole=Tr
 
 
 @router.get("/list", summary="查询/获取项目列表")
-async def list_project(page: int = 1, size: int = 8, name: str = "",
+async def list_project(paging: BaseOnlyPagingSchema = Depends(), name: str = "",
                        escarole=Depends(Permission(escarole=True))):
     operator, operator_identity = escarole
-    result, total = await ProjectDao.list_project(operator, operator_identity, page, size, name)
+    result, total = await ProjectDao.list_project(operator, operator_identity, paging, name)
     return PikaResponse.success_with_size(data=result, total=total)
 
 
