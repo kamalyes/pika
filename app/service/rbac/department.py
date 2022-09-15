@@ -22,26 +22,26 @@ from app.service import Permission
 router = APIRouter()
 
 
-@router.post("/department/insert", summary="增加全局配置")
+@router.post("/department/insert", summary="增加部门")
 async def insert_department(data: DepartmentFormSchema, user_info=Depends(Permission(RoleEnum.ADMIN))):
     await DepartmentDao.insert_department(data, user_info['emp_no'])
     return PikaResponse.success()
 
 
-@router.delete("/department/delete", summary="删除全局配置")
+@router.delete("/department/delete", summary="删除部门")
 async def delete_department(id: int, user_info=Depends(Permission(RoleEnum.ADMIN)),
                             session=Depends(async_db_session_iterator)):
     await DepartmentDao.delete_record_by_id(session, user_info['emp_no'], id, log=True)
     return PikaResponse.success()
 
 
-@router.post("/department/update", summary="更新全局配置")
+@router.post("/department/update", summary="更新部门")
 async def update_department(data: DepartmentFormSchema, user_info=Depends(Permission(RoleEnum.ADMIN))):
     await DepartmentDao.update_record_by_id(user_info['emp_no'], data, True)
     return PikaResponse.success()
 
 
-@router.get("/department/list", summary="查询全局配置列表")
+@router.get("/department/list", summary="查询部门列表")
 async def list_department(data: QueryDepartmentInSchema = Depends(),
                           paging: BaseOnlyPagingSchema = Depends(),
                           user_info=Depends(Permission(RoleEnum.ADMIN))):

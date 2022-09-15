@@ -22,39 +22,30 @@ from app.service import Permission
 router = APIRouter()
 
 
-@router.post("/organization/insert", summary="增加全局配置")
+@router.post("/organization/insert", summary="增加组织机构")
 async def insert_organization(data: OrganizationFormSchema,
                               user_info=Depends(Permission(RoleEnum.ADMIN))):
     await OrganizationDao.insert_organization(data, user_info['emp_no'])
     return PikaResponse.success()
 
 
-@router.delete("/organization/delete", summary="删除全局配置")
+@router.delete("/organization/delete", summary="删除组织机构")
 async def delete_organization(id: int, user_info=Depends(Permission(RoleEnum.ADMIN)),
                               session=Depends(async_db_session_iterator)):
     await OrganizationDao.delete_record_by_id(session, user_info['emp_no'], id, log=True)
     return PikaResponse.success()
 
 
-@router.post("/organization/update", summary="更新全局配置")
+@router.post("/organization/update", summary="更新组织机构")
 async def update_organization(data: OrganizationFormSchema,
                               user_info=Depends(Permission(RoleEnum.ADMIN))):
     await OrganizationDao.update_record_by_id(user_info['emp_no'], data, True)
     return PikaResponse.success()
 
 
-@router.get("/organization/list", summary="查询全局配置列表")
+@router.get("/organization/list", summary="查询组织机构列表")
 async def list_organization(data: QueryOrganizationInSchema = Depends(),
                             user_info=Depends(Permission(RoleEnum.ADMIN))):
     data, total = await OrganizationDao.list_with_pagination(data)
     return PikaResponse.success_with_size(data=data, total=total)
 
-
-@router.post("/organization/relation/bind", summary="建立成员与部门之间的关联")
-async def bind_organization_relation():
-    pass
-
-
-@router.delete("/organization/relation/unbind", dependencies=[], name="解除成员与部门之间的关联")
-async def unbind_organization_relation():
-    pass

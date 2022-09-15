@@ -319,7 +319,7 @@ class PikaFastApi:
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
         # rbac
-        pika.include_router(organization_router, prefix="/rbac", tags=["组织"],
+        pika.include_router(organization_router, prefix="/rbac", tags=["组织机构"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
         pika.include_router(department_router, prefix="/rbac", tags=["部门"],
