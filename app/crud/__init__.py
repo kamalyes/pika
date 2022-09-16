@@ -368,8 +368,8 @@ class PikaWrapper(object):
                                    key=model.id, title=title))
             return now
         except Exception as e:
-            cls.__log__.exception(f"删除{cls.__model__.__name__}记录失败: \n{e}")
-            raise DbException(f"删除失败,\n{e}")
+            cls.__log__.exception(f"更新{cls.__model__.__name__}记录失败: \n{e}")
+            raise DbException(f"更新失败,\n{e}")
 
     @classmethod
     async def _inner_delete(cls, *, session, operator, value, key, log=False, title=None):

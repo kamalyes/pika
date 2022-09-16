@@ -310,7 +310,7 @@ class ProjectRoleDao(PikaWrapper):
                 raise Exception("对不起，你没有权限")
 
     @staticmethod
-    async def access(operator: int, operator_identity: str, roles: List[ProjectRoleModel],
+    async def access(operator: str, operator_identity: str, roles: List[ProjectRoleModel],
                      project: ProjectModel = None):
         if operator_identity == RoleEnum.ADMIN or not project.private or operator == project.owner:
             return

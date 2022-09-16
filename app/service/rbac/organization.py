@@ -16,6 +16,7 @@ from app.core.handler.jsonres import PikaResponse
 from app.crud.rbac.organization import OrganizationDao
 from app.enums.RbacEnum import RoleEnum
 from app.models import async_db_session_iterator
+from app.schema.base import BaseOnlyPagingSchema
 from app.schema.organization import OrganizationFormSchema, QueryOrganizationInSchema
 from app.service import Permission
 
@@ -37,15 +38,17 @@ async def delete_organization(id: int, user_info=Depends(Permission(RoleEnum.ADM
 
 
 @router.post("/organization/update", summary="更新组织机构")
-async def update_organization(data: OrganizationFormSchema,
-                              user_info=Depends(Permission(RoleEnum.ADMIN))):
-    await OrganizationDao.update_record_by_id(user_info['emp_no'], data, True)
+async def update_organization(form: OrganizationFormSchema,
+                              user_info=Depends(Permission(RoleEnum.ADMIN)),
+                              session=Depends(async_db_session_iterator)):
+    await OrganizationDao.parity_field(session=session, name=form.name, parent_id=form.parent_id)
+    await OrganizationDao.update_record_by_id(user_info['emp_no'], form, True)
     return PikaResponse.success()
 
 
 @router.get("/organization/list", summary="查询组织机构列表")
-async def list_organization(data: QueryOrganizationInSchema = Depends(),
+async def list_organization(form: QueryOrganizationInSchema = Depends(),
+                            paging: BaseOnlyPagingSchema = Depends(),
                             user_info=Depends(Permission(RoleEnum.ADMIN))):
-    data, total = await OrganizationDao.list_with_pagination(data)
+    data, total = await OrganizationDao.list_with_pagination(paging, form.dict())
     return PikaResponse.success_with_size(data=data, total=total)
-

@@ -18,11 +18,16 @@ from app.schema.base import BaseLargeEditSchema, BaseQuerySchema
 
 
 class OrganizationFormSchema(BaseLargeEditSchema):
+    id: Optional[int] = Body(0, title="组织id")
     sort_id: Optional[int] = Body(0, title="排序id")
-    organization_id: Optional[int] = Body(0, title="组织id")
     name: Optional[str] = Body(..., title="用户组名称", min_length=2,
                                max_length=ByteSizeEnum.LENGTH_255)
+    parent_id: Optional[int] = Body(0, title="父序号")
 
 
-class QueryOrganizationInSchema(OrganizationFormSchema, BaseQuerySchema):
-    pass
+class QueryOrganizationInSchema(BaseQuerySchema):
+    id: Optional[int] = Body(0, title="组织id")
+    sort_id: Optional[int] = Body(0, title="排序id")
+    name: Optional[str] = Body(None, title="用户组名称", min_length=2,
+                               max_length=ByteSizeEnum.LENGTH_255)
+    parent_id: Optional[int] = Body(0, title="父序号")

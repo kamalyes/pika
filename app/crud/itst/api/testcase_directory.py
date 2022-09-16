@@ -52,7 +52,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
             raise Exception(f"获取用例目录失败, error: {e}")
 
     @classmethod
-    async def insert_directory(cls, form: ApiTestCaseDirectorySchema, operator: int):
+    async def insert_directory(cls, form: ApiTestCaseDirectorySchema, operator: str):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -70,7 +70,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
             raise Exception(f"创建目录失败: {e}")
 
     @classmethod
-    async def update_directory(cls, form: ApiTestCaseDirectorySchema, operator: int):
+    async def update_directory(cls, form: ApiTestCaseDirectorySchema, operator: str):
         """
         更新用例目录
         Args:
@@ -98,7 +98,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
             raise Exception(f"更新目录失败: {e}")
 
     @classmethod
-    async def delete_directory(cls, id: int, operator: int):
+    async def delete_directory(cls, id: int, operator: str):
         """
         删除用例目录
         Args:

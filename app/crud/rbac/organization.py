@@ -24,17 +24,37 @@ class OrganizationDao(PikaWrapper):
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def insert_organization(cls, form: OrganizationFormSchema, operator: int) -> None:
+    async def insert_organization(cls, form: OrganizationFormSchema, operator: str) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():
-                    query = await session.execute(
-                        select(OrganizationModel).where(OrganizationModel.name == form.name))
-                    data = query.scalars().first()
-                    if data is not None:
-                        raise Exception(f"部门名称: {data.name}已存在")
+                    await cls.parity_field(session=session, name=form.name, parent_id=form.parent_id)
                     config = OrganizationModel(**form.dict(), operator=operator)
                     session.add(config)
         except Exception as e:
             cls.__log__.error(f"新增部门: {form.name}失败, {e}")
             raise Exception(f"新增部门: {form.name}失败")
+
+    @classmethod
+    async def parity_field(cls, session, name, parent_id):
+        """
+        检查字段
+        Args:
+            session:
+            name:
+            parent_id:
+
+        Returns:
+
+        """
+
+        query_exists_name = await session.execute(
+            select(OrganizationModel).where(OrganizationModel.name == name))
+        exists_name = query_exists_name.scalars().first()
+        query_exists_parent_id = await session.execute(
+            select(OrganizationModel).where(OrganizationModel.id == parent_id))
+        exists_parent_id = query_exists_parent_id.scalars().first()
+        if exists_name is not None:
+            raise Exception(f"部门名称: {name}已存在")
+        if exists_parent_id is None and parent_id != 0:
+            raise Exception(f"组织父id: {parent_id}不存在")

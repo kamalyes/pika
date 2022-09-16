@@ -23,3 +23,9 @@ class OrganizationModel(LargeBaseModel):
     name = Column(String(ByteSizeEnum.LENGTH_255), nullable=False, comment="用户组名称")
     parent_id = Column(Integer, server_default="0", comment="父序号")
     sort_id = Column(Integer, server_default="0", comment="排序id")
+
+    def __init__(self, name, parent_id, sort_id, operator, enabled_flag=None, id=None, description=None):
+        super().__init__(id=id, operator=operator, enabled_flag=enabled_flag, description=description)
+        self.name = name
+        self.parent_id = parent_id
+        self.sort_id = sort_id

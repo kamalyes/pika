@@ -24,7 +24,7 @@ class DepartmentDao(PikaWrapper):
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def insert_department(cls, form: DepartmentFormSchema, operator: int) -> None:
+    async def insert_department(cls, form: DepartmentFormSchema, operator: str) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():

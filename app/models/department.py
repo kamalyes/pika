@@ -23,9 +23,21 @@ class DepartmentModel(LargeBaseModel):
     organization_id = Column(Integer, nullable=False, comment="组织id")
     sort_id = Column(Integer, server_default="0", comment="排序id")
 
+    def __init__(self, name, organization_id, sort_id, operator, id=None):
+        super().__init__(id=id, operator=operator)
+        self.name = name
+        self.organization_id = organization_id
+        self.sort_id = sort_id
+
 
 class DepartmentRelModel(NormBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_department_relation"
     __table_args__ = {"comment": "部门应用表"}
     department_id = Column(Integer, nullable=False, comment="部门id")
     emp_no = Column(String(ByteSizeEnum.LENGTH_20), comment="员工编号", nullable=False)
+
+    def __init__(self, name, department_id, operator, emp_no, id=None):
+        super().__init__(id=id, operator=operator)
+        self.name = name
+        self.department_id = department_id
+        self.emp_no = emp_no

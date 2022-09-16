@@ -48,7 +48,7 @@ class ApiTestCaseDataDao(PikaWrapper):
             raise Exception(f"新增测试数据失败, {str(e)}")
 
     @classmethod
-    async def update_testcase_data(cls, form: ApiTestCaseDataSchema, operator: int):
+    async def update_testcase_data(cls, form: ApiTestCaseDataSchema, operator: str):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -67,7 +67,7 @@ class ApiTestCaseDataDao(PikaWrapper):
             raise Exception(f"编辑测试数据失败, {str(e)}")
 
     @classmethod
-    async def delete_testcase_data(cls, id: int, operator: int):
+    async def delete_testcase_data(cls, id: int, operator: str):
         try:
             async with async_session() as session:
                 async with session.begin():

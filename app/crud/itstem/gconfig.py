@@ -25,7 +25,7 @@ class GConfigDao(PikaWrapper):
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def insert_gconfig(cls, form: GConfigFormSchema, operator: int) -> None:
+    async def insert_gconfig(cls, form: GConfigFormSchema, operator: str) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():
