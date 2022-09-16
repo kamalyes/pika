@@ -13,18 +13,18 @@ from sqlalchemy import Column, Integer, String, UniqueConstraint
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysvarEnum import PikaGlobalVarEnum
-from app.models.basic import LargeBaseModel, NormBaseModel
+from app.models.basic import NormBaseModel
 
 
-class DepartmentModel(LargeBaseModel):
+class DepartmentModel(NormBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_department"
     __table_args__ = (UniqueConstraint('name', 'organization_id'), {"comment": "部门表"})
     name = Column(String(ByteSizeEnum.LENGTH_255), nullable=False, comment="部门名称")
     organization_id = Column(Integer, nullable=False, comment="组织id")
     sort_id = Column(Integer, server_default="0", comment="排序id")
 
-    def __init__(self, name, organization_id, sort_id, operator, id=None):
-        super().__init__(id=id, operator=operator)
+    def __init__(self, name, organization_id, sort_id, operator, id=None, description=None):
+        super().__init__(id=id, operator=operator, description=description)
         self.name = name
         self.organization_id = organization_id
         self.sort_id = sort_id

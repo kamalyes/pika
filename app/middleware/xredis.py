@@ -203,13 +203,14 @@ class RedisHelper(object):
 
     @staticmethod
     @awaitable
-    def set_address_record(operator: str, address: str, regex: str):
+    def set_address_record(operator: str, address: str, regex: str, retain_history=False):
         """
         设置录制状态
         Args:
             operator:    操作者员工编号
             address:
             regex: 录制的url正则
+            retain_history: 保留历史记录
 
         Returns:
 
@@ -225,7 +226,7 @@ class RedisHelper(object):
     @awaitable
     def remove_record_data(address: str, index: int):
         """
-        停止录制任务
+        删除录制数据
         Args:
             address:
             index:

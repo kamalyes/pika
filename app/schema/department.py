@@ -12,20 +12,17 @@
 from typing import Optional
 
 from fastapi import Body
-from pydantic import BaseModel
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.schema.base import BaseQuerySchema
+from app.schema.base import BaseQuerySchema, BaseOnlyDescSchema
 
 
-class DepartmentFormSchema(BaseModel):
+class DepartmentFormSchema(BaseOnlyDescSchema):
+    id: Optional[int] = Body(0, title="部门id")
     sort_id: Optional[int] = Body(0, title="排序id")
-    dept_id: Optional[int] = Body(0, title="部门id")
     organization_id: Optional[int] = Body(..., title="组织id")
     name: Optional[str] = Body(..., title="部门名称", min_length=2,
                                max_length=ByteSizeEnum.LENGTH_255)
-    description: Optional[str] = Body(None, title="备注信息", max_length=ByteSizeEnum.LENGTH_255)
-    enabled_flag: Optional[int] = Body(1, title="禁用/启用 1：启用、0：禁用")
 
 
 class QueryDepartmentInSchema(DepartmentFormSchema, BaseQuerySchema):

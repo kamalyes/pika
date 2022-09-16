@@ -360,13 +360,15 @@ async def delete_testcase_out_parameters(id: int, user_info=Depends(Permission()
 
 
 @router.get("/record/start", summary="开始录制接口请求")
-async def record_requests(request: Request, regex: str, user_info=Depends(Permission())):
-    await RedisHelper.set_address_record(user_info['emp_no'], request.client.host, regex)
+async def start_record_requests(request: Request,
+                                regex: str, retain_history=False,
+                                user_info=Depends(Permission())):
+    await RedisHelper.set_address_record(user_info['emp_no'], request.client.host, regex, retain_history)
     return PikaResponse.success(message="开始录制，可以在浏览器/app上操作啦！")
 
 
 @router.get("/record/stop", summary="停止录制接口请求")
-async def record_requests(request: Request, user_info=Depends(Permission())):
+async def stop_record_requests(request: Request, user_info=Depends(Permission())):
     await RedisHelper.remove_address_record(request.client.host)
     return PikaResponse.success(message="停止成功，快去生成用例吧~")
 

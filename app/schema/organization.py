@@ -14,10 +14,10 @@ from typing import Optional
 from fastapi import Body
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.schema.base import BaseLargeEditSchema, BaseQuerySchema
+from app.schema.base import BaseOnlyDescSchema, BaseQuerySchema
 
 
-class OrganizationFormSchema(BaseLargeEditSchema):
+class OrganizationFormSchema(BaseOnlyDescSchema):
     id: Optional[int] = Body(0, title="组织id")
     sort_id: Optional[int] = Body(0, title="排序id")
     name: Optional[str] = Body(..., title="用户组名称", min_length=2,

@@ -10,7 +10,7 @@
 @Desc    :  translate mitmproxy request and response data
 """
 import json
-from typing import TypeVar
+from typing import TypeVar, Optional
 
 from loguru import logger
 from pydantic import BaseModel
@@ -19,16 +19,15 @@ body = TypeVar("body", bytes, str)
 
 
 class RequestInfoSchema(BaseModel):
-    url: str
-    body: str
-    request_method: str
-    # request_data: str
-    request_headers: dict
-    response_headers: dict
-    cookies: dict
-    request_cookies: dict
-    response_content: str
-    status_code: int
+    url: Optional[str]
+    body: Optional[str]
+    request_method: Optional[str]
+    request_headers: Optional[dict]
+    response_headers: Optional[dict]
+    cookies: Optional[dict]
+    request_cookies: Optional[dict]
+    response_content: Optional[str]
+    status_code: Optional[int]
 
     def __init__(self, flow=None, **kwargs):
         if flow:

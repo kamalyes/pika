@@ -36,6 +36,57 @@ class OrganizationDao(PikaWrapper):
             raise Exception(f"新增部门: {form.name}失败")
 
     @classmethod
+    async def match_org_id(cls, session, id):
+        """
+        校验org_id是否存在
+        Args:
+            session:
+            id:
+
+        Returns:
+
+        """
+        query_exists_parent_id = await session.execute(
+            select(OrganizationModel).where(OrganizationModel.id == id))
+        exists_id = query_exists_parent_id.scalars().first()
+        if exists_id is None:
+            raise Exception(f"组织id: {id}不存在")
+
+    @classmethod
+    async def match_org_parent_id(cls, session, parent_id):
+        """
+        校验org_parent_id是否存在
+        Args:
+            session:
+            parent_id:
+
+        Returns:
+
+        """
+        query_exists_parent_id = await session.execute(
+            select(OrganizationModel).where(OrganizationModel.parent_id == parent_id))
+        exists_parent_id = query_exists_parent_id.scalars().first()
+        if exists_parent_id is None and parent_id != 0:
+            raise Exception(f"组织父id: {parent_id}不存在")
+
+    @classmethod
+    async def match_org_name(cls, session, name):
+        """
+        校验org_name是否存在
+        Args:
+            session:
+            name:
+
+        Returns:
+
+        """
+        query_exists_name = await session.execute(
+            select(OrganizationModel).where(OrganizationModel.name == name))
+        exists_name = query_exists_name.scalars().first()
+        if exists_name is not None:
+            raise Exception(f"部门名称: {name}已存在")
+
+    @classmethod
     async def parity_field(cls, session, name, parent_id):
         """
         检查字段
@@ -47,14 +98,5 @@ class OrganizationDao(PikaWrapper):
         Returns:
 
         """
-
-        query_exists_name = await session.execute(
-            select(OrganizationModel).where(OrganizationModel.name == name))
-        exists_name = query_exists_name.scalars().first()
-        query_exists_parent_id = await session.execute(
-            select(OrganizationModel).where(OrganizationModel.id == parent_id))
-        exists_parent_id = query_exists_parent_id.scalars().first()
-        if exists_name is not None:
-            raise Exception(f"部门名称: {name}已存在")
-        if exists_parent_id is None and parent_id != 0:
-            raise Exception(f"组织父id: {parent_id}不存在")
+        await cls.match_org_parent_id(session, parent_id)
+        await cls.match_org_name(session, name)

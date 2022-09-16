@@ -10,9 +10,10 @@
 @Desc    :  None
 """
 
-from sqlalchemy import select
+from sqlalchemy import select, and_
 
 from app.crud import PikaWrapper, PikaMdWrapper
+from app.crud.rbac.organization import OrganizationDao
 from app.middleware.xredis import RedisHelper
 from app.models import async_session
 from app.models.department import DepartmentModel
@@ -28,16 +29,33 @@ class DepartmentDao(PikaWrapper):
         try:
             async with async_session() as session:
                 async with session.begin():
-                    query = await session.execute(
-                        select(DepartmentModel).where(DepartmentModel.sort_id == form.sort_id,
-                                                      DepartmentModel.organization_id == form.organization_id,
-                                                      DepartmentModel.name == form.name,
-                                                      DepartmentModel.description == form.description))
-                    data = query.scalars().first()
-                    if data is not None:
-                        raise Exception(f"部门名称: {data.name}已存在")
+                    await cls.parity_field(session=session, name=form.name,
+                                           organization_id=form.organization_id,
+                                           dept_id=form.id)
                     config = DepartmentModel(**form.dict(), operator=operator)
                     session.add(config)
         except Exception as e:
             cls.__log__.error(f"新增部门: {form.name}失败, {e}")
             raise Exception(f"新增部门: {form.name}失败")
+
+    @classmethod
+    async def parity_field(cls, session, name, organization_id, dept_id):
+        """
+        检查字段
+        Args:
+            session:
+            name:
+            organization_id:
+            dept_id:
+
+        Returns:
+
+        """
+
+        query_exists_name = await session.execute(
+            select(DepartmentModel).where(and_(DepartmentModel.name == name,
+                                               DepartmentModel.id == dept_id)))
+        exists_name = query_exists_name.scalars().first()
+        if exists_name is not None:
+            raise Exception(f"部门名称: {name}已存在")
+        await OrganizationDao.match_org_id(session, organization_id)

@@ -31,21 +31,24 @@ async def insert_department(data: DepartmentFormSchema, user_info=Depends(Permis
 @router.delete("/department/delete", summary="删除部门")
 async def delete_department(id: int, user_info=Depends(Permission(RoleEnum.ADMIN)),
                             session=Depends(async_db_session_iterator)):
-    await DepartmentDao.delete_record_by_id(session, user_info['emp_no'], id, log=True)
+    await DepartmentDao.delete_by_id(id, session)
     return PikaResponse.success()
 
 
 @router.post("/department/update", summary="更新部门")
-async def update_department(data: DepartmentFormSchema, user_info=Depends(Permission(RoleEnum.ADMIN))):
-    await DepartmentDao.update_record_by_id(user_info['emp_no'], data, True)
+async def update_department(form: DepartmentFormSchema, user_info=Depends(Permission(RoleEnum.ADMIN)),
+                            session=Depends(async_db_session_iterator)):
+    await DepartmentDao.parity_field(session=session, name=form.name,
+                                     organization_id=form.organization_id, dept_id=form.id)
+    await DepartmentDao.update_record_by_id(user_info['emp_no'], form, True)
     return PikaResponse.success()
 
 
 @router.get("/department/list", summary="查询部门列表")
-async def list_department(data: QueryDepartmentInSchema = Depends(),
+async def list_department(form: QueryDepartmentInSchema = Depends(),
                           paging: BaseOnlyPagingSchema = Depends(),
                           user_info=Depends(Permission(RoleEnum.ADMIN))):
-    data, total = await DepartmentDao.list_with_pagination(paging, data)
+    data, total = await DepartmentDao.list_with_pagination(paging, form)
     return PikaResponse.success_with_size(data=data, total=total)
 
 
