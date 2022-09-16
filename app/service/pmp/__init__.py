@@ -9,5 +9,5 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from app.service.project.project import router as project_router
-from app.service.project.project_role import router as project_role_router
+from app.service.pmp.project import router as project_router
+from app.service.pmp.project_role import router as project_role_router

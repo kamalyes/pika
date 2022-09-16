@@ -12,7 +12,7 @@
 import json
 
 from app.core.constructor.constructor import ConstructorAbstract
-from app.crud.online.database import DbConfigDao
+from app.crud.itstem.database import DbConfigDao
 from app.models.constructor import ConstructorModel
 
 

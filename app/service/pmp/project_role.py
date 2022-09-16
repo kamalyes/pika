@@ -12,7 +12,7 @@
 from fastapi import Depends, APIRouter
 
 from app.core.handler.jsonres import PikaResponse
-from app.crud.project.project import ProjectRoleDao
+from app.crud.pmp.project import ProjectRoleDao
 from app.models.project import ProjectRoleModel
 from app.schema.project import ProjectRoleSchema, ProjectRoleEditSchema, ProjectDelSchema
 from app.service import Permission

@@ -12,7 +12,7 @@
 from fastapi import APIRouter
 
 from app.core.handler.jsonres import PikaResponse
-from app.crud.online.rdconfig import PikaRedisConfigDao
+from app.crud.itstem.rdconfig import PikaRedisConfigDao
 from app.schema.online import OnlineRedisSchema
 
 router = APIRouter()

@@ -13,7 +13,7 @@ from fastapi import Depends, APIRouter
 from starlette.background import BackgroundTasks
 
 from app.core.handler.jsonres import PikaResponse
-from app.crud.online.rdconfig import PikaRedisConfigDao
+from app.crud.itstem.rdconfig import PikaRedisConfigDao
 from app.enums.RbacEnum import RoleEnum
 from app.middleware.xredis import PikaRedisManager
 from app.models import async_db_session_iterator

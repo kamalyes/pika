@@ -12,8 +12,8 @@
 from fastapi import APIRouter, Depends, File, UploadFile
 
 from app.core.handler.jsonres import PikaResponse
-from app.crud.project.project import ProjectDao, ProjectRoleDao
-from app.crud.project.testplan import ApiTestPlanDao
+from app.crud.pmp.project import ProjectDao, ProjectRoleDao
+from app.crud.pmp.testplan import ApiTestPlanDao
 from app.enums.RbacEnum import RoleEnum
 from app.middleware.oss import OssClient
 from app.models import async_db_session_iterator

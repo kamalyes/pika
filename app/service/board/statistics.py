@@ -15,7 +15,7 @@ from fastapi import Depends, APIRouter
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud.itst.api.testcase import ApiTestCaseDao
-from app.crud.statistics.dashboard import DashboardDao
+from app.crud.board.statistics import DashboardDao
 from app.service import Permission
 from app.utils.ws_manager import ws_manage
 

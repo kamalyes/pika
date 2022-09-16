@@ -32,12 +32,12 @@ from app.crud.itst.api.testcase_data import ApiTestCaseDataDao
 from app.crud.itst.api.testcase_out_params import ApiTestCaseOutParametersDao
 from app.crud.itst.api.testreport import ApiTestReportDao
 from app.crud.itst.api.testresult import ApiTestResultDao
-from app.crud.online.environment import EnvironmentDao
-from app.crud.online.gateway import GatewayDao
-from app.crud.online.gconfig import GConfigDao
-from app.crud.project.project import ProjectDao
+from app.crud.itstem.environment import EnvironmentDao
+from app.crud.itstem.gateway import GatewayDao
+from app.crud.itstem.gconfig import GConfigDao
+from app.crud.pmp.project import ProjectDao
 
-from app.crud.project.testplan import ApiTestPlanDao
+from app.crud.pmp.testplan import ApiTestPlanDao
 from app.crud.rbac.user import UserDao
 from app.enums.ConstructorEnum import ConstructorTypeEnum
 from app.enums.GconfigEnum import GConfigTypeEnum, GConfigParserEnum

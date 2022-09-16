@@ -12,7 +12,7 @@
 from fastapi import APIRouter, Depends
 
 from app.core.handler.jsonres import PikaResponse
-from app.crud.online.database import DbConfigDao, SQLHistoryDao
+from app.crud.itstem.database import DbConfigDao, SQLHistoryDao
 from app.models.database import DatabaseModel
 from app.models.environment import EnvironmentModel
 from app.models.sql_log import SQLHistoryModel

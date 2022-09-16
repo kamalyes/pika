@@ -57,8 +57,8 @@ from app.service.itstem import redis_config_router
 from app.service.online import redis_router
 from app.service.online import script_router
 from app.service.online import sql_router
-from app.service.project import project_role_router
-from app.service.project import project_router
+from app.service.pmp import project_role_router
+from app.service.pmp import project_router
 from app.service.rbac import access_router
 from app.service.rbac import department_router
 from app.service.rbac import kerberos_router
@@ -72,8 +72,8 @@ from app.service.system import mini_oss_router
 from app.service.system import msconfig_router
 from app.service.system import notice_router
 from app.service.system import operation_log_router
-from app.service.workspace import statistics_router
-from app.service.workspace import workspace_router
+from app.service.board import statistics_router
+from app.service.board import workspace_router
 from app.utils.scheduler import Scheduler
 from app.utils.ws_manager import ws_manage
 from config import PikaAppConfig, InterceptHandler

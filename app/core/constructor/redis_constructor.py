@@ -12,7 +12,7 @@
 import json
 
 from app.core.constructor.constructor import ConstructorAbstract
-from app.crud.online.rdconfig import PikaRedisConfigDao
+from app.crud.itstem.rdconfig import PikaRedisConfigDao
 from app.models.constructor import ConstructorModel
 
 

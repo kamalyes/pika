@@ -15,8 +15,8 @@ from fastapi import APIRouter, Depends
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud.itst.api.testcase import ApiTestCaseDao
-from app.crud.project.project import ProjectDao, ProjectRoleDao
-from app.crud.project.testplan import ApiTestPlanDao
+from app.crud.pmp.project import ProjectDao, ProjectRoleDao
+from app.crud.pmp.testplan import ApiTestPlanDao
 from app.models import async_db_session_iterator
 from app.service import Permission
 

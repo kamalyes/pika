@@ -12,7 +12,7 @@
 from fastapi import APIRouter, Depends
 
 from app.core.handler.jsonres import PikaResponse
-from app.crud.online.environment import EnvironmentDao
+from app.crud.itstem.environment import EnvironmentDao
 from app.enums.RbacEnum import RoleEnum
 from app.models import async_db_session_iterator
 from app.schema.base import BaseOnlyPagingSchema

@@ -16,7 +16,7 @@ from fastapi import Depends, APIRouter
 
 from app.core.handler.executor import Executor
 from app.core.handler.jsonres import PikaResponse
-from app.crud.project.testplan import ApiTestPlanDao
+from app.crud.pmp.testplan import ApiTestPlanDao
 from app.enums.RbacEnum import RoleEnum
 from app.models import async_db_session_iterator
 from app.schema.api_testplan import ApiTestPlanSchema, QueryApiTestPlanInSchema

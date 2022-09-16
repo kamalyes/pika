@@ -9,5 +9,5 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from app.service.workspace.statistics import router as statistics_router
-from app.service.workspace.workspace import router as workspace_router
+from app.service.board.statistics import router as statistics_router
+from app.service.board.workspace import router as workspace_router

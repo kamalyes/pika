@@ -19,7 +19,7 @@ from sqlalchemy.exc import ResourceClosedError
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud import PikaWrapper, PikaMdWrapper
-from app.crud.online.environment import EnvironmentDao
+from app.crud.itstem.environment import EnvironmentDao
 from app.enums.SysvarEnum import ValidTimeEnum
 from app.middleware.xredis import RedisHelper
 from app.models import async_session, db_helper

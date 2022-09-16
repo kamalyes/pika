@@ -12,7 +12,7 @@
 import json
 
 from app.core.constructor.constructor import ConstructorAbstract
-from app.crud.online.gateway import GatewayDao
+from app.crud.itstem.gateway import GatewayDao
 from app.middleware.async_ask import AsyncRequest
 from app.models.constructor import ConstructorModel
 

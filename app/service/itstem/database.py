@@ -12,7 +12,7 @@
 from fastapi import Depends, APIRouter
 
 from app.core.handler.jsonres import PikaResponse
-from app.crud.online.database import DbConfigDao
+from app.crud.itstem.database import DbConfigDao
 from app.enums.RbacEnum import RoleEnum
 from app.models import DatabaseHelper, db_helper
 from app.schema.base import BaseOnlyPagingSchema

@@ -16,7 +16,7 @@ from copy import deepcopy
 from sqlalchemy import select, and_, or_, null
 
 from app.crud import PikaWrapper, PikaMdWrapper
-from app.crud.project.project import ProjectDao
+from app.crud.pmp.project import ProjectDao
 from app.enums.OperationEnum import SqlOperationTypeEnum
 from app.models import async_session
 from app.models.api_test_report import ApiTestReportModel
