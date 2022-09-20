@@ -49,3 +49,4 @@ class ValidTimeEnum(IntEnum):
     GET_TABLES_TIME = 3 * 60
     USER_DETAIL_TIME = 2 * 60
     DAO_TIME = 3 * 60
+    QUERY_ORGANIZATION_TIME = 2 * 60

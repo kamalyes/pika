@@ -11,10 +11,10 @@
 """
 import asyncio
 import traceback
+from asyncio import set_event_loop, ProactorEventLoop, get_event_loop
 from mimetypes import guess_type
 from os.path import isfile
 
-import uvicorn
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI, Request, status, Depends, WebSocket, WebSocketDisconnect
@@ -27,6 +27,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.responses import Response
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
+from uvicorn import Config, Server
 
 from app.core.handler.execres import (
     ValidException,
@@ -425,6 +426,17 @@ async def get_site_static(filename):
 
 
 @pika.on_event("startup")
+def set_default_executor():
+    from concurrent.futures import ThreadPoolExecutor
+    import asyncio
+
+    loop = asyncio.get_running_loop()
+    loop.set_default_executor(
+        ThreadPoolExecutor(max_workers=5)
+    )
+
+
+@pika.on_event("startup")
 async def init_env():
     """
         初始化init_env
@@ -533,10 +545,10 @@ async def websocket_endpoint(websocket: WebSocket, emp_no: str):
 
 
 if __name__ == "__main__":
-    uvicorn.run(
-        app="Application:pika",
-        host=PikaAppConfig.SERVER_HOST,
-        port=PikaAppConfig.SERVER_PORT,
-        reload=True,
-        debug=True
-    )
+    set_event_loop(ProactorEventLoop())
+    server = Server(config=Config(app="Application:pika",
+                                  host=PikaAppConfig.SERVER_HOST,
+                                  port=PikaAppConfig.SERVER_PORT,
+                                  reload=True,
+                                  debug=True))
+    get_event_loop().run_until_complete(server.serve())

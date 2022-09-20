@@ -9,15 +9,19 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  组织架构
 """
+from typing import Any
 
 from fastapi import APIRouter, Depends
+from hutools.pagination import LimitOffsetPage, add_pagination
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud.rbac.organization import OrganizationDao
 from app.enums.RbacEnum import RoleEnum
 from app.models import async_db_session_iterator
-from app.schema.base import BaseOnlyPagingSchema
-from app.schema.organization import OrganizationFormSchema, QueryOrganizationInSchema
+from app.models.organization import OrganizationModel
+from app.schema.base import BaseBatchDelIdsSchema
+from app.schema.organization import OrganizationFormSchema, QueryOrganizationInSchema, QueryOrganizationOutSchema
 from app.service import Permission
 
 router = APIRouter()
@@ -31,9 +35,9 @@ async def insert_organization(data: OrganizationFormSchema,
 
 
 @router.delete("/organization/delete", summary="删除组织机构")
-async def delete_organization(id: int, user_info=Depends(Permission(RoleEnum.ADMIN)),
-                              session=Depends(async_db_session_iterator)):
-    await OrganizationDao.delete_record_by_id(session, user_info['emp_no'], id, log=True)
+async def delete_organization(request: BaseBatchDelIdsSchema = Depends(),
+                              user_info=Depends(Permission(RoleEnum.ADMIN))):
+    await OrganizationDao.delete_by_id(model=OrganizationModel, ids=request.ids.split(","))
     return PikaResponse.success()
 
 
@@ -47,9 +51,11 @@ async def update_organization(form: OrganizationFormSchema,
     return PikaResponse.success()
 
 
-@router.get("/organization/list", summary="查询组织机构列表")
+@router.get("/organization/list", summary="查询组织机构列表",
+            response_model=LimitOffsetPage[QueryOrganizationOutSchema])
 async def list_organization(form: QueryOrganizationInSchema = Depends(),
-                            paging: BaseOnlyPagingSchema = Depends(),
-                            user_info=Depends(Permission(RoleEnum.ADMIN))):
-    data, total = await OrganizationDao.list_with_pagination(paging, form.dict())
-    return PikaResponse.success_with_size(data=data, total=total)
+                            db: AsyncSession = Depends(async_db_session_iterator)) -> Any:
+    return await OrganizationDao.limit(db, form)
+
+
+add_pagination(router)

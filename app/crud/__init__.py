@@ -17,9 +17,10 @@ from typing import List, TypeVar, Callable, Any, Iterable
 
 from dictdiffer import diff
 from hutools.time import Moment
-from sqlalchemy import select, update
+from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.handler.asyncsql import AsyncDbSession
 from app.core.handler.jsonres import PikaResponse
 from app.core.handler.logger import PikaLogger
 from app.enums.OperationEnum import SqlOperationTypeEnum
@@ -527,21 +528,16 @@ class PikaWrapper(object):
         return diff_data
 
     @classmethod
-    @RedisHelper.up_cache("dao")
     @db_connect(transaction=True)
-    async def delete_by_id(cls, id, session=None):
+    async def delete_by_id(cls, model, ids):
         """
         物理删除
         Args:
-            session:
-            id:
+            model:
+            ids:
 
         Returns:
 
         """
-        query = cls.query_wrapper(id=id)
-        result = await session.execute(query)
-        original = result.scalars().first()
-        if original is None:
-            raise DbException("记录不存在")
-        session.delete(original)
+        del_sql = delete(model).where(model.id.in_(ids))
+        return await AsyncDbSession.delete(ids=ids, do_sql=del_sql)
