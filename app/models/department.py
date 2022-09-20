@@ -22,12 +22,14 @@ class DepartmentModel(NormBaseModel):
     name = Column(String(ByteSizeEnum.LENGTH_255), nullable=False, comment="部门名称")
     organization_id = Column(Integer, nullable=False, comment="组织id")
     sort_id = Column(Integer, server_default="0", comment="排序id")
+    parent_id = Column(Integer, server_default="0", comment="父序号")
 
-    def __init__(self, name, organization_id, sort_id, operator, id=None, description=None):
+    def __init__(self, name, organization_id, sort_id, parent_id, operator, id=None, description=None):
         super().__init__(id=id, operator=operator, description=description)
         self.name = name
         self.organization_id = organization_id
         self.sort_id = sort_id
+        self.parent_id = parent_id
 
 
 class DepartmentRelModel(NormBaseModel):

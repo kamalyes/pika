@@ -41,7 +41,8 @@ async def delete_organization(id: int, user_info=Depends(Permission(RoleEnum.ADM
 async def update_organization(form: OrganizationFormSchema,
                               user_info=Depends(Permission(RoleEnum.ADMIN)),
                               session=Depends(async_db_session_iterator)):
-    await OrganizationDao.parity_field(session=session, name=form.name, parent_id=form.parent_id)
+    await OrganizationDao.parity_field(session=session, name=form.name, organization_id=form.id,
+                                       parent_id=form.parent_id)
     await OrganizationDao.update_record_by_id(user_info['emp_no'], form, True)
     return PikaResponse.success()
 

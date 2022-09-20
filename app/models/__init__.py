@@ -53,26 +53,6 @@ async def async_create_table():
         await conn.run_sync(Base.metadata.create_all)
 
 
-@contextmanager
-def sync_db_session():
-    """
-    同步db
-    Returns:
-    """
-    session = sync_session()
-    try:
-        yield session
-        session.commit()
-    except SQLAlchemyError as sql_exc:
-        session.rollback()
-        raise DbExecuteException(
-            code=ExcCodeEnum.SQL_OPERATION_ERROR,
-            detail=f"数据操作失败，错误原因：{sql_exc}",
-        )
-    finally:
-        session.close()
-
-
 @asynccontextmanager
 async def async_db_session_generator() -> AsyncGenerator:
     """

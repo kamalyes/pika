@@ -17,7 +17,7 @@ from typing import List
 from sqlalchemy import or_, select, desc, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.handler.execres import AuthException, OperationException
+from app.core.handler.execres import AuthException
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.enums.OperationEnum import SqlOperationTypeEnum
 from app.enums.RbacEnum import RoleEnum
@@ -105,7 +105,7 @@ class ProjectDao(PikaWrapper):
                 if data.scalars().first() is not None:
                     err = f"新增项目: {name}失败, 失败原因：项目已存在"
                     cls.__log__.error(err)
-                    raise OperationException(detail=err)
+                    raise Exception(err)
                 pr = ProjectModel(name, app, owner, operator, description, private, dingtalk_url,
                                   qy_wx_url)
                 session.add(pr)

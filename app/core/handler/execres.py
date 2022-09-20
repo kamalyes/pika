@@ -27,47 +27,11 @@ class ValidException(Exception):
         self.status_code = status_code
 
 
-class RegisterException(Exception):
-    def __init__(
-            self,
-            code: int = 500,
-            detail: str = "Register failed",
-            status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
-    ):
-        self.code = code
-        self.detail = detail
-        self.status_code = status_code
-
-
-class LoginException(Exception):
-    def __init__(
-            self,
-            code: int = 500,
-            detail: str = "Login failed",
-            status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
-    ):
-        self.code = code
-        self.detail = detail
-        self.status_code = status_code
-
-
 class AuthException(Exception):
     def __init__(
             self,
             code: int = 401,
             detail: str = "Authentication failed",
-            status_code: int = status.HTTP_401_UNAUTHORIZED,
-    ):
-        self.code = code
-        self.detail = detail
-        self.status_code = status_code
-
-
-class TokenException(Exception):
-    def __init__(
-            self,
-            code: int = 401,
-            detail: str = "Token failed",
             status_code: int = status.HTTP_401_UNAUTHORIZED,
     ):
         self.code = code
@@ -81,18 +45,6 @@ class AccessException(Exception):
             code: int = 403,
             detail: str = "Access failed",
             status_code: int = status.HTTP_403_FORBIDDEN,
-    ):
-        self.code = code
-        self.detail = detail
-        self.status_code = status_code
-
-
-class OperationException(Exception):
-    def __init__(
-            self,
-            code: int = 400,
-            detail: str = "Operation failed",
-            status_code: int = status.HTTP_400_BAD_REQUEST,
     ):
         self.code = code
         self.detail = detail

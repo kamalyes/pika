@@ -23,6 +23,7 @@ class DepartmentFormSchema(BaseOnlyDescSchema):
     organization_id: Optional[int] = Body(..., title="组织id")
     name: Optional[str] = Body(..., title="部门名称", min_length=2,
                                max_length=ByteSizeEnum.LENGTH_255)
+    parent_id: Optional[int] = Body(0, title="父序号")
 
 
 class QueryDepartmentInSchema(DepartmentFormSchema, BaseQuerySchema):

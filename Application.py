@@ -32,12 +32,10 @@ from app.core.handler.execres import (
     ValidException,
     AuthException,
     AccessException,
-    OperationException,
     DbExecuteException,
     ThirdException,
     RedisException,
-    SystemException,
-    RegisterException)
+    SystemException)
 from app.core.handler.jsonres import PikaResponse
 from app.core.notice.wss_msg import WebSocketMessage
 from app.crud.system.notification import PikaNotificationDao
@@ -47,6 +45,8 @@ from app.middleware.xredis import RedisHelper
 from app.models import async_redis, async_create_table
 from app.service.ask import http_router
 from app.service.ask import mock_router
+from app.service.board import statistics_router
+from app.service.board import workspace_router
 from app.service.itst import testcase_router
 from app.service.itst import testplan_router
 from app.service.itstem import dbconfig_router
@@ -72,8 +72,6 @@ from app.service.system import mini_oss_router
 from app.service.system import msconfig_router
 from app.service.system import notice_router
 from app.service.system import operation_log_router
-from app.service.board import statistics_router
-from app.service.board import workspace_router
 from app.utils.scheduler import Scheduler
 from app.utils.ws_manager import ws_manage
 from config import PikaAppConfig, InterceptHandler
@@ -138,20 +136,6 @@ class PikaFastApi:
             return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
                                        detail=exc.detail)
 
-        @app.exception_handler(RegisterException)
-        async def register_exc_handler(request: Request, exc: RegisterException) -> Response:
-            """
-            注册异常
-            Args:
-                request:
-                exc:
-
-            Returns:
-
-            """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
-                                       detail=exc.detail)
-
         @app.exception_handler(SystemException)
         async def sys_exc_handler(request: Request, exc: SystemException) -> Response:
             """
@@ -170,20 +154,6 @@ class PikaFastApi:
         async def access_exc_handler(request: Request, exc: AccessException) -> Response:
             """
             访问失败
-            Args:
-                request:
-                exc:
-
-            Returns:
-
-            """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
-                                       detail=exc.detail)
-
-        @app.exception_handler(OperationException)
-        async def operation_exc_handler(request: Request, exc: OperationException) -> Response:
-            """
-            操作失败
             Args:
                 request:
                 exc:

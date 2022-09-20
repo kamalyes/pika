@@ -20,7 +20,7 @@ from sqlalchemy import or_, select, func, and_, update, delete, distinct
 
 from app.core.handler.asyncsql import AsyncDbSession
 from app.core.handler.execres import AuthException, \
-    SystemException, ThirdException, RedisException, RegisterException, ValidException
+    SystemException, ThirdException, RedisException,  ValidException
 from app.core.handler.jsonres import PikaResponse
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.rbac import regex_register_str, client_ip
@@ -60,11 +60,11 @@ class UserDao(PikaWrapper):
 
         """
         if username == exists_username:
-            raise RegisterException(code=ExcCodeEnum.USER_HAS_USED, detail="该用户名已被使用！")
+            raise SystemException(code=ExcCodeEnum.USER_HAS_USED, detail="该用户名已被使用！")
         elif email == exists_email:
-            raise RegisterException(code=ExcCodeEnum.EMAIL_HAS_USED, detail="该邮箱账号已被使用！")
+            raise SystemException(code=ExcCodeEnum.EMAIL_HAS_USED, detail="该邮箱账号已被使用！")
         elif mobile == exists_mobile and (mobile is not None and exists_mobile is not None):
-            raise RegisterException(code=ExcCodeEnum.EMAIL_HAS_USED, detail="该手机号已被使用！")
+            raise SystemException(code=ExcCodeEnum.EMAIL_HAS_USED, detail="该手机号已被使用！")
 
     @classmethod
     async def create_users_epd(cls, users: Any, request):
