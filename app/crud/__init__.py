@@ -528,7 +528,6 @@ class PikaWrapper(object):
         return diff_data
 
     @classmethod
-    @db_connect(transaction=True)
     async def delete_by_id(cls, model, ids):
         """
         物理删除

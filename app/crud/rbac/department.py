@@ -12,6 +12,7 @@
 
 from sqlalchemy import select, and_
 
+from app.core.handler.execres import SystemException
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.rbac.organization import OrganizationDao
 from app.middleware.xredis import RedisHelper
@@ -31,7 +32,7 @@ class DepartmentDao(PikaWrapper):
                 async with session.begin():
                     await cls.parity_field(session=session, name=form.name,
                                            organization_id=form.organization_id,
-                                           dept_id=form.id)
+                                           dept_id=form.id, parent_id=form.parent_id)
                     config = DepartmentModel(**form.dict(), operator=operator)
                     session.add(config)
         except Exception as e:
@@ -39,7 +40,75 @@ class DepartmentDao(PikaWrapper):
             raise Exception(f"新增部门: {form.name}失败")
 
     @classmethod
-    async def parity_field(cls, session, name, organization_id, dept_id):
+    async def match_dept_id(cls, session, dept_id):
+        """
+        校验dept_id是否存在
+        Args:
+            session:
+            dept_id:
+
+        Returns:
+
+        """
+        query_exists_parent_id = await session.execute(
+            select(DepartmentModel).where(DepartmentModel.id == dept_id))
+        exists_id = query_exists_parent_id.scalars().first()
+        if exists_id is None and dept_id != 0:
+            raise SystemException(detail=f"部门id: {dept_id}不存在")
+
+    @classmethod
+    async def match_dept_parent_id(cls, session, parent_id):
+        """
+        校验dept_parent_id是否存在
+        Args:
+            session:
+            parent_id:
+
+        Returns:
+
+        """
+        query_exists_parent_id = await session.execute(
+            select(DepartmentModel).where(
+                and_(DepartmentModel.id == parent_id)))
+        exists_parent_id = query_exists_parent_id.scalars().first()
+        if exists_parent_id is None and parent_id != 0:
+            raise SystemException(detail=f"部门父id: {parent_id}不存在")
+
+    @classmethod
+    async def match_dept_name(cls, session, name):
+        """
+        校验dept_name是否存在
+        Args:
+            session:
+            name:
+
+        Returns:
+
+        """
+        if name is None or len(name) < 3:
+            raise SystemException(detail="部门名称不能为空，或长度不能<3个字符")
+        query_exists_name = await session.execute(
+            select(DepartmentModel).where(DepartmentModel.name == name))
+        exists_name = query_exists_name.scalars().first()
+        if exists_name is not None:
+            raise SystemException(detail=f"部门名称: {name}已存在")
+
+    @classmethod
+    async def match_dept_id_equal_parent_id(cls, dept_id, parent_id):
+        """
+        校验dept_id与parent_id是否相同
+        Args:
+            dept_id:
+            parent_id:
+
+        Returns:
+
+        """
+        if dept_id == parent_id and dept_id != 0:
+            raise SystemException(detail=f"部门id: {dept_id}与父节点{parent_id}相同")
+
+    @classmethod
+    async def parity_field(cls, session, name, organization_id, dept_id, parent_id):
         """
         检查字段
         Args:
@@ -47,15 +116,13 @@ class DepartmentDao(PikaWrapper):
             name:
             organization_id:
             dept_id:
+            parent_id:
 
         Returns:
 
         """
-
-        query_exists_name = await session.execute(
-            select(DepartmentModel).where(and_(DepartmentModel.name == name,
-                                               DepartmentModel.id == dept_id)))
-        exists_name = query_exists_name.scalars().first()
-        if exists_name is not None:
-            raise Exception(f"部门名称: {name}已存在")
-        await OrganizationDao.match_org_id(session, organization_id)
+        await OrganizationDao.match_org_id(session=session, organization_id=organization_id)
+        await cls.match_dept_id_equal_parent_id(dept_id=dept_id, parent_id=parent_id)
+        await cls.match_dept_id(session=session, dept_id=dept_id)
+        await cls.match_dept_parent_id(session=session, parent_id=parent_id)
+        await cls.match_dept_name(session=session, name=name)

@@ -100,7 +100,7 @@ class OrganizationDao(PikaWrapper):
         Returns:
 
         """
-        if organization_id == parent_id:
+        if organization_id == parent_id and organization_id != 0:
             raise SystemException(detail=f"组织id: {organization_id}与父节点{parent_id}相同")
 
     @classmethod

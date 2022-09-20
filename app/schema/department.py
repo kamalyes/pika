@@ -20,7 +20,7 @@ from app.schema.base import BaseQuerySchema, BaseOnlyDescSchema
 class DepartmentFormSchema(BaseOnlyDescSchema):
     id: Optional[int] = Body(0, title="部门id")
     sort_id: Optional[int] = Body(0, title="排序id")
-    organization_id: Optional[int] = Body(..., title="组织id", gt=1)
+    organization_id: Optional[int] = Body(..., title="组织id", gt=0)
     name: Optional[str] = Body(..., title="部门名称", min_length=2,
                                max_length=ByteSizeEnum.LENGTH_255)
     parent_id: Optional[int] = Body(0, title="父序号")

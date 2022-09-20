@@ -15,7 +15,8 @@ from app.core.handler.jsonres import PikaResponse
 from app.crud.rbac.department import DepartmentDao
 from app.enums.RbacEnum import RoleEnum
 from app.models import async_db_session_iterator
-from app.schema.base import BaseOnlyPagingSchema
+from app.models.department import DepartmentModel
+from app.schema.base import BaseOnlyPagingSchema, BaseBatchDelIdsSchema
 from app.schema.department import DepartmentFormSchema, QueryDepartmentInSchema
 from app.service import Permission
 
@@ -29,9 +30,9 @@ async def insert_department(data: DepartmentFormSchema, user_info=Depends(Permis
 
 
 @router.delete("/department/delete", summary="删除部门")
-async def delete_department(id: int, user_info=Depends(Permission(RoleEnum.ADMIN)),
-                            session=Depends(async_db_session_iterator)):
-    await DepartmentDao.delete_by_id(id, session)
+async def delete_department(request: BaseBatchDelIdsSchema = Depends(),
+                            user_info=Depends(Permission(RoleEnum.ADMIN))):
+    await DepartmentDao.delete_by_id(model=DepartmentModel, ids=request.ids.split(","))
     return PikaResponse.success()
 
 
@@ -39,7 +40,8 @@ async def delete_department(id: int, user_info=Depends(Permission(RoleEnum.ADMIN
 async def update_department(form: DepartmentFormSchema, user_info=Depends(Permission(RoleEnum.ADMIN)),
                             session=Depends(async_db_session_iterator)):
     await DepartmentDao.parity_field(session=session, name=form.name,
-                                     organization_id=form.organization_id, dept_id=form.id)
+                                     organization_id=form.organization_id,
+                                     dept_id=form.id, parent_id=form.parent_id)
     await DepartmentDao.update_record_by_id(user_info['emp_no'], form, True)
     return PikaResponse.success()
 
