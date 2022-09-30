@@ -14,8 +14,8 @@ import smtplib
 from email.header import Header
 from email.mime.text import MIMEText
 
-from hutools.core import RegEx
-from hutools.time import Moment
+from custard.core import RegEx
+from custard.time import Moment
 from jinja2 import Environment, FileSystemLoader
 
 from app.core.handler.execres import ThirdException, ValidException

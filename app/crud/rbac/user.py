@@ -12,10 +12,10 @@
 import random
 from typing import Any
 
-from hutools.core import MockHelper, Kerberos, DataHand
-from hutools.core.factory import fake
-from hutools.pagination.async_sqlalchemy import paginate
-from hutools.time import Moment
+from custard.core import MockHelper, Kerberos, DataHand
+from custard.core.factory import fake
+from custard.pagination.async_sqlalchemy import paginate
+from custard.time import Moment
 from sqlalchemy import or_, select, func, and_, update, delete, distinct
 
 from app.core.handler.asyncsql import AsyncDbSession

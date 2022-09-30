@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import Query
-from hutools.time import Moment
+from custard.time import Moment
 
 from app.schema.base import BaseQueryTypeSchema
 

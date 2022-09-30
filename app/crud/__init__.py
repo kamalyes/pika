@@ -16,7 +16,7 @@ from datetime import datetime
 from typing import List, TypeVar, Callable, Any, Iterable
 
 from dictdiffer import diff
-from hutools.time import Moment
+from custard.time import Moment
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 

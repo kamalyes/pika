@@ -13,7 +13,7 @@ import json
 import time
 from datetime import datetime
 
-from hutools.json import JsonEncoder
+from custard.json import JsonEncoder
 from sqlalchemy import select, MetaData, text, and_
 from sqlalchemy.exc import ResourceClosedError
 

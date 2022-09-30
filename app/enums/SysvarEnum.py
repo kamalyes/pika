@@ -11,7 +11,7 @@
 """
 from enum import IntEnum
 
-from hutools.time import Moment
+from custard.time import Moment
 
 
 class PikaGlobalVarEnum:

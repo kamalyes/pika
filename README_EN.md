@@ -42,7 +42,7 @@ docker-compose -f ./devops/docker-compose.yaml up
 - [x] 💎 七牛云oss(This interface is used to test file storage during file upload)
 - [x] 👟 asyncio(Almost all asynchronous writing method, worth reference)
 - [ ] ⛏ Grpc(Grpc request support, soon to be supported)
-- [x] ⚡ [hutools](https://github.com/kamalyes/hutools) Universal treasure chest (must rely on)
+- [x] ⚡ [custard](https://github.com/kamalyes/custard) Universal treasure chest (must rely on)
 
 ### 😊 Existing function
 

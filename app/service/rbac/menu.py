@@ -12,7 +12,7 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends
-from hutools.pagination import add_pagination, LimitOffsetPage
+from custard.pagination import add_pagination, LimitOffsetPage
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.handler.jsonres import PikaResponse

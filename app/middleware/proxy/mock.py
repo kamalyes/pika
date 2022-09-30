@@ -9,7 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from hutools.mock import Mock
+from custard.mock import Mock
 
 
 class PikaMock(object):

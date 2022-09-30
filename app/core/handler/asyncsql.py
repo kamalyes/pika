@@ -11,8 +11,8 @@
 """
 from typing import Any, List
 
-from hutools.core import RegEx
-from hutools.pagination.async_sqlalchemy import paginate
+from custard.core import RegEx
+from custard.pagination.async_sqlalchemy import paginate
 
 from app.core.handler.execres import ValidException
 from app.core.handler.jsonres import PikaResponse

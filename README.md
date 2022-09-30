@@ -94,7 +94,7 @@ timeout = 120
 - [x] 💎 七牛云oss(用于文件上传时接口测试文件存储)
 - [x] 👟 asyncio(几乎全异步写法，值得参考)
 - [ ] ⛏ Grpc(支持Grpc请求，即将支持)
-- [x] ⚡ [hutools](https://github.com/kamalyes/hutools) 万能百宝箱(必须依赖)
+- [x] ⚡ [custard](https://github.com/kamalyes/custard) 万能百宝箱(必须依赖)
 
 ### 😊 已有功能
 

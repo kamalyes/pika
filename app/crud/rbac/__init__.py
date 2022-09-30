@@ -9,7 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from hutools.core import RegEx
+from custard.core import RegEx
 
 from app.core.handler.execres import ValidException
 from app.enums.SysCodeEnum import ExcCodeEnum

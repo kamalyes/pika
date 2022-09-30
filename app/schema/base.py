@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import Query, Form, Body
-from hutools.time import Moment
+from custard.time import Moment
 from pydantic import BaseModel
 
 from app.core.handler.execres import ValidException

@@ -18,9 +18,9 @@ import uvicorn
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI, Request, status, Depends, WebSocket, WebSocketDisconnect
-from hutools.core import System
-from hutools.limiter import Limiter, RateLimitException
-from hutools.limiter.depends import RateLimiter
+from custard.core import System
+from custard.limiter import Limiter, RateLimitException
+from custard.limiter.depends import RateLimiter
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware

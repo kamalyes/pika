@@ -10,7 +10,7 @@
 @Desc    :  None
 """
 from fastapi import APIRouter
-from hutools.pagination import add_pagination
+from custard.pagination import add_pagination
 
 router = APIRouter()
 

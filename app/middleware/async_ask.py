@@ -13,8 +13,8 @@ import json
 
 import aiohttp
 from aiohttp import FormData
-from hutools.core import RegEx
-from hutools.time import Moment
+from custard.core import RegEx
+from custard.time import Moment
 
 from app.enums.RequestBodyEnum import ReqBodyTypeEnum
 from app.middleware.oss import OssClient

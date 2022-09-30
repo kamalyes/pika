@@ -12,7 +12,7 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends
-from hutools.pagination import LimitOffsetPage, add_pagination
+from custard.pagination import LimitOffsetPage, add_pagination
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.system.lexicon import SensitiveWordDao, AliasWordDao
