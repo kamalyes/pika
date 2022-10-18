@@ -5,8 +5,11 @@ description = "A FullStack Template to start a FastAPI Project"
 authors = ["Kamalyes"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
-
+python = ">=3.9"
+aioify = { version = "^0.4.1", python = "<3.10", markers = "python_version < '3.10'" }
+aiofiles = { version = "^0.8.0", python = "<3.10", markers = "python_version < '3.10'" }
+APScheduler = { version = "^3.8.0", python = "<3.10", markers = "python_version < '3.10'" }
+typer= "^0.6.1"
 cos-python-sdk-v5 = "^1.9.20"
 jsonpath = "^0.82"
 pyjwt = "^2.4.0"
@@ -15,7 +18,6 @@ mysql-connector-python = "^8.0.28"
 loguru = "^0.6.0"
 requests = "^2.27.0"
 sqlalchemy = "^1.4.39"
-marshmallow = "^3.17.0"
 jsonschema = "^4.0.0"
 fastapi = "^0.76.0"
 aiosqlite = "^0.17.0"
@@ -35,9 +37,7 @@ PyYAML = "^6.0"
 aiohttp = "^3.8.1"
 aiomysql = "^0.1.1"
 Jinja2 = "^3.1.1"
-aiofiles = "^0.8.0"
 psycopg2-binary = "^2.9.3"
-APScheduler = "^3.8.0"
 redis = "^3.5.3"
 redis-py-cluster = "^2.1.3"
 redlock = "^1.2.0"
@@ -45,7 +45,6 @@ yagmail = "^0.15.277"
 oss2 = "^2.15.0"
 python-multipart = "^0.0.5"
 awaits = "^0.0.1"
-aioify = "^0.4.1"
 grpc-requests = "^0.1.1"
 qiniu = "^7.6.0"
 bs4 = "^0.0.1"
@@ -63,8 +62,6 @@ beautifulsoup4 = "^4.11.1"
 dicttoxml = "^1.7.4"
 xlwt = "^1.3.0"
 
-marshmallow = "^3.17.0"
-
 [build-system]
-requires = ["poetry=0.12"]
+requires = ["poetry=1.2.2"]
 build-backend = "poetry.masonry.api"

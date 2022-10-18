@@ -9,7 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from enum import IntEnum
+from enum import IntEnum, Enum
 
 from custard.time import Moment
 
@@ -50,3 +50,9 @@ class ValidTimeEnum(IntEnum):
     USER_DETAIL_TIME = 2 * 60
     DAO_TIME = 3 * 60
     QUERY_ORGANIZATION_TIME = 2 * 60
+
+
+class EnvironmentEnum(str, Enum):
+    production: str = "pro"
+    development: str = "dev"
+    ignore: str = "ignore"

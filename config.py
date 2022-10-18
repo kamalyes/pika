@@ -21,31 +21,30 @@ from loguru import logger
 # noinspection PyProtectedMember
 from loguru._defaults import LOGURU_FORMAT
 
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysvarEnum import PikaGlobalVarEnum, EnvironmentEnum
 
 
 class PikaAppConfig(object):
     # system
-    WORKSPACES_PATH = os.path.dirname(os.path.abspath(__file__))
-    # ENVIRONMENT = "ignore"
-    ENVIRONMENT = "dev"
+    WORKSPACES_PATH: str = os.path.dirname(os.path.abspath(__file__))
+    ENVIRONMENT: EnvironmentEnum = "dev"
     SERVER_HOST, SERVER_PORT = "0.0.0.0", 7780
     POOL_CONFIG = System.get_pool_config(work_spaces_path=WORKSPACES_PATH, environment=ENVIRONMENT)
     GLOBAL_POOL_CONFIG, GLOBAL_POOL_CONFIG_FILEPATH = POOL_CONFIG
     MITMPROXY = GLOBAL_POOL_CONFIG["mitmproxy"]
     CASE = GLOBAL_POOL_CONFIG["case"]
-    RETRY_TIMES = CASE["retry_times"]
+    RETRY_TIMES: str = CASE["retry_times"]
     PROXY_PORT, MOCK_ENABLE_FLAG = MITMPROXY["port"], MITMPROXY["enable_flag"]
-    SERVER_REPORT = "http://localhost:8000/#/record/report/"
-    TEMPLATE_PATH = f"{WORKSPACES_PATH}/templates"
-    MARKDOWN_PATH = f"{WORKSPACES_PATH}/templates/markdown/test_report.md"
-    OUTPUT_PATH = f"{WORKSPACES_PATH}/output"
-    LOGS_PATH = f"{WORKSPACES_PATH}/logs"
-    DAO_PATH = f"{WORKSPACES_PATH}/app/crud"
-    REQUIREMENTS = System.get_depend_libs(
+    SERVER_REPORT: str = "http://localhost:8000/#/record/report/"
+    TEMPLATE_PATH: str = f"{WORKSPACES_PATH}/templates"
+    MARKDOWN_PATH: str = f"{WORKSPACES_PATH}/templates/markdown/test_report.md"
+    OUTPUT_PATH: str = f"{WORKSPACES_PATH}/output"
+    LOGS_PATH: str = f"{WORKSPACES_PATH}/logs"
+    DAO_PATH: str = f"{WORKSPACES_PATH}/app/crud"
+    REQUIREMENTS: str = System.get_depend_libs(
         file_path=f"{WORKSPACES_PATH}/requirements.txt"
     )
-    JSON_AS_ASCII = False  # Flask jsonify编码问题
+    JSON_AS_ASCII: bool = False  # Flask jsonify编码问题
 
     # 数据库配置
     DB_CONFIG = GLOBAL_POOL_CONFIG["database"]
@@ -65,7 +64,7 @@ class PikaAppConfig(object):
     ASYNC_SQLALCHEMY_URI = (
         f"mysql+aiomysql://{MYSQL_USER}:{MYSQL_PWD}@{MYSQL_HOST}:{MYSQL_PORT}/{DBNAME}?{MYSQL_TIME_ZONE}"
     )
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
     RELATION = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_relation"
     TABLE_TAG = "__table_args__"
     IGNORE_FIELDS = (
@@ -146,8 +145,10 @@ class PikaAppConfig(object):
     # 日志相关
     LOGS_DIR_NAME = time.strftime("%Y-%m-%d", time.localtime(time.time()))
     LOG_GENERAL_DIR = os.path.join(LOGS_PATH, LOGS_DIR_NAME)
-    INFO_LOG_FILE = os.path.join(LOG_GENERAL_DIR, f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-info.log")
-    ERROR_LOG_FILE = os.path.join(LOG_GENERAL_DIR, f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-error.log")
+    INFO_LOG_FILE = os.path.join(LOG_GENERAL_DIR,
+                                 f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-info.log")
+    ERROR_LOG_FILE = os.path.join(LOG_GENERAL_DIR,
+                                  f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-error.log")
     # 配置日志格式
     INFO_FORMAT = (
         "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> "

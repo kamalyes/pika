@@ -10,6 +10,7 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     PIP_DEFAULT_TIMEOUT=100 \
     POETRY_HOME="/opt/poetry" \
+    POETRY_CACHE_DIR="/opt/poetry/.cache"\
     POETRY_VIRTUALENVS_IN_PROJECT=true \
     POETRY_NO_INTERACTION=1 \
     PYSETUP_PATH="/opt/pysetup" \
@@ -28,17 +29,18 @@ RUN buildDeps="build-essential" \
     && apt-get install -y --no-install-recommends $buildDeps \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry - respects $POETRY_VERSION & $POETRY_HOME
-ENV POETRY_VERSION=1.1.5
+# install poetry - respects $POETRY_VERSION & $POETRY_HOME
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python && \
-    chmod a+x /opt/poetry/bin/poetry
+RUN curl -sSL https://install.python-poetry.org | python3 - \
+    && chmod a+x /opt/poetry/bin/poetry
 
-# We copy our Python requirements here to cache them
-# and install only runtime deps using poetry
 WORKDIR $PYSETUP_PATH
-COPY ./poetry.lock ./pyproject.toml ./
-RUN poetry install --no-dev  # respects
+COPY pyproject.toml ./
+
+# [OPTIONAL] Validate the project is properly configured
+RUN poetry check
+# Install Dependencies
+RUN poetry install --no-interaction --no-cache --without dev
 
 # 'development' stage installs all dev deps and can be used to develop code.
 # For example using docker-compose to mount local volume under /app
@@ -46,23 +48,24 @@ FROM python-base as development
 ENV FASTAPI_ENV=development
 
 # Copying poetry and venv into image
-COPY --from=builder-base $POETRY_HOME $POETRY_HOME
-COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
+COPY --from=builder-base ${POETRY_HOME} ${POETRY_HOME}
+COPY --from=builder-base ${PYSETUP_PATH} ${PYSETUP_PATH}
+COPY --from=builder-base ${POETRY_VENV} ${POETRY_VENV}
 
 # Copying in our entrypoint
-COPY ./docker/docker-entrypoint.sh /docker-entrypoint.sh
+COPY ./docker-images/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
 # venv already has runtime deps installed we get a quicker install
 WORKDIR $PYSETUP_PATH
 RUN poetry install
 
-WORKDIR /app
+WORKDIR /
 COPY . .
 
 EXPOSE 7780
 ENTRYPOINT /docker-entrypoint.sh $0 $@
-CMD ["uvicorn", "--reload", "--host=0.0.0.0", "--port=7780", "app.Application:app"]
+CMD ["uvicorn", "--reload", "--host=0.0.0.0", "--port=7780", "Application:app"]
 
 
 # 'production' stage uses the clean 'python-base' stage and copyies
@@ -71,18 +74,18 @@ FROM python-base as production
 ENV FASTAPI_ENV=production
 
 COPY --from=builder-base $VENV_PATH $VENV_PATH
-COPY ./docker/gunicorn_conf.py /gunicorn_conf.py
+COPY ./docker-images/gunicorn_conf.py /gunicorn_conf.py
 
-COPY ./docker/docker-entrypoint.sh /docker-entrypoint.sh
+COPY ./docker-images/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
 # Create user
-RUN groupadd -g 1500 sven && \
-    useradd -m -u 1500 -g sven sven
+RUN groupadd -g 1500 kamalyes && \
+    useradd -m -u 1500 -g kamalyes kamalyes
 
-COPY --chown=sven:sven ./app /app
-USER sven
-WORKDIR /app
+COPY --chown=kamalyes:kamalyes ./ /
+USER kamalyes
+WORKDIR /
 
 ENTRYPOINT /docker-entrypoint.sh $0 $@
-CMD [ "gunicorn", "--worker-class uvicorn.workers.UvicornWorker", "--config /gunicorn_conf.py", "app.Application:app"]
+CMD [ "gunicorn", "--worker-class uvicorn.workers.UvicornWorker", "--config /gunicorn_conf.py", "Application:app"]
