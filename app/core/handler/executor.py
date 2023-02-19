@@ -228,7 +228,8 @@ class Executor(object):
                 for k, v in replace_kv.items():
                     new_field = field_origin.replace(k, v)
                     setattr(data, c.name, new_field)
-                    self.append("替换流程变量成功，字段: [{}]: \n\n[{}] -> [{}]\n".format(c.name, k, v))
+                    self.append(
+                        "替换流程变量成功，字段: [{}]: \n\n[{}] -> [{}]\n".format(c.name, k, v))
         except Exception as e:
             Executor.log.error(f"替换变量失败, error: {str(e)}")
             raise Exception(f"替换变量失败, error: {str(e)}")
@@ -423,7 +424,8 @@ class Executor(object):
             response_info.update(res)
 
             # 提取出参
-            out_dict = self.extract_out_parameters(response_info, out_parameters)
+            out_dict = self.extract_out_parameters(
+                response_info, out_parameters)
 
             # 替换主变量
             req_params.update(out_dict)
@@ -439,7 +441,8 @@ class Executor(object):
                                             constructors, asserts, True)
 
             # Step11: 断言
-            asserts, ok = self.my_assert(asserts, response_info.get('json_format'))
+            asserts, ok = self.my_assert(
+                asserts, response_info.get('json_format'))
             response_info["status"] = ok
             response_info["asserts"] = asserts
             # 日志输出, 如果不是主用例则不记录
@@ -546,7 +549,7 @@ class Executor(object):
         Returns:
 
         """
-        retry_times = PikaAppConfig.RETRY_TIMES if retry_minutes > 0 else 0
+        retry_times = PikaAppConfig.CASE_RETRY_TIMES if retry_minutes > 0 else 0
         for i in range(retry_times + 1):
             start_date = datetime.now()
             executor = Executor()
@@ -666,7 +669,8 @@ class Executor(object):
                 if ok is True:
                     ok = False
                 self.append(f"预期结果: {item.expected}\n实际结果: {item.actually}\n")
-                result[item.id] = {"status": False, "msg": f"断言取值失败, 请检查断言语句: {e}"}
+                result[item.id] = {"status": False,
+                                   "msg": f"断言取值失败, 请检查断言语句: {e}"}
         return json.dumps(result, ensure_ascii=False), ok
 
     @case_log
@@ -863,7 +867,7 @@ class Executor(object):
                         )
                     if int(m) == NoticeTypeEnum.DINGDING:
                         report_dict[e]['result_color'] = '#67C23A' if report_dict[e][
-                                                                          'plan_result'] == '通过' \
+                            'plan_result'] == '通过' \
                             else '#E6A23C'
                         # 批量获取用户手机号
                         users = [r.get("phone") for r in users]
@@ -900,7 +904,8 @@ class Executor(object):
             project, _ = await ProjectDao.query_project(plan.project_id)
             env = list(map(int, plan.env.split(",")))
             case_list = list(map(int, plan.case_list.split(",")))
-            receiver = list(map(int, plan.receiver.split(",") if plan.receiver else []))
+            receiver = list(map(int, plan.receiver.split(",")
+                            if plan.receiver else []))
             # 聚合报告dict
             report_dict = dict()
             await asyncio.gather(

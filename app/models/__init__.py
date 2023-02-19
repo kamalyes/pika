@@ -28,18 +28,21 @@ from app.enums.SysCodeEnum import ExcCodeEnum
 from config import PikaAppConfig
 
 # 同步engine
-engine = create_engine(PikaAppConfig.SQLALCHEMY_DATABASE_URI, pool_recycle=1500)
+engine = create_engine(
+    PikaAppConfig.SQLALCHEMY_DATABASE_URI, pool_recycle=1500)
 sync_session = sessionmaker(engine, autocommit=False)
 
 # 异步engine
-async_engine = create_async_engine(PikaAppConfig.ASYNC_SQLALCHEMY_URI, pool_recycle=1500)
-async_session = sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession)
+async_engine = create_async_engine(
+    PikaAppConfig.ASYNC_SQLALCHEMY_URI, pool_recycle=1500)
+async_session = sessionmaker(
+    async_engine, expire_on_commit=False, class_=AsyncSession)
 
 Base = declarative_base()
 
 async_redis = aioredis.from_url(f'redis://{PikaAppConfig.REDIS_HOST}',
                                 password=PikaAppConfig.REDIS_PASSWORD,
-                                db=PikaAppConfig.REDIS_DB,
+                                db=PikaAppConfig.REDIS_DB_INDEX,
                                 port=PikaAppConfig.REDIS_PORT,
                                 encoding="utf-8", decode_responses=True)
 
@@ -94,7 +97,8 @@ class DatabaseHelper(object):
         if connection is not None:
             return connection
         # 获取sqlalchemy需要的jdbc url
-        jdbc_url = DatabaseHelper.get_jdbc_url(sql_type, host, port, username, password, database)
+        jdbc_url = DatabaseHelper.get_jdbc_url(
+            sql_type, host, port, username, password, database)
         # 创建异步引擎
         eg = create_async_engine(jdbc_url, pool_recycle=1500)
         ss = sessionmaker(bind=eg, class_=AsyncSession)

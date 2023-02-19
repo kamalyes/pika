@@ -1,40 +1,83 @@
-# -*- coding:utf-8 -*-
-# !/usr/bin/env python 3.9.11
-"""
-@File    :  config.py
-@Time    :  2022/5/2 3:49 AM
-@Author  :  YuYanQing
-@Version :  1.0
-@Contact :  mryu168@163.com
-@License :  (C)Copyright 2022-2026
-@Desc    :  None
-"""
+# 基础配置类
 import logging
-import os
-import sys
-import time
 from pprint import pformat
-from urllib import parse
-
-from custard.core import DataHand, System
+import sys
+from typing import List
+import os
+import time
 from loguru import logger
-# noinspection PyProtectedMember
+from pydantic import BaseSettings
 from loguru._defaults import LOGURU_FORMAT
+from custard.core import DataHand, System
 
-from app.enums.SysvarEnum import PikaGlobalVarEnum, EnvironmentEnum
+from app.enums.SysvarEnum import PikaGlobalVarEnum
+
+ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
-class PikaAppConfig(object):
-    # system
+class BaseConfig(BaseSettings):
+    # MySQL config
+    MYSQL_HOST: str = "pika_mysql"
+    MYSQL_PORT: int = 3306
+    MYSQL_USER: str = "root"
+    MYSQL_PWD: str = ""
+    MYSQL_DATABASE_NAME: str = ""
+    MYSQL_CHARSET: str = "utf8mb4"
+    MYSQL_TIME_ZONE: str = "Asia/Shanghai"
+    TABLE_TAG = "__table_args__"
+
+    # Redis config
+    REDIS_HOST: str = "pika_redis"
+    REDIS_PORT: int = 6379
+    REDIS_DB_INDEX: int = 0
+    REDIS_PASSWORD: str = ""
+    REDIS_ENCODING: str = "utf-8"
+    REDIS_DECODE_RESPONSES: bool = True  # 获取中文数据可以直接 decode python unicode
+    REDIS_TARGET_MAX_MEMORY: str = '572978192'
+    REDIS_MAX_CONNECTIONS: int = 100
+    # Redis连接信息
+    REDIS_NODES: List = []
+
+    # sqlalchemy
+    SQLALCHEMY_DATABASE_URI: str = ''
+    # 异步URI
+    ASYNC_SQLALCHEMY_URI: str = ''
+
+    # JWT
+    JWT_SECRET_KEY: str = ""
+    JWT_MD5_SALT: str = ""
+    JWT_MPOP: bool = ""
+
+    # oss
+    OSS_TYPE: str = "aliyun"
+    OSS_ACCESS_KEY_ID: str = ""
+    OSS_ACCESS_KEY_SECRET: str = ""
+    OSS_BUCKET_NAME: str = ""
+    OSS_ENDPOINT: str = ""
+    STATIC_QINIU_URL: str = ""
+    OSS_QINIU_URL: str = ""
+
+    # Email
+    EMAIL_SENDER: str = ""  # 发件人邮箱
+    EMAIL_PASSWORD: str = ""  # 发件人邮箱授权码
+    EMAIL_HOST: str = ""  # 邮箱host
+    EMAIL_PORT: int = 465  # 端口号
+
+    # Yapi
+    YAPI_ACCESS_KEY_ID: str = ""
+    YAPI_ACCESS_KEY_SECRET: str = ""
+    
+    # Mock server
+    MITMPROXY_ENABLE_FLAG: bool = False
+    MITMPROXY_PROXY_PORT: int = 7778
+
+    # System
+    ENVIRONMENT: str = "dev"
+    SERVER_HOST: str = "0.0.0.0"
+    SERVER_PORT: int = 7777
+    CASE_RETRY_TIMES: str = 1
+    LOG_SWITCH = True
     WORKSPACES_PATH: str = os.path.dirname(os.path.abspath(__file__))
-    ENVIRONMENT: EnvironmentEnum = "dev"
-    SERVER_HOST, SERVER_PORT = "0.0.0.0", 7780
-    POOL_CONFIG = System.get_pool_config(work_spaces_path=WORKSPACES_PATH, environment=ENVIRONMENT)
-    GLOBAL_POOL_CONFIG, GLOBAL_POOL_CONFIG_FILEPATH = POOL_CONFIG
-    MITMPROXY = GLOBAL_POOL_CONFIG["mitmproxy"]
-    CASE = GLOBAL_POOL_CONFIG["case"]
-    RETRY_TIMES: str = CASE["retry_times"]
-    PROXY_PORT, MOCK_ENABLE_FLAG = MITMPROXY["port"], MITMPROXY["enable_flag"]
     SERVER_REPORT: str = "http://localhost:8000/#/record/report/"
     TEMPLATE_PATH: str = f"{WORKSPACES_PATH}/templates"
     MARKDOWN_PATH: str = f"{WORKSPACES_PATH}/templates/markdown/test_report.md"
@@ -44,106 +87,12 @@ class PikaAppConfig(object):
     REQUIREMENTS: str = System.get_depend_libs(
         file_path=f"{WORKSPACES_PATH}/requirements.txt"
     )
-    JSON_AS_ASCII: bool = False  # Flask jsonify编码问题
 
-    # 数据库配置
-    DB_CONFIG = GLOBAL_POOL_CONFIG["database"]
-    MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT, DBNAME, MYSQL_TIME_ZONE = (
-        DB_CONFIG["user"],
-        parse.quote_plus(DB_CONFIG["password"]),
-        DB_CONFIG["host"],
-        DB_CONFIG["port"],
-        DB_CONFIG["name"],
-        DB_CONFIG['time_zone']
-    )
-    # sqlalchemy
-    SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{}:{}@{}:{}/{}?{}".format(
-        MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT, DBNAME, MYSQL_TIME_ZONE
-    )
-    # 异步sqlalchemy
-    ASYNC_SQLALCHEMY_URI = (
-        f"mysql+aiomysql://{MYSQL_USER}:{MYSQL_PWD}@{MYSQL_HOST}:{MYSQL_PORT}/{DBNAME}?{MYSQL_TIME_ZONE}"
-    )
-    SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
-    RELATION = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_relation"
-    TABLE_TAG = "__table_args__"
-    IGNORE_FIELDS = (
-        "create_date",
-        "update_date",
-        "delete_date",
-        "create_emp_no",
-        "update_emp_no",
-    )
-
-    # Redis
-    REDIS_CONFIG = GLOBAL_POOL_CONFIG["redis"]
-    (
-        REDIS_HOST,
-        REDIS_ENABLE_FLAG,
-        REDIS_PORT,
-        REDIS_DB,
-        REDIS_PASSWORD,
-        DECODE_RESPONSES,
-        TARGET_MAX_MEMORY,
-        MAX_CONNECTIONS,
-        ENCODING,
-    ) = (
-        REDIS_CONFIG["host"],
-        REDIS_CONFIG["enable_flag"],
-        REDIS_CONFIG["port"],
-        REDIS_CONFIG["index"],
-        REDIS_CONFIG["auth"],
-        REDIS_CONFIG["decode_responses"],
-        REDIS_CONFIG["target_max_memory"],
-        REDIS_CONFIG["max_connections"],
-        REDIS_CONFIG["encoding"],
-    )
-    REDIS_NODES = [
-        {
-            "host": REDIS_HOST,
-            "port": REDIS_PORT,
-            "db": REDIS_DB,
-            "password": REDIS_PASSWORD,
-        }
-    ]
-    # GITHUB
-    # GITHUB_CONFIG = GLOBAL_POOL_CONFIG["github"]
-    # GITHUB_USER_INFO_URL = GITHUB_CONFIG["user_info_url"]
-    # GITHUB_ACCESS_TOKEN_URL = GITHUB_CONFIG["access_token_url"]
-    # GITHUB_CLIENT_ID = GITHUB_CONFIG["client_id"]
-    # GITHUB_ACCESS_KEY = GITHUB_CONFIG["access_key"]
-    # GITHUB_SECRET_KEY = GITHUB_CONFIG["secret_key"]
-
-    EMAIL_CONFIG = GLOBAL_POOL_CONFIG["email"]
-
-    # JWT
-    JWT_CONFIG = GLOBAL_POOL_CONFIG["jwt"]
-    JWT_SECRET_KEY = JWT_CONFIG["secret_key"]
-    JWT_MD5_SALT = JWT_CONFIG["md5_salt"]
-    JWT_MPOP = JWT_CONFIG["mpop"]
-
-    # Mino
-    OSS_CONFIG = GLOBAL_POOL_CONFIG["oss"]
-    OSS_TYPE = OSS_CONFIG["type"]
-    OSS_ACCESS_KEY_ID = OSS_CONFIG["access_key_id"]
-    OSS_ACCESS_KEY_SECRET = OSS_CONFIG["access_key_secret"]
-    OSS_BUCKET_NAME = OSS_CONFIG["bucket_name"]
-    OSS_ENDPOINT = OSS_CONFIG["endpoint"]
-    STATIC_QINIU_URL = ""
-    OSS_QINIU_URL = ""
-
-    # Other
-    OTHER_CONFIG = GLOBAL_POOL_CONFIG["other"]
-
-    # yapi
-    YAPI_CONFIG = GLOBAL_POOL_CONFIG["yapi"]
-
-    SYSTEM_CONFIG = DataHand.chain_all(
-        [{"email": EMAIL_CONFIG}, {"oss": OSS_CONFIG}, {"yapi": YAPI_CONFIG}]
-    )
     LOCAL_DATE = time.strftime("%Y-%m-%d", time.localtime(time.time()))
     # 日志相关
     LOGS_DIR_NAME = time.strftime("%Y-%m-%d", time.localtime(time.time()))
+
+    LOGS_PATH: str = f"{WORKSPACES_PATH}/logs"
     LOG_GENERAL_DIR = os.path.join(LOGS_PATH, LOGS_DIR_NAME)
     INFO_LOG_FILE = os.path.join(LOG_GENERAL_DIR,
                                  f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-info.log")
@@ -164,6 +113,34 @@ class PikaAppConfig(object):
         "| <cyan>行数: {extra[line]}</cyan> | - <level>{message}</level>"
     )
 
+
+class EnvConfig(BaseConfig):
+    class Config:
+        env_file = os.path.join(ROOT, "conf", ".env")
+
+
+PikaAppConfig = EnvConfig()
+PikaAppConfig.ENVIRONMENT = os.environ.get("PIKA_ENV", "dev")
+
+# init redis
+PikaAppConfig.REDIS_NODES = [
+    {
+        "host": PikaAppConfig.REDIS_HOST,
+        "port": PikaAppConfig.REDIS_PORT,
+        "db": PikaAppConfig.REDIS_DB_INDEX,
+        "password": PikaAppConfig.REDIS_PASSWORD
+    }
+]
+
+# init sqlalchemy (used by apscheduler)
+PikaAppConfig.SQLALCHEMY_DATABASE_URI = \
+    f'mysql+mysqlconnector://{PikaAppConfig.MYSQL_USER}:{PikaAppConfig.MYSQL_PWD}' \
+    f'@{PikaAppConfig.MYSQL_HOST}:{PikaAppConfig.MYSQL_PORT}/{PikaAppConfig.MYSQL_DATABASE_NAME}?{PikaAppConfig.MYSQL_TIME_ZONE}'
+
+# init async sqlalchemy
+PikaAppConfig.ASYNC_SQLALCHEMY_URI = \
+    f'mysql+aiomysql://{PikaAppConfig.MYSQL_USER}:{PikaAppConfig.MYSQL_PWD}' \
+    f'@{PikaAppConfig.MYSQL_HOST}:{PikaAppConfig.MYSQL_PORT}/{PikaAppConfig.MYSQL_DATABASE_NAME}?{PikaAppConfig.MYSQL_TIME_ZONE}'
 
 class InterceptHandler(logging.Handler):
     """

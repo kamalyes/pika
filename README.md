@@ -1,4 +1,3 @@
-[English](./README_EN.md)
 
 ![png](https://img.shields.io/badge/Python-3.9.11+-green)
 ![png](https://img.shields.io/badge/React-16.7+-blue)

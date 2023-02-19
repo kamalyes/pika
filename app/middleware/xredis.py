@@ -39,7 +39,7 @@ class PikaRedisManager(object):
     def client(self):
         pool = ConnectionPool(host=PikaAppConfig.REDIS_HOST,
                               port=PikaAppConfig.REDIS_PORT,
-                              db=PikaAppConfig.REDIS_DB,
+                              db=PikaAppConfig.REDIS_DB_INDEX,
                               max_connections=100,
                               password=PikaAppConfig.REDIS_PASSWORD,
                               encoding="utf-8",
@@ -126,7 +126,8 @@ class PikaRedisManager(object):
 
     @staticmethod
     def refresh_redis_cluster(redis_id: int, addr: str):
-        PikaRedisManager._cluster_pool[redis_id] = PikaRedisManager.get_cluster(addr)
+        PikaRedisManager._cluster_pool[redis_id] = PikaRedisManager.get_cluster(
+            addr)
 
     @staticmethod
     def get_cluster(address: str):
@@ -140,7 +141,8 @@ class PikaRedisManager(object):
         """
         try:
             nodes = address.split(',')
-            startup_nodes = [{"host": n.split(":")[0], "port": n.split(":")[1]} for n in nodes if ":" in n]
+            startup_nodes = [{"host": n.split(":")[0], "port": n.split(":")[
+                1]} for n in nodes if ":" in n]
             if len(startup_nodes) == 0:
                 raise RedisException("找不到集群节点，请检查配置")
             pool = ClusterConnectionPool(startup_nodes=startup_nodes, max_connections=100,
@@ -216,11 +218,13 @@ class RedisHelper(object):
 
         """
         # 默认录制1小时
-        value = json.dumps({"operator": operator, "regex": regex}, ensure_ascii=False)
+        value = json.dumps(
+            {"operator": operator, "regex": regex}, ensure_ascii=False)
         RedisHelper.pika_redis_client.set(RedisHelper.get_key(f"record:ip:{address}"), value,
                                           ex=3600)
         # 清楚上次录制数据
-        RedisHelper.pika_redis_client.delete(RedisHelper.get_key(f"record:{address}:requests"))
+        RedisHelper.pika_redis_client.delete(
+            RedisHelper.get_key(f"record:{address}:requests"))
 
     @staticmethod
     @awaitable
@@ -299,7 +303,8 @@ class RedisHelper(object):
     def get_key(_redis_key: str, args_key: bool = True, *args, **kwargs):
         if not args_key:
             return f"{RedisHelper.prefix}:{_redis_key}"
-        filter_args = [a for a in args if not str(a).startswith(('<class', '<sqlalchemy', '(<sqlalchemy'))]
+        filter_args = [a for a in args if not str(a).startswith(
+            ('<class', '<sqlalchemy', '(<sqlalchemy'))]
         for v in kwargs.values():
             if v and not str(v).startswith(('<class', '<sqlalchemy', '(<sqlalchemy')):
                 filter_args.append(str(v))
@@ -308,7 +313,8 @@ class RedisHelper(object):
 
     @staticmethod
     def get_key_with_suffix(cls_name: str, key: str, args: tuple, key_suffix):
-        filter_args = [a for a in args if not str(args[0]).startswith('<class')]
+        filter_args = [a for a in args if not str(
+            args[0]).startswith('<class')]
         suffix = key_suffix(filter_args)
         return f"{RedisHelper.prefix}:{cls_name}:{key}:{suffix}"
 
@@ -336,7 +342,8 @@ class RedisHelper(object):
                         inspect.getframeinfo(inspect.currentframe().f_back)[3][0].split(".")[
                             0].split(
                             " ")[-1]
-                    redis_key = RedisHelper.get_key(f"{cls_name}:{key}", args_key, *args, **kwargs)
+                    redis_key = RedisHelper.get_key(
+                        f"{cls_name}:{key}", args_key, *args, **kwargs)
                     data = RedisHelper.pika_redis_client.get(redis_key)
                     # 缓存已存在
                     if data is not None:
@@ -345,7 +352,8 @@ class RedisHelper(object):
                     new_data = await func(*args, **kwargs)
                     info = pickle.dumps(new_data)
                     logger.bind(name=None).info(f"set redis key: {redis_key}")
-                    RedisHelper.pika_redis_client.set(redis_key, info.hex(), ex=expired_time)
+                    RedisHelper.pika_redis_client.set(
+                        redis_key, info.hex(), ex=expired_time)
                     return new_data
 
                 return wrapper
@@ -358,7 +366,8 @@ class RedisHelper(object):
                         inspect.getframeinfo(inspect.currentframe().f_back)[3][0].split(".")[
                             0].split(
                             " ")[-1]
-                    redis_key = RedisHelper.get_key(f"{cls_name}:{key}", args_key, *args, **kwargs)
+                    redis_key = RedisHelper.get_key(
+                        f"{cls_name}:{key}", args_key, *args, **kwargs)
                     data = RedisHelper.pika_redis_client.get(redis_key)
                     # 缓存已存在
                     if data is not None:

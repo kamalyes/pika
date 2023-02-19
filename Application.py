@@ -274,7 +274,8 @@ class PikaFastApi:
             allow_methods=["*"],
             allow_headers=["*"],
         )
-        pika.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "*"])
+        pika.add_middleware(TrustedHostMiddleware,
+                            allowed_hosts=["localhost", "*"])
         # 处理包含"gzip"在Accept-Encoding标头中的任何请求的 GZip响应
         pika.add_middleware(GZipMiddleware, minimum_size=1000)
 

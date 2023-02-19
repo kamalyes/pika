@@ -245,10 +245,10 @@ class EmailManger(object):
 
         """
         if RegEx.match_email(addressee) is not None:
-            email_smtp_host = PikaAppConfig.EMAIL_CONFIG["host"]
-            email_sender = PikaAppConfig.EMAIL_CONFIG["sender"]
-            email_password = PikaAppConfig.EMAIL_CONFIG["password"]
-            email_cursor = smtplib.SMTP_SSL(email_smtp_host, 465)
+            email_smtp_host = PikaAppConfig.EMAIL_HOST
+            email_sender = PikaAppConfig.EMAIL_SENDER
+            email_password = PikaAppConfig.EMAIL_PASSWORD
+            email_cursor = smtplib.SMTP_SSL(email_smtp_host, PikaAppConfig.EMAIL_PORT)
             try:
                 email_data = MIMEText(content, send_type, "UTF-8")
                 email_data["Subject"] = Header(
