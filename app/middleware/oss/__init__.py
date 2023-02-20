@@ -27,14 +27,11 @@ class OssClient(object):
         :return:
         """
         if OssClient._client is None:
-            oss_config = PikaAppConfig.OSS_CONFIG
             oss_type = PikaAppConfig.OSS_TYPE.lower()
             access_key_id = PikaAppConfig.OSS_ACCESS_KEY_ID
             access_key_secret = PikaAppConfig.OSS_ACCESS_KEY_SECRET
             bucket_name = PikaAppConfig.OSS_BUCKET_NAME
             endpoint = PikaAppConfig.OSS_ENDPOINT
-            if oss_config is None:
-                raise Exception(f"服务器未配置oss信息, 请在application-{PikaAppConfig.ENVIRONMENT}.yaml中添加")
             if oss_type == MiniOssTypeEnum.ALIYUN.value:
                 return AliyunOss(access_key_id, access_key_secret, endpoint, bucket_name)
             if oss_type == MiniOssTypeEnum.QINIU.value:

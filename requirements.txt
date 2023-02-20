@@ -3,7 +3,7 @@ custard==1.0.1
 cos-python-sdk-v5>=1.9.20
 dictdiffer>=0.9.0
 jsonpath>=0.82
-pyjwt>=2.4.0
+pyjwt>=2.3.0
 faker==13.12.0
 mysql-connector-python~=8.0.28
 loguru~=0.6.0

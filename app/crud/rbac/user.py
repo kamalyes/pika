@@ -284,9 +284,10 @@ class UserDao(PikaWrapper):
                 users = await session.execute(sql)
                 user = users.scalars().first()
                 if user:
+                    pwd = Kerberos.md5_encode(oauth2_login.password)
                     user_admins = await session.execute(
                         select(SysUserAdminModel).where(
-                            and_(SysUserAdminModel.password == oauth2_login.password,
+                            and_(SysUserAdminModel.password == pwd ,
                                  SysUserAdminModel.uid == user.id)))
                     user_admin = user_admins.scalars().first()
                     if user_admin:

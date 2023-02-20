@@ -29,16 +29,16 @@ async def start_proxy(log):
 
     addons = [PikaRecorder()]
     try:
-        if PikaAppConfig.MOCK_ENABLE_FLAG:
+        if PikaAppConfig.MITMPROXY_ENABLE_FLAG:
             addons.append(MockModel())
-        opts = options.Options(listen_host='0.0.0.0', listen_port=PikaAppConfig.PROXY_PORT)
+        opts = options.Options(listen_host='0.0.0.0', listen_port=PikaAppConfig.MITMPROXY_PROXY_PORT)
         m = DumpMaster(opts, False, False)
         # remove global block
         block_addon = m.addons.get("block")
         m.addons.remove(block_addon)
         m.addons.add(*addons)
         log.bind(name=None).debug(
-            f"mock server is running at http://0.0.0.0:{PikaAppConfig.PROXY_PORT}")
+            f"mock server is running at http://0.0.0.0:{PikaAppConfig.MITMPROXY_PROXY_PORT}")
         await m.run()
     except Exception as e:
         log.bind(name=None).debug(

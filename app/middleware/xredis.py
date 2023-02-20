@@ -40,9 +40,9 @@ class PikaRedisManager(object):
         pool = ConnectionPool(host=PikaAppConfig.REDIS_HOST,
                               port=PikaAppConfig.REDIS_PORT,
                               db=PikaAppConfig.REDIS_DB_INDEX,
-                              max_connections=100,
+                              max_connections=PikaAppConfig.REDIS_MAX_CONNECTIONS,
                               password=PikaAppConfig.REDIS_PASSWORD,
-                              encoding="utf-8",
+                              encoding=PikaAppConfig.REDIS_ENCODING,
                               decode_responses=True)
         return StrictRedis(connection_pool=pool, decode_responses=True)
 

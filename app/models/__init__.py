@@ -44,7 +44,8 @@ async_redis = aioredis.from_url(f'redis://{PikaAppConfig.REDIS_HOST}',
                                 password=PikaAppConfig.REDIS_PASSWORD,
                                 db=PikaAppConfig.REDIS_DB_INDEX,
                                 port=PikaAppConfig.REDIS_PORT,
-                                encoding="utf-8", decode_responses=True)
+                                encoding=PikaAppConfig.REDIS_ENCODING,
+                                decode_responses=PikaAppConfig.REDIS_DECODE_RESPONSES)
 
 
 async def async_create_table():

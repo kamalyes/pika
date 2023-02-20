@@ -27,7 +27,7 @@ class AsyncRequest(object):
         self.url = url
         self.kwargs = kwargs
         self.timeout = aiohttp.ClientTimeout(total=timeout)
-        self.proxy = f"http://127.0.0.1:{PikaAppConfig.PROXY_PORT}" if PikaAppConfig.MOCK_ENABLE_FLAG else None
+        self.proxy = f"http://127.0.0.1:{PikaAppConfig.MITMPROXY_PROXY_PORT}" if PikaAppConfig.MITMPROXY_ENABLE_FLAG else None
 
     def get_cookie(self, session):
         cookies = session.cookie_jar.filter_cookies(self.url)

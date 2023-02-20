@@ -27,6 +27,7 @@ class BaseConfig(BaseSettings):
     TABLE_TAG = "__table_args__"
 
     # Redis config
+    REDIS_ENABLE_FLAG: bool = True
     REDIS_HOST: str = "pika_redis"
     REDIS_PORT: int = 6379
     REDIS_DB_INDEX: int = 0
@@ -35,6 +36,7 @@ class BaseConfig(BaseSettings):
     REDIS_DECODE_RESPONSES: bool = True  # 获取中文数据可以直接 decode python unicode
     REDIS_TARGET_MAX_MEMORY: str = '572978192'
     REDIS_MAX_CONNECTIONS: int = 100
+    REDIS_DECODE_RESPONSES: bool = True
     # Redis连接信息
     REDIS_NODES: List = []
 

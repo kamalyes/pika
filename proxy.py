@@ -8,9 +8,9 @@ from app.middleware.proxy import start_proxy
 from config import PikaAppConfig
 
 mock = FastAPI()
-if PikaAppConfig.MOCK_ENABLE_FLAG:
+if PikaAppConfig.MITMPROXY_ENABLE_FLAG:
     asyncio.run(start_proxy(logger))
 
 if __name__ == "__main__":
-    uvicorn.run("proxy:mock", host=PikaAppConfig.SERVER_HOST, port=PikaAppConfig.PROXY_PORT,
+    uvicorn.run("proxy:mock", host=PikaAppConfig.SERVER_HOST, port=PikaAppConfig.MITMPROXY_PROXY_PORT,
                 reload=False, forwarded_allow_ips="*", workers=1)
