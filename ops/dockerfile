@@ -29,4 +29,4 @@ RUN ln -sf ${WORKSPACES}/ops/dev.env.ops ${WORKSPACES}/conf/dev.env \
 
 EXPOSE 7777
 
-CMD ["${WORKSPACES}/venv/bin/supervisord", "-c", "${WORKSPACES}/ops/supervisor.conf"]
+CMD ["/opt/pika/venv/bin/supervisord", "-c", "/opt/pika/ops/supervisor.conf"]
