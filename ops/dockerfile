@@ -1,40 +1,32 @@
 # 拉取python 3.9-slim 版本镜像
 FROM python:3.9-slim as builder
-
-# 制定工作目录
-ENV APP_WORKSPACES = /opt/pika
-WORKDIR ${APP_WORKSPACES}
-
-# 复制所有资源
-COPY . ./
-
-# 创建虚拟环境
-RUN python -m venv ${APP_WORKSPACES}/venv  \
-    && ${APP_WORKSPACES}/venv/bin/python -m pip install --upgrade pip \
-    && ${APP_WORKSPACES}/venv/bin/python -m pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ \
+ENV WORKSPACES /opt/pika
+RUN mkdir -p ${WORKSPACES}
+WORKDIR ${WORKSPACES}
+COPY ./requirements.txt ./requirements.txt
+RUN python -m venv ${WORKSPACES}/venv  \
+    && ${WORKSPACES}/venv/bin/python -m pip install --upgrade pip \
+    && ${WORKSPACES}/venv/bin/python -m pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ \
     && apt update -y \
     && apt upgrade -y \
-    && apt install -y tzdata \
     && apt install -y wget \
-    && apt install -y curl \
     && apt install -y vim \
+    && apt install -y curl \
+    && apt install -y tzdata \
     && wget https://github.com/vishnubob/wait-for-it/raw/master/wait-for-it.sh
 
 
-# 相当于设置 python 命令行的 -u 选项
-# 不缓冲stdin、stdout和stderr，默认是缓冲的
+FROM python:3.9-slim
 ENV PYTHONUNBUFFERED=1
-
-# 同步时区
-RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-&& echo 'Asia/Shanghai' > /etc/timezone
-
-# 复制.env&wait-for-it.sh文件
-COPY ${APP_WORKSPACES}/wait-for-it.sh ${APP_WORKSPACES}/ops/wait-for-it.sh
-RUN ln -sf ${APP_WORKSPACES}/ops/.env ${APP_WORKSPACES}/conf/.env \
-    && chmod +x ${APP_WORKSPACES}/ops/wait-for-it.sh
-
-# 创建守护进程
-CMD ["/bin/sh", "-c", "${APP_WORKSPACES}/ops/wait-for-it.sh pika_mysql:${MYSQL_PORT} -- ${APP_WORKSPACES}/ops/wait-for-it.sh pika_redis:${REDIS_PORT} -- ${APP_WORKSPACES}/venv/bin/supervisord -c ${APP_WORKSPACES}/ops/supervisor.conf"]
+ENV WORKSPACES /opt/pika
+WORKDIR ${WORKSPACES}
+COPY . .
+COPY --from=builder ${WORKSPACES}/venv/ ${WORKSPACES}/venv/
+COPY --from=builder /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+COPY --from=builder ${WORKSPACES}/wait-for-it.sh ${WORKSPACES}/ops/wait-for-it.sh
+RUN ln -sf ${WORKSPACES}/ops/dev.env.ops ${WORKSPACES}/conf/dev.env \
+    && chmod +x ${WORKSPACES}/ops/wait-for-it.sh
 
 EXPOSE 7777
+
+CMD ["${WORKSPACES}/venv/bin/supervisord", "-c", "${WORKSPACES}/ops/supervisor.conf"]
