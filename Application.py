@@ -460,7 +460,7 @@ async def init_database():
         logger.bind(name=None).success("table created success.        ✔")
     except Exception as e:
         logger.bind(name=None).error(
-            f"table created failed, Please check AppConfig for database config.        ❌")
+            f"table created failed, Please check AppConfig for database config.        ❌\n{e}")
         raise e
 
 
@@ -556,6 +556,5 @@ if __name__ == "__main__":
         app="Application:pika",
         host=PikaAppConfig.SERVER_HOST,
         port=PikaAppConfig.SERVER_PORT,
-        reload=True,
-        debug=True
+        reload=True
     )

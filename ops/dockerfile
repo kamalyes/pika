@@ -1,6 +1,8 @@
 # 拉取python 3.9-slim 版本镜像
 FROM python:3.9-slim as builder
 ENV WORKSPACES /opt/pika
+ENV PYTHONUNBUFFERED=1
+ENV PIKA_ENV=production
 RUN mkdir -p ${WORKSPACES}
 WORKDIR ${WORKSPACES}
 COPY ./requirements.txt ./requirements.txt
@@ -15,17 +17,9 @@ RUN python -m venv ${WORKSPACES}/venv  \
     && apt install -y tzdata \
     && wget https://github.com/vishnubob/wait-for-it/raw/master/wait-for-it.sh
 
-
-FROM python:3.9-slim
-ENV PYTHONUNBUFFERED=1
-ENV WORKSPACES /opt/pika
-WORKDIR ${WORKSPACES}
 COPY . .
-COPY --from=builder ${WORKSPACES}/venv/ ${WORKSPACES}/venv/
-COPY --from=builder /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-COPY --from=builder ${WORKSPACES}/wait-for-it.sh ${WORKSPACES}/ops/wait-for-it.sh
-RUN ln -sf ${WORKSPACES}/ops/dev.env.ops ${WORKSPACES}/conf/dev.env \
-    && chmod +x ${WORKSPACES}/ops/wait-for-it.sh
+RUN ln -snf /usr/share/zoneinfo/$TIME_ZONE /etc/localtime && echo $TIME_ZONE > /etc/timezone \
+    && chmod 755 ${WORKSPACES}
 
 EXPOSE 7777
 
