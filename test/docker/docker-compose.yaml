@@ -1,0 +1,18 @@
+version: "3"
+services:
+  pika:
+    image: kamalyes/pika-testing:latest
+    container_name: pika
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - ${WORKSPACES_PATH}/conf:/opt/pika/conf
+      - ${WORKSPACES_PATH}/logs:/opt/pika/logs
+    networks:
+      pika_net:
+        aliases:
+          - pika_server
+
+networks:
+  pika_net:
