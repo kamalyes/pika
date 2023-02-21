@@ -19,7 +19,7 @@ services:
   pika_redis:
     image: redis:${REDIS_VERSION}
     container_name: ${REDIS_CONTAINER_NAME}
-    command: redis-server --requirepass ${${REDIS_PASSWORD}}
+    command: redis-server --requirepass ${REDIS_PASSWORD}
     restart: always
     ports:
       - ${REDIS_PORT}:6379
@@ -37,8 +37,6 @@ services:
       args:
         buildno: 1
     container_name: ${SERVICE_CONTAINER_NAME}
-    ports:
-      - ${SERVICE_PORT}:7777
     restart: always
     environment:
       - TZ=Asia/Shanghai
@@ -46,8 +44,6 @@ services:
       pika_net:
         aliases:
           - pika_server
-    volumes:
-      - ${WORKSPACES_PATH}/.env:/opt/pika/conf/.env
 
 networks:
   pika_net:
