@@ -17,67 +17,11 @@ Pika是一款专注于自动化建设的平台，采用`Python`+`FastApi`+`React
 
 ### 👏 Docker部署
 
-1. 安装Docker Desktop
-2. 打开终端并进入项目根目录
-3. 执行以下命令，安静等待启动即可
+1. 进入项目installer/example下
+2. 执行以下命令，安静等待启动即可
 
 ```bash
-docker-compose -f ./devops/docker-compose.yaml up
-```
-
-### 🌈Ubuntu 配置 pip.conf 添加国内源
-
-1. 新建文件夹和pip配置文件
-
-```bash
-cd ~
-mkdir .pip
-touch pip.conf
-sudo chmod 755 pip.conf
-gedit pip.conf
-```
-
-其他的配置位置
-
-```bash
-Linux/Unix:
-/etc/pip.conf
-~/.pip/pip.conf
-~/.config/pip/pip.conf
- 
-Mac OSX:
-~/Library/Application Support/pip/pip.conf
-~/.pip/pip.conf
-/Library/Application Support/pip/pip.conf
- 
-Windows:
-%APPDATA%\pip\pip.ini
-%HOME%\pip\pip.ini
-C:\Documents and Settings\All Users\Application Data\PyPA\pip\pip.conf (Windows XP)
-C:\ProgramData\PyPA\pip\pip.conf (Windows 7及以后) 
-```
-
-2. pip.conf 配置内容
-
-```shell
-[global]
-index-url = http://pypi.douban.com/simple #豆瓣源，可以换成其他的源
-extra-index-url = https://pypi.tuna.tsinghua.edu.cn/simple
-trusted-host = 
-    pypi.douban.com            #添加豆瓣源为可信主机，要不然可能报错
-    pypi.tuna.tsinghua         #清华
-timeout = 120
-```
-
-3. 其他多个源
-
-```bash
-清华：https://pypi.tuna.tsinghua.edu.cn/simple
-阿里云：http://mirrors.aliyun.com/pypi/simple/
-中国科技大学 https://pypi.mirrors.ustc.edu.cn/simple/
-华中理工大学：http://pypi.hustunique.com/
-山东理工大学：http://pypi.sdutlinux.org/ 
-豆瓣：http://pypi.douban.com/simple/
+docker-compose docker-compose.yaml up
 ```
 
 ### 🎉 技术栈
@@ -162,10 +106,6 @@ cd Python-3.9.2
 make && make install
 ln -s /usr/local/python3/bin/python3 /usr/bin/python3
 ln -s /usr/local/python3/bin/pip3 /usr/bin/pip3
-
-赋权限并执行
-[root@VM-8-3-centos ~]# chmod 777 setup_py391.sh
-[root@VM-8-3-centos ~]# ./setup_py391.sh
 ```
 
 2. clone项目

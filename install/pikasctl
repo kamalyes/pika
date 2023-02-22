@@ -1,0 +1,139 @@
+#!/bin/bash
+action=$1
+target=$2
+args=$@
+
+source ~/.pikarc >/dev/null
+PIKA_BASE=${PIKA_BASE:-/opt}
+COMPOSE_FILES=$(cat ${PIKA_BASE}/compose_files 2>/dev/null || echo "")
+source ${PIKA_BASE}/install.conf
+export COMPOSE_HTTP_TIMEOUT=180
+
+function usage() {
+  echo "Pika 控制脚本"
+  echo
+  echo "Usage: "
+  echo "  ./pikasctl.sh [COMMAND] [ARGS...]"
+  echo "  ./pikasctl.sh --help"
+  echo
+  echo "Commands: "
+  echo "  status    查看 Pika 服务运行状态"
+  echo "  start     启动 Pika 服务"
+  echo "  stop      停止 Pika 服务"
+  echo "  restart   重启 Pika 服务"
+  echo "  reload    重新加载 Pika 服务"
+  echo "  uninstall 卸载 Pika 服务"
+  echo "  version   查看 Pika 版本信息"
+}
+
+function generate_compose_files() {
+  compose_files="-f docker-compose-base.yml"
+  compose_files="${compose_files} -f docker-compose-pika.yml"
+  esac
+  if [ ${PIKA_EXTERNAL_MYSQL} = "false" ]; then
+    mkdir -p ${PIKA_BASE}/data/mysql
+    chmod 655 ${PIKA_BASE}/conf/my.cnf
+    compose_files="${compose_files} -f docker-compose-mysql.yml"
+  fi
+  # 是否使用外部 Kafka
+  if [ ${PIKA_EXTERNAL_KAFKA} = "false" ]; then
+    mkdir -p ${PIKA_BASE}/data/kafka
+    compose_files="${compose_files} -f docker-compose-kafka.yml"
+  fi
+  # 是否使用外部 Prometheus
+  if [ ${PIKA_EXTERNAL_PROM} = "false" ]; then
+    mkdir -p ${PIKA_BASE}/data/prometheus
+    compose_files="${compose_files} -f docker-compose-prometheus.yml"
+  fi
+  # 是否使用外部 Redis
+  if [ ${PIKA_EXTERNAL_REDIS} = "false" ]; then
+    mkdir -p ${PIKA_BASE}/data/redis
+    compose_files="${compose_files} -f docker-compose-redis.yml"
+  fi
+  # 是否使用外部 minio
+  if [ ${PIKA_EXTERNAL_MINIO} = "false" ]; then
+    mkdir -p ${PIKA_BASE}/data/minio
+    compose_files="${compose_files} -f docker-compose-minio.yml"
+  fi
+  echo ${compose_files} >${PIKA_BASE}/compose_files
+  chmod +rw -R ${PIKA_BASE}/conf
+  COMPOSE_FILES=$(cat ${PIKA_BASE}/compose_files 2>/dev/null || echo "")
+}
+
+function status() {
+  echo
+  cd ${PIKA_BASE}
+  docker-compose ${COMPOSE_FILES} ps
+}
+function start() {
+  echo
+  cd ${PIKA_BASE}
+  docker-compose ${COMPOSE_FILES} start ${target}
+}
+function stop() {
+  echo
+  cd ${PIKA_BASE}
+  docker-compose ${COMPOSE_FILES} stop ${target}
+}
+function restart() {
+  echo
+  cd ${PIKA_BASE}
+  docker-compose ${COMPOSE_FILES} stop ${target}
+  docker-compose ${COMPOSE_FILES} start ${target}
+}
+function reload() {
+  echo
+  cd ${PIKA_BASE}
+  docker-compose ${COMPOSE_FILES} up -d --remove-orphans
+}
+function uninstall() {
+  echo
+  cd ${PIKA_BASE}
+  docker-compose ${COMPOSE_FILES} down ${target}
+}
+function version() {
+  echo
+  cat ${PIKA_BASE}/version
+}
+
+function main() {
+  case "${action}" in
+  status)
+    status
+    ;;
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  restart)
+    restart
+    ;;
+  reload)
+    generate_compose_files
+    reload
+    ;;
+  uninstall)
+    uninstall
+    ;;
+  version)
+    version
+    ;;
+  help)
+    usage
+    ;;
+  --help)
+    usage
+    ;;
+  generate_compose_files)
+    generate_compose_files
+    ;;
+  *)
+    echo
+    cd ${PIKA_BASE}
+    docker-compose ${COMPOSE_FILES} $@
+    ;;
+  esac
+}
+main $@

@@ -18,6 +18,7 @@ RUN python -m venv ${WORKSPACES}/venv  \
     && wget https://github.com/vishnubob/wait-for-it/raw/master/wait-for-it.sh
 
 COPY . .
+RUN rm ${WORKSPACES}/install
 RUN ln -snf /usr/share/zoneinfo/$TIME_ZONE /etc/localtime && echo $TIME_ZONE > /etc/timezone \
     && chmod 755 ${WORKSPACES}
 
