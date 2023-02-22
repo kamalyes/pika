@@ -23,4 +23,4 @@ RUN ln -snf /usr/share/zoneinfo/$TIME_ZONE /etc/localtime && echo $TIME_ZONE > /
 
 EXPOSE 7777
 
-CMD ["/opt/pika/venv/bin/supervisord", "-c", "/opt/pika/ops/supervisor.conf"]
+CMD ["/opt/pika/venv/bin/supervisord", "-c", "/opt/pika/conf/supervisor.conf"]

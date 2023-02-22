@@ -2,7 +2,7 @@ name: Install Require
 on:
   push:
     branches:
-      - ssh-service # 只在master上push触发部署
+      - ssh-service # 只在ssh-service上push触发部署
     paths-ignore: # 下列文件的变更不触发部署，可以自行添加
       - README.md
       - LICENSE
@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 拉取代码
-        uses: actions/checkout@master
+        uses: actions/checkout@ssh-service
 
       - name: copy file via ssh password
-        uses: appleboy/scp-action@master
+        uses: appleboy/scp-action@ssh-service
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
@@ -25,7 +25,7 @@ jobs:
           target: "/opt/pika"
 
       - name: executing remote ssh commands using password
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@ssh-service
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
