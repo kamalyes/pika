@@ -14,25 +14,24 @@ services:
           "-h",
           "localhost",
           "-uroot",
-          "-p${MYSQL_PWD}"
+          "-p${MYSQL_ROOT_PASSWORD}"
         ]
       interval: 6s
       timeout: 5s
       retries: 50
     environment:
-      MYSQL_USER: ${MYSQL_USER}
+      TZ: Asia/Shanghai
       MYSQL_DATABASE: ${MYSQL_DATABASE_NAME}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PWD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     ports:
-      - 3307:3306
+      - ${MYSQL_PORT}:3306
     volumes:
-      - ${WORKSPACES_PATH}/conf/my.cnf:/etc/mysql/conf.d/my.cnf
-      - ${WORKSPACES_PATH}/bin/mysql:/docker-entrypoint-initdb.d/
-      - ${WORKSPACES_PATH}/data/mysql:/var/lib/mysql
+      - ${VOLUMES_BASE}/conf/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ${VOLUMES_BASE}/bin/mysql:/docker-entrypoint-initdb.d/
+      - ${VOLUMES_BASE}/data/mysql:/var/lib/mysql
     networks:
-      pika-network:
-        aliases:
-          - pika-mysql
+      - pika-network
+
 
   redis:
     image: redis:${REDIS_VERSION}
@@ -49,29 +48,28 @@ services:
     ports:
       - ${REDIS_PORT}:6379
     volumes:
-      - ${WORKSPACES_PATH}/conf/redis.conf:/etc/redis/redis.conf
-      - ${WORKSPACES_PATH}/data/redis:/data
+      - ${VOLUMES_BASE}/conf/redis.conf:/etc/redis/redis.conf
+      - ${VOLUMES_BASE}/data/redis:/data
     command: redis-server /etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
     networks:
-      pika-network:
-        aliases:
-          - pika-redis
+      - pika-network
+
 
   pika:
     image: kamalyes/pika-testing:latest
     container_name: pika
     restart: always
-    privileged: true 
+    privileged: true
+    ports:
+      - ${PIKA_PORT}:7777
     environment:
       - TZ=Asia/Shanghai
     volumes:
-      - ${WORKSPACES_PATH}/conf:/opt/pika/conf
-      - ${WORKSPACES_PATH}/logs:/opt/pika/logs
+      - ${VOLUMES_BASE}/conf:/opt/pika/conf
+      - ${VOLUMES_BASE}/logs:/opt/pika/logs
     networks:
-      pika-network:
-        aliases:
-          - pika_server
-      
+      - pika-network
+
 
 networks:
   pika-network:
@@ -79,4 +77,4 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: ${PIKA_DOCKER_SUBNET}
+        - subnet: ${DOCKER_SUBNET}

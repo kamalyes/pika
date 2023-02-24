@@ -20,7 +20,7 @@ class BaseConfig(BaseSettings):
     MYSQL_HOST: str = "pika_mysql"
     MYSQL_PORT: int = 3306
     MYSQL_USER: str = "root"
-    MYSQL_PWD: str = ""
+    MYSQL_ROOT_PASSWORD: str = ""
     MYSQL_DATABASE_NAME: str = ""
     MYSQL_CHARSET: str = "utf8mb4"
     MYSQL_TIME_ZONE: str = "Asia/Shanghai"
@@ -136,12 +136,12 @@ PikaAppConfig.REDIS_NODES = [
 
 # init sqlalchemy (used by apscheduler)
 PikaAppConfig.SQLALCHEMY_DATABASE_URI = \
-    f'mysql+mysqlconnector://{PikaAppConfig.MYSQL_USER}:{PikaAppConfig.MYSQL_PWD}' \
+    f'mysql+mysqlconnector://{PikaAppConfig.MYSQL_USER}:{PikaAppConfig.MYSQL_ROOT_PASSWORD}' \
     f'@{PikaAppConfig.MYSQL_HOST}:{PikaAppConfig.MYSQL_PORT}/{PikaAppConfig.MYSQL_DATABASE_NAME}?{PikaAppConfig.MYSQL_TIME_ZONE}'
 
 # init async sqlalchemy
 PikaAppConfig.ASYNC_SQLALCHEMY_URI = \
-    f'mysql+aiomysql://{PikaAppConfig.MYSQL_USER}:{PikaAppConfig.MYSQL_PWD}' \
+    f'mysql+aiomysql://{PikaAppConfig.MYSQL_USER}:{PikaAppConfig.MYSQL_ROOT_PASSWORD}' \
     f'@{PikaAppConfig.MYSQL_HOST}:{PikaAppConfig.MYSQL_PORT}/{PikaAppConfig.MYSQL_DATABASE_NAME}?{PikaAppConfig.MYSQL_TIME_ZONE}'
 
 class InterceptHandler(logging.Handler):

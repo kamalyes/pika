@@ -17,11 +17,11 @@ Pika是一款专注于自动化建设的平台，采用`Python`+`FastApi`+`React
 
 ### 👏 Docker部署
 
-1. 进入项目installer/example下
+1. 进入项目下
 2. 执行以下命令，安静等待启动即可
 
 ```bash
-docker-compose docker-compose.yaml up
+docker-compose --env-file ./conf/.env -f docker-compose.yml up -d
 ```
 
 ### 🎉 技术栈

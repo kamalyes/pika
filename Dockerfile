@@ -14,11 +14,10 @@ RUN python -m venv ${WORKSPACES}/venv  \
     && apt install -y wget \
     && apt install -y vim \
     && apt install -y curl \
-    && apt install -y tzdata \
-    && wget https://github.com/vishnubob/wait-for-it/raw/master/wait-for-it.sh
+    && apt install -y tzdata
 
 COPY . .
-RUN rm ${WORKSPACES}/install
+RUN rm -rf ${WORKSPACES}/{test/,docker-compose.yml,fixcommit.sh}
 RUN ln -snf /usr/share/zoneinfo/$TIME_ZONE /etc/localtime && echo $TIME_ZONE > /etc/timezone \
     && chmod 755 ${WORKSPACES}
 

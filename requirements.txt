@@ -1,5 +1,5 @@
 --index-url https://mirrors.aliyun.com/pypi/simple
-gunicorn
+gunicorn~=20.1.0
 custard~=1.0.6
 cos-python-sdk-v5~=1.9.20
 dictdiffer~=0.9.0
@@ -9,14 +9,14 @@ mysql-connector-python~=8.0.28
 loguru~=0.6.0
 requests~=2.27.0
 sqlalchemy~=1.4.39
-fastapi~=0.78.0
+fastapi
+starlette
 aioredis~=2.0.1
 mitmproxy
 uvicorn[standard]
 supervisor~=4.2.4
 pydantic~=1.9.0
-starlette>=0.25.0
-typing-extensions~=4.3.0
+typing-extensions
 PyYAML~=6.0
 aiohttp~=3.8.1
 aiomysql==0.1.1
