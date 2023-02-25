@@ -21,7 +21,8 @@ RUN python -m venv ${WORKSPACES}/venv  \
 COPY . .
 RUN rm -rf ${WORKSPACES}/{test/,docker-compose.yml,fixcommit.sh}
 RUN ln -snf /usr/share/zoneinfo/$TIME_ZONE /etc/localtime && echo $TIME_ZONE > /etc/timezone \
-    && chmod 755 ${WORKSPACES}
+    mkdir -p ${WORKSPACES}/logs && \
+    chmod 755 ${WORKSPACES}
 
 EXPOSE 7777
 
