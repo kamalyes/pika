@@ -548,13 +548,13 @@ if __name__ == "__main__":
     # set_event_loop(ProactorEventLoop())
     # server = Server(config=Config(app="Application:pika",
     #                               host=PikaAppConfig.SERVER_HOST,
-    #                               port=PikaAppConfig.SERVER_PORT,
+    #                               port=PikaAppConfig.PIKA_PORT,
     #                               reload=True,
     #                               debug=True))
     # get_event_loop().run_until_complete(server.serve())
     uvicorn.run(
         app="Application:pika",
         host=PikaAppConfig.SERVER_HOST,
-        port=PikaAppConfig.SERVER_PORT,
+        port=PikaAppConfig.PIKA_PORT,
         reload=True
     )

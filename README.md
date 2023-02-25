@@ -19,9 +19,40 @@ Pika是一款专注于自动化建设的平台，采用`Python`+`FastApi`+`React
 
 1. 进入项目下
 2. 执行以下命令，安静等待启动即可
-
 ```bash
 docker-compose --env-file ./conf/.env -f docker-compose.yml up -d
+```
+3. 修改mysql密码验证方式
+```bash
+mysql> use mysql;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> select host, user from user;  # 判断root是否存在一个，如果有两个先删除
++-----------+------------------+
+| host      | user             |
++-----------+------------------+
+| %         | root             |
+| localhost | mysql.infoschema |
+| localhost | mysql.session    |
+| localhost | mysql.sys        |
+| localhost | root             |
++-----------+------------------+
+5 rows in set (0.00 sec)
+
+mysql> delete from user where host="%" and user="root";
+Query OK, 1 row affected (0.00 sec)
+
+mysql> update user set host = '%' where user = 'root';
+Query OK, 1 row affected (0.01 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> FLUSH PRIVILEGES; #  刷新权限
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> alter user 'root'@'%' identified with mysql_native_password by 'Q1PhiW1F39Gx'; # 授予远程权限
+Query OK, 0 rows affected (0.01 sec)
 ```
 
 ### 🎉 技术栈

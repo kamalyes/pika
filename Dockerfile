@@ -5,10 +5,12 @@ ENV PYTHONUNBUFFERED=1
 ENV PIKA_ENV=production
 RUN mkdir -p ${WORKSPACES}
 WORKDIR ${WORKSPACES}
+ENV PYPI_SIMPLE_URL  https://pypi.mirrors.ustc.edu.cn/simple
+
 COPY ./requirements.txt ./requirements.txt
 RUN python -m venv ${WORKSPACES}/venv  \
-    && ${WORKSPACES}/venv/bin/python -m pip install --upgrade pip \
-    && ${WORKSPACES}/venv/bin/python -m pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ \
+    && ${WORKSPACES}/venv/bin/python -m pip install --upgrade pip -i ${PYPI_SIMPLE_URL}\
+    && ${WORKSPACES}/venv/bin/python -m pip install -r requirements.txt -i ${PYPI_SIMPLE_URL} \
     && apt update -y \
     && apt upgrade -y \
     && apt install -y wget \

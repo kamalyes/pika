@@ -76,7 +76,7 @@ class BaseConfig(BaseSettings):
     # System
     ENVIRONMENT: str = "dev"
     SERVER_HOST: str = "0.0.0.0"
-    SERVER_PORT: int = 7777
+    PIKA_PORT: int = 7777
     CASE_RETRY_TIMES: str = 1
     LOG_SWITCH = True
     WORKSPACES_PATH: str = os.path.dirname(os.path.abspath(__file__))
