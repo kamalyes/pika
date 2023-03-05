@@ -89,19 +89,22 @@ class PikaFastApi:
 
     @staticmethod
     async def request_info(request: Request):
-        logger.bind(name=None).info(f"{request.method} {request.url}")
+        """
+        获取请求信息
+        :param request:
+        :return:
+        """
+        url, method = request.url, request.method
+        common_ = f"{url}\t {method}\n"
         try:
-            body = await request.json()
-            logger.bind(payload=body, name=None).debug("request_json: ")
+            common_ += str(await request.json())
         except Exception as e:
             try:
-                body = await request.body()
-                if len(body) != 0:
-                    # 有请求体,记录日志
-                    logger.bind(payload=body, name=None).debug(body)
+                common_ += str(await request._get_form())
             except Exception as e:
                 # 忽略文件上传类型的数据
-                pass
+                logger.bind(name=None).error(f"降级获取请求入参🐎{request}")
+        logger.bind(name=None).success(f"正常获取请求入参🐎{common_}")
 
     @staticmethod
     async def load_routers(
