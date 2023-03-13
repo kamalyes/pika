@@ -13,7 +13,7 @@ on:
   # workflow_dispatch:
 
 env:
-    DOCKER_IMAGE: kamalyes/pika-testing
+    DOCKER_IMAGE: kamalyes/pika
     TAG_NAME: ${{github.ref_name}}
       
 jobs:
