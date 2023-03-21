@@ -521,7 +521,7 @@ class Executor(object):
         """
         for a in asserts:
             for p in params:
-              self.replace_cls(p, a, "expected", "actually")
+                self.replace_cls(p, a, "expected", "actually")
 
     @staticmethod
     async def run_with_test_data(
@@ -1004,7 +1004,7 @@ class Executor(object):
             report = await ApiTestReportDao.end(report_id, ok, fail, error, skip, 3, cost)
             if report_dict is not None:
                 report_dict[env] = {
-                    "report_url": f"{PikaAppConfig.SERVER_REPORT}{report_id}",
+                    "report_url": f"{PikaAppConfig.SERVER_HOST}:{PikaAppConfig.PIKA_PORT}/#/record/report/{report_id}",
                     "start_date": report.start_date.strftime("%Y-%m-%d %H:%M:%S"),
                     "finished_date": report.finished_date.strftime("%Y-%m-%d %H:%M:%S"),
                     "success": ok,

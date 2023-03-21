@@ -34,16 +34,16 @@ class BaseConfig(BaseSettings):
     REDIS_PASSWORD: str = ""
     REDIS_ENCODING: str = "utf-8"
     REDIS_DECODE_RESPONSES: bool = True  # 获取中文数据可以直接 decode python unicode
-    REDIS_TARGET_MAX_MEMORY: str = '572978192'
+    REDIS_TARGET_MAX_MEMORY: str = "572978192"
     REDIS_MAX_CONNECTIONS: int = 100
     REDIS_DECODE_RESPONSES: bool = True
     # Redis连接信息
     REDIS_NODES: List = []
 
     # sqlalchemy
-    SQLALCHEMY_DATABASE_URI: str = ''
+    SQLALCHEMY_DATABASE_URI: str = ""
     # 异步URI
-    ASYNC_SQLALCHEMY_URI: str = ''
+    ASYNC_SQLALCHEMY_URI: str = ""
 
     # JWT
     JWT_SECRET_KEY: str = ""
@@ -68,7 +68,7 @@ class BaseConfig(BaseSettings):
     # Yapi
     YAPI_ACCESS_KEY_ID: str = ""
     YAPI_ACCESS_KEY_SECRET: str = ""
-    
+
     # Mock server
     MITMPROXY_ENABLE_FLAG: bool = False
     MITMPROXY_PROXY_PORT: int = 7778
@@ -77,18 +77,15 @@ class BaseConfig(BaseSettings):
     ENVIRONMENT: str = "dev"
     SERVER_HOST: str = "0.0.0.0"
     PIKA_PORT: int = 7777
-    CASE_RETRY_TIMES: str = 1
+    CASE_RETRY_TIMES: int = 1
     LOG_SWITCH = True
     WORKSPACES_PATH: str = os.path.dirname(os.path.abspath(__file__))
-    SERVER_REPORT: str = "http://localhost:8000/#/record/report/"
     TEMPLATE_PATH: str = f"{WORKSPACES_PATH}/templates"
     MARKDOWN_PATH: str = f"{WORKSPACES_PATH}/templates/markdown/test_report.md"
     OUTPUT_PATH: str = f"{WORKSPACES_PATH}/output"
     LOGS_PATH: str = f"{WORKSPACES_PATH}/logs"
     DAO_PATH: str = f"{WORKSPACES_PATH}/app/crud"
-    REQUIREMENTS: str = System.get_depend_libs(
-        file_path=f"{WORKSPACES_PATH}/requirements.txt"
-    )
+    REQUIREMENTS: str = System.get_depend_libs(file_path=f"{WORKSPACES_PATH}/requirements.txt")
 
     LOCAL_DATE = time.strftime("%Y-%m-%d", time.localtime(time.time()))
     # 日志相关
@@ -96,10 +93,8 @@ class BaseConfig(BaseSettings):
 
     LOGS_PATH: str = f"{WORKSPACES_PATH}/logs"
     LOG_GENERAL_DIR = os.path.join(LOGS_PATH, LOGS_DIR_NAME)
-    INFO_LOG_FILE = os.path.join(LOG_GENERAL_DIR,
-                                 f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-info.log")
-    ERROR_LOG_FILE = os.path.join(LOG_GENERAL_DIR,
-                                  f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-error.log")
+    INFO_LOG_FILE = os.path.join(LOG_GENERAL_DIR, f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-info.log")
+    ERROR_LOG_FILE = os.path.join(LOG_GENERAL_DIR, f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-error.log")
     # 配置日志格式
     INFO_FORMAT = (
         "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> "
@@ -130,19 +125,22 @@ PikaAppConfig.REDIS_NODES = [
         "host": PikaAppConfig.REDIS_HOST,
         "port": PikaAppConfig.REDIS_PORT,
         "db": PikaAppConfig.REDIS_DB_INDEX,
-        "password": PikaAppConfig.REDIS_PASSWORD
+        "password": PikaAppConfig.REDIS_PASSWORD,
     }
 ]
 
 # init sqlalchemy (used by apscheduler)
-PikaAppConfig.SQLALCHEMY_DATABASE_URI = \
-    f'mysql+mysqlconnector://{PikaAppConfig.MYSQL_USER}:{PikaAppConfig.MYSQL_ROOT_PASSWORD}' \
-    f'@{PikaAppConfig.MYSQL_HOST}:{PikaAppConfig.MYSQL_PORT}/{PikaAppConfig.MYSQL_DATABASE_NAME}?{PikaAppConfig.MYSQL_TIME_ZONE}'
+PikaAppConfig.SQLALCHEMY_DATABASE_URI = (
+    f"mysql+mysqlconnector://{PikaAppConfig.MYSQL_USER}:{PikaAppConfig.MYSQL_ROOT_PASSWORD}"
+    f"@{PikaAppConfig.MYSQL_HOST}:{PikaAppConfig.MYSQL_PORT}/{PikaAppConfig.MYSQL_DATABASE_NAME}?{PikaAppConfig.MYSQL_TIME_ZONE}"
+)
 
 # init async sqlalchemy
-PikaAppConfig.ASYNC_SQLALCHEMY_URI = \
-    f'mysql+aiomysql://{PikaAppConfig.MYSQL_USER}:{PikaAppConfig.MYSQL_ROOT_PASSWORD}' \
-    f'@{PikaAppConfig.MYSQL_HOST}:{PikaAppConfig.MYSQL_PORT}/{PikaAppConfig.MYSQL_DATABASE_NAME}?{PikaAppConfig.MYSQL_TIME_ZONE}'
+PikaAppConfig.ASYNC_SQLALCHEMY_URI = (
+    f"mysql+aiomysql://{PikaAppConfig.MYSQL_USER}:{PikaAppConfig.MYSQL_ROOT_PASSWORD}"
+    f"@{PikaAppConfig.MYSQL_HOST}:{PikaAppConfig.MYSQL_PORT}/{PikaAppConfig.MYSQL_DATABASE_NAME}?{PikaAppConfig.MYSQL_TIME_ZONE}"
+)
+
 
 class InterceptHandler(logging.Handler):
     """
@@ -163,9 +161,7 @@ class InterceptHandler(logging.Handler):
             frame = frame.f_back
             depth += 1
 
-        logger.opt(depth=depth, exception=record.exc_info).log(
-            level, record.getMessage()
-        )
+        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
 
     @staticmethod
     def make_filter(name):
@@ -192,9 +188,7 @@ class InterceptHandler(logging.Handler):
 
         format_string = LOGURU_FORMAT
         if record["extra"].get("payload") is not None:
-            record["extra"]["payload"] = pformat(
-                record["extra"]["payload"], indent=4, compact=True, width=88
-            )
+            record["extra"]["payload"] = pformat(record["extra"]["payload"], indent=4, compact=True, width=88)
             format_string += "\n<level>{extra[payload]}</level>"
 
         format_string += "{exception}\n"
@@ -202,11 +196,7 @@ class InterceptHandler(logging.Handler):
 
     @staticmethod
     def init_logging():
-        loggers = (
-            logging.getLogger(name)
-            for name in logging.root.manager.loggerDict
-            if name.startswith("uvicorn.")
-        )
+        loggers = (logging.getLogger(name) for name in logging.root.manager.loggerDict if name.startswith("uvicorn."))
         for uvicorn_logger in loggers:
             uvicorn_logger.handlers = []
 
@@ -250,9 +240,7 @@ class InterceptHandler(logging.Handler):
                     "sink": PikaAppConfig.ERROR_LOG_FILE,
                     "level": logging.WARNING,
                     "format": PikaAppConfig.ERROR_FORMAT,
-                    "filter": InterceptHandler.make_filter(
-                        PikaAppConfig.ERROR_LOG_FILE
-                    ),
+                    "filter": InterceptHandler.make_filter(PikaAppConfig.ERROR_LOG_FILE),
                 },
             ]
         )
