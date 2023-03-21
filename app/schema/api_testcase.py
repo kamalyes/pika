@@ -12,6 +12,15 @@ from app.schema.constructor import ConstructorSchema
 from app.schema.request import RequestInfoSchema
 
 
+class ListTestCaseSchema(BaseModel):
+    directory_id: int = Body(None, title="directory_id")
+    name: str = Body("", title="name")
+
+
+class DeleteTestCaseSchema(BaseModel):
+    data: List[int]
+
+
 class TestCaseSchema(BaseModel):
     id: int = Body(None, title="id")
     priority: str = Body(None, title="用例优先级: p0-p3", max_length=ByteSizeEnum.LENGTH_03)

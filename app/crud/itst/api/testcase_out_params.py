@@ -24,7 +24,6 @@ from app.schema.api_testcase_out_parameters import ApiTestCaseOutParametersSchem
 
 @PikaMdWrapper(ApiTestCaseOutParametersModel)
 class ApiTestCaseOutParametersDao(PikaWrapper):
-
     @classmethod
     async def should_remove(cls, before, after):
         """
@@ -38,58 +37,52 @@ class ApiTestCaseOutParametersDao(PikaWrapper):
         """
         data = []
         for b in before:
-            for a in after:
-                if a.id == b.id:
-                    break
-            else:
+            if b.id not in after:
                 data.append(b.id)
         return data
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def update_many(cls, case_id: int, data: List[ApiTestCaseOutParametersSchema],
-                          operator: str):
+    async def update_many(cls, case_id: int, data: List[ApiTestCaseOutParametersSchema], operator: str):
         result = []
         try:
             async with async_session() as session:
                 async with session.begin():
-                    source = await session.execute(select(ApiTestCaseOutParametersModel).where(
-                        ApiTestCaseOutParametersModel.case_id == case_id,
-                        ApiTestCaseOutParametersModel.delete_flag == 0,
-                    ))
+                    source = await session.execute(
+                        select(ApiTestCaseOutParametersModel).where(
+                            ApiTestCaseOutParametersModel.case_id == case_id,
+                            ApiTestCaseOutParametersModel.delete_flag == 0,
+                        )
+                    )
                     before = source.scalars().all()
-                    should_remove = await cls.should_remove(before, data)
                     for item in data:
-                        if item.id is None:
+                        query = await session.execute(
+                            select(ApiTestCaseOutParametersModel).where(
+                                ApiTestCaseOutParametersModel.id == item.id,
+                            )
+                        )
+                        temp = query.scalars().first()
+                        if temp is None:
+                            # 走新增逻辑
                             temp = ApiTestCaseOutParametersModel(**item.dict(), case_id=case_id, operator=operator)
                             session.add(temp)
                         else:
-                            query = await session.execute(
-                                select(ApiTestCaseOutParametersModel).where(
-                                    ApiTestCaseOutParametersModel.id == item.id,
-                                ))
-                            temp = query.scalars().first()
-                            if temp is None:
-                                # 走新增逻辑
-                                temp = ApiTestCaseOutParametersModel(**item.dict(), case_id=case_id,
-                                                                     operator=operator)
-                                session.add(temp)
-                            else:
-                                temp.name = item.name
-                                temp.case_id = case_id
-                                temp.expression = item.expression
-                                temp.source = item.source
-                                temp.match_index = item.match_index
-                                temp.update_user = operator
-                                temp.update_date = datetime.now()
+                            temp.name = item.name
+                            temp.expression = item.expression
+                            temp.source = item.source
+                            temp.match_index = item.match_index
+                            temp.update_user = operator
+                            temp.update_date = datetime.now()
                         await session.flush()
                         session.expunge(temp)
                         result.append(temp)
+                    should_remove = await cls.should_remove(before, [x.id for x in result])
                     if should_remove:
                         await session.execute(
-                            update(ApiTestCaseOutParametersModel).where(
-                                ApiTestCaseOutParametersModel.id.in_(should_remove)).values(
-                                delete_flag=int(time.time() * 1000)))
+                            update(ApiTestCaseOutParametersModel)
+                            .where(ApiTestCaseOutParametersModel.id.in_(should_remove))
+                            .values(delete_flag=int(time.time() * 1000))
+                        )
             return result
         except Exception as e:
             cls.__log__.error(f"批量更新出参数据失败: {e}")

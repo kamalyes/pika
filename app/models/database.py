@@ -19,7 +19,7 @@ from app.models.environment import EnvironmentModel
 
 class DatabaseModel(LargeBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_database_info"
-    __table_args__ = (UniqueConstraint('env', 'name'), {"comment": "数据库配置表"})
+    __table_args__ = (UniqueConstraint("env", "name"), {"comment": "数据库配置表"})
     env = Column(INT, nullable=False, comment="对应环境id")
     name = Column(String(ByteSizeEnum.LENGTH_30), nullable=False, comment="名称")
     host = Column(String(ByteSizeEnum.LENGTH_128), nullable=False, comment="host")
@@ -28,10 +28,9 @@ class DatabaseModel(LargeBaseModel):
     password = Column(String(ByteSizeEnum.LENGTH_64), nullable=False, comment="登录密码")
     database = Column(String(ByteSizeEnum.LENGTH_36), nullable=True, comment="连接数据库名称")
     sql_type = Column(INT, nullable=False, comment="0: mysql 1: postgresql 2: mongo")
-    env_data: EnvironmentModel
+    env_info: EnvironmentModel
 
-    def __init__(self, env, name, host, port, username, password, database, sql_type, operator,
-                 id=None):
+    def __init__(self, env, name, host, port, username, password, database, sql_type, operator, id=None):
         super().__init__(id=id, operator=operator)
         self.env = env
         self.name = name

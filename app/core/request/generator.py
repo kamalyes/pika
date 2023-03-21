@@ -23,16 +23,22 @@ from app.enums.RequestBodyEnum import ReqBodyTypeEnum
 from app.enums.RequestTypeEnum import RequestType
 from app.excpetions.convert.GenerateException import GenerateException
 from app.schema.api_testcase import TestCaseSchema
-from app.schema.constructor import ConstructorSchema
+from app.schema.constructor import IndexConstructorSchema
 from app.schema.request import RequestInfoSchema
 
 
 class CaseGenerator(object):
     # 忽略的字段
     ignored = (
-        "Content-Type", "Connection", "Date", "Content-Length", "Host",
+        "Content-Type",
+        "Connection",
+        "Date",
+        "Content-Length",
+        "Host",
         "access-control-allow-credentials",
-        "access-control-allow-origin", "User-Agent", "Server"
+        "access-control-allow-origin",
+        "User-Agent",
+        "Server",
     )
 
     @staticmethod
@@ -70,7 +76,7 @@ class CaseGenerator(object):
         return ReqBodyTypeEnum.none
 
     @staticmethod
-    def generate_constructors(requests: List[RequestInfoSchema]) -> List[ConstructorSchema]:
+    def generate_constructors(requests: List[RequestInfoSchema]) -> List[IndexConstructorSchema]:
         """
         生成构建器
         Args:
@@ -82,18 +88,27 @@ class CaseGenerator(object):
         constructors = []
         for r in range(len(requests) - 1):
             name = f"http请求_{r + 1}"
-            constructor_json = json.dumps(dict(
-                body=requests[r].body,
-                headers=requests[r].request_headers,
-                base_path=None,
-                url=requests[r].url,
-                request_method=requests[r].request_method,
-                body_type=CaseGenerator.get_body_type(requests[r].request_headers),
-            ), ensure_ascii=False)
-            c = ConstructorSchema(name=name, value=f"http_res_{r + 1}",
-                                  constructor_json=constructor_json,
-                                  enabled_flag=True, public=True, suffix=False, index=r + 1,
-                                  type=ConstructorTypeEnum.http.value)
+            constructor_json = json.dumps(
+                dict(
+                    body=requests[r].body,
+                    headers=requests[r].request_headers,
+                    base_path=None,
+                    url=requests[r].url,
+                    request_method=requests[r].request_method,
+                    body_type=CaseGenerator.get_body_type(requests[r].request_headers),
+                ),
+                ensure_ascii=False,
+            )
+            c = IndexConstructorSchema(
+                name=name,
+                value=f"http_res_{r + 1}",
+                constructor_json=constructor_json,
+                enable=True,
+                public=True,
+                suffix=False,
+                index=r + 1,
+                type=ConstructorTypeEnum.http.value,
+            )
             constructors.append(c)
         return constructors
 
@@ -109,12 +124,19 @@ class CaseGenerator(object):
         Returns:
 
         """
-        return TestCaseSchema(directory_id=directory_id, name=name, url=last.url,
-                              request_type=RequestType.http.value, body=last.body,
-                              request_method=last.request_method,
-                              body_type=CaseGenerator.get_body_type(last.request_headers).value,
-                              request_headers=json.dumps(last.request_headers, ensure_ascii=False),
-                              case_type=0, status=CaseStatus.debugging.value, priority="P3")
+        return TestCaseSchema(
+            directory_id=directory_id,
+            name=name,
+            url=last.url,
+            request_type=RequestType.http.value,
+            body=last.body,
+            request_method=last.request_method,
+            body_type=CaseGenerator.get_body_type(last.request_headers).value,
+            request_headers=json.dumps(last.request_headers, ensure_ascii=False),
+            case_type=0,
+            status=CaseStatus.debugging.value,
+            priority="P3",
+        )
 
     @staticmethod
     def extract_field(requests: List[RequestInfoSchema]) -> List[str]:
@@ -202,7 +224,7 @@ class CaseGenerator(object):
                         ans[body].append(path)
 
     @staticmethod
-    def analysis_body(request: RequestInfoSchema, ans: dict, var_name: str = ''):
+    def analysis_body(request: RequestInfoSchema, ans: dict, var_name: str = ""):
         """
         解析body
         Args:

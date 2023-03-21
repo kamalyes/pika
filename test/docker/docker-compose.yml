@@ -3,7 +3,7 @@ services:
   mysql:
     image: mysql:${MYSQL_VERSION}
     container_name: mysql
-    privileged: true 
+    privileged: true
     restart: always
     healthcheck:
       test:
@@ -32,11 +32,10 @@ services:
     networks:
       - pika-network
 
-
   redis:
     image: redis:${REDIS_VERSION}
     container_name: redis
-    privileged: true 
+    privileged: true
     restart: always
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
@@ -54,7 +53,6 @@ services:
     networks:
       - pika-network
 
-
   pika:
     image: kamalyes/pika-testing:latest
     container_name: pika
@@ -71,11 +69,6 @@ services:
     networks:
       - pika-network
 
-
 networks:
   pika-network:
     driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: ${DOCKER_SUBNET}

@@ -23,7 +23,6 @@ from app.schema.constructor import ConstructorSchema, ConstructorIndexSchema
 
 @PikaMdWrapper(ConstructorModel)
 class ConstructorDao(PikaWrapper):
-
     @classmethod
     async def list_constructor(cls, case_id: int) -> List[ConstructorModel]:
         """
@@ -36,9 +35,11 @@ class ConstructorDao(PikaWrapper):
         """
         try:
             async with async_session() as session:
-                sql = select(ConstructorModel).where(ConstructorModel.case_id == case_id,
-                                                     ConstructorModel.delete_flag == 0) \
+                sql = (
+                    select(ConstructorModel)
+                    .where(ConstructorModel.case_id == case_id, ConstructorModel.delete_flag == 0)
                     .order_by(ConstructorModel.index, ConstructorModel.update_date)
+                )
                 result = await session.execute(sql)
                 return result.scalars().all()
         except Exception as e:
@@ -50,9 +51,11 @@ class ConstructorDao(PikaWrapper):
         try:
             async with async_session() as session:
                 async with session.begin():
-                    sql = select(ConstructorModel).where(ConstructorModel.case_id == data.case_id,
-                                                         ConstructorModel.name == data.name,
-                                                         ConstructorModel.delete_flag == 0)
+                    sql = select(ConstructorModel).where(
+                        ConstructorModel.case_id == data.case_id,
+                        ConstructorModel.name == data.name,
+                        ConstructorModel.delete_flag == 0,
+                    )
                     result = await session.execute(sql)
                     if result.scalars().first() is not None:
                         raise Exception(f"{data.name}已存在")
@@ -126,8 +129,8 @@ class ConstructorDao(PikaWrapper):
                 async with session.begin():
                     for item in data:
                         await session.execute(
-                            update(ConstructorModel).where(ConstructorModel.id == item.id).values(
-                                index=item.index))
+                            update(ConstructorModel).where(ConstructorModel.id == item.id).values(index=item.index)
+                        )
         except Exception as e:
             cls.__log__.error(f"更新前后置条件顺序失败, {e}")
             raise Exception("更新前后置条件顺序失败")
@@ -137,8 +140,7 @@ class ConstructorDao(PikaWrapper):
         try:
             async with async_session() as session:
                 # 获取所有构造参数
-                search = [ConstructorModel.public is True, ConstructorModel.suffix == suffix,
-                          ConstructorModel.delete_flag == 0]
+                search = [ConstructorModel.public is True, ConstructorModel.suffix == suffix, ConstructorModel.delete_flag == 0]
                 if name:
                     search.append(ConstructorModel.name.like("%{}%".format(name)))
                 query = await session.execute(select(ConstructorModel).where(*search))
@@ -149,21 +151,21 @@ class ConstructorDao(PikaWrapper):
                 # 建立caseID -> constructor的map
                 for c in constructor:
                     temp[c.case_id].append(c)
-                query = await session.execute(
-                    select(ApiTestCaseModel).where(ApiTestCaseModel.id.in_(temp.keys())))
+                query = await session.execute(select(ApiTestCaseModel).where(ApiTestCaseModel.id.in_(temp.keys())))
                 testcases = query.scalars().all()
                 testcase_info = {t.id: t for t in testcases}
                 result = []
                 for k, v in temp.items():
-                    result.append({
-                        "key": f"caseId_{k}",
-                        "disabled": True,
-                        "title": testcase_info[k].name,
-                        "children": [
-                            {"key": f"constructor_{x.id}", "title": x.name,
-                             "value": f"constructor_{x.id}"} for x in v
-                        ],
-                    })
+                    result.append(
+                        {
+                            "key": f"caseId_{k}",
+                            "disabled": True,
+                            "title": testcase_info[k].name,
+                            "children": [
+                                {"key": f"constructor_{x.id}", "title": x.name, "value": f"constructor_{x.id}"} for x in v
+                            ],
+                        }
+                    )
                 return result
         except Exception as e:
             cls.__log__.error(f"获取前后置条件树失败, {e}")
@@ -181,8 +183,8 @@ class ConstructorDao(PikaWrapper):
         """
         async with async_session() as session:
             query = await session.execute(
-                select(ConstructorModel).where(ConstructorModel.id == id_,
-                                               ConstructorModel.delete_flag == 0))
+                select(ConstructorModel).where(ConstructorModel.id == id_, ConstructorModel.delete_flag == 0)
+            )
             data = query.scalars().first()
             if data is None:
                 raise Exception("前后置条件不存在")
@@ -209,29 +211,28 @@ class ConstructorDao(PikaWrapper):
                     ConstructorModel.suffix == suffix,
                     ConstructorModel.type == constructor_type,
                     ConstructorModel.public is True,
-                    ConstructorModel.delete_flag == 0))
+                    ConstructorModel.delete_flag == 0,
+                )
+            )
             # 并把这些前置条件放到constructors里面
             for q in query.scalars().all():
-                constructors[q.case_id].append({
-                    "title": q.name,
-                    "key": f"constructor_{q.id}",
-                    "isLeaf": True,
-                    # 这里是为了拿到具体的代码，因为树一般只有name和id，我们这还需要其他数据
-                    "constructor_json": q.constructor_json,
-                })
+                constructors[q.case_id].append(
+                    {
+                        "title": q.name,
+                        "value": f"constructor_{q.id}",
+                        "isLeaf": True,
+                        # 这里是为了拿到具体的代码，因为树一般只有name和id，我们这还需要其他数据
+                        "constructor_json": q.constructor_json,
+                    }
+                )
             if len(constructors.keys()) == 0:
                 return []
             # 二次查询，查出有前置条件的case
             query = await session.execute(
-                select(ApiTestCaseModel).where(ApiTestCaseModel.id.in_(constructors.keys()),
-                                               ApiTestCaseModel.delete_flag == 0))
+                select(ApiTestCaseModel).where(ApiTestCaseModel.id.in_(constructors.keys()), ApiTestCaseModel.delete_flag == 0)
+            )
             # 构造树，要知道children已经构建好了，就在constructors里面
             for q in query.scalars().all():
                 # 把用例id放入cs_list，这里就不用原生join了
-                ans.append({
-                    "title": q.name,
-                    "key": f"caseId_{q.id}",
-                    "disabled": True,
-                    "children": constructors[q.id]
-                })
+                ans.append({"title": q.name, "key": f"caseId_{q.id}", "disabled": True, "children": constructors[q.id]})
         return ans

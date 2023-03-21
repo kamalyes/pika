@@ -13,7 +13,6 @@ class ConstructorSchema(BaseModel):
     value: Optional[str] = Body("", title="", max_length=ByteSizeEnum.LENGTH_255)
     type: Optional[int] = Body(0, title="类型 0: testcase 1: sqlscript 2: redis 3: py脚本 4: 其它")
     name: Optional[str] = Body("", title="", max_length=ByteSizeEnum.LENGTH_255)
-    index: Optional[int] = Body(0, title="前置条件顺序")
     constructor_json: Optional[str] = Body("", title="constructor_json")
     enabled_flag: Optional[bool] = Body(True, title="是否可用")
     case_id: Optional[int] = Body(0, title="所属用例id")
@@ -31,9 +30,12 @@ class ConstructorSchema(BaseModel):
         return v
 
 
-class ConstructorIndexSchema(BaseModel):
-    id: Optional[int] = Body(0, title="id")
+class IndexConstructorSchema(ConstructorSchema):
     index: Optional[int] = Body(0, title="前置条件顺序")
+
+
+class ConstructorIndexSchema(IndexConstructorSchema):
+    id: Optional[int] = Body(0, title="id")
 
     # noinspection PyMethodParameters
     @validator("id", "index")

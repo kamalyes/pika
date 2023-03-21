@@ -30,9 +30,8 @@ from app.schema.database import DatabaseSchema
 
 @PikaMdWrapper(DatabaseModel)
 class DbConfigDao(PikaWrapper):
-
     @classmethod
-    async def list_database(cls, name: str = '', database: str = '', env: int = None):
+    async def list_database(cls, name: str = "", database: str = "", env: int = None):
         """
         通过name, database, env获取数据库配置列表
         Args:
@@ -46,7 +45,7 @@ class DbConfigDao(PikaWrapper):
             async with async_session() as session:
                 query = [DatabaseModel.delete_flag == 0]
                 if name:
-                    query.append(DatabaseModel.name.like(f'%{name}%'))
+                    query.append(DatabaseModel.name.like(f"%{name}%"))
                 if database:
                     query.append(DatabaseModel.database.like(f"%{database}%"))
                 if env is not None:
@@ -63,9 +62,10 @@ class DbConfigDao(PikaWrapper):
             async with async_session() as session:
                 async with session.begin():
                     result = await session.execute(
-                        select(DatabaseModel).where(DatabaseModel.name == data.name,
-                                                    DatabaseModel.delete_flag == 0,
-                                                    DatabaseModel.env == data.env))
+                        select(DatabaseModel).where(
+                            DatabaseModel.name == data.name, DatabaseModel.delete_flag == 0, DatabaseModel.env == data.env
+                        )
+                    )
                     query = result.scalars().first()
                     if query is not None:
                         raise Exception("数据库配置已存在")
@@ -79,13 +79,11 @@ class DbConfigDao(PikaWrapper):
         try:
             async with async_session() as session:
                 async with session.begin():
-                    result = await session.execute(
-                        select(DatabaseModel).where(data.id == DatabaseModel.id))
+                    result = await session.execute(select(DatabaseModel).where(data.id == DatabaseModel.id))
                     query = result.scalars().first()
                     if query is None:
                         raise Exception("数据库配置不存在")
-                    db_helper.remove_connection(query.host, query.port, query.username,
-                                                query.password, query.database)
+                    db_helper.remove_connection(query.host, query.port, query.username, query.password, query.database)
                     cls.update_model(query, data, operator)
         except Exception as e:
             cls.__log__.error(f"编辑数据库配置: {data.name}失败, {e}")
@@ -97,8 +95,8 @@ class DbConfigDao(PikaWrapper):
             async with async_session() as session:
                 async with session.begin():
                     result = await session.execute(
-                        select(DatabaseModel).where(id == DatabaseModel.id,
-                                                    DatabaseModel.delete_flag == 0))
+                        select(DatabaseModel).where(id == DatabaseModel.id, DatabaseModel.delete_flag == 0)
+                    )
                     query = result.scalars().first()
                     if query is None:
                         raise Exception("数据库配置不存在或已删除")
@@ -114,7 +112,8 @@ class DbConfigDao(PikaWrapper):
         try:
             async with async_session() as session:
                 result = await session.execute(
-                    select(DatabaseModel).where(DatabaseModel.id == id, DatabaseModel.delete_flag == 0))
+                    select(DatabaseModel).where(DatabaseModel.id == id, DatabaseModel.delete_flag == 0)
+                )
                 return result.scalars().first()
         except Exception as e:
             cls.__log__.error(f"获取数据库配置失败, error: {e}")
@@ -125,9 +124,10 @@ class DbConfigDao(PikaWrapper):
         try:
             async with async_session() as session:
                 result = await session.execute(
-                    select(DatabaseModel).where(DatabaseModel.env == env,
-                                                DatabaseModel.name == name,
-                                                DatabaseModel.delete_flag == 0))
+                    select(DatabaseModel).where(
+                        DatabaseModel.env == env, DatabaseModel.name == name, DatabaseModel.delete_flag == 0
+                    )
+                )
                 return result.scalars().first()
         except Exception as e:
             cls.__log__.error(f"获取数据库配置失败, error: {e}")
@@ -149,7 +149,8 @@ class DbConfigDao(PikaWrapper):
             # 获取数据库相关的信息
             async with async_session() as session:
                 query = await session.execute(
-                    select(DatabaseModel).where(and_(DatabaseModel.enabled_flag == 1, DatabaseModel.delete_flag == 0)))
+                    select(DatabaseModel).where(and_(DatabaseModel.enabled_flag == 1, DatabaseModel.delete_flag == 0))
+                )
                 data = query.scalars().all()
                 for d in data:
                     name = env_map[d.env]
@@ -158,9 +159,14 @@ class DbConfigDao(PikaWrapper):
                         result.append(dict(title=name, key=f"env_{name}", children=list()))
                         idx = len(result) - 1
                         env_index[name] = idx
-                    result[env_index[name]]['children'].append(
-                        dict(title=f"{d.database}（{d.host}:{d.port}）", key=f"database_{d.id}",
-                             children=list(), sql_type=d.sql_type, data=d)
+                    result[env_index[name]]["children"].append(
+                        dict(
+                            title=f"{d.database}（{d.host}:{d.port}）",
+                            key=f"database_{d.id}",
+                            children=list(),
+                            sql_type=d.sql_type,
+                            data=d,
+                        )
                     )
                 return result
         except Exception as err:
@@ -170,10 +176,9 @@ class DbConfigDao(PikaWrapper):
     @staticmethod
     @RedisHelper.cache("database:table:cache", expired_time=ValidTimeEnum.GET_TABLES_TIME.value)
     async def get_tables(data: DatabaseSchema):
-        conn = await db_helper.get_connection(data.sql_type, data.host, data.port, data.username, data.password,
-                                              data.database)
+        conn = await db_helper.get_connection(data.sql_type, data.host, data.port, data.username, data.password, data.database)
         database_child = list()
-        eng = conn.get('engine')
+        eng = conn.get("engine")
         table_set = set()
         async with eng.connect() as conn:
             await conn.run_sync(DbConfigDao.load_table, table_set, data, database_child)
@@ -197,14 +202,16 @@ class DbConfigDao(PikaWrapper):
             database_child.append(dict(title=str(t), key=f"table_{data.id}_{t}", children=temp))
             for k, v in t.c.items():
                 table_map.add(k)
-                temp.append(dict(
-                    title=k,
-                    primary_key=v.primary_key,
-                    comment={str(v.comment)},
-                    type={str(v.type)},
-                    isLeaf=True,
-                    key=f"column_{t}_{data.id}_{k}",
-                ))
+                temp.append(
+                    dict(
+                        title=k,
+                        primary_key=v.primary_key,
+                        comment={str(v.comment)},
+                        type={str(v.type)},
+                        isLeaf=True,
+                        key=f"column_{t}_{data.id}_{k}",
+                    )
+                )
 
     @classmethod
     async def online_sql(cls, id: int, sql: str):
@@ -212,8 +219,9 @@ class DbConfigDao(PikaWrapper):
             query = await DbConfigDao.query_database(id)
             if query is None:
                 raise Exception("未找到对应的数据库配置")
-            data = await db_helper.get_connection(query.sql_type, query.host, query.port, query.username,
-                                                  query.password, query.database)
+            data = await db_helper.get_connection(
+                query.sql_type, query.host, query.port, query.username, query.password, query.database
+            )
             return await DbConfigDao.execute(data, sql)
         except Exception as e:
             cls.__log__.error(f"查询数据库配置失败, error: {e}")
@@ -245,10 +253,10 @@ class DbConfigDao(PikaWrapper):
             query = await DbConfigDao.query_database_by_env_and_name(env, name)
             if query is None:
                 raise Exception("未找到对应的数据库配置")
-            data = await db_helper.get_connection(query.sql_type, query.host, query.port, query.username,
-                                                  query.password,
-                                                  query.database)
-            result = await DbConfigDao.execute(data, sql)
+            data = await db_helper.get_connection(
+                query.sql_type, query.host, query.port, query.username, query.password, query.database
+            )
+            result, _ = await DbConfigDao.execute(data, sql)
             _, result = PikaResponse.parse_sql_result(result)
             return json.dumps(result, cls=JsonEncoder, ensure_ascii=False)
         except Exception as e:

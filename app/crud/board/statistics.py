@@ -29,22 +29,23 @@ class Item(object):
 
 
 class DashboardDao(PikaWrapper):
-
     @classmethod
     @db_connect
-    async def get_statistics_data(cls, start: datetime, end: datetime,
-                                  session: AsyncSession = None):
-        return await cls.get_model_statistic_data(start, end, session,
-                                                  Item("project", ProjectModel),
-                                                  Item("testcase", ApiTestCaseModel),
-                                                  Item("testplan", ApiTestPlanModel),
-                                                  Item("useradmin", SysUserAdminModel))
+    async def get_statistics_data(cls, start: datetime, end: datetime, session: AsyncSession = None):
+        return await cls.get_model_statistic_data(
+            start,
+            end,
+            session,
+            Item("project", ProjectModel),
+            Item("testcase", ApiTestCaseModel),
+            Item("testplan", ApiTestPlanModel),
+            Item("useradmin", SysUserAdminModel),
+        )
 
     @classmethod
     @RedisHelper.cache("report_statistics")
     @db_connect
-    async def get_report_statistics(cls, start: datetime, end: datetime,
-                                    session: AsyncSession = None):
+    async def get_report_statistics(cls, start: datetime, end: datetime, session: AsyncSession = None):
         result, idx = await cls.get_date_data(start, end)
         sql = cls.create_sql(ApiTestPlanModel, start, end, field="create_date")
         data = await session.execute(sql)
@@ -63,26 +64,22 @@ class DashboardDao(PikaWrapper):
             result[idx[date]]["failed"] = result[idx[date]].get("failed", 0) + item.failed_count
             result[idx[date]]["error"] = result[idx[date]].get("error", 0) + item.error_count
             result[idx[date]]["skip"] = result[idx[date]].get("skip", 0) + item.skipped_count
-            total = result[idx[date]]["success"] + result[idx[date]]["failed"] + result[idx[date]][
-                "error"]
+            total = result[idx[date]]["success"] + result[idx[date]]["failed"] + result[idx[date]]["error"]
             if total == 0:
                 result[idx[date]]["rate"] = 0.00
             else:
-                result[idx[date]]["rate"] = round(result[idx[date]]["success"] / total * 100, 2)
+                result[idx[date]]["rate"] = round(result[idx[date]]["success"] / total * 100, 2) if total > 0 else 0.00
         rate = round(total_pass / total, 2) if total > 0 else 0.00
-        return dict(count=count, success=success, failed=failed, skip=skip, error=error,
-                    data=result, rate=rate)
+        return dict(count=count, success=success, failed=failed, skip=skip, error=error, data=result, rate=rate)
 
     @classmethod
-    async def get_model_statistic_data(cls, start: datetime, end: datetime,
-                                       session: AsyncSession = None, *names: Item):
+    async def get_model_statistic_data(cls, start: datetime, end: datetime, session: AsyncSession = None, *names: Item):
         result, idx = await cls.get_date_data(start, end)
         data = dict()
         for n in names:
             query = await session.execute(cls.create_sql(n.model, start, end))
             # 找到未删除的所有项目数据
-            counts = await session.execute(
-                select(func.count(n.model.id)).where(n.model.delete_flag == 0))
+            counts = await session.execute(select(func.count(n.model.id)).where(n.model.delete_flag == 0))
             for r in query.scalars().all():
                 date = r.create_date.strftime("%Y-%m-%d")
                 if result[idx[date]].get(n.name) is None:
@@ -93,12 +90,10 @@ class DashboardDao(PikaWrapper):
         return data, result
 
     @classmethod
-    def create_sql(cls, model, start: datetime, end: datetime, *condition, field='create_date'):
+    def create_sql(cls, model, start: datetime, end: datetime, *condition, field="create_date"):
         start_str = start.replace(hour=0, minute=0, second=0, microsecond=0)
         end_str = end.replace(hour=23, minute=59, second=59)
-        return select(model).where(getattr(model, field) >= start_str,
-                                   getattr(model, field) <= end_str,
-                                   *condition)
+        return select(model).where(getattr(model, field) >= start_str, getattr(model, field) <= end_str, *condition)
 
     @classmethod
     async def get_date_data(cls, start: datetime, end: datetime):

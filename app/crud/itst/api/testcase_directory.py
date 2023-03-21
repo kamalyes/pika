@@ -23,14 +23,13 @@ from app.schema.api_testcase_directory import ApiTestCaseDirectorySchema
 
 @PikaMdWrapper(ApiTestCaseDirectoryModel)
 class ApiTestCaseDirectoryDao(PikaWrapper):
-
     @classmethod
     async def query_directory(cls, directory_id: int):
         try:
             async with async_session() as session:
                 sql = select(ApiTestCaseDirectoryModel).where(
-                    ApiTestCaseDirectoryModel.id == directory_id,
-                    ApiTestCaseDirectoryModel.delete_flag == 0)
+                    ApiTestCaseDirectoryModel.id == directory_id, ApiTestCaseDirectoryModel.delete_flag == 0
+                )
                 result = await session.execute(sql)
                 return result.scalars().first()
         except Exception as e:
@@ -41,10 +40,11 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
     async def list_directory(cls, project_id: int):
         try:
             async with async_session() as session:
-                sql = select(ApiTestCaseDirectoryModel) \
-                    .where(ApiTestCaseDirectoryModel.delete_flag == 0,
-                           ApiTestCaseDirectoryModel.project_id == project_id) \
+                sql = (
+                    select(ApiTestCaseDirectoryModel)
+                    .where(ApiTestCaseDirectoryModel.delete_flag == 0, ApiTestCaseDirectoryModel.project_id == project_id)
                     .order_by(asc(ApiTestCaseDirectoryModel.name))
+                )
                 result = await session.execute(sql)
                 return result.scalars().all()
         except Exception as e:
@@ -60,7 +60,8 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                         ApiTestCaseDirectoryModel.delete_flag == 0,
                         ApiTestCaseDirectoryModel.name == form.name,
                         ApiTestCaseDirectoryModel.parent == form.parent,
-                        ApiTestCaseDirectoryModel.id == form.project_id)
+                        ApiTestCaseDirectoryModel.id == form.project_id,
+                    )
                     result = await session.execute(sql)
                     if result.scalars().first() is not None:
                         raise Exception("目录已存在")
@@ -84,8 +85,8 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
             async with async_session() as session:
                 async with session.begin():
                     sql = select(ApiTestCaseDirectoryModel).where(
-                        ApiTestCaseDirectoryModel.id == form.id,
-                        ApiTestCaseDirectoryModel.delete_flag == 0)
+                        ApiTestCaseDirectoryModel.id == form.id, ApiTestCaseDirectoryModel.delete_flag == 0
+                    )
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
@@ -112,8 +113,8 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
             async with async_session() as session:
                 async with session.begin():
                     sql = select(ApiTestCaseDirectoryModel).where(
-                        ApiTestCaseDirectoryModel.id == id,
-                        ApiTestCaseDirectoryModel.delete_flag == 0)
+                        ApiTestCaseDirectoryModel.id == id, ApiTestCaseDirectoryModel.delete_flag == 0
+                    )
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
@@ -145,26 +146,27 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
         for directory in res:
             if directory.parent is None:
                 # 如果没有父亲，说明是最底层数据
-                ans.append(dict(
-                    title=directory.name,
-                    key=directory.id,
-                    children=list(),
-                ))
+                ans.append(
+                    dict(
+                        title=directory.name,
+                        key=directory.id,
+                        value=directory.id,
+                        label=directory.name,
+                        children=list(),
+                    )
+                )
             else:
                 parent_map[directory.parent].append(directory.id)
             ans_map[directory.id] = directory
         # 获取到所有数据信息
         for r in ans:
-            await cls.get_directory(ans_map, parent_map, r.get('key'),
-                                    r.get('children'), case_map,
-                                    case_node, move)
-            if not move and not r.get('children'):
-                r['disabled'] = True
+            await cls.get_directory(ans_map, parent_map, r.get("key"), r.get("children"), case_map, case_node, move)
+            if not move and not r.get("children"):
+                r["disabled"] = True
         return ans, case_map
 
     @classmethod
-    async def get_directory(cls, ans_map: dict, parent_map, parent, children, case_map, case_node=None,
-                            move=False):
+    async def get_directory(cls, ans_map: dict, parent_map, parent, children, case_map, case_node=None, move=False):
         current = parent_map.get(parent)
         if case_node is not None:
             nodes, cs = await case_node(parent)
@@ -179,12 +181,16 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
             else:
                 child, cs = await case_node(temp.id)
                 case_map.update(cs)
-            children.append(dict(
-                title=temp.name,
-                key=temp.id,
-                children=child,
-                disabled=len(child) == 0 and not move
-            ))
+            children.append(
+                dict(
+                    title=temp.name,
+                    key=temp.id,
+                    children=child,
+                    label=temp.name,
+                    value=temp.id,
+                    disabled=len(child) == 0 and not move,
+                )
+            )
             await cls.get_directory(ans_map, parent_map, temp.id, child, case_node, move=move)
 
     @classmethod
@@ -193,11 +199,14 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
         async with async_session() as session:
             ans = [directory_id]
             # 找出父类为directory_id或者非根的目录
-            sql = select(ApiTestCaseDirectoryModel) \
-                .where(ApiTestCaseDirectoryModel.delete_flag == 0,
-                       or_(ApiTestCaseDirectoryModel.parent == directory_id,
-                           ApiTestCaseDirectoryModel.parent is not None)) \
+            sql = (
+                select(ApiTestCaseDirectoryModel)
+                .where(
+                    ApiTestCaseDirectoryModel.delete_flag == 0,
+                    or_(ApiTestCaseDirectoryModel.parent == directory_id, ApiTestCaseDirectoryModel.parent is not None),
+                )
                 .order_by(asc(ApiTestCaseDirectoryModel.name))
+            )
             result = await session.execute(sql)
             data = result.scalars().all()
             for d in data:

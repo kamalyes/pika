@@ -39,14 +39,18 @@ from app.schema.api_testcase import TestCaseInfo, TestCaseSchema
 
 @PikaMdWrapper(ApiTestCaseModel)
 class ApiTestCaseDao(PikaWrapper):
-
     @classmethod
     async def generate_sql(cls):
-        return select(ApiTestCaseModel.create_emp_no, func.count(ApiTestCaseModel.id)) \
-            .outerjoin(SysUserAdminModel, and_(SysUserAdminModel.delete_flag == 0,
-                                               ApiTestCaseModel.create_emp_no == SysUserAdminModel.emp_no)).where(
-            ApiTestCaseModel.delete_flag == 0).group_by(ApiTestCaseModel.create_emp_no).order_by(
-            desc(func.count(ApiTestCaseModel.id)))
+        return (
+            select(ApiTestCaseModel.create_emp_no, func.count(ApiTestCaseModel.id))
+            .outerjoin(
+                SysUserAdminModel,
+                and_(SysUserAdminModel.delete_flag == 0, ApiTestCaseModel.create_emp_no == SysUserAdminModel.emp_no),
+            )
+            .where(ApiTestCaseModel.delete_flag == 0)
+            .group_by(ApiTestCaseModel.create_emp_no)
+            .order_by(desc(func.count(ApiTestCaseModel.id)))
+        )
 
     @classmethod
     async def list_testcase(cls, paging, directory_id: int = None, name: str = "", operator: str = None):
@@ -54,8 +58,7 @@ class ApiTestCaseDao(PikaWrapper):
             filters = [ApiTestCaseModel.delete_flag == 0]
             if directory_id:
                 parents = await ApiTestCaseDirectoryDao.get_directory_son(directory_id)
-                filters = [ApiTestCaseModel.delete_flag == 0,
-                           ApiTestCaseModel.directory_id.in_(parents)]
+                filters = [ApiTestCaseModel.delete_flag == 0, ApiTestCaseModel.directory_id.in_(parents)]
                 if name:
                     filters.append(ApiTestCaseModel.name.like(f"%{name}%"))
                 if operator:
@@ -72,14 +75,16 @@ class ApiTestCaseDao(PikaWrapper):
     async def get_test_case_by_directory_id(cls, directory_id: int):
         try:
             async with async_session() as session:
-                sql = select(ApiTestCaseModel).where(ApiTestCaseModel.delete_flag == 0,
-                                                     ApiTestCaseModel.directory_id == directory_id).order_by(
-                    ApiTestCaseModel.update_date.desc())
+                sql = (
+                    select(ApiTestCaseModel)
+                    .where(ApiTestCaseModel.delete_flag == 0, ApiTestCaseModel.directory_id == directory_id)
+                    .order_by(ApiTestCaseModel.update_date.desc())
+                )
                 result = await session.execute(sql)
                 ans = []
                 case_map = dict()
                 for item in result.scalars():
-                    ans.append({"title": item.name, "key": "testcase_{}".format(item.id)})
+                    ans.append({"title": item.name, "value": f"testcase_{item.id}", "key": f"testcase_{item.id}"})
                     case_map[item.id] = item.name
                 return ans, case_map
         except Exception as e:
@@ -97,8 +102,7 @@ class ApiTestCaseDao(PikaWrapper):
         return len(data)
 
     @classmethod
-    async def _insert(cls, session, case_id: int, operator: str, form: TestCaseInfo,
-                      **fields: tuple):
+    async def _insert(cls, session, case_id: int, operator: str, form: TestCaseInfo, **fields: tuple):
         for field, model_info in fields.items():
             md, model = model_info
             field_data = getattr(form, field)
@@ -123,9 +127,12 @@ class ApiTestCaseDao(PikaWrapper):
 
         """
         query = await session.execute(
-            select(ApiTestCaseModel).where(ApiTestCaseModel.directory_id == data.case.directory_id,
-                                           ApiTestCaseModel.name == data.case.name,
-                                           ApiTestCaseModel.delete_flag == 0))
+            select(ApiTestCaseModel).where(
+                ApiTestCaseModel.directory_id == data.case.directory_id,
+                ApiTestCaseModel.name == data.case.name,
+                ApiTestCaseModel.delete_flag == 0,
+            )
+        )
         if query.scalars().first() is not None:
             raise Exception("用例名称已存在")
         cs = ApiTestCaseModel(**data.case.dict(), operator=operator)
@@ -133,13 +140,16 @@ class ApiTestCaseDao(PikaWrapper):
         session.add(cs)
         await session.flush()
         session.expunge(cs)
-        await cls._insert(session, cs.id, operator, data,
-                          constructor=(ConstructorDao, ConstructorModel),
-                          asserts=(ApiTestCaseAssertsDao, ApiTestCaseAssertsModel),
-                          out_parameters=(
-                              ApiTestCaseOutParametersDao,
-                              ApiTestCaseOutParametersModel),
-                          data=(ApiTestCaseDataDao, ApiTestCaseDataModel))
+        await cls._insert(
+            session,
+            cs.id,
+            operator,
+            data,
+            constructor=(ConstructorDao, ConstructorModel),
+            asserts=(ApiTestCaseAssertsDao, ApiTestCaseAssertsModel),
+            out_parameters=(ApiTestCaseOutParametersDao, ApiTestCaseOutParametersModel),
+            data=(ApiTestCaseDataDao, ApiTestCaseDataModel),
+        )
         return cs
 
     @classmethod
@@ -157,8 +167,8 @@ class ApiTestCaseDao(PikaWrapper):
             async with async_session() as session:
                 async with session.begin():
                     query = await session.execute(
-                        select(ApiTestCaseModel).where(ApiTestCaseModel.id == test_case.id,
-                                                       ApiTestCaseModel.delete_flag == 0))
+                        select(ApiTestCaseModel).where(ApiTestCaseModel.id == test_case.id, ApiTestCaseModel.delete_flag == 0)
+                    )
                     data = query.scalars().first()
                     if data is None:
                         raise Exception("用例不存在")
@@ -183,8 +193,7 @@ class ApiTestCaseDao(PikaWrapper):
         """
         try:
             async with async_session() as session:
-                sql = select(ApiTestCaseModel).where(ApiTestCaseModel.id == case_id,
-                                                     ApiTestCaseModel.delete_flag == 0)
+                sql = select(ApiTestCaseModel).where(ApiTestCaseModel.id == case_id, ApiTestCaseModel.delete_flag == 0)
                 result = await session.execute(sql)
                 data = result.scalars().first()
                 if data is None:
@@ -193,15 +202,19 @@ class ApiTestCaseDao(PikaWrapper):
                 asserts = await ApiTestCaseAssertsDao.async_list_test_case_asserts(data.id)
                 # 获取数据构造器
                 constructors = await ConstructorDao.list_constructor(case_id)
-                constructors_case = await ApiTestCaseDao.query_test_case_by_constructors(
-                    constructors)
+                constructors_case = await ApiTestCaseDao.query_test_case_by_constructors(constructors)
                 test_data = await ApiTestCaseDataDao.list_testcase_data(case_id)
-                parameters = await ApiTestCaseOutParametersDao.select_list(case_id=case_id,
-                                                                           _sort=(
-                                                                               asc(ApiTestCaseOutParametersModel.id),))
-                return dict(asserts=asserts, constructors=constructors, case=data,
-                            constructors_case=constructors_case,
-                            test_data=test_data, out_parameters=parameters)
+                parameters = await ApiTestCaseOutParametersDao.select_list(
+                    case_id=case_id, _sort=(asc(ApiTestCaseOutParametersModel.id),)
+                )
+                return dict(
+                    asserts=asserts,
+                    constructors=constructors,
+                    case=data,
+                    constructors_case=constructors_case,
+                    test_data=test_data,
+                    out_parameters=parameters,
+                )
         except Exception as e:
             ApiTestCaseDao.__log__.error(f"查询用例失败: {str(e)}")
             raise Exception(f"查询用例失败: {str(e)}")
@@ -218,11 +231,9 @@ class ApiTestCaseDao(PikaWrapper):
         """
         try:
             # 找到所有用例名称为
-            constructors = [json.loads(x.constructor_json).get("case_id") for x in constructors if
-                            x.type == 0]
+            constructors = [json.loads(x.constructor_json).get("case_id") for x in constructors if x.type == 0]
             async with async_session() as session:
-                sql = select(ApiTestCaseModel).where(ApiTestCaseModel.id.in_(constructors),
-                                                     ApiTestCaseModel.delete_flag == 0)
+                sql = select(ApiTestCaseModel).where(ApiTestCaseModel.id.in_(constructors), ApiTestCaseModel.delete_flag == 0)
                 result = await session.execute(sql)
                 data = result.scalars().all()
                 return {x.id: x for x in data}
@@ -243,8 +254,8 @@ class ApiTestCaseDao(PikaWrapper):
         try:
             async with async_session() as session:
                 result = await session.execute(
-                    select(ApiTestCaseModel).where(ApiTestCaseModel.id == case_id,
-                                                   ApiTestCaseModel.delete_flag == 0))
+                    select(ApiTestCaseModel).where(ApiTestCaseModel.id == case_id, ApiTestCaseModel.delete_flag == 0)
+                )
                 data = result.scalars().first()
                 if data is None:
                     return None, "用例不存在"
@@ -269,25 +280,30 @@ class ApiTestCaseDao(PikaWrapper):
             project_index = {}
             for p in projects:
                 project_map[p.id] = p.name
-                result.append({
-                    "label": p.name,
-                    "value": p.id,
-                    "key": p.id,
-                    "children": [],
-                })
+                result.append(
+                    {
+                        "label": p.name,
+                        "value": p.id,
+                        "key": p.id,
+                        "children": [],
+                    }
+                )
                 project_index[p.id] = len(result) - 1
             async with async_session() as session:
-                query = await session.execute(select(ApiTestCaseModel).where(
-                    ApiTestCaseModel.project_id.in_(project_map.keys()),
-                    ApiTestCaseModel.delete_flag == 0
-                ))
+                query = await session.execute(
+                    select(ApiTestCaseModel).where(
+                        ApiTestCaseModel.project_id.in_(project_map.keys()), ApiTestCaseModel.delete_flag == 0
+                    )
+                )
                 data = query.scalars().all()
                 for d in data:
-                    result[project_index[d.project_id]]["children"].append({
-                        "label": d.name,
-                        "value": d.id,
-                        "key": d.id,
-                    })
+                    result[project_index[d.project_id]]["children"].append(
+                        {
+                            "label": d.name,
+                            "value": d.id,
+                            "key": d.id,
+                        }
+                    )
                 return result
         except Exception as e:
             cls.__log__.error(f"获取用例列表失败: {str(e)}")
@@ -298,7 +314,7 @@ class ApiTestCaseDao(PikaWrapper):
         """
         通过case_id获取用例构造数据
         Args:
-            case_id: 
+            case_id:
 
         Returns:
 
@@ -306,10 +322,8 @@ class ApiTestCaseDao(PikaWrapper):
         try:
             async with async_session() as session:
                 query = await session.execute(
-                    select(ConstructorModel).where(ConstructorModel.case_id == case_id,
-                                                   ConstructorModel.delete_flag == 0
-                                                   )).order_by(
-                    desc(ConstructorModel.create_date))
+                    select(ConstructorModel).where(ConstructorModel.case_id == case_id, ConstructorModel.delete_flag == 0)
+                ).order_by(desc(ConstructorModel.create_date))
                 return query.scalars().all()
         except Exception as e:
             cls.__log__.error(f"查询构造数据失败: {str(e)}")
@@ -326,9 +340,11 @@ class ApiTestCaseDao(PikaWrapper):
         """
         try:
             async with async_session() as session:
-                sql = select(ConstructorModel).where(ConstructorModel.case_id == case_id,
-                                                     ConstructorModel.delete_flag == 0).order_by(
-                    ConstructorModel.create_date)
+                sql = (
+                    select(ConstructorModel)
+                    .where(ConstructorModel.case_id == case_id, ConstructorModel.delete_flag == 0)
+                    .order_by(ConstructorModel.index)
+                )
                 data = await session.execute(sql)
                 return data.scalars().all()
         except Exception as e:
@@ -455,17 +471,21 @@ class ApiTestCaseDao(PikaWrapper):
         return ans
 
     @classmethod
-    async def query_weekly_user_case(cls, operator: str, start_date: datetime,
-                                     finished_date: datetime) -> List:
+    async def query_weekly_user_case(cls, operator: str, start_date: datetime, finished_date: datetime) -> List:
         ans = dict()
         async with async_session() as session:
             async with session.begin():
                 # date_ = func.date_format(ApiTestCaseModel.create_date, "%Y-%m-%d")
-                sql = select(ApiTestCaseModel.create_date, func.count(ApiTestCaseModel.id)).where(
-                    ApiTestCaseModel.create_emp_no == operator,
-                    ApiTestCaseModel.delete_flag == 0,
-                    ApiTestCaseModel.create_date.between(start_date, finished_date)).group_by(
-                    ApiTestCaseModel.create_date).order_by(asc(ApiTestCaseModel.create_date))
+                sql = (
+                    select(ApiTestCaseModel.create_date, func.count(ApiTestCaseModel.id))
+                    .where(
+                        ApiTestCaseModel.create_emp_no == operator,
+                        ApiTestCaseModel.delete_flag == 0,
+                        ApiTestCaseModel.create_date.between(start_date, finished_date),
+                    )
+                    .group_by(ApiTestCaseModel.create_date)
+                    .order_by(asc(ApiTestCaseModel.create_date))
+                )
                 query = await session.execute(sql)
                 temp_count, last_date = 0, 0
                 for i, q in enumerate(query.all()):
