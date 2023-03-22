@@ -35,6 +35,7 @@ from app.models.api_testcase_out_parameters import ApiTestCaseOutParametersModel
 from app.models.constructor import ConstructorModel
 from app.models.project import ProjectModel
 from app.schema.api_testcase import TestCaseInfo, TestCaseSchema
+from app.schema.api_testcase_out_parameters import ApiTestCaseVariablesSchema
 
 
 @PikaMdWrapper(ApiTestCaseModel)
@@ -240,6 +241,48 @@ class ApiTestCaseDao(PikaWrapper):
         except Exception as e:
             ApiTestCaseDao.__log__.error(f"查询用例失败: {str(e)}")
             raise Exception(f"查询用例失败: {str(e)}")
+
+    @staticmethod
+    async def query_test_case_out_parameters(session, case_list: List[ApiTestCaseVariablesSchema], case_set=None, var_list=None):
+        """
+        根据前置场景id获取对应的参数
+        :param case_list:
+        :param session:
+        :param case_set:
+        :param var_list:
+        :return:
+        """
+        if len(case_list) == 0:
+            return
+        if case_set is None:
+            case_set = set(list(c.case_id for c in case_list))
+        if var_list is None:
+            var_list = dict()
+        cs_list = list(c.case_id for c in case_list)
+        step_case = list()
+        name_dict = {c.case_id: c.step_name for c in case_list}
+        # 获取用例的前后置步骤和出参
+        out = select(ApiTestCaseOutParametersModel).where(
+            ApiTestCaseOutParametersModel.case_id.in_(cs_list), ApiTestCaseOutParametersModel.deleted_at == 0
+        )
+        parameters = await session.execute(out)
+        for p in parameters.scalars().all():
+            var_list.append(dict(stepName=name_dict[p.case_id], name="${%s}" % p.name))
+        sql = select(ConstructorModel).where(ConstructorModel.case_id.in_(cs_list), ConstructorModel.deleted_at == 0)
+        steps = await session.execute(sql)
+        for s in steps.scalars().all():
+            if s.value:
+                var_list.append(dict(stepName=s.name, name="${%s}" % s.value))
+                continue
+            if s.type == ConstructorTypeEnum.testcase:
+                data = json.loads(s.constructor_json)
+                case_id = data.get("constructor_case_id")
+                if not case_id:
+                    continue
+                if case_id in case_set:
+                    raise Exception("场景存在循环依赖")
+                step_case.append(ApiTestCaseVariablesSchema(case_id=case_id, step_name=s.name))
+        return step_case
 
     @classmethod
     async def async_query_test_case(cls, case_id) -> [ApiTestCaseModel, str]:

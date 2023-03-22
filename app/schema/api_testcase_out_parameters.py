@@ -19,3 +19,8 @@ class ApiTestCaseOutParametersSchema(BaseModel):
 
 class ApiTestCaseParametersSchema(ApiTestCaseOutParametersSchema):
     case_id: int = None
+
+
+class ApiTestCaseVariablesSchema(BaseModel):
+    case_id: int
+    step_name: str

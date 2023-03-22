@@ -23,7 +23,11 @@ from app.models.api_testcase_out_parameters import ApiTestCaseOutParametersModel
 from app.schema.api_testcase import TestCaseAssertsForm, TestCaseSchema, TestCaseInfo, TestCaseGeneratorForm
 from app.schema.api_testcase_data import ApiTestCaseDataSchema
 from app.schema.api_testcase_directory import ApiTestCaseDirectorySchema, MoveApiTestCaseSchema
-from app.schema.api_testcase_out_parameters import ApiTestCaseOutParametersSchema, ApiTestCaseParametersSchema
+from app.schema.api_testcase_out_parameters import (
+    ApiTestCaseOutParametersSchema,
+    ApiTestCaseParametersSchema,
+    ApiTestCaseVariablesSchema,
+)
 from app.schema.base import BaseOnlyPagingSchema
 from app.schema.constructor import ConstructorSchema, ConstructorIndexSchema
 from app.schema.report import ApiTestReportSchema
@@ -397,3 +401,11 @@ async def convert_case(import_type: CaseConvertorTypeEnum, file: UploadFile = Fi
         return PikaResponse.failed(detail=f"请传入{file_ext}后缀文件")
     requests = convert(file.file)
     return PikaResponse.success(data=requests)
+
+
+@router.post("/variables/list", summary="根据前后置步骤查询变量名")
+async def query_variables(
+    steps: List[ApiTestCaseVariablesSchema], user_info=Depends(Permission()), session=Depends(async_db_session_iterator))
+    var_list = list()
+    await ApiTestCaseDao.query_test_case_out_parameters(session, steps, var_list=var_list)
+    return PikaResponse.success(var_list)
