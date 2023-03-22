@@ -263,12 +263,12 @@ class ApiTestCaseDao(PikaWrapper):
         name_dict = {c.case_id: c.step_name for c in case_list}
         # 获取用例的前后置步骤和出参
         out = select(ApiTestCaseOutParametersModel).where(
-            ApiTestCaseOutParametersModel.case_id.in_(cs_list), ApiTestCaseOutParametersModel.deleted_at == 0
+            ApiTestCaseOutParametersModel.case_id.in_(cs_list), ApiTestCaseOutParametersModel.delete_date == 0
         )
         parameters = await session.execute(out)
         for p in parameters.scalars().all():
             var_list.append(dict(stepName=name_dict[p.case_id], name="${%s}" % p.name))
-        sql = select(ConstructorModel).where(ConstructorModel.case_id.in_(cs_list), ConstructorModel.deleted_at == 0)
+        sql = select(ConstructorModel).where(ConstructorModel.case_id.in_(cs_list), ConstructorModel.delete_date == 0)
         steps = await session.execute(sql)
         for s in steps.scalars().all():
             if s.value:
