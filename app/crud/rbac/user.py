@@ -295,10 +295,8 @@ class UserDao(PikaWrapper):
                                                         is_activate=user_admin.is_activate,
                                                         delete_flag=user_admin.delete_flag,
                                                         enabled_flag=user_admin.enabled_flag,
-                                                        pwd_valid_date=str(
-                                                            user_admin.pwd_valid_date),
-                                                        err_pwd_count=int(
-                                                            user_admin.err_pwd_count))
+                                                        pwd_valid_date=str(user_admin.pwd_valid_date),
+                                                        err_pwd_count=int(user_admin.err_pwd_count))
                     else:
                         await cls.pwd_mistake_limit(uid=user.id)
                     old_token = await async_redis.get(
