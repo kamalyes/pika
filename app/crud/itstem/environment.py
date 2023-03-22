@@ -12,7 +12,7 @@
 
 from sqlalchemy import select, desc
 
-from app.core.handler.execres import KeyExistException, KeyUndefinedException, ValidException
+from app.core.handler.exceres import KeyExistException, KeyUndefinedException, ValidException
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
 from app.models.environment import EnvironmentModel

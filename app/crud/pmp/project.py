@@ -17,7 +17,7 @@ from typing import List
 from sqlalchemy import or_, select, desc, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.handler.execres import AuthException, KeyExistException, KeyUndefinedException
+from app.core.handler.exceres import AuthException, KeyExistException, KeyUndefinedException
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.enums.OperationEnum import SqlOperationTypeEnum
 from app.enums.RbacEnum import RoleEnum

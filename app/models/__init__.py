@@ -21,7 +21,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from app.core.handler.execres import (
+from app.core.handler.exceres import (
     DbExecuteException,
     ValidException)
 from app.enums.DatabaseEnum import DatabaseTypeEnum

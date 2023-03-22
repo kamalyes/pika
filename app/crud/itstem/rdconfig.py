@@ -9,7 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from app.core.handler.execres import KeyUndefinedException
+from app.core.handler.exceres import KeyUndefinedException
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.middleware.xredis import RedisHelper, PikaRedisManager
 from app.models.redis_config import RedisModel

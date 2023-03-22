@@ -11,7 +11,7 @@
 """
 from pydantic import validator, BaseModel
 
-from app.excpetions.business.ParamsException import VariablesNullError
+from app.exceptions.business.ParamsException import VariablesNullError
 from app.schema.base import PikaBaseModel
 
 

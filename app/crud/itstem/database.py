@@ -16,7 +16,7 @@ from datetime import datetime
 from custard.json import JsonEncoder
 from sqlalchemy import select, MetaData, text, and_
 from sqlalchemy.exc import ResourceClosedError
-from app.core.handler.execres import KeyExistException, KeyUndefinedException
+from app.core.handler.exceres import KeyExistException, KeyUndefinedException
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud import PikaWrapper, PikaMdWrapper

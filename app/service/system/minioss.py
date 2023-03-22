@@ -1,5 +1,5 @@
 from fastapi import APIRouter, File, Depends, UploadFile
-from app.core.handler.execres import KeyUndefinedException
+from app.core.handler.exceres import KeyUndefinedException
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud.rbac.user import UserDao

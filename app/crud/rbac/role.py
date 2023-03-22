@@ -14,7 +14,7 @@ from typing import Dict, Any, Text
 from sqlalchemy import select, delete, update, and_, or_
 
 from app.core.handler.asyncsql import AsyncDbSession
-from app.core.handler.execres import KeyExistException
+from app.core.handler.exceres import KeyExistException
 from app.crud import PikaMdWrapper
 from app.models import async_db_session_generator
 from app.models.role import RoleModel

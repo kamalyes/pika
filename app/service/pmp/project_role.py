@@ -10,7 +10,7 @@
 @Desc    :  None
 """
 from fastapi import Depends, APIRouter
-from app.core.handler.execres import KeyExistException
+from app.core.handler.exceres import KeyExistException
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud.pmp.project import ProjectRoleDao

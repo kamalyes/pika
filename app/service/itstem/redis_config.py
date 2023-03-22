@@ -11,7 +11,7 @@
 """
 from fastapi import Depends, APIRouter
 from starlette.background import BackgroundTasks
-from app.core.handler.execres import KeyExistException
+from app.core.handler.exceres import KeyExistException
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud.itstem.rdconfig import PikaRedisConfigDao

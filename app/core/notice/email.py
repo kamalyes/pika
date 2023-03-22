@@ -18,7 +18,7 @@ from custard.core import RegEx
 from custard.time import Moment
 from jinja2 import Environment, FileSystemLoader
 
-from app.core.handler.execres import ThirdException, ValidException
+from app.core.handler.exceres import ThirdException, ValidException
 from app.enums.SysCodeEnum import ExcCodeEnum
 from app.enums.SysvarEnum import PikaGlobalVarEnum
 from config import PikaAppConfig
@@ -41,7 +41,8 @@ class EmailManger(object):
 
     @staticmethod
     def register_succeed_template(
-            username, emp_no, email, valid_time, send_time=Moment.get_now_time("%Y-%m-%d %H:%M:%S")
+            username, emp_no, email, valid_time, send_time=Moment.get_now_time(
+                "%Y-%m-%d %H:%M:%S")
     ):
         """
         注册成功邮件模板
@@ -248,20 +249,24 @@ class EmailManger(object):
             email_smtp_host = PikaAppConfig.EMAIL_HOST
             email_sender = PikaAppConfig.EMAIL_SENDER
             email_password = PikaAppConfig.EMAIL_PASSWORD
-            email_cursor = smtplib.SMTP_SSL(email_smtp_host, PikaAppConfig.EMAIL_PORT)
+            email_cursor = smtplib.SMTP_SSL(
+                email_smtp_host, PikaAppConfig.EMAIL_PORT)
             try:
                 email_data = MIMEText(content, send_type, "UTF-8")
                 email_data["Subject"] = Header(
                     "developer" if subject == "" else subject, "UTF-8"
                 )
-                email_data["From"] = Header("%s<%s>" % (title, email_sender), "UTF-8")
+                email_data["From"] = Header(
+                    "%s<%s>" % (title, email_sender), "UTF-8")
                 email_data["To"] = Header(";".join(addressee), "UTF-8")
                 email_cursor.login(email_sender, email_password)  # 登录服务器
-                email_cursor.sendmail(email_sender, addressee, email_data.as_string())
+                email_cursor.sendmail(
+                    email_sender, addressee, email_data.as_string())
                 # 开启 DEBUG
                 # email_cursor.set_debuglevel(1)
             except Exception as e:
-                raise ThirdException(code=ExcCodeEnum.SEND_EMAIL_ERROR, detail=f"发送邮件失败，错误原因：{e}")
+                raise ThirdException(
+                    code=ExcCodeEnum.SEND_EMAIL_ERROR, detail=f"发送邮件失败，错误原因：{e}")
             else:
                 return True
             finally:
@@ -273,4 +278,5 @@ class EmailManger(object):
                         detail=f"关闭邮件游标失败，错误原因{e}",
                     )
         else:
-            raise ValidException(code=ExcCodeEnum.FIELD_TYPE_ERROR, detail="邮箱地址格式不正确")
+            raise ValidException(
+                code=ExcCodeEnum.FIELD_TYPE_ERROR, detail="邮箱地址格式不正确")

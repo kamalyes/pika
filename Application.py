@@ -10,13 +10,13 @@
 @Desc    :  总程序
 """
 import asyncio
-import traceback
 from mimetypes import guess_type
 from os.path import isfile
 
 import uvicorn
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from fastapi.responses import JSONResponse
 from fastapi import FastAPI, Request, status, Depends, WebSocket, WebSocketDisconnect
 from custard.core import System
 from custard.limiter import Limiter, RateLimitException
@@ -28,7 +28,7 @@ from starlette.responses import Response
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
-from app.core.handler.execres import (
+from app.core.handler.exceres import (
     KeyExistException,
     KeyUndefinedException,
     ValidException,
@@ -42,6 +42,7 @@ from app.core.handler.jsonres import PikaResponse
 from app.core.notice.wss_msg import WebSocketMessage
 from app.crud.system.notification import PikaNotificationDao
 from app.enums.MessageEnum import MessageTypeEnum, MessageStateEnum
+from app.enums.SysCodeEnum import ExcCodeEnum
 from app.enums.SysvarEnum import PikaGlobalVarEnum
 from app.middleware.xredis import RedisHelper
 from app.models import async_redis, async_create_table
@@ -260,11 +261,14 @@ class PikaFastApi:
             Returns:
 
             """
-            error_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-            return PikaResponse.custom(code=error_code, status_code=error_code,
-                                       detail=traceback.format_exc())
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content=dict(code=ExcCodeEnum.UNKNOWN_ERROR,
+                             detail="unknown error: " + str(exc)),
+            )
 
     # noinspection PyShadowingNames
+
     @staticmethod
     def create_app(app_name=None, origins=None, title=f"{PikaGlobalVarEnum.BIG_HUMP_APP_NAME}测试平台",
                    requirements=None):

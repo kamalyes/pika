@@ -13,7 +13,7 @@ from collections import defaultdict
 from typing import List
 
 from sqlalchemy import select, update
-from app.core.handler.execres import KeyExistException, KeyUndefinedException
+from app.core.handler.exceres import KeyExistException, KeyUndefinedException
 
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session

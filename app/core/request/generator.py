@@ -21,7 +21,7 @@ from app.enums.CaseStatusEnum import CaseStatus
 from app.enums.ConstructorEnum import ConstructorTypeEnum
 from app.enums.RequestBodyEnum import ReqBodyTypeEnum
 from app.enums.RequestTypeEnum import RequestType
-from app.excpetions.convert.GenerateException import GenerateException
+from app.exceptions.convert.GenerateException import GenerateException
 from app.schema.api_testcase import TestCaseSchema
 from app.schema.constructor import IndexConstructorSchema
 from app.schema.request import RequestInfoSchema
@@ -95,7 +95,8 @@ class CaseGenerator(object):
                     base_path=None,
                     url=requests[r].url,
                     request_method=requests[r].request_method,
-                    body_type=CaseGenerator.get_body_type(requests[r].request_headers),
+                    body_type=CaseGenerator.get_body_type(
+                        requests[r].request_headers),
                 ),
                 ensure_ascii=False,
             )
@@ -132,7 +133,8 @@ class CaseGenerator(object):
             body=last.body,
             request_method=last.request_method,
             body_type=CaseGenerator.get_body_type(last.request_headers).value,
-            request_headers=json.dumps(last.request_headers, ensure_ascii=False),
+            request_headers=json.dumps(
+                last.request_headers, ensure_ascii=False),
             case_type=0,
             status=CaseStatus.debugging.value,
             priority="P3",
@@ -157,7 +159,8 @@ class CaseGenerator(object):
             if "Content-Length" in requests[i].response_headers:
                 requests[i].response_headers.pop("Content-Length")
             # 记录变量
-            CaseGenerator.record_vars(requests[i], var_pool, f"http_res_{i + 1}")
+            CaseGenerator.record_vars(
+                requests[i], var_pool, f"http_res_{i + 1}")
             if i > 0:
                 CaseGenerator.replace_vars(requests[i], var_pool, replaced)
         return replaced
@@ -190,7 +193,8 @@ class CaseGenerator(object):
         Returns:
 
         """
-        CaseGenerator.analysis_headers(request, ans, f"{var_name}.response_headers")
+        CaseGenerator.analysis_headers(
+            request, ans, f"{var_name}.response_headers")
         CaseGenerator.analysis_body(request, ans, f"{var_name}.response")
 
     @staticmethod
@@ -320,14 +324,16 @@ class CaseGenerator(object):
         """
         if isinstance(body, dict):
             for k, v in body.items():
-                string, value = CaseGenerator.dfs_replace(v, ans, var_type, replaced)
+                string, value = CaseGenerator.dfs_replace(
+                    v, ans, var_type, replaced)
                 if value is not None:
                     body[k] = "${%s}" % value
                     if not string:
                         var_type.append("${%s}" % value)
         elif isinstance(body, list):
             for i in range(len(body)):
-                string, value = CaseGenerator.dfs_replace(body[i], ans, var_type, replaced)
+                string, value = CaseGenerator.dfs_replace(
+                    body[i], ans, var_type, replaced)
                 if value is not None:
                     body[i] = "${%s}" % value
                     if not string:
@@ -337,7 +343,8 @@ class CaseGenerator(object):
             if isinstance(body, bool):
                 body_str = str(body)
             if ans.get(body_str):
-                replaced.append("%s => ${%s}" % (body_str, ans.get(body_str)[0]))
+                replaced.append("%s => ${%s}" %
+                                (body_str, ans.get(body_str)[0]))
                 if not isinstance(body_str, str):
                     return False, ans.get(body_str)[0]
                 return True, ans.get(body_str)[0]

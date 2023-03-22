@@ -12,7 +12,7 @@
 from datetime import datetime
 
 from sqlalchemy import select, desc
-from app.core.handler.execres import KeyUndefinedException
+from app.core.handler.exceres import KeyUndefinedException
 
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.itst.api.testresult import ApiTestResultDao

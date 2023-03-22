@@ -25,7 +25,7 @@ from redis import ConnectionPool, StrictRedis
 from rediscluster import RedisCluster, ClusterConnectionPool
 
 from app.enums.SysvarEnum import PikaGlobalVarEnum
-from app.excpetions.thirdparty.RedisException import RedisException
+from app.exceptions.thirdparty.RedisException import RedisException
 from config import PikaAppConfig
 
 

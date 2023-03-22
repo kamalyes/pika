@@ -12,9 +12,8 @@
 
 from fastapi import Depends
 
-from app.core.handler.execres import AuthException
+from app.core.handler.exceres import AuthException, PermissionException
 from app.crud.rbac.user import UserDao
-from app.excpetions.business.RequestException import PermissionException
 from app.schema.user import OAuth2TokenSchema
 
 FORBIDDEN = "对不起, 你没有足够的权限"

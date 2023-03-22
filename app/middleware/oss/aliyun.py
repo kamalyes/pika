@@ -11,7 +11,7 @@
 """
 import oss2
 from awaits.awaitable import awaitable
-from app.core.handler.execres import KeyUndefinedException
+from app.core.handler.exceres import KeyUndefinedException
 
 from app.middleware.oss.files import OssFile
 

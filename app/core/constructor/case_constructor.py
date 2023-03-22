@@ -12,7 +12,7 @@
 import json
 
 from app.core.constructor.constructor import ConstructorAbstract
-from app.core.handler.execres import KeyUndefinedException
+from app.core.handler.exceres import KeyUndefinedException
 from app.crud.itst.api.testcase import ApiTestCaseDao
 from app.models.constructor import ConstructorModel
 

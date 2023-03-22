@@ -4,15 +4,18 @@ from fastapi import Body
 from pydantic import BaseModel, validator
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.excpetions.business.ParamsException import VariablesNullError
+from app.exceptions.business.ParamsException import VariablesNullError
 from app.schema.base import PikaBaseModel
 
 
 class ConstructorSchema(BaseModel):
     id: Optional[int] = Body(0, title="id")
-    value: Optional[str] = Body("", title="", max_length=ByteSizeEnum.LENGTH_255)
-    type: Optional[int] = Body(0, title="类型 0: testcase 1: sqlscript 2: redis 3: py脚本 4: 其它")
-    name: Optional[str] = Body("", title="", max_length=ByteSizeEnum.LENGTH_255)
+    value: Optional[str] = Body(
+        "", title="", max_length=ByteSizeEnum.LENGTH_255)
+    type: Optional[int] = Body(
+        0, title="类型 0: testcase 1: sqlscript 2: redis 3: py脚本 4: 其它")
+    name: Optional[str] = Body(
+        "", title="", max_length=ByteSizeEnum.LENGTH_255)
     constructor_json: Optional[str] = Body("", title="constructor_json")
     enabled_flag: Optional[bool] = Body(True, title="是否可用")
     case_id: Optional[int] = Body(0, title="所属用例id")

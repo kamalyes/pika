@@ -14,7 +14,7 @@ from typing import List
 from custard.core import MockHelper
 from custard.time import Moment
 
-from app.core.handler.execres import ValidException
+from app.core.handler.exceres import ValidException
 from app.core.handler.logger import PikaLogger
 from app.core.notice.email import EmailManger
 from app.enums.RedisEnum import RedisKeyEnum
@@ -80,7 +80,8 @@ class Email(object):
                         emp_no,
                         auth_code_,
                         Moment.timestamp_to_date(valid_time),
-                        Moment.timestamp_to_date(int(valid_time - auth_code_valid_time)),
+                        Moment.timestamp_to_date(
+                            int(valid_time - auth_code_valid_time)),
                     ),
                     subject=f"{app_name}-获取验证码成功通知",
                     addressee=addressee
@@ -91,7 +92,8 @@ class Email(object):
                         addressee,
                         auth_code_,
                         Moment.timestamp_to_date(valid_time),
-                        Moment.timestamp_to_date(int(valid_time - auth_code_valid_time)),
+                        Moment.timestamp_to_date(
+                            int(valid_time - auth_code_valid_time)),
                     ),
                     subject=f"{app_name}-注册验证码通知",
                     addressee=addressee

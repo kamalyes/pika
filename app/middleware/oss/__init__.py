@@ -9,7 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from app.core.handler.execres import ValidException
+from app.core.handler.exceres import ValidException
 from app.enums.OssEnum import MiniOssTypeEnum
 from app.middleware.oss.aliyun import AliyunOss
 from app.middleware.oss.files import OssFile

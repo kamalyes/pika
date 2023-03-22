@@ -12,7 +12,7 @@
 
 from sqlalchemy import select, and_
 
-from app.core.handler.execres import KeyExistException, KeyUndefinedException, SystemException
+from app.core.handler.exceres import KeyExistException, KeyUndefinedException, SystemException
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.rbac.organization import OrganizationDao
 from app.middleware.xredis import RedisHelper

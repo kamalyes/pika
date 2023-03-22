@@ -16,7 +16,7 @@ from typing import List, Dict
 from sqlalchemy import desc, func, and_, asc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from app.core.handler.execres import KeyExistException, KeyUndefinedException
+from app.core.handler.exceres import KeyExistException, KeyUndefinedException
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud import PikaWrapper, PikaMdWrapper, db_connect

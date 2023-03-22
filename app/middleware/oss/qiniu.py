@@ -15,7 +15,7 @@ from io import BytesIO
 import aiohttp
 from awaits.awaitable import awaitable
 from qiniu import Auth, put_stream, BucketManager
-from app.core.handler.execres import KeyUndefinedException
+from app.core.handler.exceres import KeyUndefinedException
 
 from app.middleware.oss import OssFile
 from config import PikaAppConfig

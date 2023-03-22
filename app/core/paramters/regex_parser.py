@@ -13,7 +13,7 @@ import re
 from typing import Any
 
 from app.core.paramters.parser import Parser
-from app.excpetions.business.CaseException import CaseParametersException
+from app.exceptions.business.CaseException import CaseParametersException
 
 
 class RegexParser(Parser):

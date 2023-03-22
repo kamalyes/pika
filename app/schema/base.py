@@ -16,7 +16,7 @@ from fastapi import Query, Form, Body
 from custard.time import Moment
 from pydantic import BaseModel
 
-from app.core.handler.execres import ValidException
+from app.core.handler.exceres import ValidException
 from app.enums.ByteSizeEnum import ByteSizeEnum
 
 
@@ -48,15 +48,18 @@ class BaseOnlyIdSchema(BaseModel):
 
 
 class BaseOnlyNameSchema(BaseModel):
-    name: Optional[str] = Body(..., title="名称", min_length=2, max_length=ByteSizeEnum.LENGTH_255)
+    name: Optional[str] = Body(..., title="名称",
+                               min_length=2, max_length=ByteSizeEnum.LENGTH_255)
 
 
 class BaseOnlyIdsSchema(BaseModel):
-    ids: Optional[str] = Body(..., title="ids", max_length=ByteSizeEnum.LENGTH_3000)
+    ids: Optional[str] = Body(..., title="ids",
+                              max_length=ByteSizeEnum.LENGTH_3000)
 
 
 class BaseOnlyDescSchema(BaseModel):
-    description: Optional[str] = Body(None, title="备注信息", max_length=ByteSizeEnum.LENGTH_255)
+    description: Optional[str] = Body(
+        None, title="备注信息", max_length=ByteSizeEnum.LENGTH_255)
 
 
 class BaseOnlyEnabledFlagSchema(BaseModel):
@@ -68,7 +71,8 @@ class BaseOnlyDelSchema(BaseModel):
 
 
 class BaseOnlyEmpNoSchema(BaseModel):
-    emp_no: Optional[str] = Body(None, title="用户编码", max_length=ByteSizeEnum.LENGTH_16)
+    emp_no: Optional[str] = Body(
+        None, title="用户编码", max_length=ByteSizeEnum.LENGTH_16)
 
 
 class BaseLargeEditSchema(BaseOnlyIdSchema, BaseOnlyDescSchema, BaseOnlyEnabledFlagSchema):
@@ -76,18 +80,24 @@ class BaseLargeEditSchema(BaseOnlyIdSchema, BaseOnlyDescSchema, BaseOnlyEnabledF
 
 
 class BaseOnlyOperatorSchema(BaseModel):
-    create_emp_no: Optional[str] = Query(None, title="创建者员工编号", max_length=ByteSizeEnum.LENGTH_20)
-    update_emp_no: Optional[str] = Query(None, title="修改者员工编号", max_length=ByteSizeEnum.LENGTH_20)
+    create_emp_no: Optional[str] = Query(
+        None, title="创建者员工编号", max_length=ByteSizeEnum.LENGTH_20)
+    update_emp_no: Optional[str] = Query(
+        None, title="修改者员工编号", max_length=ByteSizeEnum.LENGTH_20)
 
 
 class BaseOnlyQueryDateSchema(BaseModel):
-    create_date: Optional[datetime] = Query(Moment.skew_date(days=-3), title="创建日期")
-    update_date: Optional[datetime] = Query(Moment.skew_date(minutes=15), title="更新日期")
+    create_date: Optional[datetime] = Query(
+        Moment.skew_date(days=-3), title="创建日期")
+    update_date: Optional[datetime] = Query(
+        Moment.skew_date(minutes=15), title="更新日期")
 
 
 class BaseOnlyPointDateSchema(BaseModel):
-    start_date: Optional[datetime] = Query(Moment.skew_date(days=-3), title="开始日期")
-    finished_date: Optional[datetime] = Query(Moment.skew_date(minutes=15), title="完成日期")
+    start_date: Optional[datetime] = Query(
+        Moment.skew_date(days=-3), title="开始日期")
+    finished_date: Optional[datetime] = Query(
+        Moment.skew_date(minutes=15), title="完成日期")
 
 
 class BaseOnlyPagingSchema(BaseModel):

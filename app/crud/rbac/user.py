@@ -19,7 +19,7 @@ from custard.time import Moment
 from sqlalchemy import or_, select, func, and_, update, delete, distinct
 
 from app.core.handler.asyncsql import AsyncDbSession
-from app.core.handler.execres import AuthException, \
+from app.core.handler.exceres import AuthException, \
     SystemException, ThirdException, RedisException,  ValidException
 from app.core.handler.jsonres import PikaResponse
 from app.crud import PikaWrapper, PikaMdWrapper
@@ -60,11 +60,14 @@ class UserDao(PikaWrapper):
 
         """
         if username == exists_username:
-            raise SystemException(code=ExcCodeEnum.USER_HAS_USED, detail="该用户名已被使用！")
+            raise SystemException(
+                code=ExcCodeEnum.USER_HAS_USED, detail="该用户名已被使用！")
         elif email == exists_email:
-            raise SystemException(code=ExcCodeEnum.EMAIL_HAS_USED, detail="该邮箱账号已被使用！")
+            raise SystemException(
+                code=ExcCodeEnum.EMAIL_HAS_USED, detail="该邮箱账号已被使用！")
         elif mobile == exists_mobile and (mobile is not None and exists_mobile is not None):
-            raise SystemException(code=ExcCodeEnum.EMAIL_HAS_USED, detail="该手机号已被使用！")
+            raise SystemException(
+                code=ExcCodeEnum.EMAIL_HAS_USED, detail="该手机号已被使用！")
 
     @classmethod
     async def create_users_epd(cls, users: Any, request):
@@ -75,7 +78,8 @@ class UserDao(PikaWrapper):
                                        email=request.email, exists_email=exists_users.email)
         # 注册的时候给密码加盐
         pwd = Kerberos.md5_encode(decode_msg=request.password)
-        emp_no = f"{PikaGlobalVarEnum.EMP_NO_START}{MockHelper.rand_verify_code(6, 1)}".upper()
+        emp_no = f"{PikaGlobalVarEnum.EMP_NO_START}{MockHelper.rand_verify_code(6, 1)}".upper(
+        )
         return emp_no, pwd
 
     @classmethod
@@ -96,7 +100,8 @@ class UserDao(PikaWrapper):
                         UserModel.email == register_model.email)))
                 counts = await session.execute(select(func.count(UserModel.id)))
                 # 如果用户数量为0 则注册为超管,且激活状态为1
-                identity = RoleEnum.ADMIN.value if counts.scalars().first() == 0 else RoleEnum.ORDINARY.value
+                identity = RoleEnum.ADMIN.value if counts.scalars(
+                ).first() == 0 else RoleEnum.ORDINARY.value
                 is_activate = 1 if identity == RoleEnum.ADMIN else 0
                 emp_no, pwd = await cls.create_users_epd(users=users, request=register_model)
                 user = UserModel(emp_no=emp_no, username=register_model.username,
@@ -109,7 +114,8 @@ class UserDao(PikaWrapper):
                 user_admin = SysUserAdminModel(uid=user.id, emp_no=user.emp_no, is_activate=is_activate,
                                                password=pwd,
                                                pwd_valid_date=pwd_valid_date,
-                                               registration_date=Moment.get_now_time("%Y-%m-%d %H:%M:%S"),
+                                               registration_date=Moment.get_now_time(
+                                                   "%Y-%m-%d %H:%M:%S"),
                                                registration_ip=user_ip)
                 session.add(user_admin)
             try:
@@ -124,18 +130,23 @@ class UserDao(PikaWrapper):
     async def account_status_verify(**kwargs):
         # 状态
         if kwargs["delete_flag"]:
-            raise AuthException(code=ExcCodeEnum.ACCOUNT_HAS_DELETE, detail="账号已被删除！")
+            raise AuthException(
+                code=ExcCodeEnum.ACCOUNT_HAS_DELETE, detail="账号已被删除！")
         if kwargs["enabled_flag"] is False:
-            raise AuthException(code=ExcCodeEnum.ACCOUNT_HAS_DIS_ENABLED, detail="账号已被禁用！")
+            raise AuthException(
+                code=ExcCodeEnum.ACCOUNT_HAS_DIS_ENABLED, detail="账号已被禁用！")
         if kwargs["is_activate"] == 0:
-            raise AuthException(code=ExcCodeEnum.ACCOUNT_HAS_NOT_ACTIVATE, detail="账号未激活！")
+            raise AuthException(
+                code=ExcCodeEnum.ACCOUNT_HAS_NOT_ACTIVATE, detail="账号未激活！")
         try:
             compare_time = Moment.compare_time(kwargs["pwd_valid_date"],
                                                Moment.get_now_time("%Y-%m-%d %H:%M:%S"))
         except Exception as e:
-            raise SystemException(code=ExcCodeEnum.FIELD_TYPE_ERROR, detail=f"密码有效期对比失败！具体错误原因：{e}")
+            raise SystemException(
+                code=ExcCodeEnum.FIELD_TYPE_ERROR, detail=f"密码有效期对比失败！具体错误原因：{e}")
         if compare_time is False:
-            raise AuthException(code=ExcCodeEnum.PASSWORD_HAS_EXPIRED, detail="密码已过期，请修改后进行登录！")
+            raise AuthException(
+                code=ExcCodeEnum.PASSWORD_HAS_EXPIRED, detail="密码已过期，请修改后进行登录！")
 
     @staticmethod
     async def pwd_mistake_limit(**kwargs):
@@ -152,7 +163,8 @@ class UserDao(PikaWrapper):
                         {"err_pwd_count": int(err_pwd_count + 1)})
                     await session.execute(sql)
                     await session.commit()
-                    raise AuthException(code=ExcCodeEnum.PASSWORD_ERROR, detail="登录密码错误！")
+                    raise AuthException(
+                        code=ExcCodeEnum.PASSWORD_ERROR, detail="登录密码错误！")
 
     @classmethod
     async def generate_uuid_jwt(cls, **kwargs):
@@ -162,7 +174,8 @@ class UserDao(PikaWrapper):
             **kwargs:
         Returns:
         """
-        target_value = {"emp_no": kwargs["emp_no"], "password": kwargs["password"]}
+        target_value = {
+            "emp_no": kwargs["emp_no"], "password": kwargs["password"]}
         try:
             uuid4_ = str(fake.uuid4()).upper()
             jwt_encode_result = Kerberos.jwt_encode(secret_key=PikaAppConfig.JWT_SECRET_KEY,
@@ -245,8 +258,10 @@ class UserDao(PikaWrapper):
                 user_infos = DataHand.chain_all([PikaResponse.model_to_dict(user),
                                                  PikaResponse.model_to_dict(user_admin)])
                 # 屏蔽字段
-                dislodge = ["open_id", "private_key", "password", "description", "id"]
-                result = {key: val for key, val in user_infos.items() if key not in dislodge}
+                dislodge = ["open_id", "private_key",
+                            "password", "description", "id"]
+                result = {key: val for key, val in user_infos.items()
+                          if key not in dislodge}
                 # # 菜单权限
                 # roles = RoleModel.get_roles_by_ids(user['roles'])
                 # menu_ids = []
@@ -287,7 +302,7 @@ class UserDao(PikaWrapper):
                     pwd = Kerberos.md5_encode(oauth2_login.password)
                     user_admins = await session.execute(
                         select(SysUserAdminModel).where(
-                            and_(SysUserAdminModel.password == pwd ,
+                            and_(SysUserAdminModel.password == pwd,
                                  SysUserAdminModel.uid == user.id)))
                     user_admin = user_admins.scalars().first()
                     if user_admin:
@@ -295,7 +310,8 @@ class UserDao(PikaWrapper):
                                                         is_activate=user_admin.is_activate,
                                                         delete_flag=user_admin.delete_flag,
                                                         enabled_flag=user_admin.enabled_flag,
-                                                        pwd_valid_date=str(user_admin.pwd_valid_date),
+                                                        pwd_valid_date=str(
+                                                            user_admin.pwd_valid_date),
                                                         err_pwd_count=int(user_admin.err_pwd_count))
                     else:
                         await cls.pwd_mistake_limit(uid=user.id)
@@ -336,7 +352,8 @@ class UserDao(PikaWrapper):
             raise ValidException(detail="字段：email不能为空")
         async with async_db_session_generator() as session:
             async with session.begin():
-                sql = select(UserModel).where(UserModel.email == oauth2_login.email)
+                sql = select(UserModel).where(
+                    UserModel.email == oauth2_login.email)
                 users = await session.execute(sql)
                 user = users.scalars().first()
                 if user:
@@ -445,7 +462,8 @@ class UserDao(PikaWrapper):
             user_admin = SysUserAdminModel(uid=user.id, emp_no=user.emp_no, is_activate=1,
                                            password=pwd,
                                            pwd_valid_date=PikaGlobalVarEnum.PWD_VALID_DATE,
-                                           create_emp_no=user_info.get("emp_no", None),
+                                           create_emp_no=user_info.get(
+                                               "emp_no", None),
                                            registration_date=Moment.get_now_time("%Y-%m-%d %H:%M:%S"))
             session.add(user_admin)
             return PikaResponse.success(data=user, message=PromptEnum.REGISTER_SUCCEED.value)
@@ -540,7 +558,8 @@ class UserDao(PikaWrapper):
         if dynamic_code in PikaGlobalVarEnum.VERIFY_CODE_WHITE_LIST or has_key:
             return await async_redis.delete(redis_dynamic_code_)
         else:
-            raise AuthException(code=ExcCodeEnum.DYNAMIC_ERROR, detail="验证码已过期或不存在")
+            raise AuthException(
+                code=ExcCodeEnum.DYNAMIC_ERROR, detail="验证码已过期或不存在")
 
     @staticmethod
     async def has_mail_verify_code(verify_code, model=1, emp_no=None):
@@ -564,7 +583,8 @@ class UserDao(PikaWrapper):
         if verify_code in PikaGlobalVarEnum.VERIFY_CODE_WHITE_LIST or has_key == verify_code:
             return await async_redis.delete(redis_verify_code_)
         else:
-            raise AuthException(code=ExcCodeEnum.DYNAMIC_ERROR, detail="验证码已过期或不存在")
+            raise AuthException(
+                code=ExcCodeEnum.DYNAMIC_ERROR, detail="验证码已过期或不存在")
 
     @staticmethod
     async def get_verifycode(request, user_info):
@@ -580,7 +600,8 @@ class UserDao(PikaWrapper):
         if request.model == 2:
             async with async_db_session_generator() as session:
                 async with session.begin():
-                    sel_sql = select(UserModel).where(UserModel.email == request.email)
+                    sel_sql = select(UserModel).where(
+                        UserModel.email == request.email)
                     sel_res = await session.execute(sel_sql)
                     exists_users = sel_res.scalars().first()
                     if not exists_users:
@@ -620,7 +641,8 @@ class UserDao(PikaWrapper):
                 if user_admin:
                     await cls.update_pwd(new_password=new_password, emp_no=emp_no)
                 else:
-                    raise AuthException(code=ExcCodeEnum.PASSWORD_ERROR, detail="请检查旧密码是否正确")
+                    raise AuthException(
+                        code=ExcCodeEnum.PASSWORD_ERROR, detail="请检查旧密码是否正确")
 
     @staticmethod
     async def add_security(**kwargs):
@@ -648,7 +670,8 @@ class UserDao(PikaWrapper):
             sel_res = await session.execute(select(PikaSecurityRelIssues.id).where(
                 and_(PikaSecurityRelIssues.id.in_(ids), PikaSecurityRelIssues.emp_no == emp_no)))
             sel_res_ids = sel_res.scalars().all()
-            intersection = list(set(ids).difference(set(str(index) for index in sel_res_ids)))
+            intersection = list(set(ids).difference(
+                set(str(index) for index in sel_res_ids)))
             if not sel_res_ids:
                 return PikaResponse.failed(detail="删除失败，id验签不通过")
             elif len(intersection) > 0:
@@ -672,7 +695,8 @@ class UserDao(PikaWrapper):
                     and_(PikaSecurityRelIssues.id.in_([index.id for index in pending_begin]),
                          PikaSecurityRelIssues.emp_no == emp_no))
                 execute_exists_id = await session.execute(sql)
-                exists_id = [index[0] for index in [id_ for id_ in execute_exists_id.all()]]
+                exists_id = [index[0]
+                             for index in [id_ for id_ in execute_exists_id.all()]]
                 # 遍历更新
                 for pb in pending_begin:
                     if pb.id in exists_id:

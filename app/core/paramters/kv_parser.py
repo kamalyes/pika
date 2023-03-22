@@ -15,7 +15,7 @@ from typing import Any
 import jsonpath
 
 from app.core.paramters.parser import Parser
-from app.excpetions.business.CaseException import CaseParametersException
+from app.exceptions.business.CaseException import CaseParametersException
 
 
 class HeaderParser(Parser):

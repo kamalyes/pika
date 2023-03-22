@@ -13,7 +13,7 @@
 from sqlalchemy import select, and_, or_
 
 from app.core.handler.asyncsql import AsyncDbSession
-from app.core.handler.execres import KeyExistException, KeyUndefinedException, SystemException, ValidException
+from app.core.handler.exceres import KeyExistException, KeyUndefinedException, SystemException, ValidException
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.enums.SysvarEnum import ValidTimeEnum
 from app.middleware.xredis import RedisHelper

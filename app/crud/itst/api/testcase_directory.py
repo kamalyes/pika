@@ -14,7 +14,7 @@ from datetime import datetime
 
 from custard.time import Moment
 from sqlalchemy import select, asc, or_
-from app.core.handler.execres import KeyExistException, KeyUndefinedException
+from app.core.handler.exceres import KeyExistException, KeyUndefinedException
 
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session

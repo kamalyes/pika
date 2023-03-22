@@ -14,7 +14,7 @@ from typing import Any, List
 from sqlalchemy import select, or_, and_, update
 
 from app.core.handler.asyncsql import AsyncDbSession
-from app.core.handler.execres import KeyExistException, KeyUndefinedException
+from app.core.handler.exceres import KeyExistException, KeyUndefinedException
 from app.models import async_db_session_generator
 from app.models.menu import MenuModel
 

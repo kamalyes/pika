@@ -22,7 +22,7 @@ from app.core.constructor.http_constructor import HttpConstructor
 from app.core.constructor.python_constructor import PythonConstructor
 from app.core.constructor.redis_constructor import RedisConstructor
 from app.core.constructor.sql_constructor import SqlConstructor
-from app.core.handler.execres import KeyUndefinedException, ValidException
+from app.core.handler.exceres import KeyUndefinedException, ValidException
 from app.core.handler.logger import PikaLogger
 from app.core.notice.dingtalk import DingTalk
 from app.core.notice.email import EmailManger
@@ -1030,10 +1030,3 @@ class Executor(object):
             return report_id
         except Exception as e:
             raise Exception(f"批量执行用例失败: {e}")
-
-
-if __name__ == "__main__":
-    a = Executor()
-    temp = json.dumps({"a": {"b": [{"c": 1, "d": 2}]}})
-    ans = a.parse_variable(temp, "${a.b.#name.c}", {"name": 0})
-    print(ans)

@@ -3,7 +3,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, UploadFile, File, Request
 
-from app.core.handler.execres import AuthException
+from app.core.handler.exceres import AuthException
 from app.core.handler.jsonres import PikaResponse
 from app.core.request import get_convertor
 from app.core.request.generator import CaseGenerator
@@ -230,7 +230,8 @@ async def get_directory_and_case(project_id: int, user_info=Depends(Permission()
 
     """
     try:
-        directory_tree_map = {"project_id": project_id, "case_node": ApiTestCaseDao.get_test_case_by_directory_id}
+        directory_tree_map = {"project_id": project_id,
+                              "case_node": ApiTestCaseDao.get_test_case_by_directory_id}
         tree_data, cs_map = await ApiTestCaseDirectoryDao.get_directory_tree(**directory_tree_map)
         return PikaResponse.success(data=dict(tree=tree_data, case_map=cs_map))
     except Exception as e:
@@ -323,7 +324,8 @@ async def insert_testcase_out_parameters(form: ApiTestCaseParametersSchema, user
     query = await ApiTestCaseOutParametersDao.query_record(name=form.name, case_id=form.case_id)
     if query is not None:
         return PikaResponse.failed(detail="参数名称已存在")
-    data = ApiTestCaseOutParametersModel(**form.dict(), operator=user_info["emp_no"])
+    data = ApiTestCaseOutParametersModel(
+        **form.dict(), operator=user_info["emp_no"])
     data = await ApiTestCaseOutParametersDao.insert(data)
     return PikaResponse.success(data=data)
 
@@ -384,7 +386,8 @@ async def generate_case(form: TestCaseGeneratorForm, user_info=Depends(Permissio
     if len(form.requests) == 0:
         return PikaResponse.failed(detail="无http请求，请检查参数")
     CaseGenerator.extract_field(form.requests)
-    cs = CaseGenerator.generate_case(form.directory_id, form.name, form.requests[-1])
+    cs = CaseGenerator.generate_case(
+        form.directory_id, form.name, form.requests[-1])
     constructors = CaseGenerator.generate_constructors(form.requests)
     info = TestCaseInfo(constructor=constructors, case=cs)
     async with session.begin():

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python 3.9.11
 """
-@File    :  execres.py
+@File    :  exceres.py
 @Time    :  2022/7/7 15:21 PM
 @Author  :  YuYanQing
 @Version :  1.0
@@ -10,7 +10,7 @@
 @Desc    :  None
 """
 
-from fastapi import status
+from fastapi import status, HTTPException
 
 from app.enums.SysCodeEnum import ExcCodeEnum
 
@@ -25,6 +25,10 @@ class ValidException(Exception):
         self.code = code
         self.detail = detail
         self.status_code = status_code
+
+
+class PermissionException(HTTPException):
+    pass
 
 
 class AuthException(Exception):

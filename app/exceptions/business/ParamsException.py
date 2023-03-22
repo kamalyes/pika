@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python 3.9.11
 """
-@File    :  EnvException.py
+@File    :  ParamsException.py
 @Time    :  2022/7/7 15:21 PM
 @Author  :  YuYanQing
 @Version :  1.0
@@ -11,5 +11,5 @@
 """
 
 
-class EnvNotFoundException(Exception):
+class VariablesNullError(ValueError):
     pass

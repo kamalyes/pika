@@ -21,11 +21,11 @@ from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.handler.asyncsql import AsyncDbSession
-from app.core.handler.execres import KeyUndefinedException
+from app.core.handler.exceres import KeyUndefinedException
 from app.core.handler.jsonres import PikaResponse
 from app.core.handler.logger import PikaLogger
 from app.enums.OperationEnum import SqlOperationTypeEnum
-from app.excpetions.thirdparty.DbException import DbException
+from app.exceptions.thirdparty.DbException import DbException
 from app.middleware.xredis import RedisHelper
 from app.models import async_session, async_db_session_generator
 from app.models.basic import LargeBaseModel

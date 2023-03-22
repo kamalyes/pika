@@ -13,7 +13,7 @@
 from pydantic import BaseModel, validator
 
 from app.enums.RequestBodyEnum import ReqBodyTypeEnum
-from app.excpetions.business.ParamsException import VariablesNullError
+from app.exceptions.business.ParamsException import VariablesNullError
 
 
 class HttpRequestSchema(BaseModel):

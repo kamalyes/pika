@@ -14,7 +14,7 @@ from typing import Any, List
 from custard.core import RegEx
 from custard.pagination.async_sqlalchemy import paginate
 
-from app.core.handler.execres import ValidException
+from app.core.handler.exceres import ValidException
 from app.core.handler.jsonres import PikaResponse
 from app.enums.SysCodeEnum import ExcCodeEnum
 from app.models import async_db_session_generator
@@ -57,7 +57,8 @@ class AsyncDbSession:
             if RegEx.match_only_number(ids[index]):
                 pass_ids.append(ids[index])
             else:
-                end_value, start_value, split_key = ids[index], ids[index - 1] + ",", index * ","
+                end_value, start_value, split_key = ids[index], ids[index -
+                                                                    1] + ",", index * ","
                 start_index, end_index = len(start_value + split_key), len(
                     start_value + end_value + split_key)
                 # print(ids, start_value, end_value, split_key, start_index, end_index)

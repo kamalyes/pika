@@ -15,7 +15,7 @@ from fastapi import APIRouter, Request, Depends
 from custard.pagination import LimitOffsetPage, add_pagination
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.handler.execres import ValidException
+from app.core.handler.exceres import ValidException
 from app.core.handler.jsonres import PikaResponse
 from app.crud.rbac.user import UserDao
 from app.enums.RbacEnum import RoleEnum

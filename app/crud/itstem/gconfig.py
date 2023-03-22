@@ -11,7 +11,7 @@
 """
 
 from sqlalchemy import select
-from app.core.handler.execres import KeyExistException
+from app.core.handler.exceres import KeyExistException
 
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.enums.SysvarEnum import ValidTimeEnum
