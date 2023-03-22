@@ -12,6 +12,7 @@
 from typing import List
 
 from sqlalchemy import asc, select
+from app.core.handler.execres import KeyExistException, KeyUndefinedException
 
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
@@ -70,8 +71,9 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                     result = await session.execute(sql)
                     data = result.scalars().first()
                     if data is not None:
-                        raise Exception("断言信息已存在, 请检查")
-                    new_assert = ApiTestCaseAssertsModel(**form.dict(), operator=operator)
+                        raise KeyExistException("断言信息已存在, 请检查")
+                    new_assert = ApiTestCaseAssertsModel(
+                        **form.dict(), operator=operator)
                     session.add(new_assert)
                     # TODO bug：Could not refresh instance '<ApiTestCaseAssertsModel at 0x155e8af9be0>
                     await session.flush()
@@ -104,7 +106,7 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                     result = await session.execute(sql)
                     data = result.scalars().first()
                     if data is None:
-                        raise Exception("断言信息不存在, 请检查")
+                        raise KeyUndefinedException("断言信息不存在, 请检查")
                     cls.update_model(data, form, operator)
                     await session.flush()
                     session.expunge(data)
@@ -123,7 +125,7 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                     result = await session.execute(sql)
                     data = result.scalars().first()
                     if data is None:
-                        raise Exception("断言信息不存在, 请检查")
+                        raise KeyUndefinedException("断言信息不存在, 请检查")
                     cls.delete_model(data, operator)
         except Exception as e:
             cls.__log__.error(f"删除用例断言失败, error: {e}")

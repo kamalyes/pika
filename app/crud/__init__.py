@@ -21,6 +21,7 @@ from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.handler.asyncsql import AsyncDbSession
+from app.core.handler.execres import KeyUndefinedException
 from app.core.handler.jsonres import PikaResponse
 from app.core.handler.logger import PikaLogger
 from app.enums.OperationEnum import SqlOperationTypeEnum
@@ -292,12 +293,14 @@ class PikaWrapper(object):
         # 遍历参数，当参数不为None的时候传递
         for k, v in kwargs.items():
             # 判断是否是like的情况
-            like = isinstance(v, str) and (v.startswith("%") or v.endswith("%"))
+            like = isinstance(v, str) and (
+                v.startswith("%") or v.endswith("%"))
             if like and v == "%%":
                 continue
             # 如果是like模式，则使用Model.字段.like 否则用 Model.字段 等于
             cls.where(v,
-                      getattr(cls.__model__, k).like(v) if like else getattr(cls.__model__, k) == v,
+                      getattr(cls.__model__, k).like(
+                          v) if like else getattr(cls.__model__, k) == v,
                       conditions)
         sql = select(cls.__model__, *_select)
         if isinstance(_join, Iterable):
@@ -356,7 +359,7 @@ class PikaWrapper(object):
             result = await session.execute(query)
             now = result.scalars().first()
             if now is None:
-                raise DbException("数据不存在")
+                raise KeyUndefinedException("数据不存在")
             cls.update_model(now, model, operator, not_null)
             await session.flush()
             session.expunge_all()

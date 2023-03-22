@@ -15,6 +15,7 @@ from io import BytesIO
 import aiohttp
 from awaits.awaitable import awaitable
 from qiniu import Auth, put_stream, BucketManager
+from app.core.handler.execres import KeyUndefinedException
 
 from app.middleware.oss import OssFile
 from config import PikaAppConfig
@@ -66,8 +67,9 @@ class QiniuOss(OssFile):
         key = self.get_real_path(filepath, base_path)
         exists, _ = self.bucket_manager.stat(self.bucket, key)
         if exists is None:
-            raise Exception("文件不存在")
-        base_url = '%s/%s/%s' % (PikaAppConfig.OSS_QINIU_URL, self.bucket, filepath)
+            raise KeyUndefinedException("文件不存在")
+        base_url = '%s/%s/%s' % (PikaAppConfig.OSS_QINIU_URL,
+                                 self.bucket, filepath)
         url = self.auth.private_download_url(base_url, expires=3600 * 24 * 365)
         content, real_name = await self.download_object(key, url)
         return content, real_name
@@ -76,7 +78,7 @@ class QiniuOss(OssFile):
         async with aiohttp.ClientSession() as session:
             async with session.request("GET", url, timeout=timeout, ssl=False) as resp:
                 if resp.status != 200:
-                    raise Exception("download file failed")
+                    raise KeyUndefinedException("download file failed")
                 real_filename = filepath.split("/")[-1]
                 path = rf'./{self.get_random_filename(real_filename)}'
                 with open(path, 'wb') as f:
@@ -88,9 +90,10 @@ class QiniuOss(OssFile):
         key = self.get_real_path(filepath, QiniuOss._base_path)
         exists, _ = self.bucket_manager.stat(self.bucket, key)
         if exists is None:
-            raise Exception("文件不存在")
+            raise KeyUndefinedException("文件不存在")
         async with aiohttp.ClientSession() as session:
-            basic_url = '%s/%s/%s' % (PikaAppConfig.OSS_QINIU_URL, self.bucket, filepath)
+            basic_url = '%s/%s/%s' % (PikaAppConfig.OSS_QINIU_URL,
+                                      self.bucket, filepath)
             async with session.request("GET", basic_url, timeout=15, ssl=False) as resp:
                 if resp.status != 200:
                     raise Exception("download file failed")

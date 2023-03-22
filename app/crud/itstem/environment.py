@@ -12,7 +12,7 @@
 
 from sqlalchemy import select, desc
 
-from app.core.handler.execres import ValidException
+from app.core.handler.execres import KeyExistException, KeyUndefinedException, ValidException
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
 from app.models.environment import EnvironmentModel
@@ -37,7 +37,7 @@ class EnvironmentDao(PikaWrapper):
                 select(EnvironmentModel).where(EnvironmentModel.id == id,
                                                EnvironmentModel.delete_flag == 0))
             if ans is None:
-                raise ValidException(detail=f"环境: {id}不存在")
+                raise KeyUndefinedException(detail=f"环境: {id}不存在")
             return ans.scalars().first()
 
     @classmethod
@@ -48,7 +48,7 @@ class EnvironmentDao(PikaWrapper):
                     select(EnvironmentModel).where(EnvironmentModel.name == data.name,
                                                    EnvironmentModel.delete_flag == 0))
                 if query.scalars().first() is not None:
-                    raise ValidException(detail=f"添加失败，环境名称：{data.name}已存在")
+                    raise KeyExistException(detail=f"添加失败，环境名称：{data.name}已存在")
                 env = EnvironmentModel(**data.dict(), operator=emp_no)
                 session.add(env)
 
@@ -58,8 +58,10 @@ class EnvironmentDao(PikaWrapper):
             search = [EnvironmentModel.delete_flag == 0]
             async with async_session() as session:
                 if name:
-                    search.append(EnvironmentModel.name.like("%{}%".format(name)))
-                sql = select(EnvironmentModel).where(*search).order_by(desc(EnvironmentModel.update_date))
+                    search.append(EnvironmentModel.name.like(
+                        "%{}%".format(name)))
+                sql = select(EnvironmentModel).where(
+                    *search).order_by(desc(EnvironmentModel.update_date))
                 query = await session.execute(sql)
                 if exactly:
                     data = query.scalars().all()
@@ -67,7 +69,8 @@ class EnvironmentDao(PikaWrapper):
                 total = query.raw.rowcount
                 if total == 0:
                     return [], 0
-                sql = sql.offset((paging.page_index - 1) * paging.page_size).limit(paging.page_size)
+                sql = sql.offset((paging.page_index - 1) *
+                                 paging.page_size).limit(paging.page_size)
                 data = await session.execute(sql)
                 return data.scalars().all(), total
         except Exception as e:

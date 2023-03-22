@@ -29,6 +29,8 @@ from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
 from app.core.handler.execres import (
+    KeyExistException,
+    KeyUndefinedException,
     ValidException,
     AuthException,
     AccessException,
@@ -107,6 +109,33 @@ class PikaFastApi:
         Returns:
 
         """
+        @app.exception_handler(KeyExistException)
+        async def key_exist_exc_handler(request: Request, exc: KeyExistException):
+            """
+            键值存在
+            Args:
+                request:
+                exc:
+
+            Returns:
+
+            """
+            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
+                                       detail=exc.detail)
+
+        @app.exception_handler(KeyUndefinedException)
+        async def key_undefined_exc_handler(request: Request, exc: KeyUndefinedException):
+            """
+            键值未找到
+            Args:
+                request:
+                exc:
+
+            Returns:
+
+            """
+            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
+                                       detail=exc.detail)
 
         @app.exception_handler(ValidException)
         async def valid_exc_handler(request: Request, exc: ValidException):

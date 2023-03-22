@@ -11,6 +11,7 @@
 """
 from fastapi import Depends, APIRouter
 from starlette.background import BackgroundTasks
+from app.core.handler.execres import KeyExistException
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud.itstem.rdconfig import PikaRedisConfigDao
@@ -30,7 +31,7 @@ async def insert_redis_config(form: RedisConfigSchema,
     try:
         query = await PikaRedisConfigDao.query_record(name=form.name, env=form.env)
         if query is not None:
-            raise Exception("数据已存在, 请勿重复添加")
+            raise KeyExistException("数据已存在, 请勿重复添加")
         model = RedisModel(**form.dict(), operator=user_info['emp_no'])
         result = await PikaRedisConfigDao.insert(model=model, log=True)
         return PikaResponse.success(data=result)
@@ -46,7 +47,8 @@ async def delete_redis_config(id: int, background_tasks: BackgroundTasks,
         ans = await PikaRedisConfigDao.delete_record_by_id(session, user_info['emp_no'], id, False)
         if ans:
             # 更新缓存
-            background_tasks.add_task(PikaRedisManager.delete_client, *(id, ans.cluster))
+            background_tasks.add_task(
+                PikaRedisManager.delete_client, *(id, ans.cluster))
         return PikaResponse.success()
     except Exception as err:
         return PikaResponse.failed(detail=str(err))

@@ -11,6 +11,7 @@
 """
 
 from sqlalchemy import select
+from app.core.handler.execres import KeyExistException
 
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.enums.SysvarEnum import ValidTimeEnum
@@ -35,7 +36,7 @@ class GConfigDao(PikaWrapper):
                                                    GConfigModel.delete_flag == 0))
                     data = query.scalars().first()
                     if data is not None:
-                        raise Exception(f"变量: {data.key}已存在")
+                        raise KeyExistException(f"变量: {data.key}已存在")
                     config = GConfigModel(**form.dict(), operator=operator)
                     session.add(config)
         except Exception as e:

@@ -9,6 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
+from app.core.handler.execres import ValidException
 from app.enums.OssEnum import MiniOssTypeEnum
 from app.middleware.oss.aliyun import AliyunOss
 from app.middleware.oss.files import OssFile
@@ -38,5 +39,5 @@ class OssClient(object):
                 return QiniuOss(access_key_id, access_key_secret, bucket_name)
             if oss_type == MiniOssTypeEnum.TENCENT.value:
                 return TencentCos(access_key_id, access_key_secret, endpoint, bucket_name)
-            raise Exception("不支持的oss类型")
+            raise ValidException("不支持的oss类型")
         return OssClient._client

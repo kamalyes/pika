@@ -16,6 +16,7 @@ from datetime import datetime
 from custard.json import JsonEncoder
 from sqlalchemy import select, MetaData, text, and_
 from sqlalchemy.exc import ResourceClosedError
+from app.core.handler.execres import KeyExistException, KeyUndefinedException
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud import PikaWrapper, PikaMdWrapper
@@ -68,8 +69,9 @@ class DbConfigDao(PikaWrapper):
                     )
                     query = result.scalars().first()
                     if query is not None:
-                        raise Exception("数据库配置已存在")
-                    session.add(DatabaseModel(**data.dict(), operator=operator))
+                        raise KeyExistException("数据库配置已存在")
+                    session.add(DatabaseModel(
+                        **data.dict(), operator=operator))
         except Exception as e:
             cls.__log__.error(f"新增数据库配置: {data.name}失败, {e}")
             raise Exception("新增数据库配置失败")
@@ -82,8 +84,9 @@ class DbConfigDao(PikaWrapper):
                     result = await session.execute(select(DatabaseModel).where(data.id == DatabaseModel.id))
                     query = result.scalars().first()
                     if query is None:
-                        raise Exception("数据库配置不存在")
-                    db_helper.remove_connection(query.host, query.port, query.username, query.password, query.database)
+                        raise KeyUndefinedException("数据库配置不存在")
+                    db_helper.remove_connection(
+                        query.host, query.port, query.username, query.password, query.database)
                     cls.update_model(query, data, operator)
         except Exception as e:
             cls.__log__.error(f"编辑数据库配置: {data.name}失败, {e}")
@@ -95,11 +98,12 @@ class DbConfigDao(PikaWrapper):
             async with async_session() as session:
                 async with session.begin():
                     result = await session.execute(
-                        select(DatabaseModel).where(id == DatabaseModel.id, DatabaseModel.delete_flag == 0)
+                        select(DatabaseModel).where(
+                            id == DatabaseModel.id, DatabaseModel.delete_flag == 0)
                     )
                     query = result.scalars().first()
                     if query is None:
-                        raise Exception("数据库配置不存在或已删除")
+                        raise KeyUndefinedException("数据库配置不存在或已删除")
                     query.delete_date = datetime.now()
                     query.delete_flag = 1
                     query.update_emp_no = operator
@@ -112,7 +116,8 @@ class DbConfigDao(PikaWrapper):
         try:
             async with async_session() as session:
                 result = await session.execute(
-                    select(DatabaseModel).where(DatabaseModel.id == id, DatabaseModel.delete_flag == 0)
+                    select(DatabaseModel).where(DatabaseModel.id ==
+                                                id, DatabaseModel.delete_flag == 0)
                 )
                 return result.scalars().first()
         except Exception as e:
@@ -149,14 +154,16 @@ class DbConfigDao(PikaWrapper):
             # 获取数据库相关的信息
             async with async_session() as session:
                 query = await session.execute(
-                    select(DatabaseModel).where(and_(DatabaseModel.enabled_flag == 1, DatabaseModel.delete_flag == 0))
+                    select(DatabaseModel).where(
+                        and_(DatabaseModel.enabled_flag == 1, DatabaseModel.delete_flag == 0))
                 )
                 data = query.scalars().all()
                 for d in data:
                     name = env_map[d.env]
                     idx = env_index.get(name)
                     if idx is None:
-                        result.append(dict(title=name, key=f"env_{name}", children=list()))
+                        result.append(
+                            dict(title=name, key=f"env_{name}", children=list()))
                         idx = len(result) - 1
                         env_index[name] = idx
                     result[env_index[name]]["children"].append(
@@ -199,7 +206,8 @@ class DbConfigDao(PikaWrapper):
         for t in meta.sorted_tables:
             table_map.add(str(t))
             temp = []
-            database_child.append(dict(title=str(t), key=f"table_{data.id}_{t}", children=temp))
+            database_child.append(
+                dict(title=str(t), key=f"table_{data.id}_{t}", children=temp))
             for k, v in t.c.items():
                 table_map.add(k)
                 temp.append(
@@ -218,7 +226,7 @@ class DbConfigDao(PikaWrapper):
         try:
             query = await DbConfigDao.query_database(id)
             if query is None:
-                raise Exception("未找到对应的数据库配置")
+                raise KeyUndefinedException("未找到对应的数据库配置")
             data = await db_helper.get_connection(
                 query.sql_type, query.host, query.port, query.username, query.password, query.database
             )
@@ -252,7 +260,7 @@ class DbConfigDao(PikaWrapper):
         try:
             query = await DbConfigDao.query_database_by_env_and_name(env, name)
             if query is None:
-                raise Exception("未找到对应的数据库配置")
+                raise KeyUndefinedException("未找到对应的数据库配置")
             data = await db_helper.get_connection(
                 query.sql_type, query.host, query.port, query.username, query.password, query.database
             )

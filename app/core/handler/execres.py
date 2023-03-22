@@ -97,3 +97,27 @@ class SystemException(Exception):
         self.code = code
         self.detail = detail
         self.status_code = status_code
+
+
+class KeyExistException(Exception):
+    def __init__(
+            self,
+            detail: str = "The primary Key already exists",
+            code: int = ExcCodeEnum.IS_EXISTS_ERROR,
+            status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
+    ):
+        self.code = code
+        self.detail = detail
+        self.status_code = status_code
+
+
+class KeyUndefinedException(Exception):
+    def __init__(
+            self,
+            detail: str = "The primary keyword does not exist",
+            code: int = ExcCodeEnum.IS_NOT_EXISTS_ERROR,
+            status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
+    ):
+        self.code = code
+        self.detail = detail
+        self.status_code = status_code

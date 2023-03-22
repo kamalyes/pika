@@ -12,6 +12,7 @@
 from datetime import datetime
 
 from sqlalchemy import select, desc
+from app.core.handler.execres import KeyUndefinedException
 
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.itst.api.testresult import ApiTestResultDao
@@ -32,7 +33,8 @@ class ApiTestReportDao(PikaWrapper):
         try:
             async with async_session() as session:
                 async with session.begin():
-                    report = ApiTestReportModel(executor, env, mode=mode, plan_id=plan_id)
+                    report = ApiTestReportModel(
+                        executor, env, mode=mode, plan_id=plan_id)
                     session.add(report)
                     return report.id
         except Exception as e:
@@ -44,7 +46,8 @@ class ApiTestReportDao(PikaWrapper):
         try:
             async with async_session() as session:
                 async with session.begin():
-                    sql = select(ApiTestReportModel).where(ApiTestReportModel.id == report_id)
+                    sql = select(ApiTestReportModel).where(
+                        ApiTestReportModel.id == report_id)
                     data = await session.execute(sql)
                     report = data.scalars().first()
                     if report is None:
@@ -61,7 +64,8 @@ class ApiTestReportDao(PikaWrapper):
         try:
             async with async_session() as session:
                 async with session.begin():
-                    sql = select(ApiTestReportModel).where(ApiTestReportModel.id == report_id)
+                    sql = select(ApiTestReportModel).where(
+                        ApiTestReportModel.id == report_id)
                     data = await session.execute(sql)
                     report = data.scalars().first()
                     if report is None:
@@ -99,7 +103,7 @@ class ApiTestReportDao(PikaWrapper):
                     ApiTestReportModel.id == report_id)
                 data = await session.execute(sql)
                 if data is None:
-                    raise Exception("报告不存在")
+                    raise KeyUndefinedException("报告不存在")
                 report, plan_name = data.first()
                 test_data = await ApiTestResultDao.list(report_id)
                 return report, test_data, plan_name
@@ -132,7 +136,8 @@ class ApiTestReportDao(PikaWrapper):
                 total = data.raw.rowcount
                 if total == 0:
                     return [], 0
-                sql = sql.offset((paging.page_index - 1) * paging.page_size).limit(paging.page_size)
+                sql = sql.offset((paging.page_index - 1) *
+                                 paging.page_size).limit(paging.page_size)
                 data = await session.execute(sql)
                 return data.scalars().all(), total
         except Exception as e:

@@ -14,6 +14,7 @@ from datetime import datetime
 
 from custard.time import Moment
 from sqlalchemy import select, asc, or_
+from app.core.handler.execres import KeyExistException, KeyUndefinedException
 
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
@@ -64,7 +65,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                     )
                     result = await session.execute(sql)
                     if result.scalars().first() is not None:
-                        raise Exception("目录已存在")
+                        raise KeyExistException("目录已存在")
                     session.add(ApiTestCaseDirectoryModel(form, operator))
         except Exception as e:
             cls.__log__.error(f"创建目录失败, error: {e}")
@@ -90,7 +91,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
-                        raise Exception("目录不存在")
+                        raise KeyUndefinedException("目录不存在")
                     query.name = form.name
                     query.update_user = operator
                     query.update_date = datetime.now()
@@ -118,7 +119,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
-                        raise Exception("目录不存在")
+                        raise KeyUndefinedException("目录不存在")
                     query.delete_date = Moment.get_now_time()
                     query.delete_flag = 1
                     query.update_emp_no = operator
@@ -203,7 +204,8 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                 select(ApiTestCaseDirectoryModel)
                 .where(
                     ApiTestCaseDirectoryModel.delete_flag == 0,
-                    or_(ApiTestCaseDirectoryModel.parent == directory_id, ApiTestCaseDirectoryModel.parent is not None),
+                    or_(ApiTestCaseDirectoryModel.parent == directory_id,
+                        ApiTestCaseDirectoryModel.parent is not None),
                 )
                 .order_by(asc(ApiTestCaseDirectoryModel.name))
             )

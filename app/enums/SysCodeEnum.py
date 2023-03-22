@@ -13,9 +13,8 @@
 
 class ExcCodeEnum:
     # Index_Code 1000~2000
-    DF_NOT_FOUND_ERROR = 1001  # 默认未找到
-    USER_NOT_FOUND_ERROR = 1002  # 未找到用户
-    IS_NOT_EXISTS_ERROR = 1003  # 默认未找到
+    IS_EXISTS_ERROR = 1001  # 存在
+    IS_NOT_EXISTS_ERROR = 1002  # 不存在
 
     # Var_Code 2001~3000
     DYNAMIC_ERROR = 2001  # 获取动态验证码失败

@@ -12,6 +12,7 @@
 import json
 
 from app.core.constructor.constructor import ConstructorAbstract
+from app.core.handler.execres import KeyUndefinedException
 from app.crud.itst.api.testcase import ApiTestCaseDao
 from app.models.constructor import ConstructorModel
 
@@ -28,7 +29,7 @@ class TestCaseConstructor(ConstructorAbstract):
                 raise Exception("未获取到前/后置条件的用例id, 请检查前置条件")
             testcase, err = await ApiTestCaseDao.async_query_test_case(case_id)
             if err:
-                raise Exception(f"用例: [{case_id}]不存在:")
+                raise KeyUndefinedException(f"用例: [{case_id}]不存在:")
             executor.append(
                 f"当前路径: {path}, 第{index + 1}条{ConstructorAbstract.get_name(constructor)}")
             # 说明是case
@@ -42,7 +43,8 @@ class TestCaseConstructor(ConstructorAbstract):
             if err:
                 raise Exception(err)
             if not result["status"]:
-                raise Exception(f"断言失败, 断言数据: {result.get('asserts', 'unknown')}")
+                raise KeyUndefinedException(
+                    f"断言失败, 断言数据: {result.get('asserts', 'unknown')}")
             params[constructor.value] = result
         except Exception as e:
             raise Exception(

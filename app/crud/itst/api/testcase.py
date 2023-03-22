@@ -16,6 +16,7 @@ from typing import List, Dict
 from sqlalchemy import desc, func, and_, asc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from app.core.handler.execres import KeyExistException, KeyUndefinedException
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud import PikaWrapper, PikaMdWrapper, db_connect
@@ -43,10 +44,12 @@ class ApiTestCaseDao(PikaWrapper):
     @classmethod
     async def generate_sql(cls):
         return (
-            select(ApiTestCaseModel.create_emp_no, func.count(ApiTestCaseModel.id))
+            select(ApiTestCaseModel.create_emp_no,
+                   func.count(ApiTestCaseModel.id))
             .outerjoin(
                 SysUserAdminModel,
-                and_(SysUserAdminModel.delete_flag == 0, ApiTestCaseModel.create_emp_no == SysUserAdminModel.emp_no),
+                and_(SysUserAdminModel.delete_flag == 0,
+                     ApiTestCaseModel.create_emp_no == SysUserAdminModel.emp_no),
             )
             .where(ApiTestCaseModel.delete_flag == 0)
             .group_by(ApiTestCaseModel.create_emp_no)
@@ -59,13 +62,15 @@ class ApiTestCaseDao(PikaWrapper):
             filters = [ApiTestCaseModel.delete_flag == 0]
             if directory_id:
                 parents = await ApiTestCaseDirectoryDao.get_directory_son(directory_id)
-                filters = [ApiTestCaseModel.delete_flag == 0, ApiTestCaseModel.directory_id.in_(parents)]
+                filters = [ApiTestCaseModel.delete_flag == 0,
+                           ApiTestCaseModel.directory_id.in_(parents)]
                 if name:
                     filters.append(ApiTestCaseModel.name.like(f"%{name}%"))
                 if operator:
                     filters.append(ApiTestCaseModel.create_emp_no == operator)
             async with async_session() as session:
-                sql = select(ApiTestCaseModel).where(*filters).order_by(ApiTestCaseModel.name.asc())
+                sql = select(ApiTestCaseModel).where(
+                    *filters).order_by(ApiTestCaseModel.name.asc())
                 result, total = await cls.pagination(paging.page_index, paging.page_size, session, sql, False)
                 return result, total
         except Exception as e:
@@ -85,7 +90,8 @@ class ApiTestCaseDao(PikaWrapper):
                 ans = []
                 case_map = dict()
                 for item in result.scalars():
-                    ans.append({"title": item.name, "value": f"testcase_{item.id}", "key": f"testcase_{item.id}"})
+                    ans.append(
+                        {"title": item.name, "value": f"testcase_{item.id}", "key": f"testcase_{item.id}"})
                     case_map[item.id] = item.name
                 return ans, case_map
         except Exception as e:
@@ -112,7 +118,8 @@ class ApiTestCaseDao(PikaWrapper):
                     setattr(f, "case_id", case_id)
                     data = model(**f.dict(), operator=operator)
                 else:
-                    data = model(**f.dict(), operator=operator, case_id=case_id)
+                    data = model(**f.dict(), operator=operator,
+                                 case_id=case_id)
                 await md.insert(model=data, session=session)
 
     @classmethod
@@ -135,7 +142,7 @@ class ApiTestCaseDao(PikaWrapper):
             )
         )
         if query.scalars().first() is not None:
-            raise Exception("用例名称已存在")
+            raise KeyExistException("用例名称已存在")
         cs = ApiTestCaseModel(**data.case.dict(), operator=operator)
         # 添加case，之后添加其他数据
         session.add(cs)
@@ -148,7 +155,8 @@ class ApiTestCaseDao(PikaWrapper):
             data,
             constructor=(ConstructorDao, ConstructorModel),
             asserts=(ApiTestCaseAssertsDao, ApiTestCaseAssertsModel),
-            out_parameters=(ApiTestCaseOutParametersDao, ApiTestCaseOutParametersModel),
+            out_parameters=(ApiTestCaseOutParametersDao,
+                            ApiTestCaseOutParametersModel),
             data=(ApiTestCaseDataDao, ApiTestCaseDataModel),
         )
         return cs
@@ -168,11 +176,12 @@ class ApiTestCaseDao(PikaWrapper):
             async with async_session() as session:
                 async with session.begin():
                     query = await session.execute(
-                        select(ApiTestCaseModel).where(ApiTestCaseModel.id == test_case.id, ApiTestCaseModel.delete_flag == 0)
+                        select(ApiTestCaseModel).where(ApiTestCaseModel.id ==
+                                                       test_case.id, ApiTestCaseModel.delete_flag == 0)
                     )
                     data = query.scalars().first()
                     if data is None:
-                        raise Exception("用例不存在")
+                        raise KeyUndefinedException("用例不存在")
                     cls.update_model(data, test_case, operator)
                     await session.flush()
                     # 释放你的sql数据
@@ -194,11 +203,12 @@ class ApiTestCaseDao(PikaWrapper):
         """
         try:
             async with async_session() as session:
-                sql = select(ApiTestCaseModel).where(ApiTestCaseModel.id == case_id, ApiTestCaseModel.delete_flag == 0)
+                sql = select(ApiTestCaseModel).where(
+                    ApiTestCaseModel.id == case_id, ApiTestCaseModel.delete_flag == 0)
                 result = await session.execute(sql)
                 data = result.scalars().first()
                 if data is None:
-                    raise Exception("用例不存在")
+                    raise KeyUndefinedException("用例不存在")
                 # 获取断言部分
                 asserts = await ApiTestCaseAssertsDao.async_list_test_case_asserts(data.id)
                 # 获取数据构造器
@@ -206,7 +216,8 @@ class ApiTestCaseDao(PikaWrapper):
                 constructors_case = await ApiTestCaseDao.query_test_case_by_constructors(constructors)
                 test_data = await ApiTestCaseDataDao.list_testcase_data(case_id)
                 parameters = await ApiTestCaseOutParametersDao.select_list(
-                    case_id=case_id, _sort=(asc(ApiTestCaseOutParametersModel.id),)
+                    case_id=case_id, _sort=(
+                        asc(ApiTestCaseOutParametersModel.id),)
                 )
                 return dict(
                     asserts=asserts,
@@ -232,9 +243,11 @@ class ApiTestCaseDao(PikaWrapper):
         """
         try:
             # 找到所有用例名称为
-            constructors = [json.loads(x.constructor_json).get("case_id") for x in constructors if x.type == 0]
+            constructors = [json.loads(x.constructor_json).get(
+                "case_id") for x in constructors if x.type == 0]
             async with async_session() as session:
-                sql = select(ApiTestCaseModel).where(ApiTestCaseModel.id.in_(constructors), ApiTestCaseModel.delete_flag == 0)
+                sql = select(ApiTestCaseModel).where(ApiTestCaseModel.id.in_(
+                    constructors), ApiTestCaseModel.delete_flag == 0)
                 result = await session.execute(sql)
                 data = result.scalars().all()
                 return {x.id: x for x in data}
@@ -263,12 +276,15 @@ class ApiTestCaseDao(PikaWrapper):
         name_dict = {c.case_id: c.step_name for c in case_list}
         # 获取用例的前后置步骤和出参
         out = select(ApiTestCaseOutParametersModel).where(
-            ApiTestCaseOutParametersModel.case_id.in_(cs_list), ApiTestCaseOutParametersModel.delete_date == 0
+            ApiTestCaseOutParametersModel.case_id.in_(
+                cs_list), ApiTestCaseOutParametersModel.delete_date == 0
         )
         parameters = await session.execute(out)
         for p in parameters.scalars().all():
-            var_list.append(dict(stepName=name_dict[p.case_id], name="${%s}" % p.name))
-        sql = select(ConstructorModel).where(ConstructorModel.case_id.in_(cs_list), ConstructorModel.delete_date == 0)
+            var_list.append(
+                dict(stepName=name_dict[p.case_id], name="${%s}" % p.name))
+        sql = select(ConstructorModel).where(ConstructorModel.case_id.in_(
+            cs_list), ConstructorModel.delete_date == 0)
         steps = await session.execute(sql)
         for s in steps.scalars().all():
             if s.value:
@@ -281,7 +297,8 @@ class ApiTestCaseDao(PikaWrapper):
                     continue
                 if case_id in case_set:
                     raise Exception("场景存在循环依赖")
-                step_case.append(ApiTestCaseVariablesSchema(case_id=case_id, step_name=s.name))
+                step_case.append(ApiTestCaseVariablesSchema(
+                    case_id=case_id, step_name=s.name))
         return step_case
 
     @classmethod
@@ -297,7 +314,8 @@ class ApiTestCaseDao(PikaWrapper):
         try:
             async with async_session() as session:
                 result = await session.execute(
-                    select(ApiTestCaseModel).where(ApiTestCaseModel.id == case_id, ApiTestCaseModel.delete_flag == 0)
+                    select(ApiTestCaseModel).where(ApiTestCaseModel.id ==
+                                                   case_id, ApiTestCaseModel.delete_flag == 0)
                 )
                 data = result.scalars().first()
                 if data is None:
@@ -335,7 +353,8 @@ class ApiTestCaseDao(PikaWrapper):
             async with async_session() as session:
                 query = await session.execute(
                     select(ApiTestCaseModel).where(
-                        ApiTestCaseModel.project_id.in_(project_map.keys()), ApiTestCaseModel.delete_flag == 0
+                        ApiTestCaseModel.project_id.in_(
+                            project_map.keys()), ApiTestCaseModel.delete_flag == 0
                     )
                 )
                 data = query.scalars().all()
@@ -365,7 +384,8 @@ class ApiTestCaseDao(PikaWrapper):
         try:
             async with async_session() as session:
                 query = await session.execute(
-                    select(ConstructorModel).where(ConstructorModel.case_id == case_id, ConstructorModel.delete_flag == 0)
+                    select(ConstructorModel).where(
+                        ConstructorModel.case_id == case_id, ConstructorModel.delete_flag == 0)
                 ).order_by(desc(ConstructorModel.create_date))
                 return query.scalars().all()
         except Exception as e:
@@ -430,7 +450,8 @@ class ApiTestCaseDao(PikaWrapper):
         """
         constructors = await cls.async_select_constructor(case_id)
         for c in constructors:
-            temp = dict(id=f"constructor_{c.id}", label=f"{c.name}", children=list())
+            temp = dict(id=f"constructor_{c.id}",
+                        label=f"{c.name}", children=list())
             if c.type == ConstructorTypeEnum.testcase:
                 # 说明是用例，继续递归
                 temp["label"] = "[CASE]: " + temp["label"]
@@ -463,7 +484,8 @@ class ApiTestCaseDao(PikaWrapper):
         """
         asserts = await ApiTestCaseAssertsDao.async_list_test_case_asserts(case_id)
         for a in asserts:
-            temp = dict(id=f"assert_{a.id}", label=f"{a.name}", children=list())
+            temp = dict(id=f"assert_{a.id}",
+                        label=f"{a.name}", children=list())
             parent.get("children").append(temp)
 
     @classmethod
@@ -520,11 +542,13 @@ class ApiTestCaseDao(PikaWrapper):
             async with session.begin():
                 # date_ = func.date_format(ApiTestCaseModel.create_date, "%Y-%m-%d")
                 sql = (
-                    select(ApiTestCaseModel.create_date, func.count(ApiTestCaseModel.id))
+                    select(ApiTestCaseModel.create_date,
+                           func.count(ApiTestCaseModel.id))
                     .where(
                         ApiTestCaseModel.create_emp_no == operator,
                         ApiTestCaseModel.delete_flag == 0,
-                        ApiTestCaseModel.create_date.between(start_date, finished_date),
+                        ApiTestCaseModel.create_date.between(
+                            start_date, finished_date),
                     )
                     .group_by(ApiTestCaseModel.create_date)
                     .order_by(asc(ApiTestCaseModel.create_date))

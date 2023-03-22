@@ -22,6 +22,7 @@ from app.core.constructor.http_constructor import HttpConstructor
 from app.core.constructor.python_constructor import PythonConstructor
 from app.core.constructor.redis_constructor import RedisConstructor
 from app.core.constructor.sql_constructor import SqlConstructor
+from app.core.handler.execres import KeyUndefinedException, ValidException
 from app.core.handler.logger import PikaLogger
 from app.core.notice.dingtalk import DingTalk
 from app.core.notice.email import EmailManger
@@ -130,7 +131,7 @@ class Executor(object):
             return JSONGConfigParser.parse
         if key_type == GConfigParserEnum.yaml:
             return YamlGConfigParser.parse
-        raise Exception(f"全局变量类型: {key_type}不合法, 请检查!")
+        raise ValidException(f"全局变量类型: {key_type}不合法, 请检查!")
 
     async def parse_field(self, data, field, name, env):
         """
@@ -157,7 +158,8 @@ class Executor(object):
                     new_value = parse(cf.value, v)
                     new_field = field_origin.replace("${%s}" % v, new_value)
                     setattr(data, field, new_field)
-                    self.append("替换全局变量成功, 字段: [{}]:\n\n[{}] -> [{}]\n".format(field, "${%s}" % v, new_value))
+                    self.append(
+                        "替换全局变量成功, 字段: [{}]:\n\n[{}] -> [{}]\n".format(field, "${%s}" % v, new_value))
                     field_origin = new_field
             self.append("获取{}字段: [{}]中的el表达式".format(name, field), True)
         except Exception as e:
@@ -198,7 +200,7 @@ class Executor(object):
                 else:
                     result = result.get(branch)
                 if result is None:
-                    raise Exception(f"变量路径: {v}不存在, 请检查JSON或路径!")
+                    raise KeyUndefinedException(f"变量路径: {v}不存在, 请检查JSON或路径!")
             if field_name == "request_headers":
                 new_value = json.loads(result)
             elif not isinstance(result, str):
@@ -229,7 +231,8 @@ class Executor(object):
                 for k, v in replace_kv.items():
                     new_field = field_origin.replace(k, v)
                     setattr(data, c.name, new_field)
-                    self.append("替换流程变量成功，字段: [{}]: \n\n[{}] -> [{}]\n".format(c.name, k, v))
+                    self.append(
+                        "替换流程变量成功，字段: [{}]: \n\n[{}] -> [{}]\n".format(c.name, k, v))
         except Exception as e:
             Executor.log.error(f"替换变量失败, error: {str(e)}")
             raise Exception(f"替换变量失败, error: {str(e)}")
@@ -420,7 +423,8 @@ class Executor(object):
             response_info.update(res)
 
             # 提取出参
-            out_dict = self.extract_out_parameters(response_info, out_parameters)
+            out_dict = self.extract_out_parameters(
+                response_info, out_parameters)
 
             # 替换主变量
             case_params.update(out_dict)
@@ -435,7 +439,8 @@ class Executor(object):
             await self.execute_constructors(env, path, case_info, case_params, req_params, constructors, asserts, True)
 
             # Step11: 断言
-            asserts, ok = self.my_assert(asserts, response_info.get("json_format"))
+            asserts, ok = self.my_assert(
+                asserts, response_info.get("json_format"))
             response_info["status"] = ok
             response_info["asserts"] = asserts
             # 日志输出, 如果不是主用例则不记录
@@ -702,7 +707,8 @@ class Executor(object):
                 if ok is True:
                     ok = False
                 self.append(f"预期结果: {item.expected}\n实际结果: {item.actually}\n")
-                result[item.id] = {"status": False, "msg": f"断言取值失败, 请检查断言语句: {e}"}
+                result[item.id] = {"status": False,
+                                   "msg": f"断言取值失败, 请检查断言语句: {e}"}
         return json.dumps(result, ensure_ascii=False), ok
 
     @case_log
@@ -888,15 +894,18 @@ class Executor(object):
             if msg_types and users:
                 for m in msg_types:
                     if int(m) == NoticeTypeEnum.EMAIL:
-                        content = EmailManger.test_report_template(plan_name=plan.name, **report_dict[e])
+                        content = EmailManger.test_report_template(
+                            plan_name=plan.name, **report_dict[e])
                         subject = f"【{report_dict[e].get('env')}】测试计划【{plan.name}】执行完毕（{report_dict[e].get('plan_result')}）"
                         return EmailManger.send_email(content=content, subject=subject, addressee=[r.get("email") for r in users])
                     if int(m) == NoticeTypeEnum.DINGDING:
                         report_dict[e]["result_color"] = "#67C23A" if report_dict[e]["plan_result"] == "通过" else "#E6A23C"
                         # 批量获取用户手机号
                         users = [r.get("phone") for r in users]
-                        report_dict[e]["notification_user"] = " ".join(map(lambda x: f"@{x}", users))
-                        render_markdown = DingTalk.render_markdown(**report_dict[e], plan_name=plan.name)
+                        report_dict[e]["notification_user"] = " ".join(
+                            map(lambda x: f"@{x}", users))
+                        render_markdown = DingTalk.render_markdown(
+                            **report_dict[e], plan_name=plan.name)
                         if not project.dingtalk_url:
                             Executor.log.debug("项目未配置钉钉通知机器人")
                             continue
@@ -925,7 +934,8 @@ class Executor(object):
             project, _ = await ProjectDao.query_project(plan.project_id)
             env = list(map(int, plan.env.split(",")))
             case_list = list(map(int, plan.case_list.split(",")))
-            receiver = list(map(int, plan.receiver.split(",") if plan.receiver else []))
+            receiver = list(map(int, plan.receiver.split(",")
+                            if plan.receiver else []))
             # 聚合报告dict
             report_dict = dict()
             await asyncio.gather(

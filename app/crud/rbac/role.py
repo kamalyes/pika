@@ -14,6 +14,7 @@ from typing import Dict, Any, Text
 from sqlalchemy import select, delete, update, and_, or_
 
 from app.core.handler.asyncsql import AsyncDbSession
+from app.core.handler.execres import KeyExistException
 from app.crud import PikaMdWrapper
 from app.models import async_db_session_generator
 from app.models.role import RoleModel
@@ -47,11 +48,12 @@ class RoleDao:
             menus = request.menus
             async with async_db_session_generator() as session:
                 async with session.begin():
-                    query_ex_sql = select(RoleModel).where(RoleModel.name == f'{name}')
+                    query_ex_sql = select(RoleModel).where(
+                        RoleModel.name == f'{name}')
                     query_ex_role_result = await session.execute(query_ex_sql)
                     ex_role_info = query_ex_role_result.scalars().first()
                     if ex_role_info:
-                        raise ValueError('角色名已存在!')
+                        raise KeyExistException('角色名已存在!')
                     if menus:
                         request.menus = ','.join(list(map(str, menus)))
                     update_role_info_sql = update(RoleModel) \

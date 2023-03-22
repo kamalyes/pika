@@ -22,7 +22,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from app.core.handler.execres import (
-    DbExecuteException)
+    DbExecuteException,
+    ValidException)
 from app.enums.DatabaseEnum import DatabaseTypeEnum
 from app.enums.SysCodeEnum import ExcCodeEnum
 from config import PikaAppConfig
@@ -111,7 +112,7 @@ class DatabaseHelper(object):
     @staticmethod
     async def test_connection(ss):
         if ss is None:
-            raise Exception("暂不支持的数据库类型")
+            raise ValidException("暂不支持的数据库类型")
         async with ss() as session:
             await session.execute("select 1")
 
@@ -123,7 +124,7 @@ class DatabaseHelper(object):
             return f'mysql+aiomysql://{username}:{password}@{host}:{port}/{database}'
         if sql_type == DatabaseTypeEnum.POSTGRESQL:
             return f'postgresql+asyncpg://{username}:{password}@{host}:{port}/{database}'
-        raise Exception("未知的数据库类型")
+        raise VaildException("未知的数据库类型")
 
     def remove_connection(self, host: str, port: int, username: str, password: str, database: str):
         key = f"{host}:{port}:{database}:{username}:{password}:{database}"

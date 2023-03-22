@@ -13,6 +13,7 @@ from collections import defaultdict
 from typing import List
 
 from sqlalchemy import select, update
+from app.core.handler.execres import KeyExistException, KeyUndefinedException
 
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
@@ -58,8 +59,9 @@ class ConstructorDao(PikaWrapper):
                     )
                     result = await session.execute(sql)
                     if result.scalars().first() is not None:
-                        raise Exception(f"{data.name}已存在")
-                    constructor = ConstructorModel(**data.dict(), operator=operator)
+                        raise KeyExistException(f"{data.name}已存在")
+                    constructor = ConstructorModel(
+                        **data.dict(), operator=operator)
                     constructor.index = await constructor.get_index(session, data.case_id)
                     session.add(constructor)
         except Exception as e:
@@ -80,11 +82,12 @@ class ConstructorDao(PikaWrapper):
         try:
             async with async_session() as session:
                 async with session.begin():
-                    sql = select(ConstructorModel).where(ConstructorModel.id == data.id)
+                    sql = select(ConstructorModel).where(
+                        ConstructorModel.id == data.id)
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
-                        raise Exception(f"{data.name}不存在")
+                        raise KeyUndefinedException(f"{data.name}不存在")
                     cls.update_model(query, data, operator)
         except Exception as e:
             cls.__log__.error(f"编辑前后置条件: {data.name}失败, {e}")
@@ -104,11 +107,12 @@ class ConstructorDao(PikaWrapper):
         try:
             async with async_session() as session:
                 async with session.begin():
-                    sql = select(ConstructorModel).where(ConstructorModel.id == id)
+                    sql = select(ConstructorModel).where(
+                        ConstructorModel.id == id)
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
-                        raise Exception(f"前后置条件{id}不存在")
+                        raise KeyUndefinedException(f"前后置条件{id}不存在")
                     cls.delete_model(query, operator)
         except Exception as e:
             cls.__log__.error(f"删除前后置条件: {id}失败, {e}")
@@ -129,7 +133,8 @@ class ConstructorDao(PikaWrapper):
                 async with session.begin():
                     for item in data:
                         await session.execute(
-                            update(ConstructorModel).where(ConstructorModel.id == item.id).values(index=item.index)
+                            update(ConstructorModel).where(
+                                ConstructorModel.id == item.id).values(index=item.index)
                         )
         except Exception as e:
             cls.__log__.error(f"更新前后置条件顺序失败, {e}")
@@ -140,9 +145,11 @@ class ConstructorDao(PikaWrapper):
         try:
             async with async_session() as session:
                 # 获取所有构造参数
-                search = [ConstructorModel.public is True, ConstructorModel.suffix == suffix, ConstructorModel.delete_flag == 0]
+                search = [ConstructorModel.public is True, ConstructorModel.suffix ==
+                          suffix, ConstructorModel.delete_flag == 0]
                 if name:
-                    search.append(ConstructorModel.name.like("%{}%".format(name)))
+                    search.append(ConstructorModel.name.like(
+                        "%{}%".format(name)))
                 query = await session.execute(select(ConstructorModel).where(*search))
                 constructor = query.scalars().all()
                 if not constructor:
@@ -183,11 +190,12 @@ class ConstructorDao(PikaWrapper):
         """
         async with async_session() as session:
             query = await session.execute(
-                select(ConstructorModel).where(ConstructorModel.id == id_, ConstructorModel.delete_flag == 0)
+                select(ConstructorModel).where(ConstructorModel.id ==
+                                               id_, ConstructorModel.delete_flag == 0)
             )
             data = query.scalars().first()
             if data is None:
-                raise Exception("前后置条件不存在")
+                raise KeyUndefinedException("前后置条件不存在")
             return data
 
     @staticmethod
@@ -229,10 +237,12 @@ class ConstructorDao(PikaWrapper):
                 return []
             # 二次查询，查出有前置条件的case
             query = await session.execute(
-                select(ApiTestCaseModel).where(ApiTestCaseModel.id.in_(constructors.keys()), ApiTestCaseModel.delete_flag == 0)
+                select(ApiTestCaseModel).where(ApiTestCaseModel.id.in_(
+                    constructors.keys()), ApiTestCaseModel.delete_flag == 0)
             )
             # 构造树，要知道children已经构建好了，就在constructors里面
             for q in query.scalars().all():
                 # 把用例id放入cs_list，这里就不用原生join了
-                ans.append({"title": q.name, "key": f"caseId_{q.id}", "disabled": True, "children": constructors[q.id]})
+                ans.append({"title": q.name, "key": f"caseId_{q.id}",
+                           "disabled": True, "children": constructors[q.id]})
         return ans

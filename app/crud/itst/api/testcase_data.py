@@ -13,6 +13,7 @@ from collections import defaultdict
 from typing import List
 
 from sqlalchemy import select
+from app.core.handler.execres import KeyExistException, KeyUndefinedException
 
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
@@ -36,8 +37,9 @@ class ApiTestCaseDataDao(PikaWrapper):
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is not None:
-                        raise Exception("该数据已存在, 请重新编辑")
-                    data = ApiTestCaseDataModel(**form.dict(), operator=operator)
+                        raise KeyExistException("该数据已存在, 请重新编辑")
+                    data = ApiTestCaseDataModel(
+                        **form.dict(), operator=operator)
                     session.add(data)
                     await session.flush()
                     await session.refresh(data)
@@ -57,7 +59,7 @@ class ApiTestCaseDataDao(PikaWrapper):
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
-                        raise Exception("测试数据不存在")
+                        raise KeyUndefinedException("测试数据不存在")
                     cls.update_model(query, form, operator)
                     await session.flush()
                     session.expunge(query)
@@ -76,7 +78,7 @@ class ApiTestCaseDataDao(PikaWrapper):
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
-                        raise Exception("测试数据不存在")
+                        raise KeyUndefinedException("测试数据不存在")
                     cls.delete_model(query, operator)
         except Exception as e:
             cls.__log__.error(f"删除测试数据失败, error: {str(e)}")

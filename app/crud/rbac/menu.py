@@ -14,6 +14,7 @@ from typing import Any, List
 from sqlalchemy import select, or_, and_, update
 
 from app.core.handler.asyncsql import AsyncDbSession
+from app.core.handler.execres import KeyExistException, KeyUndefinedException
 from app.models import async_db_session_generator
 from app.models.menu import MenuModel
 
@@ -50,7 +51,7 @@ class MenuDao:
         except AttributeError as e:
             pass
         if menu_parent_id == 0 and not is_parent:
-            raise ValueError('父菜单id不存在！')
+            raise KeyUndefinedException('父菜单id不存在！')
         async with async_db_session_generator() as session:
             async with session.begin():
                 query_by_id_sql = select(MenuModel.id, MenuModel.title, MenuModel.name, MenuModel.parent_id).where(
@@ -63,19 +64,20 @@ class MenuDao:
                 for ex_menu_index in ex_menu_info:
                     ex_parent_ids.append(ex_menu_index.id)
                     if menu_parent_id not in ex_parent_ids and not is_parent:
-                        raise ValueError('父菜单id不存在！')
+                        raise KeyExistException('父菜单id不存在！')
                     if menu_id != ex_menu_index.id:
                         if ex_menu_index.name == menu_name:
-                            raise ValueError('菜单名已存在！')
+                            raise KeyExistException('菜单名已存在！')
                         elif ex_menu_index.title == menu_title:
-                            raise ValueError("title已存在！")
+                            raise KeyExistException("title已存在！")
                         result = MenuModel(**request.dict(), operator=operator)
                         session.add(result)
                         await session.flush()
                     else:
                         delattr(request, "id")
                         update_sql = update(MenuModel).where(MenuModel.id == menu_id). \
-                            values(**request.dict(), create_emp_no=str(operator))
+                            values(**request.dict(),
+                                   create_emp_no=str(operator))
                         await session.execute(update_sql)
 
     @staticmethod

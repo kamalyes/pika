@@ -14,6 +14,7 @@ import time
 from copy import deepcopy
 
 from sqlalchemy import select, and_, or_, null
+from app.core.handler.execres import KeyExistException, KeyUndefinedException
 
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.pmp.project import ProjectDao
@@ -47,7 +48,8 @@ class ApiTestPlanDao(PikaWrapper):
                         # 说明用户一个项目都没有，不需要继续查询了
                         return [], 0
                     if len(projects) > 0:
-                        cls.where(projects, ApiTestPlanModel.project_id.in_(projects), conditions)
+                        cls.where(projects, ApiTestPlanModel.project_id.in_(
+                            projects), conditions)
                 cls.where(name, ApiTestPlanModel.name.like(f"%{name}%"), conditions) \
                     .where(priority, ApiTestPlanModel.priority == priority, conditions) \
                     .where(operator, ApiTestPlanModel.create_emp_no == operator, conditions)
@@ -65,7 +67,7 @@ class ApiTestPlanDao(PikaWrapper):
                                    ApiTestPlanFollowUserRelModel.plan_id == ApiTestPlanModel.id,
                                    ).where(
                         *conditions, ApiTestPlanFollowUserRelModel.emp_no == operator,
-                                     ApiTestPlanFollowUserRelModel.delete_flag == 0)
+                        ApiTestPlanFollowUserRelModel.delete_flag == 0)
                 else:
                     sql = select(ApiTestPlanModel, null().label('null_bar')) \
                         .outerjoin(ApiTestPlanFollowUserRelModel,
@@ -89,8 +91,9 @@ class ApiTestPlanDao(PikaWrapper):
                             ApiTestPlanModel.name == plan.name,
                             ApiTestPlanModel.delete_flag == 0))
                     if query.scalars().first() is not None:
-                        raise Exception("测试计划已存在")
-                    test_plan = ApiTestPlanModel(**plan.dict(), operator=operator)
+                        raise KeyExistException("测试计划已存在")
+                    test_plan = ApiTestPlanModel(
+                        **plan.dict(), operator=operator)
                     session.add(test_plan)
                     await session.flush()
                     await session.refresh(test_plan)
@@ -110,7 +113,7 @@ class ApiTestPlanDao(PikaWrapper):
                                                        ApiTestPlanModel.delete_flag == 0))
                     data = query.scalars().first()
                     if data is None:
-                        raise Exception("测试计划不存在")
+                        raise KeyUndefinedException("测试计划不存在")
                     old = deepcopy(data)
                     plan.env = ",".join(map(str, plan.env))
                     plan.receiver = ",".join(map(str, plan.receiver))
@@ -139,7 +142,7 @@ class ApiTestPlanDao(PikaWrapper):
                                                        ApiTestPlanModel.delete_flag == 0))
                     data = query.scalars().first()
                     if data is None:
-                        raise Exception("测试计划不存在")
+                        raise KeyUndefinedException("测试计划不存在")
                     data.state = state
                     # await session.flush()
                     # session.expunge(data)

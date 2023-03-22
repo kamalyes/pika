@@ -13,7 +13,7 @@
 from sqlalchemy import select, and_, or_
 
 from app.core.handler.asyncsql import AsyncDbSession
-from app.core.handler.execres import SystemException
+from app.core.handler.execres import KeyExistException, KeyUndefinedException, SystemException, ValidException
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.enums.SysvarEnum import ValidTimeEnum
 from app.middleware.xredis import RedisHelper
@@ -50,7 +50,7 @@ class OrganizationDao(PikaWrapper):
             select(OrganizationModel).where(OrganizationModel.id == organization_id))
         exists_id = query_exists_parent_id.scalars().first()
         if exists_id is None and organization_id != 0:
-            raise SystemException(detail=f"组织id: {organization_id}不存在")
+            raise KeyUndefinedException(detail=f"组织id: {organization_id}不存在")
 
     @classmethod
     async def match_org_parent_id(cls, session, parent_id):
@@ -68,7 +68,7 @@ class OrganizationDao(PikaWrapper):
                 and_(OrganizationModel.id == parent_id)))
         exists_parent_id = query_exists_parent_id.scalars().first()
         if exists_parent_id is None and parent_id != 0:
-            raise SystemException(detail=f"组织父id: {parent_id}不存在")
+            raise KeyUndefinedException(detail=f"组织父id: {parent_id}不存在")
 
     @classmethod
     async def match_org_name(cls, session, name):
@@ -82,12 +82,12 @@ class OrganizationDao(PikaWrapper):
 
         """
         if name is None or len(name) < 3:
-            raise SystemException(detail="组织名称不能为空，或长度不能<3个字符")
+            raise ValidException(detail="组织名称不能为空，或长度不能<3个字符")
         query_exists_name = await session.execute(
             select(OrganizationModel).where(OrganizationModel.name == name))
         exists_name = query_exists_name.scalars().first()
         if exists_name is not None:
-            raise SystemException(detail=f"组织名称: {name}已存在")
+            raise KeyExistException(detail=f"组织名称: {name}已存在")
 
     @classmethod
     async def match_org_id_equal_parent_id(cls, organization_id, parent_id):
@@ -101,7 +101,8 @@ class OrganizationDao(PikaWrapper):
 
         """
         if organization_id == parent_id and organization_id != 0:
-            raise SystemException(detail=f"组织id: {organization_id}与父节点{parent_id}相同")
+            raise SystemException(
+                detail=f"组织id: {organization_id}与父节点{parent_id}相同")
 
     @classmethod
     async def parity_field(cls, session, name, organization_id, parent_id):
@@ -130,8 +131,10 @@ class OrganizationDao(PikaWrapper):
                 OrganizationModel.name == request.name,
                 OrganizationModel.parent_id == request.parent_id,
                 OrganizationModel.sort_id == request.sort_id,
-                OrganizationModel.create_emp_no.like(f"%{request.create_emp_no}%"),
-                OrganizationModel.update_emp_no.like(f"%{request.update_emp_no}%"),
+                OrganizationModel.create_emp_no.like(
+                    f"%{request.create_emp_no}%"),
+                OrganizationModel.update_emp_no.like(
+                    f"%{request.update_emp_no}%"),
                 and_(OrganizationModel.create_date >= request.create_date,
                      OrganizationModel.update_date <= request.update_date)
                 ))
