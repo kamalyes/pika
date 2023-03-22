@@ -39,5 +39,5 @@ class OssClient(object):
                 return QiniuOss(access_key_id, access_key_secret, bucket_name)
             if oss_type == MiniOssTypeEnum.TENCENT.value:
                 return TencentCos(access_key_id, access_key_secret, endpoint, bucket_name)
-            raise ValidException("不支持的oss类型")
+            raise ValidException(detail="不支持的oss类型")
         return OssClient._client

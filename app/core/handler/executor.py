@@ -131,7 +131,7 @@ class Executor(object):
             return JSONGConfigParser.parse
         if key_type == GConfigParserEnum.yaml:
             return YamlGConfigParser.parse
-        raise ValidException(f"全局变量类型: {key_type}不合法, 请检查!")
+        raise ValidException(detail=f"全局变量类型: {key_type}不合法, 请检查!")
 
     async def parse_field(self, data, field, name, env):
         """
