@@ -53,7 +53,7 @@ class EnvironmentDao(PikaWrapper):
                 session.add(env)
 
     @classmethod
-    async def list_env(cls, paging, name=None, exactly=False):
+    async def list_env(cls, page, size, name=None, exactly=False):
         try:
             search = [EnvironmentModel.delete_flag == 0]
             async with async_session() as session:
@@ -69,8 +69,7 @@ class EnvironmentDao(PikaWrapper):
                 total = query.raw.rowcount
                 if total == 0:
                     return [], 0
-                sql = sql.offset((paging.page_index - 1) *
-                                 paging.page_size).limit(paging.page_size)
+                sql = sql.offset((page - 1) * size).limit(size)
                 data = await session.execute(sql)
                 return data.scalars().all(), total
         except Exception as e:

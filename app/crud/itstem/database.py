@@ -168,7 +168,7 @@ class DbConfigDao(PikaWrapper):
                         env_index[name] = idx
                     result[env_index[name]]["children"].append(
                         dict(
-                            title=f"{d.database}（{d.host}:{d.port}）",
+                            title=f"{d.database}({d.host}:{d.port})",
                             key=f"database_{d.id}",
                             children=list(),
                             sql_type=d.sql_type,

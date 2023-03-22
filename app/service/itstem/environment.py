@@ -46,5 +46,5 @@ async def update_environment(data: EnvironmentSchema, user_info=Depends(Permissi
 async def list_environment(paging: BaseOnlyPagingSchema = Depends(),
                            name: str = "", exactly=False,
                            user_info=Depends(Permission())):
-    data, total = await EnvironmentDao.list_env(paging, name, exactly)
+    data, total = await EnvironmentDao.list_env(paging.page_index, paging.page_size, name, exactly)
     return PikaResponse.success_with_size(data=data, total=total)
