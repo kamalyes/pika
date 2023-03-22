@@ -52,5 +52,6 @@ class ByteSizeEnum(IntEnum):
     LENGTH_3W = 30000
     LENGTH_5W = 50000
     LENGTH_6W = 60000
+    LENGTH_15W = 150000
     LENGTH_30W = 300000
     LENGTH_60W = 6000000

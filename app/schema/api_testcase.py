@@ -31,7 +31,7 @@ class TestCaseSchema(BaseModel):
     tag: str = Body(None, title="用例标签", max_length=ByteSizeEnum.LENGTH_64)
     body: str = Body(None, title="请求body", max_length=ByteSizeEnum.LENGTH_1W)
     body_type: int = Body(0, title="请求类型, 0: none 1: json 2: form 3: x-form 4: binary 5: GraphQL")
-    request_headers: str = Body(None, title="请求头，可为空", max_length=ByteSizeEnum.LENGTH_1000)
+    request_headers: str = Body(None, title="请求头，可为空", max_length=ByteSizeEnum.LENGTH_15W)
     request_method: str = Body(None, title="请求方式, 如果非http可为空", max_length=ByteSizeEnum.LENGTH_12)
     status: int = Body(0, title="用例状态: 1: 调试中 2: 暂时关闭 3: 正常运作")
     out_parameters: List[ApiTestCaseOutParametersSchema] = Body([], title="用例出参")
