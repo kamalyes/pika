@@ -405,7 +405,8 @@ async def convert_case(import_type: CaseConvertorTypeEnum, file: UploadFile = Fi
 
 @router.post("/variables/list", summary="根据前后置步骤查询变量名")
 async def query_variables(
-    steps: List[ApiTestCaseVariablesSchema], user_info=Depends(Permission()), session=Depends(async_db_session_iterator))
+    steps: List[ApiTestCaseVariablesSchema], user_info=Depends(Permission()), session=Depends(async_db_session_iterator)
+):
     var_list = list()
     await ApiTestCaseDao.query_test_case_out_parameters(session, steps, var_list=var_list)
     return PikaResponse.success(var_list)
