@@ -18,6 +18,14 @@ Pika是一款专注于自动化建设的平台，采用`Python`+`FastApi`+`React
 ### 👏 Docker部署
 
 1. 进入项目下
+```bash
+# 设置git使用utf-8
+git config --global core.quotepath false 
+git config --global gui.encoding utf-8
+git config --global i18n.commit.encoding utf-8 
+git config --global i18n.logoutputencoding utf-8 
+export LESSCHARSET=utf-8
+```
 2. 执行以下命令，安静等待启动即可
 ```bash
 docker-compose --env-file ./conf/.env -f docker-compose.yml up -d
@@ -130,9 +138,9 @@ Query OK, 0 rows affected (0.01 sec)
 vi setup_py391.sh
 
 将以下内容复制粘贴
-wget https://www.python.org/ftp/python/3.9.2/Python-3.9.2.tar.xz
-tar -xvJf  Python-3.9.2.tar.xz
-cd Python-3.9.2
+wget https://www.python.org/ftp/python/3.9.11/Python-3.9.11.tar.xz
+tar -xvJf  Python-3.9.11.tar.xz
+cd Python-3.9.11
 ./configure prefix=/usr/local/python3
 make && make install
 ln -s /usr/local/python3/bin/python3 /usr/bin/python3
