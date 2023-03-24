@@ -146,22 +146,37 @@ make && make install
 ln -s /usr/local/python3/bin/python3 /usr/bin/python3
 ln -s /usr/local/python3/bin/pip3 /usr/bin/pip3
 ```
+2. 安装nodejs
+```
+https://nodejs.org/download/release/v16.9.1/
+# 若出现如下错误：则需执行提权或重新安装yarn
+npm@8.19.3 D:\Program Files\NodeJs16.19.0\node_modules\npm
+npm ERR! code EPERM
+npm ERR! syscall mkdir
+npm ERR! The operation was rejected by your operating system.
+npm ERR! It's possible that the file was already in use (by a text editor or antivirus),
+npm ERR! or that you lack permissions to access it.
+npm ERR! If you believe this might be a permissions issue, please double-check the
+npm ERR! permissions of the file and its containing directories, or try running
+npm ERR! the command again as root/Administrator.
+npm ERR! You can rerun the command with `--loglevel=verbose` to see the logs in your terminal
+```
 
-2. clone项目
+3. clone项目
 
 ```bash
 后端：git clone git@github.com:kamalyes/pika.git
 前端：git clone git@github.com:kamalyes/pikaWeb.git
 ```
 
-3. 修改配置文件
+4. 修改配置文件
 
 ```bash
 后端：修改config.py中ENVIRONMENT变量、以及applicationxxx.yaml
 前端：修改config.js
 ```
 
-4. 数据库时区不对
+5. 数据库时区不对
 
 ```bash
 方案一

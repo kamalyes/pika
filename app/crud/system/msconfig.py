@@ -23,7 +23,7 @@ class MsConfigDao(object):
     @RedisHelper.cache("msconfig", ValidTimeEnum.SYSTEM_CONFIG_VALID_TIME.value)
     def get_config():
         try:
-            return PikaAppConfig.GLOBAL_POOL_CONFIG
+            return PikaAppConfig
         except Exception as e:
             raise Exception(f"获取系统设置失败, {e}")
 
