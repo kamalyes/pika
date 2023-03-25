@@ -269,7 +269,7 @@ async def update_testcase_directory(form: ApiTestCaseDirectorySchema, user_info=
         return PikaResponse.failed(detail=str(e))
 
 
-@router.get("/directory/delete", summary="删除测试用例类目")
+@router.delete("/directory/delete", summary="删除测试用例类目")
 async def insert_testcase_directory(id: int, user_info=Depends(Permission())):
     try:
         await ApiTestCaseDirectoryDao.delete_directory(id, user_info["emp_no"])
