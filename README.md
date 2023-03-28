@@ -47,7 +47,7 @@ export LESSCHARSET=utf-8
 ```bash
 CREATE DATABASE `pika` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci
 docker build -t kamalyes/pika:latest .
-docker-compose --env-file ./conf/.env -f ./test/docker/docker-compose.yml up -d
+docker-compose --env-file .env -f docker-compose.yml up -d
 或者在根目录下执行：
 docker run --name pika -d  -p 7777:7777 -p 7778:7778 -p 9001:9001  --privileged=true -v ./logs:/opt/pika/logs -v ./conf/.env:/opt/pika/conf/.env -e 'TZ=Asia/Shanghai' kamalyes/pika:latest
 ```
