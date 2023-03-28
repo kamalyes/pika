@@ -18,7 +18,7 @@ from app.enums.SysvarEnum import ValidTimeEnum
 from app.middleware.xredis import RedisHelper
 from app.models import async_session
 from app.models.gconfig import GConfigModel
-from app.schema.gconfig import GConfigFormSchema
+from app.schema.gconfig import GConfigSchema
 
 
 @PikaMdWrapper(GConfigModel)
@@ -26,7 +26,7 @@ class GConfigDao(PikaWrapper):
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def insert_gconfig(cls, form: GConfigFormSchema, operator: str) -> None:
+    async def insert_gconfig(cls, form: GConfigSchema, operator: str) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():

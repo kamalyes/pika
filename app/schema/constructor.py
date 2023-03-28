@@ -5,11 +5,10 @@ from pydantic import BaseModel, validator
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.exceptions.business.ParamsException import VariablesNullError
-from app.schema.base import PikaBaseModel
+from app.schema.base import BaseOnlyDelSchema, BaseOnlyIdSchema, PikaBaseModel
 
 
-class ConstructorSchema(BaseModel):
-    id: Optional[int] = Body(0, title="id")
+class ConstructorSchema(BaseOnlyIdSchema):
     value: Optional[str] = Body(
         "", title="", max_length=ByteSizeEnum.LENGTH_255)
     type: Optional[int] = Body(
@@ -37,10 +36,10 @@ class IndexConstructorSchema(ConstructorSchema):
     index: Optional[int] = Body(0, title="前置条件顺序")
 
 
-class ConstructorIndexSchema(IndexConstructorSchema):
-    id: Optional[int] = Body(0, title="id")
+class ConstructorIndexSchema(IndexConstructorSchema, BaseOnlyDelSchema):
+    pass
 
     # noinspection PyMethodParameters
-    @validator("id", "index")
+    @validator("index")
     def name_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)

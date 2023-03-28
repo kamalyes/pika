@@ -35,7 +35,7 @@ from app.models.api_testcase_data import ApiTestCaseDataModel
 from app.models.api_testcase_out_parameters import ApiTestCaseOutParametersModel
 from app.models.constructor import ConstructorModel
 from app.models.project import ProjectModel
-from app.schema.api_testcase import TestCaseInfo, TestCaseSchema
+from app.schema.api_testcase import TestCaseInfoSchema, TestCaseSchema
 from app.schema.api_testcase_out_parameters import ApiTestCaseVariablesSchema
 
 
@@ -109,7 +109,7 @@ class ApiTestCaseDao(PikaWrapper):
         return len(data)
 
     @classmethod
-    async def _insert(cls, session, case_id: int, operator: str, form: TestCaseInfo, **fields: tuple):
+    async def _insert(cls, session, case_id: int, operator: str, form: TestCaseInfoSchema, **fields: tuple):
         for field, model_info in fields.items():
             md, model = model_info
             field_data = getattr(form, field)
@@ -123,7 +123,7 @@ class ApiTestCaseDao(PikaWrapper):
                 await md.insert(model=data, session=session)
 
     @classmethod
-    async def insert_test_case(cls, session, data: TestCaseInfo, operator: str) -> ApiTestCaseModel:
+    async def insert_test_case(cls, session, data: TestCaseInfoSchema, operator: str) -> ApiTestCaseModel:
         """
         测试数据和用户id
         Args:
@@ -582,3 +582,17 @@ class ApiTestCaseDao(PikaWrapper):
             ans.append(dict(date=date, count=data.get(date, 0)))
             start += timedelta(days=1)
         return ans
+
+    @classmethod
+    async def swagger_import(cls, url, file):
+        """
+          填补数据
+          Args:
+              start_date:
+              finished_date:
+              data:
+
+          Returns:
+
+          """
+        pass

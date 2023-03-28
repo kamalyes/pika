@@ -12,7 +12,8 @@ class ApiTestReportModel(Base):
     __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_test_report'
     __table_args__ = {"comment": "测试报告表"}
     id = Column(INT, primary_key=True)
-    executor = Column(String(ByteSizeEnum.LENGTH_16), server_default="0", index=True, comment="执行人 0则为CPU")
+    executor = Column(String(ByteSizeEnum.LENGTH_16),
+                      server_default="0", index=True, comment="执行人 0则为CPU")
     env = Column(INT, nullable=False, comment="环境")
     cost = Column(String(ByteSizeEnum.LENGTH_08), comment="花费时间")
     plan_id = Column(INT, index=True, nullable=True, comment="测试集合id，预留字段")
@@ -25,13 +26,15 @@ class ApiTestReportModel(Base):
     status = Column(SMALLINT, nullable=False,
                     comment="执行状态 0: pending, 1: running, 2: stopped, 3: finished",
                     index=True)
-    mode = Column(SMALLINT, default=0, comment="case执行模式 0: 普通, 1: 测试集, 2: pipeline, 3: 其他")
+    mode = Column(SMALLINT, default=0,
+                  comment="case执行模式 0: 普通, 1: 测试集, 2: pipeline, 3: 其他")
 
-    delete_flag = Column(BOOLEAN, server_default="0", comment="删除标识 1：已删除，0：未删除")
+    delete_flag = Column(BOOLEAN, server_default="0",
+                         comment="删除标识 1：已删除，0：未删除")
 
     def __init__(self, executor: int, env: int, success_count: int = 0, failed_count: int = 0,
                  error_count: int = 0, skipped_count: int = 0, status: int = 0, mode: int = 0,
-                 plan_id: int = None, finished_date: datetime = None, cost=None):
+                 plan_id: int = 0, finished_date: datetime = None, cost=None):
         self.executor = executor
         self.env = env
         self.start_date = datetime.now()

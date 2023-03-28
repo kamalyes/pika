@@ -18,7 +18,7 @@ from pydantic import BaseModel
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.RbacEnum import RoleEnum
-from app.schema.base import BaseQuerySchema, BaseQueryTypeSchema, BaseBatchDelIdsSchema
+from app.schema.base import BaseOnlyIdSchema, BaseQuerySchema, BaseQueryTypeSchema, BaseBatchDelIdsSchema
 
 
 class OAuth2TokenSchema:
@@ -26,8 +26,10 @@ class OAuth2TokenSchema:
 
     def __init__(
             self,
-            emp_no: Optional[str] = Header(None, title="用户编码", max_length=ByteSizeEnum.LENGTH_16),
-            token: Optional[str] = Header(None, title="token", max_length=ByteSizeEnum.LENGTH_600),
+            emp_no: Optional[str] = Header(
+                None, title="用户编码", max_length=ByteSizeEnum.LENGTH_16),
+            token: Optional[str] = Header(
+                None, title="token", max_length=ByteSizeEnum.LENGTH_600),
     ):
         self.emp_no = emp_no
         self.token = token
@@ -41,7 +43,10 @@ class RegisterUserSchema(BaseModel):
         min_length=ByteSizeEnum.LENGTH_06,
         max_length=ByteSizeEnum.LENGTH_16,
     )
-    email: Optional[str] = Body(..., title="邮箱地址", max_length=ByteSizeEnum.LENGTH_255)
+    el_code: Optional[str] = Body(
+        None, title="验证码", max_length=ByteSizeEnum.LENGTH_11)
+    email: Optional[str] = Body(..., title="邮箱地址",
+                                max_length=ByteSizeEnum.LENGTH_255)
     password: Optional[str] = Body(
         None,
         title="登录密码",
@@ -54,9 +59,12 @@ class RegisterUserSchema(BaseModel):
         min_length=ByteSizeEnum.LENGTH_06,
         max_length=ByteSizeEnum.LENGTH_20,
     )
-    mobile: Optional[str] = Body(None, title="手机号码", max_length=ByteSizeEnum.LENGTH_11)
-    plane: Optional[str] = Body(None, title="座机", max_length=ByteSizeEnum.LENGTH_20)
-    avatar: Optional[str] = Body(None, title="头像", max_length=ByteSizeEnum.LENGTH_255)
+    mobile: Optional[str] = Body(
+        None, title="手机号码", max_length=ByteSizeEnum.LENGTH_11)
+    plane: Optional[str] = Body(
+        None, title="座机", max_length=ByteSizeEnum.LENGTH_20)
+    avatar: Optional[str] = Body(
+        None, title="头像", max_length=ByteSizeEnum.LENGTH_255)
     gender: Optional[int] = Body(None, title="性别")
     location: Optional[str] = Body(None, title="所在城市")
     identity: Optional[int] = Body(RoleEnum.ORDINARY.value, title="用户身份")
@@ -76,14 +84,16 @@ class OAuth2LoginSchema:
                                                max_length=ByteSizeEnum.LENGTH_06),
             grant_type: Optional[str] = Form(..., title="授权方式, account：用户名/员工编号、email：邮箱验证码",
                                              max_length=ByteSizeEnum.LENGTH_255),
-            username: Optional[str] = Form(None, title="用户名", max_length=ByteSizeEnum.LENGTH_16),
-            emp_no: Optional[str] = Form(None, title="用户编码", max_length=ByteSizeEnum.LENGTH_16),
-            email: Optional[str] = Form(None, title="邮箱地址", max_length=ByteSizeEnum.LENGTH_255),
-            password: Optional[str] = Form(None, title="密码", max_length=ByteSizeEnum.LENGTH_255),
-            private_key: Optional[str] = Form(None, title="私钥", max_length=ByteSizeEnum.LENGTH_255),
+            username: Optional[str] = Form(
+                None, title="用户名", max_length=ByteSizeEnum.LENGTH_16),
+            email: Optional[str] = Form(
+                None, title="邮箱地址", max_length=ByteSizeEnum.LENGTH_255),
+            password: Optional[str] = Form(
+                None, title="密码", max_length=ByteSizeEnum.LENGTH_255),
+            private_key: Optional[str] = Form(
+                None, title="私钥", max_length=ByteSizeEnum.LENGTH_255),
     ):
         self.grant_type = grant_type
-        self.emp_no = emp_no
         self.username = username
         self.email = email
         self.password = password
@@ -97,7 +107,8 @@ class ModifyUserInfoSchema(RegisterUserSchema):
 
 class QueryUserInSchema(BaseQuerySchema, BaseQueryTypeSchema):
     user_alias: Optional[str] = Query(None, title="用户花名")
-    username: Optional[str] = Query(None, title="用户名", max_length=ByteSizeEnum.LENGTH_16)
+    username: Optional[str] = Query(
+        None, title="用户名", max_length=ByteSizeEnum.LENGTH_16)
     emp_no: Optional[str] = Query(None, title="用户编码")
     email: Optional[str] = Query(None, title="邮箱地址")
     mobile: Optional[str] = Query(None, title="手机号码")
@@ -109,7 +120,8 @@ class QueryUserInSchema(BaseQuerySchema, BaseQueryTypeSchema):
 
 
 class QueryUserOutSchema(BaseQuerySchema):
-    username: Optional[str] = Query(None, title="用户名", max_length=ByteSizeEnum.LENGTH_16)
+    username: Optional[str] = Query(
+        None, title="用户名", max_length=ByteSizeEnum.LENGTH_16)
     user_alias: Optional[str] = Query(None, title="用户花名")
     emp_no: Optional[str] = Query(None, title="用户编码")
     email: Optional[str] = Query(None, title="邮箱地址")
@@ -126,9 +138,9 @@ class SendAuthCodeSchema:
         self.dynamic_code = dynamic_code
 
 
-class ItemSecuritySchema(BaseModel):
-    id: Optional[int] = Body(0, title="密保id")
-    question: Optional[str] = Body(None, title="密保问题", max_length=ByteSizeEnum.LENGTH_255)
+class ItemSecuritySchema(BaseOnlyIdSchema):
+    question: Optional[str] = Body(
+        None, title="密保问题", max_length=ByteSizeEnum.LENGTH_255)
     answers: Optional[str] = Body(
         ...,
         title="密保答案",
@@ -149,9 +161,9 @@ class DelSecuritySchema(BaseBatchDelIdsSchema):
     pass
 
 
-class QuerySecuritySchema(BaseModel):
-    id: Optional[int] = Body(0, title="id")
-    question: Optional[str] = Body(None, title="密保问题", max_length=ByteSizeEnum.LENGTH_255)
+class QuerySecuritySchema(BaseOnlyIdSchema):
+    question: Optional[str] = Body(
+        None, title="密保问题", max_length=ByteSizeEnum.LENGTH_255)
     answers: Optional[str] = Body(
         ...,
         title="密保答案",
@@ -180,17 +192,21 @@ class EmailVerifyCodeSchema(BaseModel):
 
 class ForgetPwdSchema(BaseModel):
     alter_type: Optional[int] = Body(1, title="验证方式：（1：邮箱验证码, 2：密保）")
-    verify_code: Optional[str] = Body(None, title="验证码", max_length=ByteSizeEnum.LENGTH_06)
+    verify_code: Optional[str] = Body(
+        None, title="验证码", max_length=ByteSizeEnum.LENGTH_06)
     security: List[ItemSecuritySchema] = Body(None, title="密保信息")
-    new_password: Optional[str] = Body(..., title="新密码", max_length=ByteSizeEnum.LENGTH_255)
+    new_password: Optional[str] = Body(..., title="新密码",
+                                       max_length=ByteSizeEnum.LENGTH_255)
 
     class Config:
         orm_mode = True
 
 
 class ModifySecretSchema(BaseModel):
-    old_password: Optional[str] = Body(..., title="旧密码", max_length=ByteSizeEnum.LENGTH_255)
-    new_password: Optional[str] = Body(..., title="新密码", max_length=ByteSizeEnum.LENGTH_255)
+    old_password: Optional[str] = Body(..., title="旧密码",
+                                       max_length=ByteSizeEnum.LENGTH_255)
+    new_password: Optional[str] = Body(..., title="新密码",
+                                       max_length=ByteSizeEnum.LENGTH_255)
 
     class Config:
         orm_mode = True

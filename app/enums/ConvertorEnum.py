@@ -14,3 +14,4 @@ from enum import IntEnum
 
 class CaseConvertorTypeEnum(IntEnum):
     har = 1
+    swagger = 2

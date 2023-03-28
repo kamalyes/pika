@@ -7,10 +7,10 @@ RUN mkdir -p ${WORKSPACES}
 WORKDIR ${WORKSPACES}
 ENV PYPI_SIMPLE_URL  https://pypi.mirrors.ustc.edu.cn/simple
 
-COPY ./requirements.txt ./requirements.txt
+COPY ./requirements.txt ./requirements.txt 
 RUN python -m venv ${WORKSPACES}/venv  \
   && ${WORKSPACES}/venv/bin/python -m pip install --upgrade pip -i ${PYPI_SIMPLE_URL}\
-  && ${WORKSPACES}/venv/bin/python -m pip install -r requirements.txt -i ${PYPI_SIMPLE_URL} \
+  && ${WORKSPACES}/venv/bin/python -m pip install -r requirements.txt -i ${PYPI_SIMPLE_URL} --force-reinstall \
   && apt update -y \
   && apt upgrade -y \
   && apt install -y wget \

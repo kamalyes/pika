@@ -1,13 +1,14 @@
 from typing import List
 
-from fastapi import Body
+from fastapi import Body, UploadFile, File
 from pydantic import BaseModel, validator
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
+from app.enums.ConvertorEnum import CaseConvertorTypeEnum
 from app.exceptions.business.ParamsException import VariablesNullError
 from app.schema.api_testcase_data import ApiTestCaseDataSchema
 from app.schema.api_testcase_out_parameters import ApiTestCaseOutParametersSchema
-from app.schema.base import PikaBaseModel
+from app.schema.base import BaseOnlyIdSchema, PikaBaseModel
 from app.schema.constructor import ConstructorSchema
 from app.schema.request import RequestInfoSchema
 
@@ -21,8 +22,7 @@ class DeleteTestCaseSchema(BaseModel):
     data: List[int]
 
 
-class TestCaseSchema(BaseModel):
-    id: int = Body(None, title="id")
+class TestCaseSchema(BaseOnlyIdSchema):
     priority: str = Body(None, title="用例优先级: p0-p3",
                          max_length=ByteSizeEnum.LENGTH_03)
     url: str = Body("", title="请求url", max_length=ByteSizeEnum.LENGTH_1W)
@@ -51,7 +51,7 @@ class TestCaseSchema(BaseModel):
         return v
 
 
-class TestCaseAssertsForm(BaseModel):
+class TestCaseAssertsSchema(BaseModel):
     id: int = None
     name: str
     case_id: int = None
@@ -65,9 +65,9 @@ class TestCaseAssertsForm(BaseModel):
         return PikaBaseModel.not_empty(v)
 
 
-class TestCaseInfo(BaseModel):
+class TestCaseInfoSchema(BaseModel):
     case: TestCaseSchema = None
-    asserts: List[TestCaseAssertsForm] = []
+    asserts: List[TestCaseAssertsSchema] = []
     data: List[ApiTestCaseDataSchema] = []
     constructor: List[ConstructorSchema] = []
     out_parameters: List[ApiTestCaseOutParametersSchema] = []
@@ -78,7 +78,14 @@ class TestCaseInfo(BaseModel):
         return PikaBaseModel.not_empty(v)
 
 
-class TestCaseGeneratorForm(BaseModel):
+class TestCaseGeneratorSchema(BaseModel):
     directory_id: int
     requests: List[RequestInfoSchema]
     name: str
+
+
+class TestCaseImportSchema(BaseModel):
+    import_type: CaseConvertorTypeEnum = Body(0, title="导入类型")
+    file: UploadFile = File(None)
+    api_docs_url: str = Body(None, title="在线接口文档地址")
+    is_cover: int = Body(0, title="是否叠加")

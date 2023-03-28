@@ -15,13 +15,14 @@ from fastapi import Body
 from pydantic import BaseModel
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.schema.base import BaseBatchDelIdsSchema, BaseQuerySchema, BaseQueryTypeSchema
+from app.schema.base import BaseBatchDelIdsSchema, BaseOnlyIdSchema, BaseQuerySchema, BaseQueryTypeSchema
 
 
-class KerberosGlobalSchema(BaseModel):
-    id: Optional[int] = Body(0, title="id")
-    question: Optional[str] = Body(None, title="密保问题", max_length=ByteSizeEnum.LENGTH_255)
-    description: Optional[str] = Body(None, title="备注信息", max_length=ByteSizeEnum.LENGTH_255)
+class KerberosGlobalSchema(BaseOnlyIdSchema):
+    question: Optional[str] = Body(
+        None, title="密保问题", max_length=ByteSizeEnum.LENGTH_255)
+    description: Optional[str] = Body(
+        None, title="备注信息", max_length=ByteSizeEnum.LENGTH_255)
 
 
 class EditKerberosItemSchema(BaseModel):

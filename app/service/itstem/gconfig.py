@@ -16,14 +16,14 @@ from app.crud.itstem.gconfig import GConfigDao
 from app.enums.RbacEnum import RoleEnum
 from app.models import async_db_session_iterator
 from app.schema.base import BaseOnlyPagingSchema
-from app.schema.gconfig import GConfigFormSchema
+from app.schema.gconfig import GConfigSchema
 from app.service import Permission
 
 router = APIRouter()
 
 
 @router.post("/gconfig/insert", summary="增加全局配置")
-async def insert_gconfig(data: GConfigFormSchema, user_info=Depends(Permission(RoleEnum.ADMIN))):
+async def insert_gconfig(data: GConfigSchema, user_info=Depends(Permission(RoleEnum.ADMIN))):
     await GConfigDao.insert_gconfig(data, user_info['emp_no'])
     return PikaResponse.success()
 
@@ -36,7 +36,7 @@ async def delete_gconfig(id: int, user_info=Depends(Permission(RoleEnum.ADMIN)),
 
 
 @router.post("/gconfig/update", summary="更新全局配置")
-async def update_gconfig(data: GConfigFormSchema, user_info=Depends(Permission(RoleEnum.ADMIN))):
+async def update_gconfig(data: GConfigSchema, user_info=Depends(Permission(RoleEnum.ADMIN))):
     await GConfigDao.update_record_by_id(user_info['emp_no'], data, True)
     return PikaResponse.success()
 

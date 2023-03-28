@@ -4,8 +4,8 @@ from app.schema.base import PikaBaseModel
 
 
 class ApiTestCaseOutParametersSchema(BaseModel):
-    id: int = None
-    # case_id: int = None
+    id: int = 0
+    # case_id: int = 0
     name: str
     expression: str = None
     match_index: str = None
@@ -18,7 +18,7 @@ class ApiTestCaseOutParametersSchema(BaseModel):
 
 
 class ApiTestCaseParametersSchema(ApiTestCaseOutParametersSchema):
-    case_id: int = None
+    case_id: int = 0
 
 
 class ApiTestCaseVariablesSchema(BaseModel):

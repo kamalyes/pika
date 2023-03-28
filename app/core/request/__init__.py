@@ -14,7 +14,7 @@ from app.core.request.har_convertor import HarConvertor
 from app.enums.ConvertorEnum import CaseConvertorTypeEnum
 
 
-def get_convertor(c: CaseConvertorTypeEnum) -> (Convertor.convert, str):
-    if c == CaseConvertorTypeEnum.har:
+def get_convertor(ct: CaseConvertorTypeEnum) -> (Convertor.convert, str):
+    if ct == CaseConvertorTypeEnum.har:
         return HarConvertor.convert, CaseConvertorTypeEnum.har.name
     return None, ""

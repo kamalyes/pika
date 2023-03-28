@@ -1,9 +1,9 @@
 import json
 from typing import List
 
-from fastapi import APIRouter, Depends, UploadFile, File, Request
+from fastapi import APIRouter, Depends, Request
 
-from app.core.handler.exceres import AuthException
+from app.core.handler.exceres import AuthException, ValidException
 from app.core.handler.jsonres import PikaResponse
 from app.core.request import get_convertor
 from app.core.request.generator import CaseGenerator
@@ -20,7 +20,7 @@ from app.middleware.xredis import RedisHelper
 from app.models import async_db_session_iterator
 from app.models.api_test_case import ApiTestCaseModel
 from app.models.api_testcase_out_parameters import ApiTestCaseOutParametersModel
-from app.schema.api_testcase import TestCaseAssertsForm, TestCaseSchema, TestCaseInfo, TestCaseGeneratorForm
+from app.schema.api_testcase import TestCaseAssertsSchema, TestCaseImportSchema, TestCaseSchema, TestCaseInfoSchema, TestCaseGeneratorSchema
 from app.schema.api_testcase_data import ApiTestCaseDataSchema
 from app.schema.api_testcase_directory import ApiTestCaseDirectorySchema, MoveApiTestCaseSchema
 from app.schema.api_testcase_out_parameters import (
@@ -37,7 +37,7 @@ router = APIRouter()
 
 
 @router.get("/list", summary="用例列表查询")
-async def list_testcase(paging: BaseOnlyPagingSchema = Depends(), directory_id: int = None, name: str = "", operator: str = ""):
+async def list_testcase(paging: BaseOnlyPagingSchema = Depends(), directory_id: int = 0, name: str = "", operator: str = ""):
     data, total = await ApiTestCaseDao.list_testcase(paging, directory_id, name, operator)
     return PikaResponse.success_with_size(data=data, total=total)
 
@@ -56,7 +56,7 @@ async def insert_testcase(data: TestCaseSchema, user_info=Depends(Permission()))
 
 
 @router.post("/create", summary="v2版本创建用例接口")
-async def create_testcase(data: TestCaseInfo, user_info=Depends(Permission()), session=Depends(async_db_session_iterator)):
+async def create_testcase(data: TestCaseInfoSchema, user_info=Depends(Permission()), session=Depends(async_db_session_iterator)):
     async with session.begin():
         await ApiTestCaseDao.insert_test_case(session, data, user_info["emp_no"])
     return PikaResponse.success()
@@ -99,7 +99,7 @@ async def query_testcase(caseId: int, user_info=Depends(Permission())):
 
 
 @router.post("/asserts/insert", summary="增加用例断言")
-async def insert_testcase_asserts(data: TestCaseAssertsForm, user_info=Depends(Permission())):
+async def insert_testcase_asserts(data: TestCaseAssertsSchema, user_info=Depends(Permission())):
     try:
         new_assert = await ApiTestCaseAssertsDao.insert_test_case_asserts(data, operator=user_info["emp_no"])
         return PikaResponse.success(data=new_assert)
@@ -108,7 +108,7 @@ async def insert_testcase_asserts(data: TestCaseAssertsForm, user_info=Depends(P
 
 
 @router.post("/asserts/update", summary="更新用例断言")
-async def update_testcase_asserts(data: TestCaseAssertsForm, user_info=Depends(Permission())):
+async def update_testcase_asserts(data: TestCaseAssertsSchema, user_info=Depends(Permission())):
     try:
         updated = await ApiTestCaseAssertsDao.update_test_case_asserts(data, operator=user_info["emp_no"])
         return PikaResponse.success(data=updated)
@@ -382,27 +382,33 @@ async def remove_record(index: int, request: Request, user_info=Depends(Permissi
 
 
 @router.post("/generate", summary="生成用例")
-async def generate_case(form: TestCaseGeneratorForm, user_info=Depends(Permission()), session=Depends(async_db_session_iterator)):
+async def generate_case(form: TestCaseGeneratorSchema, user_info=Depends(Permission()), session=Depends(async_db_session_iterator)):
     if len(form.requests) == 0:
         return PikaResponse.failed(detail="无http请求，请检查参数")
     CaseGenerator.extract_field(form.requests)
     cs = CaseGenerator.generate_case(
         form.directory_id, form.name, form.requests[-1])
     constructors = CaseGenerator.generate_constructors(form.requests)
-    info = TestCaseInfo(constructor=constructors, case=cs)
+    info = TestCaseInfoSchema(constructor=constructors, case=cs)
     async with session.begin():
         ans = await ApiTestCaseDao.insert_test_case(session, info, user_info["emp_no"])
         return PikaResponse.success(data=ans)
 
 
 @router.post("/import", summary="导入har或其他用例数据文件")
-async def convert_case(import_type: CaseConvertorTypeEnum, file: UploadFile = File(...), user_info=Depends(Permission())):
-    convert, file_ext = get_convertor(import_type)
-    if convert is None:
-        return PikaResponse.failed(detail=f"不支持的导入数据")
-    if not file.filename.endswith(f".{file_ext}"):
-        return PikaResponse.failed(detail=f"请传入{file_ext}后缀文件")
-    requests = convert(file.file)
+async def convert_case(form: TestCaseImportSchema, user_info=Depends(Permission())):
+    import_type, file_, api_docs_url = form.import_type, form.file, form.api_docs_url
+    if import_type == CaseConvertorTypeEnum.har.name and import_type:
+        convert, file_ext = get_convertor(import_type)
+        if convert is None:
+            return PikaResponse.failed(detail=f"不支持的导入数据")
+        if not file_.filename.endswith(f".{file_ext}"):
+            return PikaResponse.failed(detail=f"请传入{file_ext}后缀文件")
+        requests = convert(file_.file)
+    elif import_type == CaseConvertorTypeEnum.swagger.name:
+        requests = ApiTestCaseDao.swagger_import(api_docs_url, file_)
+    else:
+        raise ValidException(detail="请检查入参是否正确！")
     return PikaResponse.success(data=requests)
 
 

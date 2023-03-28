@@ -20,7 +20,7 @@ FORBIDDEN = "对不起, 你没有足够的权限"
 
 
 class Permission:
-    def __init__(self, identity: int = None, escarole=False):
+    def __init__(self, identity: int = 0, escarole=False):
         self.identity = identity
         self.escarole = escarole
 

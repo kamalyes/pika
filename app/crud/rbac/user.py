@@ -92,7 +92,6 @@ class UserDao(PikaWrapper):
         Returns:
         """
         user_ip = await client_ip(request)
-        await regex_register_str(email=register_model.email)
         async with async_db_session_generator() as session:
             async with session.begin():
                 users = await session.execute(select(UserModel).where(
@@ -295,7 +294,9 @@ class UserDao(PikaWrapper):
         async with async_db_session_generator() as session:
             async with session.begin():
                 sql = select(UserModel).where(or_(UserModel.username == oauth2_login.username,
-                                                  UserModel.emp_no == oauth2_login.emp_no))
+                                                  UserModel.emp_no == oauth2_login.username,
+                                                  UserModel.mobile == oauth2_login.username,
+                                                  UserModel.email == oauth2_login.username))
                 users = await session.execute(sql)
                 user = users.scalars().first()
                 if user:
@@ -558,11 +559,11 @@ class UserDao(PikaWrapper):
         if dynamic_code in PikaGlobalVarEnum.VERIFY_CODE_WHITE_LIST or has_key:
             return await async_redis.delete(redis_dynamic_code_)
         else:
-            raise AuthException(
+            raise SystemException(
                 code=ExcCodeEnum.DYNAMIC_ERROR, detail="验证码已过期或不存在")
 
     @staticmethod
-    async def has_mail_verify_code(verify_code, model=1, emp_no=None):
+    async def has_mail_verify_code(verify_code, model=1, emp_no=None, addressee=None):
         """
         检查邮箱验证码是否存在
             verify_code:
@@ -575,15 +576,17 @@ class UserDao(PikaWrapper):
         """
         if model == 1:
             redis_verify_code_ = f"{RedisKeyEnum.FORGET_PWD_VERIFYCODE}"
-        elif model:
-            redis_verify_code_ = f"{RedisKeyEnum.LOGIN_VERIFYCODE}:{emp_no}"
+        elif model == 2:
+            redis_verify_code_ = f"{RedisKeyEnum.EMAIL_LOGIN_VERIFYCODE}:{emp_no}"
+        elif model == 3:
+            redis_verify_code_ = f"{RedisKeyEnum.REGISTER_VERIFYCODE}:{addressee}"
         else:
             raise ValidException(detail="暂不支持该model！")
         has_key = await async_redis.get(redis_verify_code_)
         if verify_code in PikaGlobalVarEnum.VERIFY_CODE_WHITE_LIST or has_key == verify_code:
             return await async_redis.delete(redis_verify_code_)
         else:
-            raise AuthException(
+            raise SystemException(
                 code=ExcCodeEnum.DYNAMIC_ERROR, detail="验证码已过期或不存在")
 
     @staticmethod

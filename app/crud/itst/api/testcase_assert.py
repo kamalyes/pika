@@ -17,7 +17,7 @@ from app.core.handler.exceres import KeyExistException, KeyUndefinedException
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
 from app.models.api_testcase_asserts import ApiTestCaseAssertsModel
-from app.schema.api_testcase import TestCaseAssertsForm
+from app.schema.api_testcase import TestCaseAssertsSchema
 
 
 @PikaMdWrapper(ApiTestCaseAssertsModel)
@@ -59,7 +59,7 @@ class ApiTestCaseAssertsDao(PikaWrapper):
             raise Exception(f"获取用例断言失败: {str(e)}")
 
     @staticmethod
-    async def insert_test_case_asserts(form: TestCaseAssertsForm, operator: str):
+    async def insert_test_case_asserts(form: TestCaseAssertsSchema, operator: str):
         try:
             ans = None
             async with async_session() as session:
@@ -86,7 +86,7 @@ class ApiTestCaseAssertsDao(PikaWrapper):
             raise Exception(f"新增用例断言失败, {e}")
 
     @classmethod
-    async def update_test_case_asserts(cls, form: TestCaseAssertsForm,
+    async def update_test_case_asserts(cls, form: TestCaseAssertsSchema,
                                        operator: str) -> ApiTestCaseAssertsModel:
         """
         更新用例断言

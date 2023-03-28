@@ -26,12 +26,17 @@ from app.schema.user import RegisterUserSchema, OAuth2LoginSchema, \
     GetVerifyCodeSchema, ModifySecretSchema, EditSecuritySchema, \
     DelSecuritySchema, QuerySecuritySchema, EmailVerifyCodeSchema
 from app.service import Permission
+from app.crud.rbac import regex_register_str
 
 router = APIRouter()
 
 
 @router.post("/register", summary="普通用户注册")
 async def register(request: Request, register_model: RegisterUserSchema):
+    await regex_register_str(email=register_model.email)
+    await UserDao.has_mail_verify_code(verify_code=register_model.el_code,
+                                       model=3,
+                                       addressee=register_model.email)
     return await UserDao.register_user(request, register_model)
 
 

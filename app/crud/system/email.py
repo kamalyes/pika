@@ -66,7 +66,7 @@ class Email(object):
         if model == 1:
             auth_verify_code = f"{RedisKeyEnum.FORGET_PWD_VERIFYCODE}:{emp_no}"
         elif model == 2:
-            auth_verify_code = f"{RedisKeyEnum.LOGIN_VERIFYCODE}:{emp_no}"
+            auth_verify_code = f"{RedisKeyEnum.EMAIL_LOGIN_VERIFYCODE}:{emp_no}"
         elif model == 3:
             auth_verify_code = f"{RedisKeyEnum.REGISTER_VERIFYCODE}:{addressee}"
         else:

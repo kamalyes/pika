@@ -10,13 +10,12 @@
 @Desc    :  None
 """
 from fastapi import Body
-from pydantic import BaseModel
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
+from app.schema.base import BaseOnlyIdSchema
 
 
-class GConfigFormSchema(BaseModel):
-    id: int = Body(None, name="id")
+class GConfigSchema(BaseOnlyIdSchema):
     key: str = Body(..., name="key", max_length=ByteSizeEnum.LENGTH_56)
     value: str = Body(..., name="value", max_length=ByteSizeEnum.LENGTH_1W)
     env: int = Body(..., name="环境id")
