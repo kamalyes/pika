@@ -72,8 +72,7 @@ async def update_test_plan(form: ApiTestPlanSchema,
 async def delete_test_plan(id: int, user_info=Depends(Permission(RoleEnum.MANAGER)),
                            session=Depends(async_db_session_iterator)):
     try:
-        await ApiTestPlanDao.delete_record_by_id(session=session, operator=user_info['emp_no'],
-                                                 value=id)
+        await ApiTestPlanDao.delete_record_by_id(session=session, operator=user_info['emp_no'], value=id)
         Scheduler.remove(id)
     except JobLookupError:
         # 说明没找到job

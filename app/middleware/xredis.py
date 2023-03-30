@@ -404,10 +404,7 @@ class RedisHelper(object):
                     new_data = await func(*args, **kwargs)
                     if not PikaAppConfig.REDIS_ENABLE_FLAG:
                         return new_data
-                    cls_name = \
-                        inspect.getframeinfo(inspect.currentframe().f_back)[3][0].split(".")[
-                            0].split(
-                            " ")[-1]
+                    cls_name = inspect.getframeinfo(inspect.currentframe().f_back)[3][0].split(".")[0].split(" ")[-1]
                     for k in key:
                         redis_key = f"{RedisHelper.prefix}:{cls_name}:{k}"
                         await RedisHelper.async_delete_prefix(redis_key)

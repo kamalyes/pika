@@ -26,7 +26,7 @@ services:
     ports:
       - ${MYSQL_PORT}:3306
     volumes:
-      - ${VOLUMES_BASE}/conf/mysql.cnf:/etc/mysql/conf.d/my.cnf
+      - ${VOLUMES_BASE}/conf/my.cnf:/etc/mysql/conf.d/my.cnf
       - ${VOLUMES_BASE}/bin/mysql:/docker-entrypoint-initdb.d/
       - ${VOLUMES_BASE}/data/mysql:/var/lib/mysql
     networks:
