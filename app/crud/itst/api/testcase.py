@@ -142,7 +142,7 @@ class ApiTestCaseDao(PikaWrapper):
             )
         )
         if query.scalars().first() is not None:
-            raise KeyExistException(deatil="用例名称已存在")
+            raise KeyExistException(detail="用例名称已存在")
         cs = ApiTestCaseModel(**data.case.dict(), operator=operator)
         # 添加case，之后添加其他数据
         session.add(cs)

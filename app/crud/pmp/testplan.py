@@ -91,7 +91,7 @@ class ApiTestPlanDao(PikaWrapper):
                             ApiTestPlanModel.name == plan.name,
                             ApiTestPlanModel.delete_flag == 0))
                     if query.scalars().first() is not None:
-                        raise KeyExistException(deatil="测试计划已存在")
+                        raise KeyExistException(detail="测试计划已存在")
                     test_plan = ApiTestPlanModel(
                         **plan.dict(), operator=operator)
                     session.add(test_plan)

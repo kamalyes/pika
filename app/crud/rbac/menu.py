@@ -69,7 +69,7 @@ class MenuDao:
                         if ex_menu_index.name == menu_name:
                             raise KeyExistException(detail='菜单名已存在！')
                         elif ex_menu_index.title == menu_title:
-                            raise KeyExistException(deatil="title已存在！")
+                            raise KeyExistException(detail="title已存在！")
                         result = MenuModel(**request.dict(), operator=operator)
                         session.add(result)
                         await session.flush()

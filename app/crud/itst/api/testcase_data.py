@@ -37,7 +37,7 @@ class ApiTestCaseDataDao(PikaWrapper):
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is not None:
-                        raise KeyExistException(deatil="该数据已存在, 请重新编辑")
+                        raise KeyExistException(detail="该数据已存在, 请重新编辑")
                     data = ApiTestCaseDataModel(
                         **form.dict(), operator=operator)
                     session.add(data)

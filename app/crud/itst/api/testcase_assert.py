@@ -71,7 +71,7 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                     result = await session.execute(sql)
                     data = result.scalars().first()
                     if data is not None:
-                        raise KeyExistException(deatil="断言信息已存在, 请检查")
+                        raise KeyExistException(detail="断言信息已存在, 请检查")
                     new_assert = ApiTestCaseAssertsModel(
                         **form.dict(), operator=operator)
                     session.add(new_assert)

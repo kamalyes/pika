@@ -69,7 +69,7 @@ class DbConfigDao(PikaWrapper):
                     )
                     query = result.scalars().first()
                     if query is not None:
-                        raise KeyExistException(deatil="数据库配置已存在")
+                        raise KeyExistException(detail="数据库配置已存在")
                     session.add(DatabaseModel(
                         **data.dict(), operator=operator))
         except Exception as e:

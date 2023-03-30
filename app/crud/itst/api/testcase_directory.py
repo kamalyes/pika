@@ -65,7 +65,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                     )
                     result = await session.execute(sql)
                     if result.scalars().first() is not None:
-                        raise KeyExistException(deatil="目录已存在")
+                        raise KeyExistException(detail="目录已存在")
                     session.add(ApiTestCaseDirectoryModel(form, operator))
         except Exception as e:
             cls.__log__.error(f"创建目录失败, error: {e}")
