@@ -11,6 +11,8 @@
 """
 from enum import IntEnum
 
+from app.core.handler.exceres import SystemException, ValidException
+
 
 class CertType(IntEnum):
     windows = 0
@@ -26,4 +28,4 @@ class CertType(IntEnum):
             return "pem"
         if self == CertType.android:
             return "cer"
-        raise Exception("unsupported cert type")
+        raise ValidException(detail="unsupported cert type")

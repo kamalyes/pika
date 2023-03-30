@@ -12,6 +12,7 @@
 from awaits.awaitable import awaitable
 # noinspection PyPackageRequirements
 from qcloud_cos import CosConfig, CosS3Client
+from app.core.handler.exceres import SystemException
 
 from app.middleware.oss import OssFile
 
@@ -35,7 +36,7 @@ class TencentCos(OssFile):
             res = self.client.get_object_url(self.bucket, key)
             return res, len(content)
         except Exception as e:
-            raise Exception(f"上传出错: {e}")
+            raise SystemException(detail=f"上传出错: {e}")
 
     @awaitable
     def update_file(self, filepath: str, content: bytes, base_path: str = None):

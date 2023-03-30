@@ -12,7 +12,7 @@
 
 from sqlalchemy import select, desc
 
-from app.core.handler.exceres import KeyExistException, KeyUndefinedException, ValidException
+from app.core.handler.exceres import KeyExistException, KeyUndefinedException, SystemException, ValidException
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
 from app.models.environment import EnvironmentModel
@@ -75,4 +75,4 @@ class EnvironmentDao(PikaWrapper):
         except Exception as e:
             err = f"获取环境数据失败，失败原因： {str(e)}"
             cls.__log__.error(err)
-            raise Exception(err)
+            raise SystemException(detail=err)

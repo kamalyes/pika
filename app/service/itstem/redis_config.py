@@ -31,7 +31,7 @@ async def insert_redis_config(form: RedisConfigSchema,
     try:
         query = await PikaRedisConfigDao.query_record(name=form.name, env=form.env)
         if query is not None:
-            raise KeyExistException("数据已存在, 请勿重复添加")
+            raise KeyExistException(deatil="数据已存在, 请勿重复添加")
         model = RedisModel(**form.dict(), operator=user_info['emp_no'])
         result = await PikaRedisConfigDao.insert(model=model, log=True)
         return PikaResponse.success(data=result)

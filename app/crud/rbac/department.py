@@ -37,7 +37,7 @@ class DepartmentDao(PikaWrapper):
                     session.add(config)
         except Exception as e:
             cls.__log__.error(f"新增部门: {form.name}失败, {e}")
-            raise Exception(f"新增部门: {form.name}失败")
+            raise SystemException(detail=f"新增部门: {form.name}失败")
 
     @classmethod
     async def match_dept_id(cls, session, dept_id):

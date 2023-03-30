@@ -69,7 +69,7 @@ async def delete_oss_file(filepath: str, user_info=Depends(Permission(RoleEnum.M
         # 先获取到本地的记录，拿到sha值
         record = await PikaOssDao.query_record(file_path=filepath, delete_flag=False)
         if record is None:
-            raise KeyUndefinedException("文件不存在或已被删除")
+            raise KeyUndefinedException(detail="文件不存在或已被删除")
         await PikaOssDao.delete_record_by_id(session, user_info["emp_no"], record.id, log=True)
         client = OssClient.get_oss_client()
         await client.delete_file(filepath)

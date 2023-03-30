@@ -14,7 +14,7 @@ from typing import Dict, Any, Text
 from sqlalchemy import select, delete, update, and_, or_
 
 from app.core.handler.asyncsql import AsyncDbSession
-from app.core.handler.exceres import KeyExistException
+from app.core.handler.exceres import KeyExistException, SystemException
 from app.crud import PikaMdWrapper
 from app.models import async_db_session_generator
 from app.models.role import RoleModel
@@ -53,7 +53,7 @@ class RoleDao:
                     query_ex_role_result = await session.execute(query_ex_sql)
                     ex_role_info = query_ex_role_result.scalars().first()
                     if ex_role_info:
-                        raise KeyExistException('角色名已存在!')
+                        raise KeyExistException(detail='角色名已存在!')
                     if menus:
                         request.menus = ','.join(list(map(str, menus)))
                     update_role_info_sql = update(RoleModel) \
@@ -62,7 +62,7 @@ class RoleDao:
         except ValueError as err:
             err_msg = f"更新/写入失败，错误原因：{err}"
             cls.__log__.error(err_msg)
-            raise Exception(err_msg)
+            raise SystemException(detail=err_msg)
 
     @classmethod
     async def delete(cls, id: int):
@@ -79,4 +79,4 @@ class RoleDao:
                     await session.execute(del_role_sql)
         except Exception as e:
             cls.__log__.error(f"获取数据库配置失败, error: {e}")
-            raise Exception("获取数据库配置失败")
+            raise SystemException(detail="获取数据库配置失败")

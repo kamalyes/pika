@@ -13,17 +13,18 @@ RUN python -m venv ${WORKSPACES}/venv  \
   && ${WORKSPACES}/venv/bin/python -m pip install -r requirements.txt -i ${PYPI_SIMPLE_URL} --force-reinstall \
   && apt update -y \
   && apt upgrade -y \
-  && apt install -y wget \
   && apt install -y vim \
+  && apt install -y wget \
   && apt install -y curl \
-  && apt install -y tzdata
+  && apt install -y tzdata \
+  && apt upgrade -y telnet
 
 COPY . .
 RUN rm -rf ${WORKSPACES}/{test/,docker-compose.yml,fixcommit.sh,.env.example}
 RUN ln -snf /usr/share/zoneinfo/$TIME_ZONE /etc/localtime && echo $TIME_ZONE > /etc/timezone \
   mkdir -p ${WORKSPACES}/logs && \
-  chmod 755 ${WORKSPACES}
+  chmod 755 -R ${WORKSPACES}/
 
-EXPOSE 7777
+EXPOSE 7777 7778 9001
 
-CMD ["/opt/pika/venv/bin/supervisord", "-c", "/opt/pika/conf/supervisor.conf"]
+CMD ["/opt/pika/venv/bin/supervisord", "--configuration", "/opt/pika/conf/supervisor.conf"]

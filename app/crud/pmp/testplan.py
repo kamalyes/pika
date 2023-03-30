@@ -14,7 +14,7 @@ import time
 from copy import deepcopy
 
 from sqlalchemy import select, and_, or_, null
-from app.core.handler.exceres import KeyExistException, KeyUndefinedException
+from app.core.handler.exceres import KeyExistException, KeyUndefinedException, SystemException
 
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.pmp.project import ProjectDao
@@ -78,7 +78,7 @@ class ApiTestPlanDao(PikaWrapper):
                 return result, total
         except Exception as e:
             cls.__log__.error(f"获取测试计划失败: {str(e)}")
-            raise Exception(f"获取测试计划失败: {str(e)}")
+            raise SystemException(detail=f"获取测试计划失败: {str(e)}")
 
     @staticmethod
     async def insert_test_plan(plan: ApiTestPlanSchema, operator: str) -> ApiTestPlanModel:
@@ -91,7 +91,7 @@ class ApiTestPlanDao(PikaWrapper):
                             ApiTestPlanModel.name == plan.name,
                             ApiTestPlanModel.delete_flag == 0))
                     if query.scalars().first() is not None:
-                        raise KeyExistException("测试计划已存在")
+                        raise KeyExistException(deatil="测试计划已存在")
                     test_plan = ApiTestPlanModel(
                         **plan.dict(), operator=operator)
                     session.add(test_plan)
@@ -101,7 +101,7 @@ class ApiTestPlanDao(PikaWrapper):
                     return test_plan
         except Exception as e:
             ApiTestPlanDao.__log__.error(f"新增测试计划失败: {str(e)}")
-            raise Exception(f"添加失败: {str(e)}")
+            raise SystemException(detail=f"添加失败: {str(e)}")
 
     @classmethod
     async def update_test_plan(cls, plan: ApiTestPlanSchema, user: int, log=True):
@@ -113,7 +113,7 @@ class ApiTestPlanDao(PikaWrapper):
                                                        ApiTestPlanModel.delete_flag == 0))
                     data = query.scalars().first()
                     if data is None:
-                        raise KeyUndefinedException("测试计划不存在")
+                        raise KeyUndefinedException(detail="测试计划不存在")
                     old = deepcopy(data)
                     plan.env = ",".join(map(str, plan.env))
                     plan.receiver = ",".join(map(str, plan.receiver))
@@ -130,7 +130,7 @@ class ApiTestPlanDao(PikaWrapper):
                                            changed))
         except Exception as e:
             cls.__log__.exception(f"编辑测试计划失败: {str(e)}")
-            raise Exception(f"编辑失败: {str(e)}")
+            raise SystemException(detail=f"编辑失败: {str(e)}")
 
     @staticmethod
     async def update_test_plan_state(id: int, state: int):
@@ -142,14 +142,14 @@ class ApiTestPlanDao(PikaWrapper):
                                                        ApiTestPlanModel.delete_flag == 0))
                     data = query.scalars().first()
                     if data is None:
-                        raise KeyUndefinedException("测试计划不存在")
+                        raise KeyUndefinedException(detail="测试计划不存在")
                     data.state = state
                     # await session.flush()
                     # session.expunge(data)
                     # return data
         except Exception as e:
             ApiTestPlanDao.__log__.error(f"编辑测试计划失败: {str(e)}")
-            raise Exception(f"编辑失败: {str(e)}")
+            raise SystemException(detail=f"编辑失败: {str(e)}")
 
     @staticmethod
     async def query_test_plan(id: int) -> ApiTestPlanModel:
@@ -161,7 +161,7 @@ class ApiTestPlanDao(PikaWrapper):
                 return data.scalars().first()
         except Exception as e:
             ApiTestPlanDao.__log__.error(f"获取测试计划失败: {str(e)}")
-            raise Exception(f"获取测试计划失败: {str(e)}")
+            raise SystemException(detail=f"获取测试计划失败: {str(e)}")
 
     # @classmethod
     # async def delete_test_plan(cls, id: int, user: int):
@@ -172,11 +172,11 @@ class ApiTestPlanDao(PikaWrapper):
     #                     select(ApiTestPlanModel).where(ApiTestPlanModel.id == id, ApiTestPlanModel.delete_flag == 0))
     #                 data = query.scalars().first()
     #                 if data is None:
-    #                     raise Exception("测试计划不存在")
+    #                     raise SystemException(detail="测试计划不存在")
     #                 cls.delete_model(data, user)
     #     except Exception as e:
     #         cls.__log__.error(f"删除测试计划失败: {str(e)}")
-    #         raise Exception(f"删除失败: {str(e)}")
+    #         raise SystemException(detail=f"删除失败: {str(e)}")
 
     @staticmethod
     async def follow_test_plan(plan_id: int, operator: str):
@@ -198,7 +198,7 @@ class ApiTestPlanDao(PikaWrapper):
                 data = await session.execute(sql)
                 ans = data.scalars().first()
                 if ans is not None:
-                    raise Exception("已关注过此测试计划")
+                    raise SystemException(detail="已关注过此测试计划")
                 model = ApiTestPlanFollowUserRelModel(plan_id, operator)
                 session.add(model)
 
@@ -222,7 +222,7 @@ class ApiTestPlanDao(PikaWrapper):
                 data = await session.execute(sql)
                 ans = data.scalars().first()
                 if ans is None:
-                    raise Exception("已取关过此测试计划")
+                    raise SystemException(detail="已取关过此测试计划")
                 ans.delete_date = int(time.time() * 1000)
 
     @staticmethod

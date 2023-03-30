@@ -26,9 +26,9 @@ services:
     ports:
       - ${MYSQL_PORT}:3306
     volumes:
-      - ${VOLUMES_BASE}/mysql/conf/my.cnf:/etc/mysql/conf.d/my.cnf
-      - ${VOLUMES_BASE}/mysql/bin/mysql:/docker-entrypoint-initdb.d/
-      - ${VOLUMES_BASE}/mysql/data/mysql:/var/lib/mysql
+      - ${VOLUMES_BASE}/conf/mysql.cnf:/etc/mysql/conf.d/my.cnf
+      - ${VOLUMES_BASE}/bin/mysql:/docker-entrypoint-initdb.d/
+      - ${VOLUMES_BASE}/data/mysql:/var/lib/mysql
     networks:
       - pika-network
 
@@ -47,8 +47,8 @@ services:
     ports:
       - ${REDIS_PORT}:6379
     volumes:
-      - ${VOLUMES_BASE}/redis/conf/.conf:/etc/redis/redis.conf
-      - ${VOLUMES_BASE}/redis/data:/data
+      - ${VOLUMES_BASE}/conf/redis.conf:/etc/redis/redis.conf
+      - ${VOLUMES_BASE}/data/redis:/data
     command: redis-server /etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
     networks:
       - pika-network
@@ -59,13 +59,13 @@ services:
     restart: always
     privileged: true
     ports:
-      - ${PIKA_PORT}:7777
+      - ${PIKA_BACKEND_PORT}:7777
     environment:
       - TZ=Asia/Shanghai
     volumes:
-      - ${VOLUMES_BASE}/pika/logs:/opt/pika/logs
-      - ${VOLUMES_BASE}/pika/conf/.env:/opt/pika/conf/.env
-      - ${VOLUMES_BASE}/pika/conf/supervisor.conf:/opt/pika/conf/supervisor.conf
+      - ${VOLUMES_BASE}/logs:/opt/pika/logs
+      - ${VOLUMES_BASE}/conf/.env:/opt/pika/conf/.env
+      - ${VOLUMES_BASE}/conf/supervisor.conf:/opt/pika/conf/supervisor.conf
     networks:
       - pika-network
 

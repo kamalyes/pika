@@ -13,7 +13,7 @@ from collections import defaultdict
 from typing import List
 
 from sqlalchemy import select
-from app.core.handler.exceres import KeyExistException, KeyUndefinedException
+from app.core.handler.exceres import KeyExistException, KeyUndefinedException, SystemException
 
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
@@ -37,7 +37,7 @@ class ApiTestCaseDataDao(PikaWrapper):
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is not None:
-                        raise KeyExistException("该数据已存在, 请重新编辑")
+                        raise KeyExistException(deatil="该数据已存在, 请重新编辑")
                     data = ApiTestCaseDataModel(
                         **form.dict(), operator=operator)
                     session.add(data)
@@ -47,7 +47,7 @@ class ApiTestCaseDataDao(PikaWrapper):
                     return data
         except Exception as e:
             cls.__log__.error(f"新增测试数据失败, error: {str(e)}")
-            raise Exception(f"新增测试数据失败, {str(e)}")
+            raise SystemException(detail=f"新增测试数据失败, {str(e)}")
 
     @classmethod
     async def update_testcase_data(cls, form: ApiTestCaseDataSchema, operator: str):
@@ -59,14 +59,14 @@ class ApiTestCaseDataDao(PikaWrapper):
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
-                        raise KeyUndefinedException("测试数据不存在")
+                        raise KeyUndefinedException(detail="测试数据不存在")
                     cls.update_model(query, form, operator)
                     await session.flush()
                     session.expunge(query)
                     return query
         except Exception as e:
             cls.__log__.error(f"编辑测试数据失败, error: {str(e)}")
-            raise Exception(f"编辑测试数据失败, {str(e)}")
+            raise SystemException(detail=f"编辑测试数据失败, {str(e)}")
 
     @classmethod
     async def delete_testcase_data(cls, id: int, operator: str):
@@ -78,11 +78,11 @@ class ApiTestCaseDataDao(PikaWrapper):
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
-                        raise KeyUndefinedException("测试数据不存在")
+                        raise KeyUndefinedException(detail="测试数据不存在")
                     cls.delete_model(query, operator)
         except Exception as e:
             cls.__log__.error(f"删除测试数据失败, error: {str(e)}")
-            raise Exception(f"删除测试数据失败, {str(e)}")
+            raise SystemException(detail=f"删除测试数据失败, {str(e)}")
 
     @classmethod
     async def list_testcase_data(cls, case_id: int):
@@ -98,7 +98,7 @@ class ApiTestCaseDataDao(PikaWrapper):
                 return ans
         except Exception as e:
             cls.__log__.error(f"查询测试数据失败, error: {str(e)}")
-            raise Exception(f"查询测试数据失败, {str(e)}")
+            raise SystemException(detail=f"查询测试数据失败, {str(e)}")
 
     @classmethod
     async def list_testcase_data_by_env(cls, env: int, case_id: int) -> List[ApiTestCaseDataModel]:
@@ -111,4 +111,4 @@ class ApiTestCaseDataDao(PikaWrapper):
                 return result.scalars().all()
         except Exception as e:
             cls.__log__.error(f"查询测试数据失败, error: {str(e)}")
-            raise Exception(f"查询测试数据失败, {str(e)}")
+            raise SystemException(detail=f"查询测试数据失败, {str(e)}")

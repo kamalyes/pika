@@ -12,7 +12,7 @@
 from typing import List
 
 from sqlalchemy import asc, select
-from app.core.handler.exceres import KeyExistException, KeyUndefinedException
+from app.core.handler.exceres import KeyExistException, KeyUndefinedException, SystemException
 
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
@@ -42,7 +42,7 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                 return query.scalars().all()
         except Exception as e:
             cls.__log__.error(f"获取用例断言失败: {str(e)}")
-            raise Exception("获取用例断言失败")
+            raise SystemException(detail="获取用例断言失败")
 
     @classmethod
     async def async_list_test_case_asserts(cls, case_id: int):
@@ -56,7 +56,7 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                 return case_list.scalars().all()
         except Exception as e:
             cls.__log__.error(f"获取用例断言失败: {str(e)}")
-            raise Exception(f"获取用例断言失败: {str(e)}")
+            raise SystemException(detail=f"获取用例断言失败: {str(e)}")
 
     @staticmethod
     async def insert_test_case_asserts(form: TestCaseAssertsSchema, operator: str):
@@ -71,7 +71,7 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                     result = await session.execute(sql)
                     data = result.scalars().first()
                     if data is not None:
-                        raise KeyExistException("断言信息已存在, 请检查")
+                        raise KeyExistException(deatil="断言信息已存在, 请检查")
                     new_assert = ApiTestCaseAssertsModel(
                         **form.dict(), operator=operator)
                     session.add(new_assert)
@@ -83,7 +83,7 @@ class ApiTestCaseAssertsDao(PikaWrapper):
             return ans
         except Exception as e:
             ApiTestCaseAssertsDao.__log__.error(f"新增用例断言失败, error: {e}")
-            raise Exception(f"新增用例断言失败, {e}")
+            raise SystemException(detail=f"新增用例断言失败, {e}")
 
     @classmethod
     async def update_test_case_asserts(cls, form: TestCaseAssertsSchema,
@@ -106,14 +106,14 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                     result = await session.execute(sql)
                     data = result.scalars().first()
                     if data is None:
-                        raise KeyUndefinedException("断言信息不存在, 请检查")
+                        raise KeyUndefinedException(detail="断言信息不存在, 请检查")
                     cls.update_model(data, form, operator)
                     await session.flush()
                     session.expunge(data)
                     return data
         except Exception as e:
             cls.__log__.error(f"编辑用例断言失败, error: {e}")
-            raise Exception(f"编辑用例断言失败, {e}")
+            raise SystemException(detail=f"编辑用例断言失败, {e}")
 
     @classmethod
     async def delete_test_case_asserts(cls, id: int, operator: str) -> None:
@@ -125,8 +125,8 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                     result = await session.execute(sql)
                     data = result.scalars().first()
                     if data is None:
-                        raise KeyUndefinedException("断言信息不存在, 请检查")
+                        raise KeyUndefinedException(detail="断言信息不存在, 请检查")
                     cls.delete_model(data, operator)
         except Exception as e:
             cls.__log__.error(f"删除用例断言失败, error: {e}")
-            raise Exception(f"删除用例断言失败, {e}")
+            raise SystemException(detail=f"删除用例断言失败, {e}")

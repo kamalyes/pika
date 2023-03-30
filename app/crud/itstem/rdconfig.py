@@ -9,7 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from app.core.handler.exceres import KeyUndefinedException
+from app.core.handler.exceres import KeyUndefinedException, RedisException, SystemException
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.middleware.xredis import RedisHelper, PikaRedisManager
 from app.models.redis_config import RedisModel
@@ -23,7 +23,7 @@ class PikaRedisConfigDao(PikaWrapper):
         try:
             redis_config = await PikaRedisConfigDao.query_record(**kwargs)
             if redis_config is None:
-                raise KeyUndefinedException("Redis配置不存在")
+                raise KeyUndefinedException(detail="Redis配置不存在")
             if not redis_config.cluster:
                 client = PikaRedisManager.get_single_node_client(redis_config.id, redis_config.addr,
                                                                  redis_config.password,
@@ -33,4 +33,4 @@ class PikaRedisConfigDao(PikaWrapper):
                     redis_config.id, redis_config.addr)
             return await RedisHelper.execute_command(client, command)
         except Exception as e:
-            raise Exception(f"执行redis命令出错: {e}")
+            raise RedisException(detail=f"执行redis命令出错: {e}")

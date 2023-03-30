@@ -7,7 +7,6 @@ on:
       - README.md
       - LICENSE
 jobs:
-
   build:
     name: deploy
     runs-on: ubuntu-latest
@@ -18,17 +17,19 @@ jobs:
       - name: copy file via ssh password
         uses: appleboy/scp-action@ssh-service
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
-          source: "*"
-          target: "/opt/pika"
+          host: ${{ secrets.ECS_HOST }}
+          username: ${{ secrets.ECS_TESTER_USER }}
+          key: ${{ secrets.ECS_KEY }}
+          port: ${{ secrets.ECS_PORT }}
+          source: '*'
+          target: '/opt/pika/'
 
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@ssh-service
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
+          host: ${{ secrets.ECS_HOST }}
+          username: ${{ secrets.ECS_TESTER_USER }}
+          key: ${{ secrets.ECS_KEY }}
+          port: ${{ secrets.ECS_PORT }}
           script: |
             cd /opt/pika && pip3 install -r requirements.txt --user && pkill gunicorn

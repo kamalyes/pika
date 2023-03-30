@@ -164,7 +164,7 @@ class Executor(object):
             self.append("获取{}字段: [{}]中的el表达式".format(name, field), True)
         except Exception as e:
             Executor.log.error(f"查询全局变量失败, error: {str(e)}")
-            raise Exception(f"查询全局变量失败, error: {str(e)}")
+            raise SystemException(detail=f"查询全局变量失败, error: {str(e)}")
 
     def replace_params(self, field_name, field_origin, params: dict):
         """
@@ -235,7 +235,7 @@ class Executor(object):
                         "替换流程变量成功，字段: [{}]: \n\n[{}] -> [{}]\n".format(c.name, k, v))
         except Exception as e:
             Executor.log.error(f"替换变量失败, error: {str(e)}")
-            raise Exception(f"替换变量失败, error: {str(e)}")
+            raise SystemException(detail=f"替换变量失败, error: {str(e)}")
 
     @case_log
     async def get_constructor(self, case_id):
@@ -870,7 +870,7 @@ class Executor(object):
                 else:
                     result = result.get(branch)
         except Exception as e:
-            raise Exception(f"获取变量失败: {str(e)}")
+            raise SystemException(detail=f"获取变量失败: {str(e)}")
         if string == "${response}":
             return result
         return json.dumps(result, ensure_ascii=False)
@@ -1014,7 +1014,7 @@ class Executor(object):
             report = await ApiTestReportDao.end(report_id, ok, fail, error, skip, 3, cost)
             if report_dict is not None:
                 report_dict[env] = {
-                    "report_url": f"{PikaAppConfig.SERVER_HOST}:{PikaAppConfig.PIKA_PORT}/#/record/report/{report_id}",
+                    "report_url": f"{PikaAppConfig.PIKA_SERVER_URL}/#/record/report/{report_id}",
                     "start_date": report.start_date.strftime("%Y-%m-%d %H:%M:%S"),
                     "finished_date": report.finished_date.strftime("%Y-%m-%d %H:%M:%S"),
                     "success": ok,
@@ -1029,4 +1029,4 @@ class Executor(object):
                 }
             return report_id
         except Exception as e:
-            raise Exception(f"批量执行用例失败: {e}")
+            raise SystemException(detail=f"批量执行用例失败: {e}")

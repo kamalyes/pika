@@ -15,6 +15,8 @@ from typing import TypeVar, Optional
 from loguru import logger
 from pydantic import BaseModel
 
+from app.core.handler.exceres import SystemException
+
 body = TypeVar("body", bytes, str)
 
 
@@ -47,7 +49,7 @@ class RequestInfoSchema(BaseModel):
     def from_dict(self, **kwargs):
         for k, v in kwargs:
             if not hasattr(self, k):
-                raise Exception(f"set RequestInfoSchema error, no field: {k}")
+                raise SystemException(detail=f"set RequestInfoSchema error, no field: {k}")
             setattr(self, k, v)
 
     @classmethod

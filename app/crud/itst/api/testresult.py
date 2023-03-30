@@ -14,6 +14,7 @@ from typing import List
 
 from sqlalchemy import asc
 from sqlalchemy.future import select
+from app.core.handler.exceres import SystemException
 
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
@@ -45,7 +46,7 @@ class ApiTestResultDao(PikaWrapper):
                     await session.flush()
         except Exception as e:
             cls.__log__.error(f"新增测试结果失败, error: {e}")
-            raise Exception("新增测试结果失败")
+            raise SystemException(detail="新增测试结果失败")
 
     @classmethod
     async def list(cls, report_id: int) -> List[ApiTestResultModel]:
@@ -65,4 +66,4 @@ class ApiTestResultDao(PikaWrapper):
                 return ans
         except Exception as e:
             cls.__log__.error(f"获取测试用例执行记录失败, error: {e}")
-            raise Exception("获取测试用例执行记录失败")
+            raise SystemException(detail="获取测试用例执行记录失败")

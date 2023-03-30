@@ -19,7 +19,7 @@ from custard.time import Moment
 from app.enums.RequestBodyEnum import ReqBodyTypeEnum
 from app.middleware.oss import OssClient
 from config import PikaAppConfig
-
+from app.core.handler.exceres import SystemException, ValidException
 
 class AsyncRequest(object):
     def __init__(self, url: str, timeout=15, **kwargs):
@@ -66,7 +66,7 @@ class AsyncRequest(object):
         async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar(unsafe=True)) as session:
             async with session.request("GET", self.url, timeout=self.timeout, proxy=self.proxy, ssl=False, **self.kwargs) as resp:
                 if resp.status != 200:
-                    raise Exception("download file failed")
+                    raise SystemException(detail="download file failed")
                 return await resp.content.read()
 
     @staticmethod
@@ -75,7 +75,7 @@ class AsyncRequest(object):
             url = f"http://{url}"
         else:
             if RegEx.match_url(url) is False:
-                raise Exception("请输入正确的url, 记得带上http哦")
+                raise ValidException(detail="请输入正确的url, 记得带上http哦")
         headers = kwargs.get("headers", {})
         if body_type == ReqBodyTypeEnum.json:
             if "Content-Type" not in headers:
@@ -86,7 +86,7 @@ class AsyncRequest(object):
                 if body:
                     body = json.loads(body)
             except Exception as e:
-                raise Exception(f"json格式不正确: {e}")
+                raise SystemException(detail=f"json格式不正确: {e}")
             r = AsyncRequest(url, headers=headers, timeout=timeout, json=body)
         elif body_type == ReqBodyTypeEnum.form:
             try:
@@ -106,7 +106,7 @@ class AsyncRequest(object):
                             form_data.add_field(item.get("key"), file_object)
                 r = AsyncRequest(url, headers=headers, data=form_data, timeout=timeout)
             except Exception as e:
-                raise Exception(f"解析form-data失败: {str(e)}")
+                raise SystemException(detail=f"解析form-data失败: {str(e)}")
         elif body_type == ReqBodyTypeEnum.x_form:
             body = kwargs.get("body", "{}")
             body = json.loads(body)

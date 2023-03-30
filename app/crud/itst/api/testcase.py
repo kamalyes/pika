@@ -16,7 +16,7 @@ from typing import List, Dict
 from sqlalchemy import desc, func, and_, asc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from app.core.handler.exceres import KeyExistException, KeyUndefinedException
+from app.core.handler.exceres import KeyExistException, KeyUndefinedException, SystemException
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud import PikaWrapper, PikaMdWrapper, db_connect
@@ -75,7 +75,7 @@ class ApiTestCaseDao(PikaWrapper):
                 return result, total
         except Exception as e:
             cls.__log__.error(f"获取测试用例失败: {str(e)}")
-            raise Exception(f"获取测试用例失败: {str(e)}")
+            raise SystemException(detail=f"获取测试用例失败: {str(e)}")
 
     @classmethod
     async def get_test_case_by_directory_id(cls, directory_id: int):
@@ -96,7 +96,7 @@ class ApiTestCaseDao(PikaWrapper):
                 return ans, case_map
         except Exception as e:
             cls.__log__.error(f"获取测试用例失败: {str(e)}")
-            raise Exception(f"获取测试用例失败: {str(e)}")
+            raise SystemException(detail=f"获取测试用例失败: {str(e)}")
 
     @classmethod
     async def get_case_children(cls, case_id: int):
@@ -142,7 +142,7 @@ class ApiTestCaseDao(PikaWrapper):
             )
         )
         if query.scalars().first() is not None:
-            raise KeyExistException("用例名称已存在")
+            raise KeyExistException(deatil="用例名称已存在")
         cs = ApiTestCaseModel(**data.case.dict(), operator=operator)
         # 添加case，之后添加其他数据
         session.add(cs)
@@ -181,7 +181,7 @@ class ApiTestCaseDao(PikaWrapper):
                     )
                     data = query.scalars().first()
                     if data is None:
-                        raise KeyUndefinedException("用例不存在")
+                        raise KeyUndefinedException(detail="用例不存在")
                     cls.update_model(data, test_case, operator)
                     await session.flush()
                     # 释放你的sql数据
@@ -189,7 +189,7 @@ class ApiTestCaseDao(PikaWrapper):
                     return data
         except Exception as e:
             cls.__log__.error(f"编辑用例失败: {str(e)}")
-            raise Exception(f"编辑用例失败: {str(e)}")
+            raise SystemException(detail=f"编辑用例失败: {str(e)}")
 
     @classmethod
     async def query_test_case(cls, case_id: int) -> dict:
@@ -208,7 +208,7 @@ class ApiTestCaseDao(PikaWrapper):
                 result = await session.execute(sql)
                 data = result.scalars().first()
                 if data is None:
-                    raise KeyUndefinedException("用例不存在")
+                    raise KeyUndefinedException(detail="用例不存在")
                 # 获取断言部分
                 asserts = await ApiTestCaseAssertsDao.async_list_test_case_asserts(data.id)
                 # 获取数据构造器
@@ -229,7 +229,7 @@ class ApiTestCaseDao(PikaWrapper):
                 )
         except Exception as e:
             ApiTestCaseDao.__log__.error(f"查询用例失败: {str(e)}")
-            raise Exception(f"查询用例失败: {str(e)}")
+            raise SystemException(detail=f"查询用例失败: {str(e)}")
 
     @staticmethod
     async def query_test_case_by_constructors(constructors: List[ConstructorModel]):
@@ -253,7 +253,7 @@ class ApiTestCaseDao(PikaWrapper):
                 return {x.id: x for x in data}
         except Exception as e:
             ApiTestCaseDao.__log__.error(f"查询用例失败: {str(e)}")
-            raise Exception(f"查询用例失败: {str(e)}")
+            raise SystemException(detail=f"查询用例失败: {str(e)}")
 
     @staticmethod
     async def query_test_case_out_parameters(session, case_list: List[ApiTestCaseVariablesSchema], case_set=None, var_list=None):
@@ -296,7 +296,7 @@ class ApiTestCaseDao(PikaWrapper):
                 if not case_id:
                     continue
                 if case_id in case_set:
-                    raise Exception("场景存在循环依赖")
+                    raise SystemException(detail="场景存在循环依赖")
                 step_case.append(ApiTestCaseVariablesSchema(
                     case_id=case_id, step_name=s.name))
         return step_case
@@ -369,7 +369,7 @@ class ApiTestCaseDao(PikaWrapper):
                 return result
         except Exception as e:
             cls.__log__.error(f"获取用例列表失败: {str(e)}")
-            raise Exception("获取用例列表失败")
+            raise SystemException(detail="获取用例列表失败")
 
     @classmethod
     async def select_constructor(cls, case_id: int) -> List[ConstructorModel]:

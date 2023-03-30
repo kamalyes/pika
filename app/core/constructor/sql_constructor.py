@@ -12,6 +12,7 @@
 import json
 
 from app.core.constructor.constructor import ConstructorAbstract
+from app.core.handler.exceres import SystemException
 from app.crud.itstem.database import DbConfigDao
 from app.models.constructor import ConstructorModel
 
@@ -34,5 +35,5 @@ class SqlConstructor(ConstructorAbstract):
             executor.append(
                 f"当前{ConstructorAbstract.get_name(constructor)}返回变量: {constructor.value}\n返回值:\n {sql_data}\n")
         except Exception as e:
-            raise Exception(
+            raise SystemException(detail=
                 f"{path}->{constructor.name} 第{index + 1}个{ConstructorAbstract.get_name(constructor)}执行失败: {e}")

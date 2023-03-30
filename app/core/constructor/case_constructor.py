@@ -12,7 +12,7 @@
 import json
 
 from app.core.constructor.constructor import ConstructorAbstract
-from app.core.handler.exceres import KeyUndefinedException
+from app.core.handler.exceres import KeyUndefinedException, SystemException, ValidException
 from app.crud.itst.api.testcase import ApiTestCaseDao
 from app.models.constructor import ConstructorModel
 
@@ -26,7 +26,7 @@ class TestCaseConstructor(ConstructorAbstract):
             data = json.loads(constructor.constructor_json)
             case_id = data.get("constructor_case_id")
             if not case_id:
-                raise Exception("未获取到前/后置条件的用例id, 请检查前置条件")
+                raise ValidException(detail="未获取到前/后置条件的用例id, 请检查前置条件")
             testcase, err = await ApiTestCaseDao.async_query_test_case(case_id)
             if err:
                 raise KeyUndefinedException(f"用例: [{case_id}]不存在:")
@@ -41,11 +41,11 @@ class TestCaseConstructor(ConstructorAbstract):
             result, err = await executor_class.run(env, case_id, params, req_params,
                                                    f"{path}->{testcase.name}")
             if err:
-                raise Exception(err)
+                raise SystemException(detail=err)
             if not result["status"]:
                 raise KeyUndefinedException(
                     f"断言失败, 断言数据: {result.get('asserts', 'unknown')}")
             params[constructor.value] = result
         except Exception as e:
-            raise Exception(
+            raise SystemException(detail=
                 f"{path}->{constructor.name} 第{index + 1}个{ConstructorAbstract.get_name(constructor)}执行失败: {e}")

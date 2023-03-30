@@ -580,14 +580,14 @@ async def websocket_endpoint(websocket: WebSocket, emp_no: str):
 if __name__ == "__main__":
     # set_event_loop(ProactorEventLoop())
     # server = Server(config=Config(app="Application:pika",
-    #                               host=PikaAppConfig.SERVER_HOST,
-    #                               port=PikaAppConfig.PIKA_PORT,
+    #                               host=PikaAppConfig.PIKA_BACKEND_HOST,
+    #                               port=PikaAppConfig.PIKA_BACKEND_PORT,
     #                               reload=True,
     #                               debug=True))
     # get_event_loop().run_until_complete(server.serve())
     uvicorn.run(
         app="Application:pika",
-        host=PikaAppConfig.SERVER_HOST,
-        port=PikaAppConfig.PIKA_PORT,
+        host=PikaAppConfig.PIKA_BACKEND_HOST,
+        port=PikaAppConfig.PIKA_BACKEND_PORT,
         reload=True
     )

@@ -11,6 +11,7 @@
 """
 
 import yaml
+from app.core.handler.exceres import SystemException
 
 from app.enums.SysvarEnum import ValidTimeEnum
 from app.middleware.xredis import RedisHelper
@@ -25,7 +26,7 @@ class MsConfigDao(object):
         try:
             return PikaAppConfig
         except Exception as e:
-            raise Exception(f"获取系统设置失败, {e}")
+            raise SystemException(detail=f"获取系统设置失败, {e}")
 
     @classmethod
     @RedisHelper.up_cache("msconfig")
@@ -41,4 +42,4 @@ class MsConfigDao(object):
             with open(filepath, "w") as output:
                 yaml.safe_dump(old_config, output, default_flow_style=False)
         except Exception as e:
-            raise Exception(f"更新系统设置失败, {e}")
+            raise SystemException(detail=f"更新系统设置失败, {e}")

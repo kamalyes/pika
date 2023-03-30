@@ -756,7 +756,7 @@ class UserDao(PikaWrapper):
                 return query_result
         except Exception as e:
             cls.__log__.error(f"获取用户列表失败: {str(e)}")
-            raise Exception("获取用户列表失败")
+            raise SystemException(detail="获取用户列表失败")
 
     @classmethod
     @RedisHelper.cache("user_detail", ValidTimeEnum.USER_DETAIL_TIME.value)
@@ -780,4 +780,4 @@ class UserDao(PikaWrapper):
                         query_user.scalars().all()]
         except Exception as e:
             cls.__log__.error(f"获取用户联系方式失败: {str(e)}")
-            raise Exception(f"获取用户联系方式失败: {e}")
+            raise SystemException(detail=f"获取用户联系方式失败: {e}")

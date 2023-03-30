@@ -333,7 +333,7 @@ class PikaWrapper(object):
                                mode=SqlOperationTypeEnum.ONLY_INSERT,
                                before={}, changed=changed))
         return model
-
+    
     @classmethod
     @RedisHelper.up_cache("dao")
     async def update_by_map(cls, operator, *condition, **kwargs):
@@ -347,7 +347,7 @@ class PikaWrapper(object):
                     await session.execute(sql)
         except Exception as e:
             cls.__log__.error(f"更新数据失败: {e}")
-            raise DbException("更新数据失败")
+            raise DbException(detail="更新数据失败")
 
     @classmethod
     @RedisHelper.up_cache("dao")
@@ -359,7 +359,7 @@ class PikaWrapper(object):
             result = await session.execute(query)
             now = result.scalars().first()
             if now is None:
-                raise KeyUndefinedException("数据不存在")
+                raise KeyUndefinedException(detail="数据不存在")
             cls.update_model(now, model, operator, not_null)
             await session.flush()
             session.expunge_all()
@@ -454,7 +454,7 @@ class PikaWrapper(object):
                 original = result.scalars().first()
                 if original is None:
                     continue
-                    # raise DbException("记录不存在")
+                    # raise DbException(detail="记录不存在")
                 cls.delete_model(original, operator)
                 await session.flush()
                 session.expunge(original)

@@ -1,4 +1,15 @@
-# 基础配置类
+# -*- coding:utf-8 -*-
+# !/usr/bin/env python 3.9.11
+"""
+@File    :  config.py
+@Time    :  2021/10/18 2:28 AM
+@Author  :  YuYanQing
+@Version :  1.0
+@Contact :  mryu168@163.com
+@License :  (C)Copyright 2022-2026
+@Desc    :  基础配置类
+"""
+
 import logging
 from pprint import pformat
 import sys
@@ -48,7 +59,7 @@ class BaseConfig(BaseSettings):
     # JWT
     JWT_SECRET_KEY: str = ""
     JWT_MD5_SALT: str = ""
-    JWT_MPOP: bool = ""
+    JWT_MPOP: bool = False
 
     # oss
     OSS_TYPE: str = "aliyun"
@@ -71,14 +82,29 @@ class BaseConfig(BaseSettings):
 
     # Mock server
     MITMPROXY_ENABLE_FLAG: bool = False
+    MITMPROXY_PROXY_HOST: str = '0.0.0.0'
     MITMPROXY_PROXY_PORT: int = 7778
 
+    # Supervisor
+    SUPERVISOR_DEBUG: bool = True
+    SUPERVISOR_LOGLEVEL: str = 'info'
+    SUPERVISOR_THREAD_NUM: int = 2
+    SUPERVISOR_WORKER_CLASS: str = 'uvicorn.workers.UvicornWorker'
+    SUPERVISOR_FORWARDED_ALLOW_IPS: str  = "*"
+    SUPERVISOR_X_FORWARDED_FOR_HEADER: str = 'X-FORWARDED-FOR'
+    SUPERVISOR_DAEMON: bool = False
+    SUPERVISOR_TIMEOUT: int = 60
+    SUPERVISOR_WORKER_CONNECTIONS: int = 5000
+    SUPERVISOR_PIDFILE: str = '/var/run/gunicorn.pid'
+    SUPERVISOR_ACCESSLOG: str = '/var/log/gunicorn_acess.log'
+    SUPERVISOR_ERRORLOG: str = '/var/log/gunicorn_error.log'
+    
     # System
     ENVIRONMENT: str = "dev"
-    SERVER_HOST: str = "0.0.0.0"
-    PIKA_PORT: int = 7777
+    PIKA_BACKEND_HOST: str = "0.0.0.0"
+    PIKA_BACKEND_PORT: int = 7777
+    PIKA_FRONTEND_URL: str = 'http://unknown(.env未声明)'
     CASE_RETRY_TIMES: int = 1
-    LOG_SWITCH = True
     WORKSPACES_PATH: str = os.path.dirname(os.path.abspath(__file__))
     TEMPLATE_PATH: str = f"{WORKSPACES_PATH}/templates"
     MARKDOWN_PATH: str = f"{WORKSPACES_PATH}/templates/markdown/test_report.md"
@@ -86,11 +112,10 @@ class BaseConfig(BaseSettings):
     LOGS_PATH: str = f"{WORKSPACES_PATH}/logs"
     DAO_PATH: str = f"{WORKSPACES_PATH}/app/crud"
     REQUIREMENTS: str = System.get_depend_libs(file_path=f"{WORKSPACES_PATH}/requirements.txt")
-
-    LOCAL_DATE = time.strftime("%Y-%m-%d", time.localtime(time.time()))
+    
     # 日志相关
+    LOCAL_DATE = time.strftime("%Y-%m-%d", time.localtime(time.time()))
     LOGS_DIR_NAME = time.strftime("%Y-%m-%d", time.localtime(time.time()))
-
     LOGS_PATH: str = f"{WORKSPACES_PATH}/logs"
     LOG_GENERAL_DIR = os.path.join(LOGS_PATH, LOGS_DIR_NAME)
     INFO_LOG_FILE = os.path.join(LOG_GENERAL_DIR, f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-info.log")

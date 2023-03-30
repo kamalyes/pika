@@ -14,6 +14,7 @@ import json
 from awaits.awaitable import awaitable
 
 from app.core.constructor.constructor import ConstructorAbstract
+from app.core.handler.exceres import SystemException
 from app.models.constructor import ConstructorModel
 
 
@@ -42,5 +43,5 @@ class PythonConstructor(ConstructorAbstract):
             executor.append(
                 f"当前{ConstructorAbstract.get_name(constructor)}返回变量: {constructor.value}\n返回值:\n {py_data}\n")
         except Exception as e:
-            raise Exception(
+            raise SystemException(detail=
                 f"{path}->{constructor.name} 第{index + 1}个{ConstructorAbstract.get_name(constructor)}执行失败: {e}")

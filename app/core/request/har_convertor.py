@@ -44,7 +44,7 @@ class HarConvertor(Convertor):
             ans = []
             entries = data.get("log", {}).get("entries")
             if not entries:
-                raise HarConvertException("entries数据为空")
+                raise HarConvertException(detail="entries数据为空")
             for entry in entries:
                 # 如果是fetch或xhr接口，说明是http请求（暂不支持js)
                 if entry.get("_resourceType").lower() in ("fetch", "xhr"):

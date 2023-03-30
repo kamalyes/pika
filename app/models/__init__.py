@@ -124,7 +124,7 @@ class DatabaseHelper(object):
             return f'mysql+aiomysql://{username}:{password}@{host}:{port}/{database}'
         if sql_type == DatabaseTypeEnum.POSTGRESQL:
             return f'postgresql+asyncpg://{username}:{password}@{host}:{port}/{database}'
-        raise VaildException("未知的数据库类型")
+        raise ValidException(detail="未知的数据库类型")
 
     def remove_connection(self, host: str, port: int, username: str, password: str, database: str):
         key = f"{host}:{port}:{database}:{username}:{password}:{database}"

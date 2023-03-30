@@ -17,7 +17,7 @@ from typing import List
 from sqlalchemy import or_, select, desc, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.handler.exceres import AuthException, KeyExistException, KeyUndefinedException
+from app.core.handler.exceres import AuthException, KeyExistException, KeyUndefinedException, SystemException
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.enums.OperationEnum import SqlOperationTypeEnum
 from app.enums.RbacEnum import RoleEnum
@@ -64,7 +64,7 @@ class ProjectDao(PikaWrapper):
                 return data.scalars().all(), total
         except Exception as e:
             cls.__log__.error(f"获取用户: {operator}项目列表失败, {e}")
-            raise Exception(f"获取用户: {operator}项目列表失败")
+            raise SystemException(detail=f"获取用户: {operator}项目列表失败")
 
     @classmethod
     async def list_project_id_by_user(cls, session, operator, role):
@@ -107,7 +107,7 @@ class ProjectDao(PikaWrapper):
                 if data.scalars().first() is not None:
                     err = f"新增项目: {name}失败, 失败原因：项目已存在"
                     cls.__log__.error(err)
-                    raise KeyExistException(err)
+                    raise KeyExistException(detail=err)
                 pr = ProjectModel(name, app, owner, operator, description, private, dingtalk_url,
                                   qy_wx_url)
                 session.add(pr)
@@ -123,16 +123,16 @@ class ProjectDao(PikaWrapper):
                                                    ProjectModel.delete_flag == 0))
                     data = query.scalars().first()
                     if data is None:
-                        raise KeyUndefinedException("项目不存在")
+                        raise KeyUndefinedException(detail="项目不存在")
                     if data.owner != operator and operator_identity < RoleEnum.ADMIN:
-                        raise Exception("你没有权限修改项目头像")
+                        raise SystemException(detail="你没有权限修改项目头像")
                     # 如果修改人不是owner或者超管
                     data.avatar = file_url
                     data.update_date = datetime.now()
                     data.update_user = operator
         except Exception as e:
             cls.__log__.error(f"修改项目头像失败, 项目: {project_id}, error: {e}")
-            raise Exception(e)
+            raise SystemException(detail=e)
 
     @classmethod
     async def update_project(cls, id: int, operator, operator_identity: int, name: str, app: str,
@@ -164,12 +164,12 @@ class ProjectDao(PikaWrapper):
                                                    ProjectModel.delete_flag == 0))
                     data = query.scalars().first()
                     if data is None:
-                        raise KeyUndefinedException("项目不存在")
+                        raise KeyUndefinedException(detail="项目不存在")
                     data.name = name
                     data.app = app
                     # 如果修改人不是owner或者超管
                     if data.owner != owner and operator_identity < RoleEnum.ADMIN and operator != data.owner:
-                        raise Exception("您没有权限修改项目负责人")
+                        raise SystemException(detail="您没有权限修改项目负责人")
                     data.owner = owner
                     data.private = private
                     data.description = description
@@ -179,7 +179,7 @@ class ProjectDao(PikaWrapper):
                     data.qy_wx_url = qy_wx_url
         except Exception as e:
             cls.__log__.error(f"编辑项目: {name}失败, {e}")
-            raise Exception(f"编辑项目: {name}失败, {e}")
+            raise SystemException(detail=f"编辑项目: {name}失败, {e}")
 
     @classmethod
     async def query_project(cls, project_id: int) -> (List[ProjectModel], List[ProjectRoleModel]):
@@ -190,12 +190,12 @@ class ProjectDao(PikaWrapper):
                                                ProjectModel.delete_flag == 0))
                 data = query.scalars().first()
                 if data is None:
-                    raise KeyUndefinedException("项目不存在")
+                    raise KeyUndefinedException(detail="项目不存在")
                 roles = await ProjectRoleDao.list_role(project_id)
                 return data, roles
         except Exception as e:
             cls.__log__.error(f"查询项目: {project_id}失败, {e}")
-            raise Exception(f"查询项目: {project_id}失败, {e}")
+            raise SystemException(detail=f"查询项目: {project_id}失败, {e}")
 
     @staticmethod
     async def query_user_project(emp_no: str) -> int:
@@ -251,7 +251,7 @@ class ProjectRoleDao(PikaWrapper):
                 return data.scalars().all()
         except Exception as e:
             cls.__log__.error(f"查询用户: {emp_no}项目失败, {e}")
-            raise Exception("获取项目失败")
+            raise SystemException(detail="获取项目失败")
 
     @classmethod
     def query_number_count_by_emp_no(cls, emp_no):
@@ -279,7 +279,7 @@ class ProjectRoleDao(PikaWrapper):
                 return query.scalars().all()
         except Exception as e:
             cls.__log__.error(f"查询项目: {project_id}角色列表失败, {e}")
-            raise Exception(f"获取项目角色列表失败")
+            raise SystemException(detail=f"获取项目角色列表失败")
 
     @classmethod
     async def judge_permission(cls, session: AsyncSession, project_id: int, emp_no: str,
@@ -300,17 +300,17 @@ class ProjectRoleDao(PikaWrapper):
         query = await session.execute(select(ProjectModel).where(ProjectModel.id == project_id))
         project = query.scalars().first()
         if project is None:
-            raise KeyUndefinedException("该项目不存在")
+            raise KeyUndefinedException(detail="该项目不存在")
         if project.owner != emp_no:
             if project_admin and project_role == RoleEnum.MANAGER:
-                raise Exception("不能修改组长的权限")
+                raise SystemException(detail="不能修改组长的权限")
             query = await session.execute(select(ProjectRoleModel)
                                           .where(ProjectRoleModel.member_no == emp_no,
                                                  ProjectRoleModel.project_id == project_id,
                                                  ProjectRoleModel.delete_flag == 0))
             updater_role = query.scalars().first()
             if updater_role is None or updater_role.project_role == RoleEnum.MANAGER:
-                raise Exception("对不起，你没有权限")
+                raise SystemException(detail="对不起，你没有权限")
 
     @staticmethod
     async def access(operator: str, operator_identity: str, roles: List[ProjectRoleModel],
@@ -341,7 +341,7 @@ class ProjectRoleDao(PikaWrapper):
                                            ProjectModel.delete_flag == 0))
             project = query.scalars().first()
             if project is None:
-                raise KeyUndefinedException("项目不存在")
+                raise KeyUndefinedException(detail="项目不存在")
             if project.private and project.owner != operator:
                 query = await session.execute(
                     select(ProjectRoleModel).where(ProjectRoleModel.member_no == operator,
@@ -394,7 +394,7 @@ class ProjectRoleDao(PikaWrapper):
                 async with session.begin():
                     original = await cls.query_record(session=session, id=prole.id, delete_flag=False)
                     if original is None:
-                        raise KeyUndefinedException("该用户角色不存在")
+                        raise KeyUndefinedException(detail="该用户角色不存在")
                     await cls.has_permission(original.project_id, original.project_role,
                                              operator,
                                              operator_identity, True, session=session)
@@ -410,7 +410,7 @@ class ProjectRoleDao(PikaWrapper):
                                        changed=changed))
         except Exception as e:
             cls.__log__.error(f"更新用户角色失败: {e}")
-            raise Exception(f"更新用户角色失败: {e}")
+            raise SystemException(detail=f"更新用户角色失败: {e}")
 
     @classmethod
     async def delete_project_role(cls, prole_id: int, operator: str,
@@ -431,7 +431,7 @@ class ProjectRoleDao(PikaWrapper):
                     role = await cls.query_record(session=session, id=prole_id,
                                                   delete_flag=False)
                     if role is None:
-                        raise KeyUndefinedException("用户角色不存在")
+                        raise KeyUndefinedException(detail="用户角色不存在")
                     await cls.has_permission(role.project_id, role.project_role, operator,
                                              operator_identity, True)
                     cls.delete_model(role, operator)
@@ -444,4 +444,4 @@ class ProjectRoleDao(PikaWrapper):
                                        key=prole_id))
         except Exception as e:
             cls.__log__.error(f"删除用户角色失败: {e}")
-            raise Exception(f"删除用户角色失败: {e}")
+            raise SystemException(detail=f"删除用户角色失败: {e}")

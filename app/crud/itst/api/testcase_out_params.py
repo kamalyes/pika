@@ -14,6 +14,7 @@ from datetime import datetime
 from typing import List
 
 from sqlalchemy import select, update
+from app.core.handler.exceres import SystemException
 
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.middleware.xredis import RedisHelper
@@ -86,4 +87,4 @@ class ApiTestCaseOutParametersDao(PikaWrapper):
             return result
         except Exception as e:
             cls.__log__.error(f"批量更新出参数据失败: {e}")
-            raise Exception(f"批量更新出参数据失败: {e}")
+            raise SystemException(detail=f"批量更新出参数据失败: {e}")

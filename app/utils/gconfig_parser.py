@@ -12,6 +12,7 @@
 import json
 
 import yaml
+from app.core.handler.exceres import SystemException
 
 from app.core.handler.logger import PikaLogger
 
@@ -34,7 +35,7 @@ class GConfigParser(object):
                     try:
                         result = json.loads(result)
                     except Exception as e:
-                        raise Exception(f"反序列化失败, result: {result}\nERROR: {e}")
+                        raise SystemException(detail=f"反序列化失败, result: {result}\nERROR: {e}")
                 if isinstance(branch, int):
                     # 说明路径里面的是数组
                     result = result[int(branch)]

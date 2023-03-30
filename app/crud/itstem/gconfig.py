@@ -11,7 +11,7 @@
 """
 
 from sqlalchemy import select
-from app.core.handler.exceres import KeyExistException
+from app.core.handler.exceres import KeyExistException, SystemException
 
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.enums.SysvarEnum import ValidTimeEnum
@@ -41,7 +41,7 @@ class GConfigDao(PikaWrapper):
                     session.add(config)
         except Exception as e:
             cls.__log__.error(f"新增变量: {form.key}失败, {e}")
-            raise Exception(f"新增变量: {form.key}失败")
+            raise SystemException(detail=f"新增变量: {form.key}失败")
 
     @staticmethod
     @RedisHelper.cache("dao", ValidTimeEnum.DAO_TIME.value, True)
@@ -55,4 +55,4 @@ class GConfigDao(PikaWrapper):
                 result = await session.execute(sql)
                 return result.scalars().first()
         except Exception as e:
-            raise Exception(f"查询全局变量失败: {str(e)}")
+            raise SystemException(detail=f"查询全局变量失败: {str(e)}")
