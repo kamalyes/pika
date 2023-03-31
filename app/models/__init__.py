@@ -30,12 +30,16 @@ from config import PikaAppConfig
 
 # 同步engine
 engine = create_engine(
-    PikaAppConfig.SQLALCHEMY_DATABASE_URI, pool_recycle=1500)
+    PikaAppConfig.SQLALCHEMY_DATABASE_URI,
+    pool_recycle=PikaAppConfig.MYSQL_POOL_RECYCLE,
+    encoding=PikaAppConfig.MYSQL_CHARSET)
 sync_session = sessionmaker(engine, autocommit=False)
 
 # 异步engine
 async_engine = create_async_engine(
-    PikaAppConfig.ASYNC_SQLALCHEMY_URI, pool_recycle=1500)
+    PikaAppConfig.ASYNC_SQLALCHEMY_URI,
+    pool_recycle=PikaAppConfig.MYSQL_POOL_RECYCLE,
+    encoding=PikaAppConfig.MYSQL_CHARSET)
 async_session = sessionmaker(
     async_engine, expire_on_commit=False, class_=AsyncSession)
 
@@ -102,7 +106,7 @@ class DatabaseHelper(object):
         jdbc_url = DatabaseHelper.get_jdbc_url(
             sql_type, host, port, username, password, database)
         # 创建异步引擎
-        eg = create_async_engine(jdbc_url, pool_recycle=1500)
+        eg = create_async_engine(jdbc_url, pool_recycle=PikaAppConfig.MYSQL_POOL_RECYCLE)
         ss = sessionmaker(bind=eg, class_=AsyncSession)
         # 将数据缓存起来
         data = dict(engine=eg, session=ss)

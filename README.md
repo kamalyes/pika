@@ -28,6 +28,7 @@ export LESSCHARSET=utf-8
 ```
 2. 执行以下命令，安静等待启动即可
 ```bash
+CREATE DATABASE `pika` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci
 docker-compose --env-file ./conf/.env -f docker-compose.yml up -d
 ```
 3. 修改mysql密码验证方式
@@ -172,7 +173,7 @@ npm ERR! You can rerun the command with `--loglevel=verbose` to see the logs in 
 4. 修改配置文件
 
 ```bash
-后端：修改config.py中ENVIRONMENT变量、以及applicationxxx.yaml
+后端：修改conf/.env中ENVIRONMENT变量
 前端：修改config.js
 ```
 

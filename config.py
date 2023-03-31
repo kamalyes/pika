@@ -35,6 +35,8 @@ class BaseConfig(BaseSettings):
     MYSQL_DATABASE_NAME: str = ""
     MYSQL_CHARSET: str = "utf8mb4"
     MYSQL_TIME_ZONE: str = "Asia/Shanghai"
+    MYSQL_POOL_RECYCLE: int = 1500
+    MYSQL_ASYNC_POOL_RECYCLE: int = 1500
     TABLE_TAG = "__table_args__"
 
     # Redis config

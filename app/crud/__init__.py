@@ -10,6 +10,7 @@
 @Desc    :  None
 """
 import asyncio
+import copy
 import functools
 import json
 from datetime import datetime
@@ -395,12 +396,14 @@ class PikaWrapper(object):
             original = result.scalars().first()
             if original is None:
                 return None
+            changed = copy.copy(original)
             cls.delete_model(original, operator)
             await session.flush()
             session.expunge(original)
             if log:
                 await asyncio.create_task(
                     cls.insert_log(session=session, operator=operator,
+                                   changed=changed,
                                    mode=SqlOperationTypeEnum.ONLY_DELETE, key=value,
                                    description=description))
                 return original
@@ -483,14 +486,16 @@ class PikaWrapper(object):
         model = OperationLogModel(operator=operator, mode=mode, description=description, key=key)
         if mode == SqlOperationTypeEnum.ONLY_UPDATE:
             diff_data = await cls.diff_data(before, changed)
-        elif mode == SqlOperationTypeEnum.ONLY_INSERT:
+        elif mode in (SqlOperationTypeEnum.ONLY_INSERT, SqlOperationTypeEnum.ONLY_DELETE):
             diff_data = changed
-        elif mode != SqlOperationTypeEnum.ONLY_DELETE:
-            diff_data = "".join(changed)
         model.key = model.id if key is None else key
         table_tag = getattr(model, PikaAppConfig.TABLE_TAG, False)
         model.tag = table_tag.get('comment','') if table_tag  else '未设置'
-        model.diff_data = json.dumps(diff_data, ensure_ascii=False)
+        try:
+            diff_data = json.dumps(diff_data, ensure_ascii=False)
+        except Exception as e:
+            cls.__log__.warning(f"changed参数转换失败,model={cls.__model__}\tdiff_data={diff_data}, error: {e}")
+        model.diff_data = diff_data
         session.add(model)
         
     @classmethod
