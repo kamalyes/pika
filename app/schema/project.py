@@ -23,7 +23,8 @@ class ProjectDelSchema(BaseModel):
 
 
 class ProjectRoleSchema(BaseModel):
-    emp_no: str = Body(..., name="员工编号", max_length=ByteSizeEnum.LENGTH_16)
+    member_no: str = Body(..., name="项目成员(emp_no)",
+                          max_length=ByteSizeEnum.LENGTH_16)
     project_role: int = Body(..., name="项目角色")
     project_id: int = Body(..., name="项目id")
 

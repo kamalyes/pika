@@ -64,6 +64,6 @@ class ProjectRoleModel(LargeBaseModel):
 
     def __init__(self, member_no, project_id, project_role, operator):
         super().__init__(operator=operator)
-        self.emp_no = member_no
+        self.member_no = member_no
         self.project_id = project_id
         self.project_role = project_role
