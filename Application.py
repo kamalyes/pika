@@ -503,6 +503,19 @@ async def get_site(filename):
     content_type, _ = guess_type(filename)
     return Response(content, media_type=content_type)
 
+@pika.get("/static/{filename}")
+async def get_site_static(filename):
+    filename = './dist/static/' + filename
+
+    if not isfile(filename):
+        return Response(status_code=404)
+
+    with open(filename, mode='rb') as f:
+        content = f.read()
+
+    content_type, _ = guess_type(filename)
+    return Response(content, media_type=content_type)
+  
 @pika.on_event("startup")
 def set_default_executor():
     from concurrent.futures import ThreadPoolExecutor
