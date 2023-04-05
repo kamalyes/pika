@@ -14,6 +14,7 @@ from fastapi import Depends, APIRouter
 from app.core.handler.jsonres import PikaResponse
 from app.crud.itstem.gateway import GatewayDao
 from app.enums.RbacEnum import RoleEnum
+from app.enums.SysVarEnum import ValidTimeEnum
 from app.models import async_db_session_iterator
 from app.models.gateway import GatewayModel
 from app.schema.gateway import PikaGatewaySchema
@@ -33,7 +34,7 @@ async def insert_gateway(form: PikaGatewaySchema, user_info=Depends(Permission(R
 async def delete_gateway(id: str, user_info=Depends(Permission(RoleEnum.MANAGER)),
                          session=Depends(async_db_session_iterator)):
     await GatewayDao.delete_record_by_id(session=session, operator=user_info['emp_no'], value=id, log=True)
-    return PikaResponse.success()
+    return PikaResponse.success(message=f'删除成功,因redis缓存结果需等待{ValidTimeEnum.GLOBAL_SELECT_LIST_TIME.value}s后查询')
 
 
 @router.post("/gateway/update", summary="编辑请求地址")

@@ -27,6 +27,7 @@ from app.core.handler.exceres import KeyUndefinedException
 from app.core.handler.jsonres import PikaResponse
 from app.core.handler.logger import PikaLogger
 from app.enums.OperationEnum import SqlOperationTypeEnum
+from app.enums.SysVarEnum import ValidTimeEnum
 from app.exceptions.thirdparty.DbException import DbException
 from app.middleware.xredis import RedisHelper
 from app.models import async_session, async_db_session_generator
@@ -126,7 +127,7 @@ class PikaWrapper(object):
     __model__ = LargeBaseModel
 
     @classmethod
-    @RedisHelper.cache("dao")
+    @RedisHelper.cache("dao", expired_time=ValidTimeEnum.GLOBAL_SELECT_LIST_TIME.value)
     @db_connect
     async def select_list(cls, *, session: AsyncSession = None, condition: list = None, **kwargs):
         """
@@ -416,7 +417,7 @@ class PikaWrapper(object):
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def delete_record_by_id(cls, session, operator: str, value: str, key='id',
+    async def delete_record_by_id(cls, session, operator: str, value: int, key='id',
                                   log=False, description=None,
                                   session_begin=False):
         """
