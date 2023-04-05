@@ -32,8 +32,7 @@ class ProjectModel(LargeBaseModel):
         comment="项目所有者",
         nullable=False,
     )
-    app = Column(BinaryUUID,
-                 index=True, comment="项目所属应用")
+    app = Column(String(ByteSizeEnum.LENGTH_32), index=True, comment="项目所属应用")
     private = Column(BOOLEAN, default=False, comment="是否私有")
     description = Column(String(ByteSizeEnum.LENGTH_200), comment="项目描述")
     avatar = Column(String(ByteSizeEnum.LENGTH_128), nullable=True, comment="项目头像")

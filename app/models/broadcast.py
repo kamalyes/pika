@@ -11,8 +11,9 @@
 """
 from datetime import datetime
 from uuid import uuid4
-from sqlalchemy import Column, DATETIME
+from sqlalchemy import Column, DATETIME, String
 from app.core.handler.sqlbin_uuid import BinaryUUID
+from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models import Base
 
@@ -24,7 +25,7 @@ class BroadcastReadUserModel(Base):
                 default=uuid4, primary_key=True)
     notification_id = Column(BinaryUUID,
                              default=uuid4, comment="对应消息id", index=True)
-    read_user = Column(BinaryUUID,
+    read_user = Column(String(ByteSizeEnum.LENGTH_20),
                        default=uuid4, comment="已读用户")
     read_time = Column(DATETIME, comment="已读时间")
 

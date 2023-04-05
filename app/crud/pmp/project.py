@@ -220,8 +220,7 @@ class ProjectDao(PikaWrapper):
                     project_list.append(r.id)
                     if r.owner == emp_no:
                         ans.add(r.id)
-                # 接着查询项目角色表有该用户的角色,把角色的项目id放入列表
-                # 由于是set,所以不会重复
+                # 接着查询项目角色表有该用户的角色,把角色的项目id放入列表,由于是set,所以不会重复
                 query = await session.execute(
                     select(ProjectRoleModel).where(ProjectRoleModel.delete_flag == 0,
                                                    ProjectRoleModel.member_no == emp_no))
