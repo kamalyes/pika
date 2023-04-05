@@ -10,11 +10,12 @@
 @Desc    :  None
 """
 from uuid import uuid4
-from sqlalchemy import Column, String, UniqueConstraint, TEXT
+from sqlalchemy import Column, ForeignKey, String, UniqueConstraint, TEXT
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
 from app.core.handler.sqlbin_uuid import BinaryUUID
+from app.models.environment import EnvironmentModel
 
 
 class ApiTestCaseDataModel(LargeBaseModel):
@@ -23,8 +24,8 @@ class ApiTestCaseDataModel(LargeBaseModel):
         UniqueConstraint('env', 'case_id', 'name'),
         {"comment": "测试数据表, 用来存储各个环境下的测试数据,用于数据驱动"}
     )
-    env = Column(BinaryUUID,
-                 default=uuid4, nullable=False, comment="环境")
+    env = Column(BinaryUUID, ForeignKey(
+        EnvironmentModel.id, ondelete="cascade", onupdate="cascade"), comment="环境id")
     case_id = Column(BinaryUUID,
                      default=uuid4, nullable=False, comment="用例id")
     name = Column(String(ByteSizeEnum.LENGTH_50),

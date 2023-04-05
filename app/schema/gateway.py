@@ -9,19 +9,18 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
+from typing import Optional
 from pydantic import validator
-
 from app.exceptions.business.ParamsException import VariablesNullError
-from app.schema.base import BaseOnlyIdSchema, PikaBaseModel
+from app.schema.base import BaseOnlyEnvIdSchema, BaseOnlyIdSchema, PikaBaseModel
 
 
-class PikaGatewaySchema(BaseOnlyIdSchema):
-    env: str = None
-    name: str = None
-    address: str = None
+class PikaGatewaySchema(BaseOnlyIdSchema, BaseOnlyEnvIdSchema):
+    name: Optional[str] = None
+    address: Optional[str] = None
 
     # noinspection PyMethodParameters
-    @validator("env", 'name')
+    @validator('name')
     def name_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)
 

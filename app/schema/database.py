@@ -10,13 +10,15 @@
 @Desc    :  None
 """
 from typing import Optional
+from fastapi import Body
 
 from pydantic import BaseModel, validator
+from app.enums.ByteSizeEnum import ByteSizeEnum
 
-from app.schema.base import PikaBaseModel, BaseOnlyIdSchema
+from app.schema.base import BaseOnlyEnvIdSchema, PikaBaseModel, BaseOnlyIdSchema
 
 
-class DatabaseSchema(BaseOnlyIdSchema):
+class DatabaseSchema(BaseOnlyIdSchema, BaseOnlyEnvIdSchema):
     name: Optional[str]
     host: Optional[str]
     port: Optional[int] = None
@@ -24,9 +26,8 @@ class DatabaseSchema(BaseOnlyIdSchema):
     password: Optional[str]
     database: Optional[str]
     sql_type: int
-    env: str
 
     # noinspection PyMethodParameters
-    @validator("name", "host", "port", "username", "password", "sql_type", "env")
+    @validator("name", "host", "port", "username", "password", "sql_type")
     def data_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)

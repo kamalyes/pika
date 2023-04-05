@@ -10,11 +10,12 @@
 @Desc    :  redis配置
 """
 from uuid import uuid4
-from sqlalchemy import Column, INT, String, Boolean, UniqueConstraint
+from sqlalchemy import Column, INT, ForeignKey, String, Boolean, UniqueConstraint
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
 from app.core.handler.sqlbin_uuid import BinaryUUID
+from app.models.environment import EnvironmentModel
 
 
 class RedisModel(LargeBaseModel):
@@ -23,8 +24,8 @@ class RedisModel(LargeBaseModel):
         UniqueConstraint('env', 'name'),
         {"comment": "Redis配置"}
     )
-    env = Column(BinaryUUID,
-                 default=uuid4, nullable=False, comment="对应环境id")
+    env = Column(BinaryUUID, ForeignKey(
+        EnvironmentModel.id, ondelete="cascade", onupdate="cascade"), comment="环境id")
     name = Column(String(ByteSizeEnum.LENGTH_50),
                   nullable=False, comment="redis名称")
     addr = Column(String(ByteSizeEnum.LENGTH_128),

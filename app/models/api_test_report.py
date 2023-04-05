@@ -11,12 +11,13 @@
 """
 from datetime import datetime
 from uuid import uuid4
-from sqlalchemy import INT, Column, DATETIME, String, BOOLEAN
+from sqlalchemy import INT, Column, DATETIME, ForeignKey, String, BOOLEAN
 from sqlalchemy.dialects.mysql import SMALLINT
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.core.handler.sqlbin_uuid import BinaryUUID
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models import Base
+from app.models.environment import EnvironmentModel
 
 
 
@@ -27,8 +28,8 @@ class ApiTestReportModel(Base):
                 default=uuid4, primary_key=True)
     executor = Column(String(ByteSizeEnum.LENGTH_16),
                       server_default="0", index=True, comment="执行人 0则为CPU")
-    env = Column(BinaryUUID,
-                 default=uuid4, nullable=False, comment="环境")
+    env = Column(BinaryUUID, ForeignKey(
+        EnvironmentModel.id, ondelete="cascade", onupdate="cascade"), comment="环境id")
     cost = Column(String(ByteSizeEnum.LENGTH_08), comment="花费时间")
     plan_id = Column(BinaryUUID,
                      default=uuid4, index=True, nullable=True, comment="测试集合id,预留字段")

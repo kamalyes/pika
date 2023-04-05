@@ -21,6 +21,12 @@ from app.enums.ByteSizeEnum import ByteSizeEnum
 
 
 class PikaBaseModel(object):
+    @staticmethod
+    def not_empty(v):
+        undefind_msg = "不能为空"
+        if isinstance(v, str) and len(v.strip()) == 0:
+            raise ValidException(detail=undefind_msg)
+        return v
 
     @staticmethod
     def check_time(time):
@@ -39,6 +45,10 @@ class BaseOnlyIdSchema(BaseModel):
     id: Optional[str] = Body(
         None, title="id", max_length=ByteSizeEnum.LENGTH_36)
 
+
+class BaseOnlyEnvIdSchema(BaseModel):
+    env: Optional[str] = Body(..., name="环境id",
+                              max_length=ByteSizeEnum.LENGTH_36)
 
 class BaseOnlyParentIdSchema(BaseModel):
     parent_id: Optional[str] = Body(
@@ -62,7 +72,7 @@ class BaseOnlyIterateIdSchema(BaseModel):
 
 class BaseOnlyDirectoryIdSchema(BaseModel):
     directory_id: Optional[str] = Body(
-        None, title="所属目录id", max_length=ByteSizeEnum.LENGTH_36)
+        None, title="所属目录id", max_length=ByteSizeEnum.LENGTH_32)
 
 
 class BaseOnlyNameSchema(BaseModel):

@@ -29,7 +29,7 @@ class SysUserAdminModel(LargeBaseModel):
         comment="员工编号",
     )
     emp_no = Column(
-        String(ByteSizeEnum.LENGTH_16),
+        String(ByteSizeEnum.LENGTH_20),
         ForeignKey(UserModel.emp_no, ondelete="cascade", onupdate="cascade"),
         comment="员工编号",
         nullable=False,

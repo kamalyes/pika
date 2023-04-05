@@ -10,11 +10,12 @@
 @Desc    :  None
 """
 from uuid import uuid4
-from sqlalchemy import Column, String, TEXT, BOOLEAN, SMALLINT
+from sqlalchemy import Column, ForeignKey, String, TEXT, BOOLEAN, SMALLINT
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
 from app.core.handler.sqlbin_uuid import BinaryUUID
+from app.models.environment import EnvironmentModel
 
 _notice_type = {
     '0': '邮件',
@@ -29,8 +30,8 @@ class ApiTestPlanModel(LargeBaseModel):
     __table_args__ = {"comment": "测试计划表"}
     project_id = Column(BinaryUUID,
                         default=uuid4, nullable=False, comment="测试计划执行环境, 可以多选")
-    env = Column(String(ByteSizeEnum.LENGTH_64),
-                 nullable=False, comment="测试计划名称")
+    env = Column(BinaryUUID, ForeignKey(
+        EnvironmentModel.id, ondelete="cascade", onupdate="cascade"), comment="环境id")
     name = Column(String(ByteSizeEnum.LENGTH_50),
                   nullable=False, comment="名称")
     priority = Column(String(ByteSizeEnum.LENGTH_03),

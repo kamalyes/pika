@@ -27,7 +27,7 @@ class ProjectModel(LargeBaseModel):
     name = Column(String(ByteSizeEnum.LENGTH_16),
                   unique=True, index=True, comment="项目名称")
     owner = Column(
-        String(ByteSizeEnum.LENGTH_16),
+        String(ByteSizeEnum.LENGTH_20),
         ForeignKey(UserModel.emp_no, ondelete="cascade", onupdate="cascade"),
         comment="项目所有者",
         nullable=False,
@@ -57,7 +57,7 @@ class ProjectRoleModel(LargeBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_project_role'
     __table_args__ = {"comment": "项目人员关联表"}
     member_no = Column(
-        String(ByteSizeEnum.LENGTH_16),
+        String(ByteSizeEnum.LENGTH_20),
         ForeignKey(UserModel.emp_no, ondelete="cascade", onupdate="cascade"),
         nullable=False,
         comment="项目成员编号（用户编号）")

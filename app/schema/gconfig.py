@@ -12,12 +12,11 @@
 from fastapi import Body
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.schema.base import BaseOnlyIdSchema
+from app.schema.base import BaseOnlyEnvIdSchema, BaseOnlyIdSchema
 
 
-class GConfigSchema(BaseOnlyIdSchema):
+class GConfigSchema(BaseOnlyIdSchema, BaseOnlyEnvIdSchema):
     key: str = Body(..., name="key", max_length=ByteSizeEnum.LENGTH_56)
     value: str = Body(..., name="value", max_length=ByteSizeEnum.LENGTH_1W)
-    env: str = Body(..., name="环境id", max_length=ByteSizeEnum.LENGTH_32)
     key_type: int = Body(..., name="参数类型 0: string 1: json 2: yaml")
     enabled_flag: bool = Body(True, name="启用标识")

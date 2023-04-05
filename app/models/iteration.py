@@ -35,5 +35,6 @@ class PikaIterateRel(NormBaseModel):
     __table_args__ = {"comment": "用户迭代关联表"}
     iterate_id = Column(BinaryUUID,
                         default=uuid4, comment="迭代id")
-    emp_no = Column(String(ByteSizeEnum.LENGTH_30), comment="员工编号", nullable=False)
+    emp_no = Column(String(ByteSizeEnum.LENGTH_20),
+                    comment="员工编号", nullable=False)
     description = Column(String(ByteSizeEnum.LENGTH_255), comment="描述", nullable=False)

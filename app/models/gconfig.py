@@ -10,17 +10,18 @@
 @Desc    :   全局变量
 """
 from uuid import uuid4
-from sqlalchemy import INT, Column, String, TEXT, UniqueConstraint
+from sqlalchemy import INT, Column, ForeignKey, String, TEXT, UniqueConstraint
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
 from app.core.handler.sqlbin_uuid import BinaryUUID
+from app.models.environment import EnvironmentModel
 
 
 class GConfigModel(LargeBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_gconfig'
-    env = Column(BinaryUUID,
-                 default=uuid4, comment="环境")
+    env = Column(BinaryUUID, ForeignKey(
+        EnvironmentModel.id, ondelete="cascade", onupdate="cascade"), comment="环境id")
     key = Column(String(ByteSizeEnum.LENGTH_56), comment="key")
     value = Column(TEXT, comment="变量")
     key_type = Column(INT, nullable=False, comment="参数类型 0: string 1: json 2: yaml")

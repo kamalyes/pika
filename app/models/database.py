@@ -10,7 +10,7 @@
 @Desc    :  数据库配置表
 """
 from uuid import uuid4
-from sqlalchemy import UniqueConstraint, Column, INT, String
+from sqlalchemy import ForeignKey, UniqueConstraint, Column, INT, String
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
@@ -21,8 +21,8 @@ from app.core.handler.sqlbin_uuid import BinaryUUID
 class DatabaseModel(LargeBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_database_info"
     __table_args__ = (UniqueConstraint("env", "name"), {"comment": "数据库配置表"})
-    env = Column(BinaryUUID,
-                 default=uuid4, nullable=False, comment="对应环境id")
+    env = Column(BinaryUUID, ForeignKey(
+        EnvironmentModel.id, ondelete="cascade", onupdate="cascade"), comment="环境id")
     name = Column(String(ByteSizeEnum.LENGTH_50), nullable=False, comment="名称")
     host = Column(String(ByteSizeEnum.LENGTH_128),
                   nullable=False, comment="host")

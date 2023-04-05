@@ -10,12 +10,14 @@
 @Desc    :  系统
 """
 
-from sqlalchemy import Column, String, Text, DateTime, SMALLINT, INT
+from sqlalchemy import Column, ForeignKey, String, Text, DateTime, SMALLINT, INT
+from app.core.handler.sqlbin_uuid import BinaryUUID
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.OperationEnum import SqlOperationTypeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import NormBaseModel, MinBaseModel
+from app.models.environment import EnvironmentModel
 
 
 class SysRecordModel(NormBaseModel):
@@ -31,7 +33,8 @@ class SysRecordModel(NormBaseModel):
     response = Column(Text, nullable=True, comment='响应')
     elapsed = Column(Text, nullable=True, comment='操作')
     request_time = Column(DateTime, nullable=True, comment='请求时间')
-    env = Column(String(ByteSizeEnum.LENGTH_255), nullable=True, comment='环境')
+    env = Column(BinaryUUID, ForeignKey(
+        EnvironmentModel.id, ondelete="cascade", onupdate="cascade"), comment="环境id")
     emp_code = Column(String(ByteSizeEnum.LENGTH_255), nullable=True, comment='员工编号')
 
 

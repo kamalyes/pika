@@ -43,7 +43,7 @@ async def insert_gateway(form: PikaGatewaySchema, user_info=Depends(Permission(R
 
 
 @router.get("/gateway/list", summary="查询请求地址列表")
-async def list_gateway(name: str = None, address: str = None, env: str = None,
+async def list_gateway(name: str = '', address: str = '', env: str = None,
                        user_info=Depends(Permission(RoleEnum.MANAGER))):
     data = await GatewayDao.select_list(env=env, address=f"%{address}%", name=f"%{name}%")
     return PikaResponse.success(data)

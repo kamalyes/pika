@@ -10,18 +10,16 @@
 @Desc    :  None
 """
 from typing import Optional
-from pydantic import BaseModel, validator
+from pydantic import validator
 from fastapi import Body
-from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.schema.base import BaseOnlyCaseIdSchema, BaseOnlyIdSchema, PikaBaseModel
+from app.schema.base import BaseOnlyCaseIdSchema, BaseOnlyEnvIdSchema, BaseOnlyIdSchema, PikaBaseModel
 
 
-class ApiTestCaseDataSchema(BaseOnlyIdSchema, BaseOnlyCaseIdSchema):
-    name: str
-    json_data: str
-    env: str
+class ApiTestCaseDataSchema(BaseOnlyIdSchema, BaseOnlyCaseIdSchema, BaseOnlyEnvIdSchema):
+    name: Optional[str]
+    json_data: Optional[str]
 
     # noinspection PyMethodParameters
-    @validator("env", "name", "json_data")
+    @validator("name", "json_data")
     def name_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)

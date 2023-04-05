@@ -11,21 +11,21 @@
 """
 
 from typing import Optional
+from fastapi import Body
 from pydantic import validator
 
-from app.schema.base import BaseOnlyIdSchema, PikaBaseModel
+from app.schema.base import BaseOnlyEnvIdSchema, BaseOnlyIdSchema, PikaBaseModel
 
 
-class RedisConfigSchema(BaseOnlyIdSchema):
+class RedisConfigSchema(BaseOnlyIdSchema, BaseOnlyEnvIdSchema):
     name: Optional[str] = None
     addr: Optional[str] = None
     db: Optional[int] = 0
     username: Optional[str] = None
     password: Optional[str] = None
     cluster: bool = False
-    env: Optional[str] = None
 
     # noinspection PyMethodParameters
-    @validator("name", "addr", "cluster", "db", "env")
+    @validator("name", "addr", "cluster", "db")
     def data_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)
