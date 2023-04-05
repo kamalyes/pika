@@ -37,32 +37,32 @@ class PikaBaseModel(object):
 
 class BaseOnlyIdSchema(BaseModel):
     id: Optional[str] = Body(
-        None, title="id", max_length=ByteSizeEnum.LENGTH_32)
+        None, title="id", max_length=ByteSizeEnum.LENGTH_36)
 
 
 class BaseOnlyParentIdSchema(BaseModel):
     parent_id: Optional[str] = Body(
-        None, title="父id", max_length=ByteSizeEnum.LENGTH_32)
+        None, title="父id", max_length=ByteSizeEnum.LENGTH_36)
 
 
 class BaseOnlyProjectIdSchema(BaseModel):
     project_id: Optional[str] = Body(
-        None, title="项目id", max_length=ByteSizeEnum.LENGTH_32)
+        None, title="项目id", max_length=ByteSizeEnum.LENGTH_36)
 
 
 class BaseOnlyCaseIdSchema(BaseModel):
     case_id: Optional[str] = Body(
-        None, title="case_id", max_length=ByteSizeEnum.LENGTH_32)
+        None, title="case_id", max_length=ByteSizeEnum.LENGTH_36)
 
 
 class BaseOnlyIterateIdSchema(BaseModel):
     iterate_id: Optional[str] = Body(
-        None, title="迭代id", max_length=ByteSizeEnum.LENGTH_32)
+        None, title="迭代id", max_length=ByteSizeEnum.LENGTH_36)
 
 
 class BaseOnlyDirectoryIdSchema(BaseModel):
     directory_id: Optional[str] = Body(
-        None, title="所属目录id", max_length=ByteSizeEnum.LENGTH_32)
+        None, title="所属目录id", max_length=ByteSizeEnum.LENGTH_36)
 
 
 class BaseOnlyNameSchema(BaseModel):
