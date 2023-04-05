@@ -25,7 +25,7 @@ from app.schema.api_testcase_directory import ApiTestCaseDirectorySchema
 @PikaMdWrapper(ApiTestCaseDirectoryModel)
 class ApiTestCaseDirectoryDao(PikaWrapper):
     @classmethod
-    async def query_directory(cls, directory_id: int):
+    async def query_directory(cls, directory_id: str):
         try:
             async with async_session() as session:
                 sql = select(ApiTestCaseDirectoryModel).where(
@@ -38,7 +38,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
             raise SystemException(detail=f"获取目录详情失败: {str(e)}")
 
     @classmethod
-    async def list_directory(cls, project_id: int):
+    async def list_directory(cls, project_id: str):
         try:
             async with async_session() as session:
                 sql = (
@@ -100,7 +100,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
             raise SystemException(detail=f"更新目录失败: {e}")
 
     @classmethod
-    async def delete_directory(cls, id: int, operator: str):
+    async def delete_directory(cls, id: str, operator: str):
         """
         删除用例目录
         Args:
@@ -128,7 +128,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
             raise SystemException(detail=f"删除目录失败: {e}")
 
     @classmethod
-    async def get_directory_tree(cls, project_id: int, case_node=None, move: bool = False) -> (list, dict):
+    async def get_directory_tree(cls, project_id: str, case_node=None, move: bool = False) -> (list, dict):
         """
         通过项目获取目录树
         Args:
@@ -146,7 +146,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
         parent_map = defaultdict(list)
         for directory in res:
             if directory.parent is None:
-                # 如果没有父亲，说明是最底层数据
+                # 如果没有父亲,说明是最底层数据
                 ans.append(
                     dict(
                         title=directory.name,
@@ -195,7 +195,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
             await cls.get_directory(ans_map, parent_map, temp.id, child, case_node, move=move)
 
     @classmethod
-    async def get_directory_son(cls, directory_id: int):
+    async def get_directory_son(cls, directory_id: str):
         parent_map = defaultdict(list)
         async with async_session() as session:
             ans = [directory_id]

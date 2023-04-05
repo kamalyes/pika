@@ -1,28 +1,36 @@
-from typing import List
-
+# -*- coding:utf-8 -*-
+# !/usr/bin/env python 3.9.11
+"""
+@File    :  api_testcase.py
+@Time    :  2022/9/15 11:01
+@Author  :  YuYanQing
+@Version :  1.0
+@Contact :  mryu168@163.com
+@License :  (C)Copyright 2022-2026
+@Desc    :  None
+"""
+from typing import List, Optional
 from fastapi import Body, UploadFile, File
 from pydantic import BaseModel, validator
-
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.ConvertorEnum import CaseConvertorTypeEnum
 from app.exceptions.business.ParamsException import VariablesNullError
 from app.schema.api_testcase_data import ApiTestCaseDataSchema
 from app.schema.api_testcase_out_parameters import ApiTestCaseOutParametersSchema
-from app.schema.base import BaseOnlyIdSchema, PikaBaseModel
+from app.schema.base import BaseOnlyDirectoryIdSchema, BaseOnlyIdSchema, PikaBaseModel
 from app.schema.constructor import ConstructorSchema
 from app.schema.request import RequestInfoSchema
 
 
-class ListTestCaseSchema(BaseModel):
-    directory_id: int = Body(None, title="directory_id")
+class ListTestCaseSchema(BaseOnlyDirectoryIdSchema):
     name: str = Body("", title="name")
 
 
 class DeleteTestCaseSchema(BaseModel):
-    data: List[int]
+    data: List[str]
 
 
-class TestCaseSchema(BaseOnlyIdSchema):
+class TestCaseSchema(BaseOnlyIdSchema, BaseOnlyDirectoryIdSchema):
     priority: str = Body(None, title="用例优先级: p0-p3",
                          max_length=ByteSizeEnum.LENGTH_03)
     url: str = Body("", title="请求url", max_length=ByteSizeEnum.LENGTH_1W)
@@ -34,27 +42,23 @@ class TestCaseSchema(BaseOnlyIdSchema):
     body_type: int = Body(
         0, title="请求类型, 0: none 1: json 2: form 3: x-form 4: binary 5: GraphQL")
     request_headers: str = Body(
-        None, title="请求头，可为空", max_length=ByteSizeEnum.LENGTH_15W)
+        None, title="请求头,可为空", max_length=ByteSizeEnum.LENGTH_15W)
     request_method: str = Body(
         None, title="请求方式, 如果非http可为空", max_length=ByteSizeEnum.LENGTH_12)
     status: int = Body(0, title="用例状态: 1: 调试中 2: 暂时关闭 3: 正常运作")
     out_parameters: List[ApiTestCaseOutParametersSchema] = Body(
         [], title="用例出参")
-    directory_id: int = Body(0, title="所属目录")
     request_type: int = Body(0, title="请求类型 1: http 2: grpc 3: dubbo")
 
     # noinspection PyMethodParameters
     @validator("priority", "status", "directory_id", "request_type", "url", "name")
     def name_not_empty(cls, v):
-        if isinstance(v, str) and len(v.strip()) == 0:
-            raise VariablesNullError("不能为空")
-        return v
+        return PikaBaseModel.not_empty(v)
 
 
-class TestCaseAssertsSchema(BaseModel):
-    id: int = None
+class TestCaseAssertsSchema(BaseOnlyIdSchema):
     name: str
-    case_id: int = None
+    case_id: Optional[str] = None
     assert_type: str
     expected: str
     actually: str
@@ -66,7 +70,7 @@ class TestCaseAssertsSchema(BaseModel):
 
 
 class TestCaseInfoSchema(BaseModel):
-    case: TestCaseSchema = None
+    case: Optional[TestCaseSchema] = None
     asserts: List[TestCaseAssertsSchema] = []
     data: List[ApiTestCaseDataSchema] = []
     constructor: List[ConstructorSchema] = []
@@ -78,8 +82,7 @@ class TestCaseInfoSchema(BaseModel):
         return PikaBaseModel.not_empty(v)
 
 
-class TestCaseGeneratorSchema(BaseModel):
-    directory_id: int
+class TestCaseGeneratorSchema(BaseOnlyDirectoryIdSchema):
     requests: List[RequestInfoSchema]
     name: str
 

@@ -9,18 +9,21 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from sqlalchemy import Column, INT, String, TEXT
-
+from uuid import uuid4
+from sqlalchemy import Column, String, TEXT
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
+from app.core.handler.sqlbin_uuid import BinaryUUID
 
 
 class ApiTestCaseAssertsModel(LargeBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_testcase_asserts'
     __table_args__ = {"comment": "断言表"}
-    name = Column(String(ByteSizeEnum.LENGTH_32), nullable=False, comment="名称")
-    case_id = Column(INT, index=True, comment="用例id")
+    name = Column(String(ByteSizeEnum.LENGTH_50),
+                  nullable=False, comment="名称")
+    case_id = Column(BinaryUUID,
+                     default=uuid4, index=True, comment="用例id")
     assert_type = Column(String(ByteSizeEnum.LENGTH_16),
                          comment="断言类型 equal: 等于 not_equal: 不等于 in: 属于")
     expected = Column(TEXT, nullable=False, comment="预期结果")

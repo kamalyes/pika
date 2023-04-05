@@ -1,9 +1,7 @@
 import asyncio
-
 import uvicorn
 from fastapi import FastAPI
 from loguru import logger
-
 from app.middleware.proxy import start_proxy
 from config import PikaAppConfig
 

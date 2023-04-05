@@ -33,7 +33,7 @@ async def insert_dbconfig(form: DatabaseSchema, user_info=Depends(Permission(Rol
 
 
 @router.delete("/dbconfig/delete", summary="删除数据库配置")
-async def delete_dbconfig(id: int, user_info=Depends(Permission(RoleEnum.ADMIN))):
+async def delete_dbconfig(id: str, user_info=Depends(Permission(RoleEnum.ADMIN))):
     try:
         await DbConfigDao.delete_database(id, user_info['emp_no'])
         return PikaResponse.success()
@@ -51,7 +51,7 @@ async def update_dbconfig(form: DatabaseSchema, user_info=Depends(Permission(Rol
 
 
 @router.get("/dbconfig/list", summary="查询数据库配置")
-async def list_dbconfig(name: str = '', database: str = '', env: int = None,
+async def list_dbconfig(name: str = None, database: str = None, env: str = None,
                         user_info=Depends(Permission(RoleEnum.MANAGER))):
     try:
         data = await DbConfigDao.list_database(name, database, env)

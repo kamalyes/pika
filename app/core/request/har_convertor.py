@@ -46,13 +46,13 @@ class HarConvertor(Convertor):
             if not entries:
                 raise HarConvertException(detail="entries数据为空")
             for entry in entries:
-                # 如果是fetch或xhr接口，说明是http请求（暂不支持js)
+                # 如果是fetch或xhr接口,说明是http请求（暂不支持js)
                 if entry.get("_resourceType").lower() in ("fetch", "xhr"):
                     request_data = entry.get("request")
                     response_data = entry.get("response")
                     url = request_data.get("url")
                     if flag is not None and not re.findall(flag, url):
-                        # 由于不符合预期的url，所以过滤掉
+                        # 由于不符合预期的url,所以过滤掉
                         continue
                     info = RequestInfoSchema(url=url, response_data=entry.get("response"),
                                              body=HarConvertor.get_body(
@@ -75,9 +75,9 @@ class HarConvertor(Convertor):
                     ans.append(info)
             return ans
         except HarConvertException as e:
-            raise HarConvertException(f"har文件转换异常: {e}")
+            raise HarConvertException(detail=f"har文件转换异常: {e}")
         except Exception as e:
-            raise HarConvertException(f"har文件转换失败: {e}")
+            raise HarConvertException(detail=f"har文件转换失败: {e}")
 
     @staticmethod
     def convert(file_data, regex: str = None) -> List[RequestInfoSchema]:

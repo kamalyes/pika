@@ -9,22 +9,21 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-
 from typing import Optional
-
 from fastapi import Body, Form, Query
-
 from app.enums.ByteSizeEnum import ByteSizeEnum
 
 
 class EditRoleActionSchema:
     def __init__(
             self,
-            role_action_id: Optional[int] = Body(0, title="id"),
-            menu_id: Optional[int] = Body(0, title="菜单id"),
+            role_action_id: Optional[str] = Body(
+                None, title="id", max_length=ByteSizeEnum.LENGTH_32),
+            menu_id: Optional[str] = Body(
+                None, max_length=ByteSizeEnum.LENGTH_32, title="菜单id"),
             emp_no: Optional[str] = Body(..., title="员工编号", max_length=ByteSizeEnum.LENGTH_20),
             auth_control_id: Optional[str] = Body(..., title="权限控制id",
-                                                  max_length=ByteSizeEnum.LENGTH_255),
+                                                  max_length=ByteSizeEnum.LENGTH_32),
             auth_control_desc: Optional[str] = Body(..., title="权限控制说明",
                                                     max_length=ByteSizeEnum.LENGTH_255),
             create_emp_no: Optional[str] = Query(None, title="创建者员工编号",

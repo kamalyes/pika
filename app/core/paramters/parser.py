@@ -18,7 +18,7 @@ from app.exceptions.business.CaseException import CaseParametersException
 
 class Parser(object):
     @staticmethod
-    def parse(source: dict, expression: str = "", **kwargs) -> Any:
+    def parse(source: dict, expression: str = None, **kwargs) -> Any:
         raise NotImplementedError
 
     @staticmethod

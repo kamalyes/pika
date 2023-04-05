@@ -9,7 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 
 
 class RedisKeyEnum:

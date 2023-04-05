@@ -17,4 +17,4 @@ from app.schema.base import BaseOnlyPointDateSchema
 
 
 class ApiTestReportSchema(BaseOnlyPointDateSchema):
-    executor: Optional[int] = Body(0, title="执行人 0则为CPU")
+    executor: Optional[str] = Body(None, title="执行人 None则为CPU")

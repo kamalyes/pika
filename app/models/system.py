@@ -14,7 +14,7 @@ from sqlalchemy import Column, String, Text, DateTime, SMALLINT, INT
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.OperationEnum import SqlOperationTypeEnum
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import NormBaseModel, MinBaseModel
 
 
@@ -41,7 +41,7 @@ class OperationLogModel(MinBaseModel):
     diff_data = Column(String(ByteSizeEnum.LENGTH_1000), nullable=True, comment="diff_data")
     tag = Column(String(ByteSizeEnum.LENGTH_1000), comment="操作table_args")
     mode = Column(SMALLINT, comment="操作类型")
-    key = Column(INT, nullable=True, comment="关键id，可能是目录id，case_id或者其他id")
+    key = Column(INT, nullable=True, comment="关键id,可能是目录id,case_id或者其他id")
 
     def __init__(self, operator, mode: SqlOperationTypeEnum, tag=None, diff_data=None, description=None, key=None):
         super().__init__(operator=operator, description=description)

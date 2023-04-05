@@ -10,22 +10,25 @@
 @Desc    :  None
 """
 from datetime import datetime
-
-from sqlalchemy import Column, INT, DATETIME, BIGINT
-
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from uuid import uuid4
+from sqlalchemy import Column, DATETIME
+from app.core.handler.sqlbin_uuid import BinaryUUID
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models import Base
 
 
 class BroadcastReadUserModel(Base):
     __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_broadcast_read_user'
     __table_args__ = {"comment": "消息已读表"}
-    id = Column(BIGINT, primary_key=True)
-    notification_id = Column(INT, comment="对应消息id", index=True)
-    read_user = Column(INT, comment="已读用户id")
+    id = Column(BinaryUUID,
+                default=uuid4, primary_key=True)
+    notification_id = Column(BinaryUUID,
+                             default=uuid4, comment="对应消息id", index=True)
+    read_user = Column(BinaryUUID,
+                       default=uuid4, comment="已读用户")
     read_time = Column(DATETIME, comment="已读时间")
 
-    def __init__(self, notification_id: int, read_user: int):
+    def __init__(self, notification_id: str, read_user: int):
         self.notification_id = notification_id
         self.read_user = read_user
         self.read_time = datetime.now()

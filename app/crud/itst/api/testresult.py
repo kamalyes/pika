@@ -26,13 +26,13 @@ from app.models.api_test_result import ApiTestResultModel
 class ApiTestResultDao(PikaWrapper):
 
     @classmethod
-    async def insert_report(cls, report_id: int, case_id: int, case_name: str, status: int,
+    async def insert_report(cls, report_id: str, case_id: str, case_name: str, status: int,
                             case_log: str, start_date: datetime, finished_date: datetime,
                             url: str, body: str, request_method: str, request_headers: str,
                             cost: str,
                             asserts: str, response_headers: str, response: str,
                             status_code: int, cookies: str, retry: int = None,
-                            request_params: str = '', data_name: str = '', data_id: int = None,
+                            request_params: str = None, data_name: str = None, data_id: str = None,
                             ) -> None:
         try:
             async with async_session() as session:
@@ -49,7 +49,7 @@ class ApiTestResultDao(PikaWrapper):
             raise SystemException(detail="新增测试结果失败")
 
     @classmethod
-    async def list(cls, report_id: int) -> List[ApiTestResultModel]:
+    async def list(cls, report_id: str) -> List[ApiTestResultModel]:
         try:
             async with async_session() as session:
                 sql = select(ApiTestResultModel, ApiTestCaseModel.directory_id).join(

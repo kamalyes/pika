@@ -11,21 +11,20 @@
 """
 from typing import Optional, List
 
-from app.schema.base import BaseQuerySchema, BaseQueryTypeSchema, BaseOnlyIdSchema
+from app.schema.base import BaseIPdSchema, BaseQuerySchema, BaseQueryTypeSchema, BaseOnlyIdSchema
 
 
-class MenuSchema(BaseOnlyIdSchema):
+class MenuSchema(BaseIPdSchema):
     path: Optional[str]
     component: Optional[str]
     title: Optional[str]
     name: Optional[str]
-    isLink: Optional[bool]
-    isHide: Optional[bool]
-    isKeepAlive: Optional[bool]
-    isAffix: Optional[bool]
-    isIframe: Optional[bool]
+    is_link: Optional[bool]
+    is_hide: Optional[bool]
+    is_keepalive: Optional[bool]
+    is_affix: Optional[bool]
+    is_iframe: Optional[bool]
     icon: Optional[str]
-    parent_id: Optional[int]
     redirect: Optional[str]
     roles: Optional[str]
     sort: Optional[int]

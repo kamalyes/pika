@@ -21,7 +21,7 @@ from app.exceptions.business.CaseException import CaseParametersException
 
 class JSONPathParser(Parser):
     @staticmethod
-    def parse(source: dict, expression: str = "", **kwargs) -> Any:
+    def parse(source: dict, expression: str = None, **kwargs) -> Any:
         source = source.get("response")
         if not source or not expression:
             raise CaseParametersException(
@@ -31,7 +31,7 @@ class JSONPathParser(Parser):
             results = jsonpath.jsonpath(data, expression)
             if results is False:
                 if not data and expression == "$..*":
-                    # 说明想要全匹配并且没数据，直接返回data
+                    # 说明想要全匹配并且没数据,直接返回data
                     return json.dumps(data, ensure_ascii=False)
                 raise CaseParametersException(
                     "jsonpath match failed, please check your response or jsonpath.")

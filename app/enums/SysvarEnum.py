@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python 3.9.11
 """
-@File    :  SysvarEnum.py
+@File    :  SysVarEnum.py
 @Time    :  2022/7/7 15:21 PM
 @Author  :  YuYanQing
 @Version :  1.0
@@ -29,10 +29,11 @@ class PikaGlobalVarEnum:
     DEFAULT_PASSWORD = "1235678"
     LOWER_HUMP_APP_NAME = BIG_HUMP_APP_NAME.lower()
     PL_EMAIL = "mryu168@163.com"
-    AGREE_MENT = "2022~2026"
+    AGREEMENT = "2022~2026"
     VERIFY_CODE_WHITE_LIST = ("888888", "Sweet")
     PWD_VALID_DATE = Moment.skew_date(180)  # 用户密码有效期
-    SYS_NOW_TIME = Moment.get_now_time("%Y-%m-%d %H:%M:%S")  # 系统当前时间
+    TIME_FORMATTING_YTDHMS = "%Y-%m-%d %H:%M:%S"
+    SYS_NOW_TIME = Moment.get_now_time(TIME_FORMATTING_YTDHMS)  # 系统当前时间
 
 
 class ValidTimeEnum(IntEnum):

@@ -37,7 +37,7 @@ router = APIRouter()
 
 
 @router.get("/list", summary="用例列表查询")
-async def list_testcase(paging: BaseOnlyPagingSchema = Depends(), directory_id: int = 0, name: str = "", operator: str = ""):
+async def list_testcase(paging: BaseOnlyPagingSchema = Depends(), directory_id: str = None, name: str = None, operator: str = None):
     data, total = await ApiTestCaseDao.list_testcase(paging, directory_id, name, operator)
     return PikaResponse.success_with_size(data=data, total=total)
 
@@ -73,7 +73,7 @@ async def update_testcase(form: TestCaseSchema, user_info=Depends(Permission()))
 
 
 @router.delete("/delete", summary="删除测试用例")
-async def delete_testcase(id_list: List[int], user_info=Depends(Permission()), session=Depends(async_db_session_iterator)):
+async def delete_testcase(id_list: List[str], user_info=Depends(Permission()), session=Depends(async_db_session_iterator)):
     operator = user_info["emp_no"]
     try:
         async with session.begin():
@@ -90,9 +90,9 @@ async def delete_testcase(id_list: List[int], user_info=Depends(Permission()), s
 
 
 @router.get("/query", summary="查询测试用例")
-async def query_testcase(caseId: int, user_info=Depends(Permission())):
+async def query_testcase(case_id: str, user_info=Depends(Permission())):
     try:
-        data = await ApiTestCaseDao.query_test_case(caseId)
+        data = await ApiTestCaseDao.query_test_case(case_id)
         return PikaResponse.success(data=PikaResponse.dict_model_to_dict(data))
     except Exception as e:
         return PikaResponse.failed(detail=str(e))
@@ -117,7 +117,7 @@ async def update_testcase_asserts(data: TestCaseAssertsSchema, user_info=Depends
 
 
 @router.get("/asserts/delete", summary="删除用例断言")
-async def delete_test_case_asserts(id: int, user_info=Depends(Permission())):
+async def delete_test_case_asserts(id: str, user_info=Depends(Permission())):
     await ApiTestCaseAssertsDao.delete_test_case_asserts(id, operator=user_info["emp_no"])
     return PikaResponse.success()
 
@@ -135,7 +135,7 @@ async def update_constructor(data: ConstructorSchema, user_info=Depends(Permissi
 
 
 @router.get("/constructor/delete", summary="删除前置条件")
-async def delete_constructor(id: int, user_info=Depends(Permission())):
+async def delete_constructor(id: str, user_info=Depends(Permission())):
     await ConstructorDao.delete_constructor(id, operator=user_info["emp_no"])
     return PikaResponse.success()
 
@@ -147,13 +147,13 @@ async def update_constructor_index(data: List[ConstructorIndexSchema], user_info
 
 
 @router.get("/constructor/tree", summary="获取所有构造器树")
-async def get_constructor_tree(suffix: bool, name: str = "", user_info=Depends(Permission())):
+async def get_constructor_tree(suffix: bool, name: str = None, user_info=Depends(Permission())):
     result = await ConstructorDao.get_constructor_tree(name, suffix)
     return PikaResponse.success(data=result)
 
 
 @router.get("/constructor", summary="获取数据构造器树")
-async def get_constructor_data(id: int, user_info=Depends(Permission())):
+async def get_constructor_data(id: str, user_info=Depends(Permission())):
     """
     获取数据构造器树
     Args:
@@ -183,7 +183,7 @@ async def list_case_and_constructor(constructor_type: int, suffix: bool):
 
 
 @router.get("/report", summary="根据id查询具体报告内容")
-async def query_report(id: int, user_info=Depends(Permission())):
+async def query_report(id: str, user_info=Depends(Permission())):
     """
 
     Args:
@@ -206,20 +206,20 @@ async def list_report(
 
 
 @router.get("/xmind", summary="获取脑图数据")
-async def get_xmind_data(case_id: int, user_info=Depends(Permission())):
+async def get_xmind_data(case_id: str, user_info=Depends(Permission())):
     tree_data = await ApiTestCaseDao.get_xmind_data(case_id)
     return PikaResponse.success(data=tree_data)
 
 
 @router.get("/directory", summary="获取case目录")
-async def get_testcase_directory(project_id: int, move: bool = False, user_info=Depends(Permission())):
-    # 如果是move，则不需要禁用树
+async def get_testcase_directory(project_id: str, move: bool = False, user_info=Depends(Permission())):
+    # 如果是move,则不需要禁用树
     tree_data, _ = await ApiTestCaseDirectoryDao.get_directory_tree(project_id, move=move)
     return PikaResponse.success(data=tree_data)
 
 
 @router.get("/tree", summary="获取case目录+case")
-async def get_directory_and_case(project_id: int, user_info=Depends(Permission())):
+async def get_directory_and_case(project_id: str, user_info=Depends(Permission())):
     """
     获取case目录+case
     Args:
@@ -239,7 +239,7 @@ async def get_directory_and_case(project_id: int, user_info=Depends(Permission()
 
 
 @router.get("/directory/query", summary="查询测试用例类目")
-async def query_testcase_directory(directory_id: int, escarole=Depends(Permission(escarole=True))):
+async def query_testcase_directory(directory_id: str, escarole=Depends(Permission(escarole=True))):
     operator, operator_identity = escarole
     try:
         data = await ApiTestCaseDirectoryDao.query_directory(directory_id)
@@ -270,7 +270,7 @@ async def update_testcase_directory(form: ApiTestCaseDirectorySchema, user_info=
 
 
 @router.delete("/directory/delete", summary="删除测试用例类目")
-async def insert_testcase_directory(id: int, user_info=Depends(Permission())):
+async def insert_testcase_directory(id: str, user_info=Depends(Permission())):
     try:
         await ApiTestCaseDirectoryDao.delete_directory(id, user_info["emp_no"])
         return PikaResponse.success()
@@ -297,7 +297,7 @@ async def update_testcase_data(form: ApiTestCaseDataSchema, user_info=Depends(Pe
 
 
 @router.get("/data/delete", summary="删除测试用例数据")
-async def delete_testcase_data(id: int, user_info=Depends(Permission())):
+async def delete_testcase_data(id: str, user_info=Depends(Permission())):
     try:
         await ApiTestCaseDataDao.delete_testcase_data(id, user_info["emp_no"])
         return PikaResponse.success()
@@ -332,7 +332,7 @@ async def insert_testcase_out_parameters(form: ApiTestCaseParametersSchema, user
 
 @router.post("/parameters/update/batch", summary="批量更新出参数据")
 async def update_batch_testcase_out_parameters(
-    case_id: int, form: List[ApiTestCaseOutParametersSchema], user_info=Depends(Permission())
+    case_id: str, form: List[ApiTestCaseOutParametersSchema], user_info=Depends(Permission())
 ):
     result = await ApiTestCaseOutParametersDao.update_many(case_id, form, user_info["emp_no"])
     return PikaResponse.success(data=result)
@@ -345,7 +345,7 @@ async def update_testcase_out_parameters(form: ApiTestCaseOutParametersSchema, u
 
 
 @router.get("/parameters/delete", summary="删除出参数据")
-async def delete_testcase_out_parameters(id: int, user_info=Depends(Permission()), session=Depends(async_db_session_iterator)):
+async def delete_testcase_out_parameters(id: str, user_info=Depends(Permission()), session=Depends(async_db_session_iterator)):
     await ApiTestCaseOutParametersDao.delete_record_by_id(session=session, operator=user_info["emp_no"], value=id, log=True)
     return PikaResponse.success()
 
@@ -353,13 +353,13 @@ async def delete_testcase_out_parameters(id: int, user_info=Depends(Permission()
 @router.get("/record/start", summary="开始录制接口请求")
 async def start_record_requests(request: Request, regex: str, retain_history=False, user_info=Depends(Permission())):
     await RedisHelper.set_address_record(user_info["emp_no"], request.client.host, regex, retain_history)
-    return PikaResponse.success(message="开始录制，可以在浏览器/app上操作啦！")
+    return PikaResponse.success(message="开始录制,可以在浏览器/app上操作啦！")
 
 
 @router.get("/record/stop", summary="停止录制接口请求")
 async def stop_record_requests(request: Request, user_info=Depends(Permission())):
     await RedisHelper.remove_address_record(request.client.host)
-    return PikaResponse.success(message="停止成功，快去生成用例吧~")
+    return PikaResponse.success(message="停止成功,快去生成用例吧~")
 
 
 @router.get("/record/list", summary="获取录制数据列表")
@@ -384,7 +384,7 @@ async def remove_record(index: int, request: Request, user_info=Depends(Permissi
 @router.post("/generate", summary="生成用例")
 async def generate_case(form: TestCaseGeneratorSchema, user_info=Depends(Permission()), session=Depends(async_db_session_iterator)):
     if len(form.requests) == 0:
-        return PikaResponse.failed(detail="无http请求，请检查参数")
+        return PikaResponse.failed(detail="无http请求,请检查参数")
     CaseGenerator.extract_field(form.requests)
     cs = CaseGenerator.generate_case(
         form.directory_id, form.name, form.requests[-1])
@@ -401,7 +401,7 @@ async def convert_case(form: TestCaseImportSchema, user_info=Depends(Permission(
     if import_type == CaseConvertorTypeEnum.har.name and import_type:
         convert, file_ext = get_convertor(import_type)
         if convert is None:
-            return PikaResponse.failed(detail=f"不支持的导入数据")
+            return PikaResponse.failed(detail="不支持导入的数据类型")
         if not file_.filename.endswith(f".{file_ext}"):
             return PikaResponse.failed(detail=f"请传入{file_ext}后缀文件")
         requests = convert(file_.file)

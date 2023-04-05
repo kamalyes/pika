@@ -9,22 +9,26 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from sqlalchemy import Column, INT, String, UniqueConstraint, TEXT
-
+from uuid import uuid4
+from sqlalchemy import Column, String, UniqueConstraint, TEXT
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
+from app.core.handler.sqlbin_uuid import BinaryUUID
 
 
 class ApiTestCaseDataModel(LargeBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_testcase_data"
     __table_args__ = (
         UniqueConstraint('env', 'case_id', 'name'),
-        {"comment": "测试数据表, 用来存储各个环境下的测试数据，用于数据驱动"}
+        {"comment": "测试数据表, 用来存储各个环境下的测试数据,用于数据驱动"}
     )
-    env = Column(INT, nullable=False, comment="环境")
-    case_id = Column(INT, nullable=False, comment="用例id")
-    name = Column(String(ByteSizeEnum.LENGTH_32), nullable=False, comment="名称")
+    env = Column(BinaryUUID,
+                 default=uuid4, nullable=False, comment="环境")
+    case_id = Column(BinaryUUID,
+                     default=uuid4, nullable=False, comment="用例id")
+    name = Column(String(ByteSizeEnum.LENGTH_50),
+                  nullable=False, comment="名称")
     json_data = Column(TEXT, nullable=False, comment="json")
 
     def __init__(self, env, case_id, name, json_data, operator, id=None):

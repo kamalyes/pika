@@ -10,22 +10,22 @@
 @Desc    :  None
 """
 
+from typing import Optional
 from pydantic import BaseModel, validator
 
 from app.enums.RequestBodyEnum import ReqBodyTypeEnum
 from app.exceptions.business.ParamsException import VariablesNullError
+from app.schema.base import PikaBaseModel
 
 
 class HttpRequestSchema(BaseModel):
-    method: str
-    url: str
-    body: str = None
+    method: Optional[str] = None
+    url: Optional[str] = None
+    body: Optional[str] = None
     body_type: ReqBodyTypeEnum = ReqBodyTypeEnum.none
     headers: dict = {}
 
     # noinspection PyMethodParameters
     @validator('method', 'url')
     def name_not_empty(cls, v):
-        if isinstance(v, str) and len(v.strip()) == 0:
-            raise VariablesNullError("不能为空")
-        return v
+        return PikaBaseModel.not_empty(v)

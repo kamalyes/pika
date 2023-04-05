@@ -18,12 +18,11 @@ from pydantic import BaseModel
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.RbacEnum import RoleEnum
-from app.schema.base import BaseOnlyIdSchema, BaseQuerySchema, BaseQueryTypeSchema, BaseBatchDelIdsSchema
+from app.schema.base import BaseOnlyEmpNoSchema, BaseOnlyIdSchema, BaseOnlyUserNameSchema, BaseQuerySchema, BaseQueryTypeSchema, BaseBatchDelIdsSchema
 
 
 class OAuth2TokenSchema:
     """Token鉴权"""
-
     def __init__(
             self,
             emp_no: Optional[str] = Header(
@@ -36,7 +35,6 @@ class OAuth2TokenSchema:
 
 
 class RegisterUserSchema(BaseModel):
-    """用户注册"""
     username: Optional[str] = Body(
         ...,
         title="用户名",
@@ -105,25 +103,18 @@ class ModifyUserInfoSchema(RegisterUserSchema):
     pass
 
 
-class QueryUserInSchema(BaseQuerySchema, BaseQueryTypeSchema):
+class QueryUserInSchema(BaseOnlyUserNameSchema, BaseOnlyEmpNoSchema, BaseQuerySchema, BaseQueryTypeSchema):
     user_alias: Optional[str] = Query(None, title="用户花名")
-    username: Optional[str] = Query(
-        None, title="用户名", max_length=ByteSizeEnum.LENGTH_16)
-    emp_no: Optional[str] = Query(None, title="用户编码")
     email: Optional[str] = Query(None, title="邮箱地址")
     mobile: Optional[str] = Query(None, title="手机号码")
-
     # identity: Optional[str] = Query(None, title="用户身份")
 
     class Config:
         orm_mode = True
 
 
-class QueryUserOutSchema(BaseQuerySchema):
-    username: Optional[str] = Query(
-        None, title="用户名", max_length=ByteSizeEnum.LENGTH_16)
+class QueryUserOutSchema(BaseOnlyUserNameSchema, BaseOnlyEmpNoSchema, BaseQuerySchema):
     user_alias: Optional[str] = Query(None, title="用户花名")
-    emp_no: Optional[str] = Query(None, title="用户编码")
     email: Optional[str] = Query(None, title="邮箱地址")
     mobile: Optional[str] = Query(None, title="手机号码")
     identity: Optional[int] = Query(None, title="用户身份")
@@ -183,7 +174,7 @@ class GetVerifyCodeSchema(BaseModel):
 
 
 class EmailVerifyCodeSchema(BaseModel):
-    model: Optional[int] = Body(3, title="模型：2：邮箱登录使用，3：用户注册时使用")
+    model: Optional[int] = Body(3, title="模型：2：邮箱登录使用,3：用户注册时使用")
     email: Optional[str] = Body(None, title="邮箱地址")
 
     class Config:

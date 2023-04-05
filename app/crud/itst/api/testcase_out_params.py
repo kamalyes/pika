@@ -44,7 +44,7 @@ class ApiTestCaseOutParametersDao(PikaWrapper):
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def update_many(cls, case_id: int, data: List[ApiTestCaseOutParametersSchema], operator: str):
+    async def update_many(cls, case_id: str, data: List[ApiTestCaseOutParametersSchema], operator: str):
         result = []
         try:
             async with async_session() as session:

@@ -5,6 +5,7 @@ from apscheduler.triggers.cron import CronTrigger
 
 from app.core.handler.executor import Executor
 from app.core.handler.jsonres import PikaResponse
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 
 
 class Scheduler(object):
@@ -31,7 +32,7 @@ class Scheduler(object):
     @staticmethod
     def edit_test_plan(plan_id, plan_name, cron):
         """
-        通过测试计划id，更新测试计划任务的cron，name等数据
+        通过测试计划id,更新测试计划任务的cron,name等数据
         Args:
             plan_id:
             plan_name:
@@ -52,7 +53,7 @@ class Scheduler(object):
     @staticmethod
     def pause_resume_test_plan(plan_id, status):
         """
-        暂停或恢复测试计划，会影响到next_run_at
+        暂停或恢复测试计划,会影响到next_run_at
         Args:
             plan_id:
             status:
@@ -68,7 +69,7 @@ class Scheduler(object):
     @staticmethod
     def remove(plan_id):
         """
-        删除job，当删除测试计划时，调用此方法
+        删除job,当删除测试计划时,调用此方法
         Args:
             plan_id:
 
@@ -93,6 +94,7 @@ class Scheduler(object):
                 # 说明job被暂停了
                 temp["state"] = 3
             else:
-                temp["next_run"] = job.next_run_time.strftime("%Y-%m-%d %H:%M:%S")
+                temp["next_run"] = job.next_run_time.strftime(
+                    PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS)
             ans.append(temp)
         return ans

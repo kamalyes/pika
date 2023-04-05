@@ -46,7 +46,7 @@ from app.core.notice.wss_msg import WebSocketMessage
 from app.crud.system.notification import PikaNotificationDao
 from app.enums.MessageEnum import MessageTypeEnum, MessageStateEnum
 from app.enums.SysCodeEnum import ExcCodeEnum
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.middleware.xredis import RedisHelper
 from app.models import async_redis, async_create_table
 from app.service.ask import http_router
@@ -97,13 +97,12 @@ class PikaFastApi:
             try:
                 body = await request.body()
                 if len(body) != 0:
-                    # 有请求体，记录日志
+                    # 有请求体,记录日志
                     logger.bind(payload=body, name=None).debug(body)
             except Exception as e:
                 # 忽略文件上传类型的数据
                 pass
-    
-        
+
     @staticmethod
     async def load_routers(
         app,
@@ -116,16 +115,16 @@ class PikaFastApi:
         """
         自动注册路由
         :param app: FastAPI 实例对象 或者 APIRouter对象
-        :param package_path: 路由包所在路径，默认相对路径router包
-        :param router_name: APIRouter实例名称，需所有实例统一，默认router
-        :param is_init: 是否在包中的__init__.py中导入了所有APIRouter实例，默认是
-        :param no_depends: 不需要依赖注入的模块（py文件）名，默认common
+        :param package_path: 路由包所在路径,默认相对路径router包
+        :param router_name: APIRouter实例名称,需所有实例统一,默认router
+        :param is_init: 是否在包中的__init__.py中导入了所有APIRouter实例,默认是
+        :param no_depends: 不需要依赖注入的模块（py文件）名,默认common
         :param depends: 依赖注入列表 默认为None
         :return: 默认None
         """
 
         def __register(module_obj):
-            """注册路由，module_obj： 模块对象"""
+            """注册路由,module_obj： 模块对象"""
             if hasattr(module_obj, router_name):
                 router_obj = getattr(module_obj, router_name)
                 if no_depends in module_obj.__name__:
@@ -148,16 +147,17 @@ class PikaFastApi:
             for _, _, files in os.walk(package_path):
                 for file in files:
                     if file.endswith(".py") and file != "__init__.py":
-                        module = importlib.import_module(f"{package_path}.{file[:-3]}")
+                        module = importlib.import_module(
+                            f"{package_path}.{file[:-3]}")
                         __register(module)
 
         for route in app.routes:
-              try:
-                  logger.bind(name=None).success(
-                      f"🦌{route.path}, {route.methods}, {route.__dict__.get('summary')}"
-                  )
-              except AttributeError as e:
-                  logger.error(e)
+            try:
+                logger.bind(name=None).success(
+                    f"🦌{route.path}, {route.methods}, {route.__dict__.get('summary')}"
+                )
+            except AttributeError as e:
+                logger.error(e)
         logger.bind(name=None).success("®️路由注册完成✅。")
 
     @staticmethod
@@ -360,7 +360,7 @@ class PikaFastApi:
         origins = [origins]
         #  解决跨域问题
         pika.add_middleware(
-            CORSMiddleware,  # 强制所有传入请求都具有正确设置的Host标头，以防止 HTTP 主机标头攻击。
+            CORSMiddleware,  # 强制所有传入请求都具有正确设置的Host标头,以防止 HTTP 主机标头攻击。
             allow_origins=origins,  # 允许访问的源
             allow_origin_regex="https?://.*",
             allow_credentials=True,
@@ -378,7 +378,7 @@ class PikaFastApi:
         # rbac
         pika.include_router(user_router, prefix="/user", tags=["用户中心"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=100, minutes=1))])
         pika.include_router(kerberos_router, prefix="/kerberos", tags=["密保问题"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
@@ -503,6 +503,7 @@ async def get_site(filename):
     content_type, _ = guess_type(filename)
     return Response(content, media_type=content_type)
 
+
 @pika.get("/static/{filename}")
 async def get_site_static(filename):
     filename = './dist/static/' + filename
@@ -515,7 +516,8 @@ async def get_site_static(filename):
 
     content_type, _ = guess_type(filename)
     return Response(content, media_type=content_type)
-  
+
+
 @pika.on_event("startup")
 def set_default_executor():
     from concurrent.futures import ThreadPoolExecutor
@@ -542,7 +544,7 @@ async def init_env():
 @pika.on_event("startup")
 async def init_database():
     """
-        初始化数据库，建表
+        初始化数据库,建表
     Returns:
 
     """
@@ -558,7 +560,7 @@ async def init_database():
 @pika.on_event('startup')
 async def init_redis():
     """
-    初始化redis，失败则服务起不来
+    初始化redis,失败则服务起不来
     :return:
     """
     try:
@@ -579,7 +581,7 @@ def init_scheduler():
     """
     # SQLAlchemyJobStore指定存储链接
     engine_options = {"pool_recycle": PikaAppConfig.MYSQL_POOL_RECYCLE,
-                      "encoding":PikaAppConfig.MYSQL_CHARSET}
+                      "encoding": PikaAppConfig.MYSQL_CHARSET}
     job_store = {
         'default': SQLAlchemyJobStore(url=PikaAppConfig.SQLALCHEMY_DATABASE_URI,
                                       engine_options=engine_options,
@@ -591,14 +593,10 @@ def init_scheduler():
     Scheduler.start()
     logger.bind(name=None).success("ApScheduler started success.        ✔")
 
+
 @pika.on_event('startup')
 async def load_routers():
     await PikaFastApi.load_routers(pika, "app")
-
-
-@pika.on_event("shutdown")
-def stop_test():
-    pass
 
 
 @pika.websocket("/ws/{emp_no}")
@@ -613,7 +611,7 @@ async def websocket_endpoint(websocket: WebSocket, emp_no: str):
 
     await ws_manage.connect(websocket, emp_no)
     try:
-        # 定义特殊值的回复，配合前端实现确定连接，心跳检测等逻辑
+        # 定义特殊值的回复,配合前端实现确定连接,心跳检测等逻辑
         questions_and_answers_map: dict = {
             "HELLO SERVER": F"hello {emp_no}",
             "HEARTBEAT": F"{emp_no}",
@@ -627,7 +625,7 @@ async def websocket_endpoint(websocket: WebSocket, emp_no: str):
         if len(msg_records) > 0:
             await websocket.send_json(WebSocketMessage.msg_count(len(msg_records), True))
         # 发送心跳包
-        # asyncio.create_task(send_heartbeat())
+        asyncio.create_task(send_heartbeat())
         while True:
             data: str = await websocket.receive_text()
             du = data.upper()
@@ -642,13 +640,6 @@ async def websocket_endpoint(websocket: WebSocket, emp_no: str):
 
 
 if __name__ == "__main__":
-    # set_event_loop(ProactorEventLoop())
-    # server = Server(config=Config(app="Application:pika",
-    #                               host=PikaAppConfig.PIKA_BACKEND_HOST,
-    #                               port=PikaAppConfig.PIKA_BACKEND_PORT,
-    #                               reload=True,
-    #                               debug=True))
-    # get_event_loop().run_until_complete(server.serve())
     uvicorn.run(
         app="Application:pika",
         host=PikaAppConfig.PIKA_BACKEND_HOST,

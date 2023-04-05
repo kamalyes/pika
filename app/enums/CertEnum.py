@@ -11,7 +11,7 @@
 """
 from enum import IntEnum
 
-from app.core.handler.exceres import SystemException, ValidException
+from app.core.handler.exceres import ValidException
 
 
 class CertType(IntEnum):

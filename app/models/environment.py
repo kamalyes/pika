@@ -12,7 +12,7 @@
 from sqlalchemy import Column, String, UniqueConstraint
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
 
 

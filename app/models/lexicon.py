@@ -12,7 +12,7 @@
 from sqlalchemy import Column, String, UniqueConstraint, INT
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import NormBaseModel, LargeBaseModel
 
 
@@ -34,7 +34,7 @@ class UserAlias(LargeBaseModel):
     english_alias = Column(String(ByteSizeEnum.LENGTH_16), comment="英文花名")
     chinese_transliteration = Column(String(ByteSizeEnum.LENGTH_64), comment="中文音译")
     moral = Column(String(ByteSizeEnum.LENGTH_64), comment="寓意")
-    gender_bias = Column(INT, server_default="0", comment="性别倾向：0-未填写，1-男，2-女")
+    gender_bias = Column(INT, server_default="0", comment="性别倾向：0-未填写,1-男,2-女")
 
     def __init__(self, english_alias, operator=None, chinese_transliteration=None, moral=None, gender_bias=0):
         super().__init__(operator=operator)

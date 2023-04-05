@@ -25,9 +25,9 @@ from app.models.api_testplan import ApiTestPlanModel
 class ApiTestReportDao(PikaWrapper):
 
     @classmethod
-    async def start(cls, executor: int, env: int, mode: int = 0, plan_id: int = None) -> int:
+    async def start(cls, executor: str, env: str, mode: int = 0, plan_id: str = None) -> int:
         """
-        生成buildId，开始执行任务，任务完成后通过回调方法更新报告
+        生成buildId,开始执行任务,任务完成后通过回调方法更新报告
         :return: 返回report_id
         """
         try:
@@ -42,7 +42,7 @@ class ApiTestReportDao(PikaWrapper):
             raise SystemException(detail="新增报告失败")
 
     @classmethod
-    async def update(cls, report_id: int, status) -> None:
+    async def update(cls, report_id: str, status) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -58,7 +58,7 @@ class ApiTestReportDao(PikaWrapper):
             raise SystemException(detail="更新报告失败")
 
     @classmethod
-    async def end(cls, report_id: int, success_count: int, failed_count: int,
+    async def end(cls, report_id: str, success_count: int, failed_count: int,
                   error_count: int, skipped_count: int, status: int,
                   cost: str) -> ApiTestReportModel:
         try:
@@ -85,7 +85,7 @@ class ApiTestReportDao(PikaWrapper):
             raise SystemException(detail="更新报告失败")
 
     @classmethod
-    async def query(cls, report_id: int):
+    async def query(cls, report_id: str):
         """
         根据报告id查询报告
         Args:
@@ -113,7 +113,7 @@ class ApiTestReportDao(PikaWrapper):
 
     @classmethod
     async def list_report(cls, paging, start_date: datetime, finished_date: datetime,
-                          executor: int = None):
+                          executor: str = None):
         """
         获取报告列表
         Args:

@@ -17,7 +17,7 @@ import time
 
 from loguru import logger
 
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from config import PikaAppConfig
 
 

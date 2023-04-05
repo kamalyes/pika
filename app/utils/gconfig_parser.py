@@ -7,7 +7,7 @@
 @Version :  1.0
 @Contact :  mryu168@163.com
 @License :  (C)Copyright 2022-2026
-@Desc    :  全局变量解析器，包括JSON/YAML/STRING
+@Desc    :  全局变量解析器,包括JSON/YAML/STRING
 """
 import json
 
@@ -21,10 +21,6 @@ class GConfigParser(object):
     log = PikaLogger("GConfigParser")
 
     @staticmethod
-    def parse(value, jsonpath):
-        pass
-
-    @staticmethod
     def get(data, key):
         el_list = key.split(".")
         result = data
@@ -35,7 +31,8 @@ class GConfigParser(object):
                     try:
                         result = json.loads(result)
                     except Exception as e:
-                        raise SystemException(detail=f"反序列化失败, result: {result}\nERROR: {e}")
+                        raise SystemException(
+                            detail=f"反序列化失败, result: {result}\nERROR: {e}")
                 if isinstance(branch, int):
                     # 说明路径里面的是数组
                     result = result[int(branch)]

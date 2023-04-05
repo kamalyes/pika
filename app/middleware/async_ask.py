@@ -80,7 +80,7 @@ class AsyncRequest(object):
         if body_type == ReqBodyTypeEnum.json:
             if "Content-Type" not in headers:
                 headers["Content-Type"] = "application/json; charset=UTF-8"
-            # 新增json校验，修复史诗级bug: json被额外序列化
+            # 新增json校验,修复史诗级bug: json被额外序列化
             try:
                 body = kwargs.get("body")
                 if body:
@@ -94,10 +94,10 @@ class AsyncRequest(object):
                 form_data = None
                 if body:
                     form_data = FormData()
-                    # 因为存储的是字符串，所以需要反序列化
+                    # 因为存储的是字符串,所以需要反序列化
                     items = json.loads(body)
                     for item in items:
-                        # 如果是文本类型，直接添加key-value
+                        # 如果是文本类型,直接添加key-value
                         if item.get("type") == "TEXT":
                             form_data.add_field(item.get("key"), item.get("value", ""))
                         else:
@@ -124,7 +124,7 @@ class AsyncRequest(object):
             return json.dumps(data, ensure_ascii=False, indent=4), True
         except:
             data = await resp.text()
-            # 说明不是json格式，我们不做loads操作了
+            # 说明不是json格式,我们不做loads操作了
             return data, False
 
     @staticmethod

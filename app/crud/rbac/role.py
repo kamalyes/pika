@@ -60,12 +60,12 @@ class RoleDao:
                         .where(RoleModel.id == id).values(**request.__dict__, operator=operator)
                     await session.execute(update_role_info_sql)
         except ValueError as err:
-            err_msg = f"更新/写入失败，错误原因：{err}"
+            err_msg = f"更新/写入失败,错误原因：{err}"
             cls.__log__.error(err_msg)
             raise SystemException(detail=err_msg)
 
     @classmethod
-    async def delete(cls, id: int):
+    async def delete(cls, id: str):
         try:
             async with async_db_session_generator() as session:
                 async with session.begin():
@@ -74,7 +74,7 @@ class RoleDao:
                     query_result_ = await session.execute(query_us_role_sql)
                     users = query_result_.scalars().first()
                     if users:
-                        raise ValueError('有用户关联了当前角色，不允许删除!')
+                        raise ValueError('有用户关联了当前角色,不允许删除!')
                     del_role_sql = delete(RoleModel).where(RoleModel.id == id)
                     await session.execute(del_role_sql)
         except Exception as e:

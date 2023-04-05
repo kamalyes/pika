@@ -1,22 +1,37 @@
+# -*- coding:utf-8 -*-
+# !/usr/bin/env python 3.9.11
+"""
+@File    :  api_test_report.py
+@Time    :  2022/7/7 15:21 PM
+@Author  :  YuYanQing
+@Version :  1.0
+@Contact :  mryu168@163.com
+@License :  (C)Copyright 2022-2026
+@Desc    :  None
+"""
 from datetime import datetime
-
+from uuid import uuid4
 from sqlalchemy import INT, Column, DATETIME, String, BOOLEAN
 from sqlalchemy.dialects.mysql import SMALLINT
-
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.core.handler.sqlbin_uuid import BinaryUUID
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models import Base
+
 
 
 class ApiTestReportModel(Base):
     __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_test_report'
     __table_args__ = {"comment": "测试报告表"}
-    id = Column(INT, primary_key=True)
+    id = Column(BinaryUUID,
+                default=uuid4, primary_key=True)
     executor = Column(String(ByteSizeEnum.LENGTH_16),
                       server_default="0", index=True, comment="执行人 0则为CPU")
-    env = Column(INT, nullable=False, comment="环境")
+    env = Column(BinaryUUID,
+                 default=uuid4, nullable=False, comment="环境")
     cost = Column(String(ByteSizeEnum.LENGTH_08), comment="花费时间")
-    plan_id = Column(INT, index=True, nullable=True, comment="测试集合id，预留字段")
+    plan_id = Column(BinaryUUID,
+                     default=uuid4, index=True, nullable=True, comment="测试集合id,预留字段")
     start_date = Column(DATETIME, nullable=False, comment="开始时间")
     finished_date = Column(DATETIME, comment="结束时间")
     success_count = Column(INT, nullable=False, default=0, comment="成功数量")
@@ -28,13 +43,12 @@ class ApiTestReportModel(Base):
                     index=True)
     mode = Column(SMALLINT, default=0,
                   comment="case执行模式 0: 普通, 1: 测试集, 2: pipeline, 3: 其他")
-
     delete_flag = Column(BOOLEAN, server_default="0",
-                         comment="删除标识 1：已删除，0：未删除")
+                         comment="删除标识 1：已删除,0：未删除")
 
-    def __init__(self, executor: int, env: int, success_count: int = 0, failed_count: int = 0,
+    def __init__(self, executor: str, env: str, success_count: int = 0, failed_count: int = 0,
                  error_count: int = 0, skipped_count: int = 0, status: int = 0, mode: int = 0,
-                 plan_id: int = 0, finished_date: datetime = None, cost=None):
+                 plan_id: str = None, finished_date: datetime = None, cost=None):
         self.executor = executor
         self.env = env
         self.start_date = datetime.now()

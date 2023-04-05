@@ -20,6 +20,7 @@ from fastapi import status, Response, Request
 from fastapi.encoders import jsonable_encoder
 from starlette.background import BackgroundTask
 from starlette.responses import JSONResponse, FileResponse
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 
 
 class PikaJsonEncoder(JSONEncoder):
@@ -28,7 +29,7 @@ class PikaJsonEncoder(JSONEncoder):
         if isinstance(o, set):
             return list(o)
         if isinstance(o, datetime):
-            return o.strftime("%Y-%m-%d %H:%M:%S")
+            return o.strftime(PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS)
         if isinstance(o, Decimal):
             return str(o)
         if isinstance(o, bytes):
@@ -37,8 +38,6 @@ class PikaJsonEncoder(JSONEncoder):
 
 
 class PikaResponse:
-    def __init__(self):
-        pass
 
     @staticmethod
     def model_to_dict(obj, *ignore: str):
@@ -60,7 +59,8 @@ class PikaResponse:
                 continue
             val = getattr(obj, c.name)
             if isinstance(val, datetime):
-                result[c.name] = val.strftime("%Y-%m-%d %H:%M:%S")
+                result[c.name] = val.strftime(
+                    PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS)
             else:
                 result[c.name] = val
         return result
@@ -80,7 +80,7 @@ class PikaResponse:
             if isinstance(o, set):
                 ans[k] = list(o)
             elif isinstance(o, datetime):
-                ans[k] = o.strftime("%Y-%m-%d %H:%M:%S")
+                ans[k] = o.strftime(PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS)
             elif isinstance(o, Decimal):
                 ans[k] = str(o)
             elif isinstance(o, bytes):
@@ -114,7 +114,8 @@ class PikaResponse:
     @staticmethod
     def encode_json(data: Any, *exclude: str):
         return jsonable_encoder(data, exclude=exclude, custom_encoder={
-            datetime: lambda x: x.strftime("%Y-%m-%d %H:%M:%S")
+            datetime: lambda x: x.strftime(
+                PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS)
         })
 
     @staticmethod
@@ -187,7 +188,7 @@ class PikaResponse:
             *,
             code: Union[int, str] = status.HTTP_201_CREATED,
             status_code: Union[int, str] = status.HTTP_201_CREATED,
-            detail: str = "",
+            detail: str = None,
     ) -> Response:
         """
         自定义返回值

@@ -10,27 +10,26 @@
 @Desc    :  None
 """
 from typing import Optional
+from fastapi import Body
 
 from pydantic import BaseModel, validator
 
-from app.schema.base import PikaBaseModel
+from app.schema.base import BaseOnlyIdSchema, PikaBaseModel
 
 
-class OnlineSqlSchema(BaseModel):
-    id: Optional[int] = None
+class OnlineSqlSchema(BaseOnlyIdSchema):
     sql: Optional[str]
 
     # noinspection PyMethodParameters
-    @validator("sql", 'id')
+    @validator("sql")
     def name_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)
 
 
-class OnlineRedisSchema(BaseModel):
-    id: Optional[int] = None
+class OnlineRedisSchema(BaseOnlyIdSchema):
     command: Optional[str]
 
     # noinspection PyMethodParameters
-    @validator('id', 'command')
+    @validator('command')
     def name_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)

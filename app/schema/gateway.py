@@ -9,17 +9,16 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from pydantic import validator, BaseModel
+from pydantic import validator
 
 from app.exceptions.business.ParamsException import VariablesNullError
-from app.schema.base import PikaBaseModel
+from app.schema.base import BaseOnlyIdSchema, PikaBaseModel
 
 
-class PikaGatewaySchema(BaseModel):
-    id: int = 0
-    env: int = None
-    name: str = ''
-    address: str = ''
+class PikaGatewaySchema(BaseOnlyIdSchema):
+    env: str = None
+    name: str = None
+    address: str = None
 
     # noinspection PyMethodParameters
     @validator("env", 'name')

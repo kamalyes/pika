@@ -25,7 +25,7 @@ from app.schema.constructor import ConstructorSchema, ConstructorIndexSchema
 @PikaMdWrapper(ConstructorModel)
 class ConstructorDao(PikaWrapper):
     @classmethod
-    async def list_constructor(cls, case_id: int) -> List[ConstructorModel]:
+    async def list_constructor(cls, case_id: str) -> List[ConstructorModel]:
         """
         根据用例id获取数据构造器列表（包括前后置条件）
         Args:
@@ -59,7 +59,7 @@ class ConstructorDao(PikaWrapper):
                     )
                     result = await session.execute(sql)
                     if result.scalars().first() is not None:
-                        raise KeyExistException(f"{data.name}已存在")
+                        raise KeyExistException(detail=f"{data.name}已存在")
                     constructor = ConstructorModel(
                         **data.dict(), operator=operator)
                     constructor.index = await constructor.get_index(session, data.case_id)
@@ -87,14 +87,14 @@ class ConstructorDao(PikaWrapper):
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
-                        raise KeyUndefinedException(f"{data.name}不存在")
+                        raise KeyUndefinedException(detail=f"{data.name}不存在")
                     cls.update_model(query, data, operator)
         except Exception as e:
             cls.__log__.error(f"编辑前后置条件: {data.name}失败, {e}")
             raise SystemException(detail=f"编辑前后置条件失败, {e}")
 
     @classmethod
-    async def delete_constructor(cls, id: int, operator: str) -> None:
+    async def delete_constructor(cls, id: str, operator: str) -> None:
         """
         删除前后置条件
         Args:
@@ -112,7 +112,7 @@ class ConstructorDao(PikaWrapper):
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
-                        raise KeyUndefinedException(f"前后置条件{id}不存在")
+                        raise KeyUndefinedException(detail=f"前后置条件{id}不存在")
                     cls.delete_model(query, operator)
         except Exception as e:
             cls.__log__.error(f"删除前后置条件: {id}失败, {e}")
@@ -165,7 +165,7 @@ class ConstructorDao(PikaWrapper):
                 for k, v in temp.items():
                     result.append(
                         {
-                            "key": f"caseId_{k}",
+                            "key": f"case_id_{k}",
                             "disabled": True,
                             "title": testcase_info[k].name,
                             "children": [
@@ -213,7 +213,7 @@ class ConstructorDao(PikaWrapper):
         async with async_session() as session:
             # 此处存放case_id => 前置条件的映射
             constructors = defaultdict(list)
-            # 根据传入的前后置条件类型，找出所有前置条件, 类型一致，共享开关打开，并未被删除
+            # 根据传入的前后置条件类型,找出所有前置条件, 类型一致,共享开关打开,并未被删除
             query = await session.execute(
                 select(ConstructorModel).where(
                     ConstructorModel.suffix == suffix,
@@ -229,20 +229,20 @@ class ConstructorDao(PikaWrapper):
                         "title": q.name,
                         "value": f"constructor_{q.id}",
                         "isLeaf": True,
-                        # 这里是为了拿到具体的代码，因为树一般只有name和id，我们这还需要其他数据
+                        # 这里是为了拿到具体的代码,因为树一般只有name和id,我们这还需要其他数据
                         "constructor_json": q.constructor_json,
                     }
                 )
             if len(constructors.keys()) == 0:
                 return []
-            # 二次查询，查出有前置条件的case
+            # 二次查询,查出有前置条件的case
             query = await session.execute(
                 select(ApiTestCaseModel).where(ApiTestCaseModel.id.in_(
                     constructors.keys()), ApiTestCaseModel.delete_flag == 0)
             )
-            # 构造树，要知道children已经构建好了，就在constructors里面
+            # 构造树,要知道children已经构建好了,就在constructors里面
             for q in query.scalars().all():
-                # 把用例id放入cs_list，这里就不用原生join了
-                ans.append({"title": q.name, "key": f"caseId_{q.id}",
+                # 把用例id放入cs_list,这里就不用原生join了
+                ans.append({"title": q.name, "key": f"case_id_{q.id}",
                            "disabled": True, "children": constructors[q.id]})
         return ans

@@ -69,7 +69,7 @@ async def update_test_plan(form: ApiTestPlanSchema,
 
 
 @router.get("/delete", summary="删除定时任务&测试计划")
-async def delete_test_plan(id: int, user_info=Depends(Permission(RoleEnum.MANAGER)),
+async def delete_test_plan(id: str, user_info=Depends(Permission(RoleEnum.MANAGER)),
                            session=Depends(async_db_session_iterator)):
     try:
         await ApiTestPlanDao.delete_record_by_id(session=session, operator=user_info['emp_no'], value=id)
@@ -83,7 +83,7 @@ async def delete_test_plan(id: int, user_info=Depends(Permission(RoleEnum.MANAGE
 
 
 @router.get("/switch", summary="暂停或恢复测试计划")
-async def switch_test_plan(id: int, status: bool, user_info=Depends(Permission(RoleEnum.MANAGER))):
+async def switch_test_plan(id: str, status: bool, user_info=Depends(Permission(RoleEnum.MANAGER))):
     try:
         Scheduler.pause_resume_test_plan(id, status)
         return PikaResponse.success()
@@ -92,16 +92,16 @@ async def switch_test_plan(id: int, status: bool, user_info=Depends(Permission(R
 
 
 @router.get("/execute", summary="执行测试计划")
-async def run_test_plan(id: int, user_info=Depends(Permission(RoleEnum.MANAGER))):
+async def run_test_plan(id: str, user_info=Depends(Permission(RoleEnum.MANAGER))):
     try:
         asyncio.create_task(Executor.run_test_plan(id, user_info['emp_no']))
-        return PikaResponse.success("开始执行，请耐心等待")
+        return PikaResponse.success("开始执行,请耐心等待")
     except Exception as e:
         return PikaResponse.failed(detail=str(e))
 
 
 @router.get("/follow", summary="关注测试计划")
-async def follow_test_plan(id: int, user_info=Depends(Permission(RoleEnum.MANAGER))):
+async def follow_test_plan(id: str, user_info=Depends(Permission(RoleEnum.MANAGER))):
     try:
         await ApiTestPlanDao.follow_test_plan(id, user_info['emp_no'])
         return PikaResponse.success(message="关注成功")
@@ -110,7 +110,7 @@ async def follow_test_plan(id: int, user_info=Depends(Permission(RoleEnum.MANAGE
 
 
 @router.get("/unfollow", summary="取消关注测试计划")
-async def unfollow_test_plan(id: int, user_info=Depends(Permission(RoleEnum.MANAGER))):
+async def unfollow_test_plan(id: str, user_info=Depends(Permission(RoleEnum.MANAGER))):
     try:
         await ApiTestPlanDao.unfollow_test_plan(id, user_info['emp_no'])
         return PikaResponse.success(message="取关成功")

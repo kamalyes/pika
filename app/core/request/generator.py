@@ -7,7 +7,7 @@
 @Version :  1.0
 @Contact :  mryu168@163.com
 @License :  (C)Copyright 2022-2026
-@Desc    :  case生成器，根据RequestInfoSchema数组生成
+@Desc    :  case生成器,根据RequestInfoSchema数组生成
 """
 
 import json
@@ -114,7 +114,7 @@ class CaseGenerator(object):
         return constructors
 
     @staticmethod
-    def generate_case(directory_id: int, name: str, last: RequestInfoSchema) -> TestCaseSchema:
+    def generate_case(directory_id: str, name: str, last: RequestInfoSchema) -> TestCaseSchema:
         """
         生成用例
         Args:
@@ -143,7 +143,7 @@ class CaseGenerator(object):
     @staticmethod
     def extract_field(requests: List[RequestInfoSchema]) -> List[str]:
         """
-        遍历接口，并提取其中的变量
+        遍历接口,并提取其中的变量
         Args:
             requests:
 
@@ -220,7 +220,7 @@ class CaseGenerator(object):
                 CaseGenerator.dfs(v, c_path, ans, headers)
         else:
             if not headers or not CaseGenerator.ignore(path):
-                # 如果是bool值，需要特殊处理一下，因为Python get False/True会变成get 0 1
+                # 如果是bool值,需要特殊处理一下,因为Python get False/True会变成get 0 1
                 if body is not None:
                     if isinstance(body, bool):
                         ans[str(body)].append(path)
@@ -228,7 +228,7 @@ class CaseGenerator(object):
                         ans[body].append(path)
 
     @staticmethod
-    def analysis_body(request: RequestInfoSchema, ans: dict, var_name: str = ""):
+    def analysis_body(request: RequestInfoSchema, ans: dict, var_name: str = None):
         """
         解析body
         Args:
@@ -244,13 +244,13 @@ class CaseGenerator(object):
                 body = json.loads(request.response_content)
                 CaseGenerator.dfs(body, var_name, ans)
             except JSONDecodeError:
-                # 可能body不是JSON，跳过
+                # 可能body不是JSON,跳过
                 pass
             except Exception as e:
-                raise GenerateException(f"解析接口body变量出错: {e}")
+                raise GenerateException(detail=f"解析接口body变量出错: {e}")
 
     @staticmethod
-    def analysis_headers(request: RequestInfoSchema, ans: dict, var_name: str = ""):
+    def analysis_headers(request: RequestInfoSchema, ans: dict, var_name: str = None):
         """
         解析headers
         Args:
@@ -264,7 +264,7 @@ class CaseGenerator(object):
         try:
             CaseGenerator.dfs(request.response_headers, var_name, ans, True)
         except Exception as e:
-            raise GenerateException(f"解析接口headers变量出错: {e}")
+            raise GenerateException(detail=f"解析接口headers变量出错: {e}")
 
     @staticmethod
     def replace_headers(request: RequestInfoSchema, ans: dict, replaced: list):
@@ -353,7 +353,7 @@ class CaseGenerator(object):
     @staticmethod
     def replace_url(request: RequestInfoSchema, ans: dict, replaced: list):
         """
-        拆解url，将url里面的路由path和query参数
+        拆解url,将url里面的路由path和query参数
         Args:
             request:
             ans:

@@ -12,7 +12,7 @@
 from sqlalchemy import String, Column, UniqueConstraint
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
 
 units = (
@@ -26,7 +26,7 @@ class OssFileModel(LargeBaseModel):
         UniqueConstraint('file_path'),
         {"comment": "oss文件映射表"}
     )
-    # 因为没有目录的概念，都是目录+文件名
+    # 因为没有目录的概念,都是目录+文件名
     file_path = Column(String(ByteSizeEnum.LENGTH_64), nullable=False, index=True, comment="文件路径")
     view_url = Column(String(ByteSizeEnum.LENGTH_256), nullable=False, comment="文件预览url")
     file_size = Column(String(ByteSizeEnum.LENGTH_16), comment="文件大小")

@@ -15,8 +15,9 @@ import os
 from datetime import datetime
 from functools import wraps
 from typing import Coroutine
-
+from custard.time import Moment
 from redlock import RedLock, RedLockError
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 
 from config import PikaAppConfig
 
@@ -33,17 +34,19 @@ class SingletonDecorator:
 
 
 def case_log(func):
+    format_ytdhms = Moment.get_now_time(
+        PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS)
     if asyncio.iscoroutine(func):
         @wraps(func)
         async def wrapper(*args, **kw):
             self = args[0]
             doc = func.__doc__
             self.logger.o_append(
-                "[{}]: 步骤开始 -> {}".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                "[{}]: 步骤开始 -> {}".format(format_ytdhms,
                                           doc.strip() if doc else func.__name__, get_str(args, kw)))
             returns = await func(*args, **kw)
             self.logger.o_append(
-                "[{}]: 步骤结束 -> {} {}".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                "[{}]: 步骤结束 -> {} {}".format(format_ytdhms,
                                              doc.strip() if doc else func.__name__,
                                              get_returns(returns)))
             return returns
@@ -53,17 +56,17 @@ def case_log(func):
             self = args[0]
             doc = func.__doc__
             self.logger.o_append(
-                "[{}]: 步骤开始 -> {}".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                "[{}]: 步骤开始 -> {}".format(format_ytdhms,
                                           doc.strip() if doc else func.__name__, get_str(args, kw)))
             returns = func(*args, **kw)
             if not isinstance(returns, Coroutine):
                 self.logger.o_append(
-                    "[{}]: 步骤结束 -> {} {}".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    "[{}]: 步骤结束 -> {} {}".format(format_ytdhms,
                                                  doc.strip() if doc else func.__name__,
                                                  get_returns(returns)))
             else:
                 self.logger.o_append(
-                    "[{}]: 步骤结束 -> {}".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    "[{}]: 步骤结束 -> {}".format(format_ytdhms,
                                               doc.strip() if doc else func.__name__))
             return returns
     return wrapper
@@ -71,7 +74,7 @@ def case_log(func):
 
 def get_str(args, kwargs):
     result = []
-    # 这里从1索引开始，是因为args[0]是self, 也就注定了case_log只能在Executor方法下使用
+    # 这里从1索引开始,是因为args[0]是self, 也就注定了case_log只能在Executor方法下使用
     for i, a in enumerate(args[1:], start=1):
         if callable(a):
             result.append(a.__doc__ if a.__doc__ else a.__name__)
@@ -97,9 +100,9 @@ def get_returns(obj):
 
 def lock(key):
     """
-    redis分布式锁，基于redlock
+    redis分布式锁,基于redlock
     Args:
-        key: 唯一key，确保所有任务一致，但不与其他任务冲突
+        key: 唯一key,确保所有任务一致,但不与其他任务冲突
 
     Returns:
 
@@ -115,7 +118,7 @@ def lock(key):
                              ):
                     return await func(*args, **kwargs)
             except RedLockError:
-                print(f"进程: {os.getpid()}获取任务失败, 不用担心，还有其他哥们给你执行了")
+                print(f"进程: {os.getpid()}获取任务失败, 不用担心,还有其他哥们给你执行了")
 
         return wrapper
 

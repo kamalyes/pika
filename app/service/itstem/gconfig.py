@@ -29,7 +29,7 @@ async def insert_gconfig(data: GConfigSchema, user_info=Depends(Permission(RoleE
 
 
 @router.delete("/gconfig/delete", summary="删除全局配置")
-async def delete_gconfig(id: int, user_info=Depends(Permission(RoleEnum.ADMIN)),
+async def delete_gconfig(id: str, user_info=Depends(Permission(RoleEnum.ADMIN)),
                          session=Depends(async_db_session_iterator)):
     await GConfigDao.delete_record_by_id(session, user_info['emp_no'], id, log=True)
     return PikaResponse.success()
@@ -43,7 +43,7 @@ async def update_gconfig(data: GConfigSchema, user_info=Depends(Permission(RoleE
 
 @router.get("/gconfig/list", summary="查询全局配置列表")
 async def list_gconfig(paging: BaseOnlyPagingSchema = Depends(),
-                       env=None, key: str = "",
+                       env=None, key: str = None,
                        user_info=Depends(Permission())):
     data, total = await GConfigDao.list_with_pagination(paging, env=env, key=key)
     return PikaResponse.success_with_size(data=data, total=total)

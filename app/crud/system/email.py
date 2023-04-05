@@ -18,7 +18,7 @@ from app.core.handler.exceres import ValidException
 from app.core.handler.logger import PikaLogger
 from app.core.notice.email import EmailManger
 from app.enums.RedisEnum import RedisKeyEnum
-from app.enums.SysvarEnum import ValidTimeEnum, PikaGlobalVarEnum
+from app.enums.SysVarEnum import ValidTimeEnum, PikaGlobalVarEnum
 from app.models import async_redis
 
 

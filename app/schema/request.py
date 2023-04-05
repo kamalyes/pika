@@ -10,26 +10,31 @@
 @Desc    :  translate mitmproxy request and response data
 """
 import json
+from fastapi import Body
 from typing import TypeVar, Optional
 
 from loguru import logger
 from pydantic import BaseModel
 
 from app.core.handler.exceres import SystemException
+from app.enums.ByteSizeEnum import ByteSizeEnum
 
 body = TypeVar("body", bytes, str)
 
 
 class RequestInfoSchema(BaseModel):
-    url: Optional[str]
-    body: Optional[str]
-    request_method: Optional[str]
-    request_headers: Optional[dict]
-    response_headers: Optional[dict]
-    cookies: Optional[dict]
-    request_cookies: Optional[dict]
-    response_content: Optional[str]
-    status_code: Optional[int]
+    url: Optional[str] = Body(
+        None, name='url', max_length=ByteSizeEnum.LENGTH_256)
+    body: Optional[str] = Body(
+        None, name='body', max_length=ByteSizeEnum.LENGTH_2W)
+    request_method: Optional[str] = Body(
+        None, name='请求方式', max_length=ByteSizeEnum.LENGTH_12)
+    request_headers: Optional[dict] = Body(None, name='请求头部信息')
+    response_headers: Optional[dict] = Body(None, name='响应头部信息')
+    cookies: Optional[dict] = Body(None, name='响应Cookies')
+    request_cookies: Optional[dict] = Body(None, name='请求Cookies')
+    response_content: Optional[str] = Body(None, name='响应Content')
+    status_code: Optional[int] = Body(None, name='状态码')
 
     def __init__(self, flow=None, **kwargs):
         if flow:

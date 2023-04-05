@@ -31,7 +31,7 @@ class ProjectDao(PikaWrapper):
 
     @classmethod
     async def list_project(cls, operator: str, operator_identity: int, paging,
-                           name: str = None) -> (List[ProjectModel], int):
+                           name: str = None) -> (List[ProjectModel]):
         """
         查询/获取项目列表
         Args:
@@ -91,7 +91,7 @@ class ProjectDao(PikaWrapper):
         return list(ans) if len(ans) > 0 else None
 
     @classmethod
-    async def is_project_admin(cls, session, project_id: int, operator: str):
+    async def is_project_admin(cls, session, project_id: str, operator: str):
         query = await session.execute(
             select(ProjectModel.owner).where(ProjectModel.id == project_id))
         return query.scalars().first() == operator
@@ -113,7 +113,7 @@ class ProjectDao(PikaWrapper):
                 session.add(pr)
 
     @classmethod
-    async def update_avatar(cls, project_id: int, operator: str, operator_identity: int,
+    async def update_avatar(cls, project_id: str, operator: str, operator_identity: int,
                             file_url: [str, int]):
         try:
             async with async_session() as session:
@@ -135,10 +135,10 @@ class ProjectDao(PikaWrapper):
             raise SystemException(detail=e)
 
     @classmethod
-    async def update_project(cls, id: int, operator, operator_identity: int, name: str, app: str,
-                             owner: int,
+    async def update_project(cls, id: str, operator, operator_identity: int, name: str, app: str,
+                             owner: str,
                              private: bool, description: str,
-                             dingtalk_url: str = '', qy_wx_url: str = '') -> None:
+                             dingtalk_url: str = None, qy_wx_url: str = None) -> None:
         """
         修改项目
         Args:
@@ -182,7 +182,7 @@ class ProjectDao(PikaWrapper):
             raise SystemException(detail=f"编辑项目: {name}失败, {e}")
 
     @classmethod
-    async def query_project(cls, project_id: int) -> (List[ProjectModel], List[ProjectRoleModel]):
+    async def query_project(cls, project_id: str) -> (List[ProjectModel], List[ProjectRoleModel]):
         try:
             async with async_session() as session:
                 query = await session.execute(
@@ -215,13 +215,13 @@ class ProjectDao(PikaWrapper):
                     ProjectModel.delete_flag == 0)
                 projects = await session.execute(project_sql)
                 project_list = []
-                # 将数据放入列表，把owner等于该用户的放入列表
+                # 将数据放入列表,把owner等于该用户的放入列表
                 for r in projects.scalars().all():
                     project_list.append(r.id)
                     if r.owner == emp_no:
                         ans.add(r.id)
-                # 接着查询项目角色表有该用户的角色，把角色的项目id放入列表
-                # 由于是set，所以不会重复
+                # 接着查询项目角色表有该用户的角色,把角色的项目id放入列表
+                # 由于是set,所以不会重复
                 query = await session.execute(
                     select(ProjectRoleModel).where(ProjectRoleModel.delete_flag == 0,
                                                    ProjectRoleModel.member_no == emp_no))
@@ -234,7 +234,7 @@ class ProjectDao(PikaWrapper):
 class ProjectRoleDao(PikaWrapper):
 
     @classmethod
-    async def list_project_by_user(cls, emp_no: str) -> List[int]:
+    async def list_project_by_user(cls, emp_no: str) -> List[str]:
         """
         通过emp_no获取项目列表
         Args:
@@ -270,7 +270,7 @@ class ProjectRoleDao(PikaWrapper):
             ProjectRoleModel.project_id)
 
     @classmethod
-    async def list_role(cls, project_id: int) -> List[ProjectRoleModel]:
+    async def list_role(cls, project_id: str) -> List[ProjectRoleModel]:
         try:
             async with async_session() as session:
                 query = await session.execute(
@@ -279,10 +279,10 @@ class ProjectRoleDao(PikaWrapper):
                 return query.scalars().all()
         except Exception as e:
             cls.__log__.error(f"查询项目: {project_id}角色列表失败, {e}")
-            raise SystemException(detail=f"获取项目角色列表失败")
+            raise SystemException(detail="获取项目角色列表失败")
 
     @classmethod
-    async def judge_permission(cls, session: AsyncSession, project_id: int, emp_no: str,
+    async def judge_permission(cls, session: AsyncSession, project_id: str, emp_no: str,
                                project_role: int,
                                project_admin: bool) -> None:
         """
@@ -310,7 +310,7 @@ class ProjectRoleDao(PikaWrapper):
                                                  ProjectRoleModel.delete_flag == 0))
             updater_role = query.scalars().first()
             if updater_role is None or updater_role.project_role == RoleEnum.MANAGER:
-                raise SystemException(detail="对不起，你没有权限")
+                raise SystemException(detail="对不起,你没有权限")
 
     @staticmethod
     async def access(operator: str, operator_identity: str, roles: List[ProjectRoleModel],
@@ -321,7 +321,7 @@ class ProjectRoleDao(PikaWrapper):
             raise AuthException(detail="没有权限访问项目")
 
     @classmethod
-    async def read_permission(cls, project_id: int, operator: str, operator_identity: str):
+    async def read_permission(cls, project_id: str, operator: str, operator_identity: str):
         """
         判断用户是否有读取项目的权限
         Args:
@@ -352,7 +352,7 @@ class ProjectRoleDao(PikaWrapper):
                     raise AuthException(detail="没有权限访问项目")
 
     @classmethod
-    async def has_permission(cls, project_id: int, project_role: int, operator: str,
+    async def has_permission(cls, project_id: str, project_role: int, operator: str,
                              operator_identity: int,
                              project_admin: bool = False, session: AsyncSession = None):
         """
@@ -413,7 +413,7 @@ class ProjectRoleDao(PikaWrapper):
             raise SystemException(detail=f"更新用户角色失败: {e}")
 
     @classmethod
-    async def delete_project_role(cls, prole_id: int, operator: str,
+    async def delete_project_role(cls, prole_id: str, operator: str,
                                   operator_identity: int) -> None:
         """
         删除用户角色

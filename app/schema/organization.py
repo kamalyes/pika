@@ -14,20 +14,22 @@ from typing import Optional
 from fastapi import Body
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.schema.base import BaseOnlyDescSchema, BaseQuerySchema, BaseQueryTypeSchema
+from app.schema.base import BaseIPdSchema, BaseQuerySchema, BaseQueryTypeSchema
 
 
-class OrganizationFormSchema(BaseOnlyDescSchema):
-    id: Optional[int] = Body(0, title="组织id")
+class OrganizationFormSchema(BaseIPdSchema):
     sort_id: Optional[int] = Body(0, title="排序id")
     name: Optional[str] = Body(None, title="用户组名称", max_length=ByteSizeEnum.LENGTH_255)
-    parent_id: Optional[int] = Body(0, title="父序号")
 
 
-class QueryOrganizationInSchema(BaseQuerySchema, BaseQueryTypeSchema, OrganizationFormSchema):
+class QueryOrganizationSchema(BaseQuerySchema, OrganizationFormSchema):
+  pass
+
+
+class QueryOrganizationInSchema(QueryOrganizationSchema, BaseQueryTypeSchema):
     pass
 
 
-class QueryOrganizationOutSchema(BaseQuerySchema, OrganizationFormSchema):
+class QueryOrganizationOutSchema(QueryOrganizationSchema):
     class Config:
         orm_mode = True

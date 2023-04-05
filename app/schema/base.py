@@ -21,14 +21,6 @@ from app.enums.ByteSizeEnum import ByteSizeEnum
 
 
 class PikaBaseModel(object):
-    @staticmethod
-    def not_empty(v):
-        if isinstance(v, str) and len(v.strip()) == 0:
-            raise ValidException(detail="不能为空")
-        if not isinstance(v, int):
-            if not v:
-                raise ValidException(detail="不能为空")
-        return v
 
     @staticmethod
     def check_time(time):
@@ -36,7 +28,7 @@ class PikaBaseModel(object):
             datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
             return time
         except Exception as e:
-            raise ValidException(detail='时间日期格式有误')
+            raise ValidException(detail=f'时间日期格式有误{e}')
 
     @property
     def parameters(self):
@@ -44,7 +36,33 @@ class PikaBaseModel(object):
 
 
 class BaseOnlyIdSchema(BaseModel):
-    id: Optional[int] = Body(0, title="id")
+    id: Optional[str] = Body(
+        None, title="id", max_length=ByteSizeEnum.LENGTH_32)
+
+
+class BaseOnlyParentIdSchema(BaseModel):
+    parent_id: Optional[str] = Body(
+        None, title="父id", max_length=ByteSizeEnum.LENGTH_32)
+
+
+class BaseOnlyProjectIdSchema(BaseModel):
+    project_id: Optional[str] = Body(
+        None, title="项目id", max_length=ByteSizeEnum.LENGTH_32)
+
+
+class BaseOnlyCaseIdSchema(BaseModel):
+    case_id: Optional[str] = Body(
+        None, title="case_id", max_length=ByteSizeEnum.LENGTH_32)
+
+
+class BaseOnlyIterateIdSchema(BaseModel):
+    iterate_id: Optional[str] = Body(
+        None, title="迭代id", max_length=ByteSizeEnum.LENGTH_32)
+
+
+class BaseOnlyDirectoryIdSchema(BaseModel):
+    directory_id: Optional[str] = Body(
+        None, title="所属目录id", max_length=ByteSizeEnum.LENGTH_32)
 
 
 class BaseOnlyNameSchema(BaseModel):
@@ -63,11 +81,11 @@ class BaseOnlyDescSchema(BaseModel):
 
 
 class BaseOnlyEnabledFlagSchema(BaseModel):
-    enabled_flag: Optional[bool] = Query(True, title="启用标识 1：启用，0：禁用")
+    enabled_flag: Optional[bool] = Query(True, title="启用标识 1:启用,0:禁用")
 
 
 class BaseOnlyDelSchema(BaseModel):
-    delete_flag: Optional[bool] = Query(True, title="删除标识 1：已删除，0：未删除")
+    delete_flag: Optional[bool] = Query(True, title="删除标识 1:已删除,0:未删除")
 
 
 class BaseOnlyEmpNoSchema(BaseModel):
@@ -75,7 +93,20 @@ class BaseOnlyEmpNoSchema(BaseModel):
         None, title="用户编码", max_length=ByteSizeEnum.LENGTH_16)
 
 
+class BaseOnlyUserNameSchema(BaseModel):
+    username: Optional[str] = Query(
+        None, title="用户名", max_length=ByteSizeEnum.LENGTH_16)
+
+
 class BaseLargeEditSchema(BaseOnlyIdSchema, BaseOnlyDescSchema, BaseOnlyEnabledFlagSchema):
+    pass
+
+
+class BaseIPdSchema(BaseOnlyIdSchema, BaseOnlyParentIdSchema, BaseOnlyDescSchema):
+    pass
+
+
+class BasePPdSchema(BaseOnlyProjectIdSchema, BaseOnlyParentIdSchema):
     pass
 
 
@@ -114,5 +145,5 @@ class BaseBatchDelIdsSchema(BaseOnlyIdsSchema):
 
 
 class BaseQueryTypeSchema(BaseModel):
-    query_type: Optional[str] = Form("0", title="查询方式：0：全部，1：条件查询",
+    query_type: Optional[str] = Form("0", title="查询方式:0:全部,1:条件查询",
                                      max_length=ByteSizeEnum.LENGTH_255)

@@ -9,13 +9,8 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from typing import Optional
-
-from fastapi import Body
-
-from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.schema.base import BaseOnlyDescSchema, BaseOnlyIdSchema
+from app.schema.base import BaseOnlyDescSchema, BaseOnlyIdSchema, BaseOnlyNameSchema
 
 
-class EnvironmentSchema(BaseOnlyIdSchema, BaseOnlyDescSchema):
-    name: Optional[str] = Body(..., max_length=ByteSizeEnum.LENGTH_50)
+class EnvironmentSchema(BaseOnlyIdSchema, BaseOnlyDescSchema, BaseOnlyNameSchema):
+  pass

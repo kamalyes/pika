@@ -53,7 +53,7 @@ class DepartmentDao(PikaWrapper):
         query_exists_parent_id = await session.execute(
             select(DepartmentModel).where(DepartmentModel.id == dept_id))
         exists_id = query_exists_parent_id.scalars().first()
-        if exists_id is None and dept_id != 0:
+        if exists_id is None and dept_id is not None:
             raise KeyUndefinedException(detail=f"部门id: {dept_id}不存在")
 
     @classmethod
@@ -71,7 +71,7 @@ class DepartmentDao(PikaWrapper):
             select(DepartmentModel).where(
                 and_(DepartmentModel.id == parent_id)))
         exists_parent_id = query_exists_parent_id.scalars().first()
-        if exists_parent_id is None and parent_id != 0:
+        if exists_parent_id is None and parent_id is not None:
             raise KeyUndefinedException(detail=f"部门父id: {parent_id}不存在")
 
     @classmethod
@@ -86,7 +86,7 @@ class DepartmentDao(PikaWrapper):
 
         """
         if name is None or len(name) < 3:
-            raise SystemException(detail="部门名称不能为空，或长度不能<3个字符")
+            raise SystemException(detail="部门名称不能为空,或长度不能<3个字符")
         query_exists_name = await session.execute(
             select(DepartmentModel).where(DepartmentModel.name == name))
         exists_name = query_exists_name.scalars().first()
@@ -104,7 +104,7 @@ class DepartmentDao(PikaWrapper):
         Returns:
 
         """
-        if dept_id == parent_id and dept_id != 0:
+        if dept_id == parent_id and dept_id is not None:
             raise SystemException(detail=f"部门id: {dept_id}与父节点{parent_id}相同")
 
     @classmethod

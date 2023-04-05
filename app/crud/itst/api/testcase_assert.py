@@ -24,7 +24,7 @@ from app.schema.api_testcase import TestCaseAssertsSchema
 class ApiTestCaseAssertsDao(PikaWrapper):
 
     @classmethod
-    async def list_test_case_asserts(cls, case_id: int) -> List[ApiTestCaseAssertsModel]:
+    async def list_test_case_asserts(cls, case_id: str) -> List[ApiTestCaseAssertsModel]:
         """
         通过用例id获取断言数据
         Args:
@@ -45,7 +45,7 @@ class ApiTestCaseAssertsDao(PikaWrapper):
             raise SystemException(detail="获取用例断言失败")
 
     @classmethod
-    async def async_list_test_case_asserts(cls, case_id: int):
+    async def async_list_test_case_asserts(cls, case_id: str):
         try:
             async with async_session() as session:
                 sql = select(ApiTestCaseAssertsModel).where(
@@ -116,7 +116,7 @@ class ApiTestCaseAssertsDao(PikaWrapper):
             raise SystemException(detail=f"编辑用例断言失败, {e}")
 
     @classmethod
-    async def delete_test_case_asserts(cls, id: int, operator: str) -> None:
+    async def delete_test_case_asserts(cls, id: str, operator: str) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():

@@ -6,14 +6,14 @@
 
 ### ☕ 关于平台
 
-Pika是一款专注于自动化建设的平台，采用`Python`+`FastApi`+`React`开发，目前还不能作为生产级别的工具，作者正在努力之中。
+Pika是一款专注于自动化建设的平台,采用`Python`+`FastApi`+`React`开发,目前还不能作为生产级别的工具,作者正在努力之中。
 
-一个从0开始写的测试平台(基于FastApi)，旨在总结自己最近几年的工作经验， 也顺便帮助大家进步。目前还在火热更新中，希望大家能够喜欢！ 话不多说，赶快开始体验吧！靓仔靓女们~
+一个从0开始写的测试平台(基于FastApi),旨在总结自己最近几年的工作经验, 也顺便帮助大家进步。目前还在火热更新中,希望大家能够喜欢！ 话不多说,赶快开始体验吧！靓仔靓女们~
 
 ### ⚽ 前端地址
 
 [🎁 前端项目地址](https://github.com/kamalyes/pikaWeb)
-[🍍 在线体验](https://114.132.233.15/)
+[🍍 在线体验](https://114.132.233.15:7777)
 
 ### 👏 Docker部署
 
@@ -26,7 +26,7 @@ git config --global i18n.commit.encoding utf-8
 git config --global i18n.logoutputencoding utf-8 
 export LESSCHARSET=utf-8
 ```
-2. 执行以下命令，安静等待启动即可
+2. 执行以下命令,安静等待启动即可
 ```bash
 CREATE DATABASE `pika` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci
 docker-compose --env-file ./conf/.env -f docker-compose.yml up -d
@@ -38,7 +38,7 @@ Reading table information for completion of table and column names
 You can turn off this feature to get a quicker startup with -A
 
 Database changed
-mysql> select host, user from user;  # 判断root是否存在一个，如果有两个先删除
+mysql> select host, user from user;  # 判断root是否存在一个,如果有两个先删除
 +-----------+------------------+
 | host      | user             |
 +-----------+------------------+
@@ -72,44 +72,44 @@ Query OK, 0 rows affected (0.01 sec)
 - [x] 🎃 mitmproxy(用例录制生成)
 - [x] 🌙 mockjs(mock服务)
 - [x] 🔒 Redis
-- [x] 🏐 Gunicorn(内含uvicorn，部署服务)
-- [x] 🎲 Nginx(反向代理，https配置等)
+- [x] 🏐 Gunicorn(内含uvicorn,部署服务)
+- [x] 🎲 Nginx(反向代理,https配置等)
 - [x] 💎 七牛云oss(用于文件上传时接口测试文件存储)
-- [x] 👟 asyncio(几乎全异步写法，值得参考)
-- [ ] ⛏ Grpc(支持Grpc请求，即将支持)
+- [x] 👟 asyncio(几乎全异步写法,值得参考)
+- [ ] ⛏ Grpc(支持Grpc请求,即将支持)
 - [x] ⚡ [custard](https://github.com/kamalyes/custard) 万能百宝箱(必须依赖)
 
 ### 😊 已有功能
 
-+ [x] 🔥 完善的用户登录/注册机制，提供第三方(github)登录
++ [x] 🔥 完善的用户登录/注册机制,提供第三方(github)登录
 
 - [x] 🀄 完善的项目管理机制
 
-* [x] 🚴 结合FastApi，利用asyncio让Python代码也可以起飞
+* [x] 🚴 结合FastApi,利用asyncio让Python代码也可以起飞
 
 - [x] 💎 完整的接口测试流程
 - [x] 📝 强大的数据构造器, 解决接口数据依赖问题
-- [x] 🎨 在线调试http请求，堪比网页版本postman
-- [x] 🍷 完善的全局变量机制，拒绝case中的死数据
+- [x] 🎨 在线调试http请求,堪比网页版本postman
+- [x] 🍷 完善的全局变量机制,拒绝case中的死数据
 - [x] 🚀 速度还挺快的
 - [x] 🐍 在线redis请求
 - [x] 🐎 测试计划/集合
-- [x] 🙈 在线数据库ide，数据库管理功能
+- [x] 🙈 在线数据库ide,数据库管理功能
 - [x] 📰 漂亮的邮件通知
 - [x] 😹 定时构建测试用例
 - [x] 🐧 精美的测试报告展示页面
 
 ## 🙋 待开发的功能
 
-- [ ] 💀 app管理功能，支持app的导入和导出
+- [ ] 💀 app管理功能,支持app的导入和导出
 
 * [ ] 😼 代码覆盖率增量/全量统计功能
 
 - [ ] 🐘 微服务化
-- [ ] 🐄 数据工厂，强大的造数功能
-- [ ] 🐸 用例支持har，jmx等格式导入
-- [ ] 👍 CI/CD，类pipeline功能
-- [ ] 🌼 推送功能，支持钉钉/企信推送
+- [ ] 🐄 数据工厂,强大的造数功能
+- [ ] 🐸 用例支持har,jmx等格式导入
+- [ ] 👍 CI/CD,类pipeline功能
+- [ ] 🌼 推送功能,支持钉钉/企信推送
 - [ ] 🌛 支持dubbo/grpc
 - [ ] 🐛 打通yapi
 - [ ] 🌽 等等等等
@@ -200,20 +200,20 @@ npm ERR! You can rerun the command with `--loglevel=verbose` to see the logs in 
 
 ### 💌 赞助
 
-如果您觉得这个项目对你`有所帮助`，帮忙点个star，让创作更有动力，谢谢！
+如果您觉得这个项目对你`有所帮助`,帮忙点个star,让创作更有动力,谢谢！
 
 ### ❓ 想法
 
-希望大家点个star⭐，感激不尽~也欢迎大家提出各种各样的问题。可以加我个人微信: `yyq501893067`，若有想法的也欢迎进行提交
+希望大家点个star⭐,感激不尽~也欢迎大家提出各种各样的问题。可以加我个人微信: `yyq501893067`,若有想法的也欢迎进行提交
 
 ### Git提交规范
 
 ```
-feat 适用场景：全是新增功能，在旧功能基础上做改动（包含新增，删除）
-fix 适用场景：修复bug，包含测试环境和生产环境
-refactor 适用场景：重构任何功能，重构前和重构后输入和输出需要完全不变，如果有变化，在改动的部分请使用`feat`
+feat 适用场景：全是新增功能,在旧功能基础上做改动（包含新增,删除）
+fix 适用场景：修复bug,包含测试环境和生产环境
+refactor 适用场景：重构任何功能,重构前和重构后输入和输出需要完全不变,如果有变化,在改动的部分请使用`feat`
 test 适用场景：增加单元测试时
-style 适用场景：修改代码格式，代码逻辑完全不变
+style 适用场景：修改代码格式,代码逻辑完全不变
 docs 适用场景：编写注释或者使用文档
 emoji	emoji代码	commit说明
 🎨 (调色板)	:art:	改进代码结构/代码格式

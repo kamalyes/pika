@@ -19,7 +19,7 @@ from app.exceptions.business.CaseException import CaseParametersException
 class RegexParser(Parser):
 
     @staticmethod
-    def parse(source: dict, expression: str = "", idx: str = None) -> Any:
+    def parse(source: dict, expression: str = None, idx: str = None) -> Any:
         try:
             source = source.get("response")
             if not source or not expression:

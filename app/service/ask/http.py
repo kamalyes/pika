@@ -51,7 +51,7 @@ async def http_request(cert: CertType):
 
 
 @router.get("/request/run", summary="执行用例")
-async def execute_case(env: int, case_id: int, user_info=Depends(Permission())):
+async def execute_case(env: str, case_id: str, user_info=Depends(Permission())):
     try:
         executor = Executor()
         test_data = await ApiTestCaseDataDao.list_testcase_data_by_env(env, case_id)
@@ -72,7 +72,7 @@ async def execute_case(env: int, case_id: int, user_info=Depends(Permission())):
 
 
 @router.get("/request/retry", summary="根据测试数据重新运行测试用例")
-async def re_run_case(env: int, case_id: int, data_id: int = 0, user_info=Depends(Permission())):
+async def re_run_case(env: str, case_id: str, data_id: str, user_info=Depends(Permission())):
     try:
         executor = Executor()
         params = dict()
@@ -87,7 +87,7 @@ async def re_run_case(env: int, case_id: int, data_id: int = 0, user_info=Depend
 
 
 @router.post("/request/run/async", summary="异步执行用例")
-async def execute_case(env: int, case_id: List[int], user_info=Depends(Permission())):
+async def execute_case(env: str, case_id: List[str], user_info=Depends(Permission())):
     data = dict()
     # s = time.perf_counter()
     await asyncio.gather(*(run_single(env, c, data) for c in case_id))
@@ -97,10 +97,9 @@ async def execute_case(env: int, case_id: List[int], user_info=Depends(Permissio
 
 
 @router.post("/request/run/sync", summary="同步执行用例")
-async def execute_case(env: int, case_id: List[int], user_info=Depends(Permission())):
+async def execute_case(env: str, case_id: List[str], user_info=Depends(Permission())):
     data = dict()
     task_id = uuid.uuid5(uuid.NAMESPACE_URL, "task")
-
     # s = time.perf_counter()
     for c in case_id:
         executor = Executor()
@@ -111,7 +110,7 @@ async def execute_case(env: int, case_id: List[int], user_info=Depends(Permissio
 
 
 @router.post("/request/run/multiple", summary="作为报告执行")
-async def execute_as_report(env: int, case_id: List[int], user_info=Depends(Permission())):
+async def execute_as_report(env: str, case_id: List[str], user_info=Depends(Permission())):
     report_id = await Executor.run_multiple(user_info['emp_no'], env, case_id)
     return PikaResponse.success(report_id)
     # task = asyncio.create_task(Executor.run_multiple(user_info['id'], env, case_id))
@@ -130,6 +129,6 @@ async def execute_as_report(env: int, case_id: List[int], user_info=Depends(Perm
 #     return PikaResponse.success(data=random_id, msg="操作已停止")
 
 
-async def run_single(env: int, case_id: int, data: Dict[int, tuple]):
+async def run_single(env: str, case_id: str, data: Dict[int, tuple]):
     executor = Executor()
     data[case_id] = await executor.run(env, case_id)

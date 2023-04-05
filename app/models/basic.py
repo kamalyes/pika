@@ -9,17 +9,20 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  公共基础字段
 """
-
-from sqlalchemy import INT, DATETIME, Column, String, BOOLEAN, text
-
+from uuid import uuid4
+from sqlalchemy import DATETIME, Column, String, BOOLEAN, text
 from app.enums.ByteSizeEnum import ByteSizeEnum
+from app.core.handler.sqlbin_uuid import BinaryUUID
 from app.models import Base
 
 
 class LargeBaseModel(Base):
-    id = Column(INT, primary_key=True, autoincrement=True, comment="id")
-    enabled_flag = Column(BOOLEAN, server_default="1", comment="启用标识 1：启用，0：禁用")
-    delete_flag = Column(BOOLEAN, server_default="0", comment="删除标识 1：已删除，0：未删除")
+    id = Column(BinaryUUID,
+                primary_key=True, default=uuid4, comment="id")
+    enabled_flag = Column(BOOLEAN, server_default="1",
+                          comment="启用标识 1：启用,0：禁用")
+    delete_flag = Column(BOOLEAN, server_default="0",
+                         comment="删除标识 1：已删除,0：未删除")
     create_emp_no = Column(String(ByteSizeEnum.LENGTH_16), comment="创建者emp_no")
     update_emp_no = Column(String(ByteSizeEnum.LENGTH_16), comment="修改者emp_no")
     create_date = Column(
@@ -51,7 +54,8 @@ class LargeBaseModel(Base):
 
 
 class NormBaseModel(Base):
-    id = Column(INT, primary_key=True, autoincrement=True, comment="id")
+    id = Column(BinaryUUID,
+                primary_key=True, default=uuid4, comment="id")
     description = Column(String(ByteSizeEnum.LENGTH_600), default=None, comment="备注信息")
     create_emp_no = Column(String(ByteSizeEnum.LENGTH_16), comment="创建者emp_no")
     update_emp_no = Column(String(ByteSizeEnum.LENGTH_16), comment="修改者emp_no")
@@ -101,7 +105,8 @@ class TimestampBaseModel(Base):
 
 
 class MinBaseModel(Base):
-    id = Column(INT, primary_key=True, autoincrement=True, comment="id")
+    id = Column(BinaryUUID,
+                primary_key=True, default=uuid4, comment="id")
     description = Column(String(ByteSizeEnum.LENGTH_600), default=None, comment="备注信息")
     operator = Column(String(ByteSizeEnum.LENGTH_16), comment="操作者emp_no")
     operator_date = Column(

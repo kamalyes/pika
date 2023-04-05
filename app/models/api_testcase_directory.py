@@ -10,22 +10,22 @@
 @Desc    :  None
 """
 from datetime import datetime
-
+from uuid import uuid4
 from sqlalchemy import Column, INT, String, UniqueConstraint
-
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
 from app.schema.api_testcase_directory import ApiTestCaseDirectorySchema
-
+from app.core.handler.sqlbin_uuid import BinaryUUID
 
 class ApiTestCaseDirectoryModel(LargeBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_testcase_directory'
     __table_args__ = (UniqueConstraint('project_id', 'name', 'parent'), {"comment": "用例目录表"})
-    name = Column(String(ByteSizeEnum.LENGTH_18), nullable=False, comment="目录名称")
-    id = Column(INT, primary_key=True, comment="用例id")
-    project_id = Column(INT, index=True, comment="项目id")
-    parent = Column(INT, comment="目录上级目录，如果没有则为None")
+    name = Column(String(ByteSizeEnum.LENGTH_50),
+                  nullable=False, comment="目录名称")
+    project_id = Column(BinaryUUID,
+                        default=uuid4, index=True, comment="项目id")
+    parent = Column(INT, comment="目录上级目录,如果没有则为None")
 
     def __init__(self, form: ApiTestCaseDirectorySchema, operator):
         super().__init__(operator=operator)

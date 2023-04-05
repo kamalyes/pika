@@ -13,15 +13,15 @@ from typing import Optional
 
 from fastapi import Body
 
-from app.schema.base import BaseQuerySchema, BaseQueryTypeSchema, BaseBatchDelIdsSchema, BaseLargeEditSchema
+from app.schema.base import BaseOnlyProjectIdSchema, BaseQuerySchema, BaseQueryTypeSchema, BaseBatchDelIdsSchema, BaseLargeEditSchema
 
 
-class MockGlobalSchema(BaseLargeEditSchema):
-    project_id: Optional[str] = Body('0', title="项目id")
+class MockGlobalSchema(BaseLargeEditSchema, BaseOnlyProjectIdSchema):
     url: Optional[str] = Body(None, title="url")
     method: Optional[str] = Body('GET', title="请求方式")
     headers: Optional[str] = Body(None, title='headers')
-    match_type: Optional[str] = Body("0", title="类型：0：default，1：mockjs，2：faker")
+    match_type: Optional[str] = Body(
+        "0", title="类型：0：default,1：mockjs,2：faker")
     content_type: Optional[str] = Body(None, title="content_type")
     response_templates: Optional[str] = Body(..., title="响应模版")
     status_code: Optional[str] = Body('200', title='http 响应状态码：200（默认）')

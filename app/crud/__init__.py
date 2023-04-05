@@ -15,6 +15,7 @@ import functools
 import json
 from datetime import datetime
 from typing import List, TypeVar, Callable, Any, Iterable
+import uuid
 
 from dictdiffer import diff
 from custard.time import Moment
@@ -70,9 +71,9 @@ class PikaMdWrapper:
 
 def db_connect(transaction: Transaction = False):
     """
-    装饰器，支持自动创建session，支持事务 自动获取session连接，简化model相关操作
+    装饰器,支持自动创建session,支持事务 自动获取session连接,简化model相关操作
     Args:
-        transaction: 是否开启事务，开启则会被session.begin包裹
+        transaction: 是否开启事务,开启则会被session.begin包裹
 
     Returns:
 
@@ -88,9 +89,9 @@ def db_connect(transaction: Transaction = False):
                 async with async_db_session_generator() as session_:
                     return await transaction(cls, *args, session=session_, **kwargs)
             except Exception as e:
-                # 这边调用cls本身的log参数，写入日志+抛出异常
+                # 这边调用cls本身的log参数,写入日志+抛出异常
                 cls.__log__.error(f"操作Model: {cls.__model__.__name__}失败: {e}")
-                raise DbException(f"操作数据库失败: {e}")
+                raise DbException(detail=f"操作数据库失败: {e}")
 
         return wrap
 
@@ -112,14 +113,14 @@ def db_connect(transaction: Transaction = False):
                     return await func(cls, *args, session=session_generator, **kwargs)
             except Exception as e:
                 cls.__log__.error(f"操作Model: {cls.__model__.__name__}失败: {e}")
-                raise DbException(f"操作数据库失败: {e}")
+                raise DbException(detail=f"操作数据库失败: {e}")
 
         return wrapper
 
     return decorator
 
 
-# Mapper单表类，类似mybatis-plus
+# Mapper单表类,类似mybatis-plus
 class PikaWrapper(object):
     __log__ = PikaLogger("LargeBaseModel")
     __model__ = LargeBaseModel
@@ -221,7 +222,7 @@ class PikaWrapper(object):
     @staticmethod
     def delete_model(dist, operator):
         """
-        删除数据，兼容老的deleted_at
+        删除数据,兼容老的deleted_at
         :param dist:
         :param operator:
         :return:
@@ -253,7 +254,7 @@ class PikaWrapper(object):
     @classmethod
     def where(cls, param: Any, sentence, condition: list):
         """
-        根据where语句的内容，决定是否生成对应的sql
+        根据where语句的内容,决定是否生成对应的sql
         Args:
             param:
             sentence:
@@ -277,7 +278,7 @@ class PikaWrapper(object):
     @classmethod
     def query_wrapper(cls, condition=None, **kwargs):
         """
-        包装查询条件，支持like, == 和自定义条件(condition)
+        包装查询条件,支持like, == 和自定义条件(condition)
         Args:
             condition:
             **kwargs:
@@ -291,14 +292,14 @@ class PikaWrapper(object):
         _sort = kwargs.pop("_sort", None)
         _select = kwargs.pop("_select", list())
         _join = kwargs.pop("_join", None)
-        # 遍历参数，当参数不为None的时候传递
+        # 遍历参数,当参数不为None的时候传递
         for k, v in kwargs.items():
             # 判断是否是like的情况
             like = isinstance(v, str) and (
                 v.startswith("%") or v.endswith("%"))
             if like and v == "%%":
                 continue
-            # 如果是like模式，则使用Model.字段.like 否则用 Model.字段 等于
+            # 如果是like模式,则使用Model.字段.like 否则用 Model.字段 等于
             cls.where(v,
                       getattr(cls.__model__, k).like(
                           v) if like else getattr(cls.__model__, k) == v,
@@ -372,8 +373,9 @@ class PikaWrapper(object):
                                    key=model.id, description=description))
             return now
         except Exception as e:
-            cls.__log__.exception(f"更新{cls.__model__.__name__}记录失败: \n{e}")
-            raise DbException(f"更新失败,\n{e}")
+            cls.__log__.Exception(
+                detail=f"更新{cls.__model__.__name__}记录失败: \n{e}")
+            raise DbException(detail=f"更新失败,\n{e}")
 
     @classmethod
     async def _inner_delete(cls, *, session, operator, value, key, log=False, description=None):
@@ -408,8 +410,9 @@ class PikaWrapper(object):
                                    description=description))
                 return original
         except Exception as e:
-            cls.__log__.exception(f"删除{cls.__model__.__name__}记录失败: \n{e}")
-            raise DbException(f"删除失败,\n{e}")
+            cls.__log__.Exception(
+                detail=f"删除{cls.__model__.__name__}记录失败: \n{e}")
+            raise DbException(detail=f"删除失败,\n{e}")
 
     @classmethod
     @RedisHelper.up_cache("dao")
@@ -440,12 +443,13 @@ class PikaWrapper(object):
             async with session.begin():
                 return await cls._inner_delete(**mode)
         except Exception as e:
-            cls.__log__.exception(f"删除{cls.__model__.__name__}记录失败: \n{e}")
-            raise DbException(f"删除失败,\n{e}")
+            cls.__log__.Exception(
+                detail=f"删除{cls.__model__.__name__}记录失败: \n{e}")
+            raise DbException(detail=f"删除失败,\n{e}")
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def delete_records(cls, session, operator, id_list: List[int], column="id", description=None,
+    async def delete_records(cls, session, operator, id_list: List[str], column="id", description=None,
                              log=True):
         try:
             for id_ in id_list:
@@ -465,8 +469,8 @@ class PikaWrapper(object):
                                        changed={},
                                        key=id_, description=description))
         except Exception as e:
-            cls.__log__.exception(f"删除{cls.__model__}记录失败, error: {e}")
-            raise DbException(f"删除记录失败")
+            cls.__log__.Exception(detail=f"删除{cls.__model__}记录失败, error: {e}")
+            raise DbException(detail="删除记录失败")
 
     @classmethod
     async def insert_log(cls, session, operator, mode, before=None, changed=None, key=None, description=None):

@@ -20,7 +20,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from app.core.handler.exceres import ThirdException, ValidException
 from app.enums.SysCodeEnum import ExcCodeEnum
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from config import PikaAppConfig
 
 
@@ -42,7 +42,7 @@ class EmailManger(object):
     @staticmethod
     def register_succeed_template(
             username, emp_no, email, valid_time, send_time=Moment.get_now_time(
-                "%Y-%m-%d %H:%M:%S")
+                PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS)
     ):
         """
         注册成功邮件模板
@@ -61,7 +61,7 @@ class EmailManger(object):
             "emp_no": emp_no,
             "email": email,
             "valid_time": valid_time,
-            "agreement": PikaGlobalVarEnum.AGREE_MENT,
+            "agreement": PikaGlobalVarEnum.AGREEMENT,
             "form": PikaGlobalVarEnum.BIG_HUMP_APP_NAME,
             "send_time": send_time,
             "root_email": PikaGlobalVarEnum.PL_EMAIL,
@@ -70,7 +70,7 @@ class EmailManger(object):
 
     @staticmethod
     def exc_events_template(username, emp_no, events_key: int,
-                            send_time=Moment.get_now_time("%Y-%m-%d %H:%M:%S")):
+                            send_time=Moment.get_now_time(PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS)):
         """
         异常操作事件邮件模板
         Args:
@@ -87,7 +87,7 @@ class EmailManger(object):
                 '系统检测到你的账号<span style="color:red;font-size: 26px">密码泄露</span>我们建议你尽快修改！'
             )
         elif events_key == 1:
-            event_content = '系统检测到你的账号<span style="color:red;font-size: 26px">正在使用爬虫伪造/Mock数据</span>已强制封禁24小时，也可以联系我们！'
+            event_content = '系统检测到你的账号<span style="color:red;font-size: 26px">正在使用爬虫伪造/Mock数据</span>已强制封禁24小时,也可以联系我们！'
         elif events_key == 2:
             event_content = (
                 '系统检测到你的账号<span color:#f60;font-size: 26px">密码即将过期</span>我们建议你尽快修改！'
@@ -98,7 +98,7 @@ class EmailManger(object):
             "username": username,
             "emp_no": emp_no,
             "event_content": event_content,
-            "agreement": PikaGlobalVarEnum.AGREE_MENT,
+            "agreement": PikaGlobalVarEnum.AGREEMENT,
             "form": PikaGlobalVarEnum.BIG_HUMP_APP_NAME,
             "send_time": send_time,
         }
@@ -106,7 +106,7 @@ class EmailManger(object):
 
     @staticmethod
     def get_reg_code_template(email, auth_code, valid_time,
-                              redis_time=Moment.get_now_time("%Y-%m-%d %H:%M:%S")):
+                              redis_time=Moment.get_now_time(PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS)):
         """
         获取验证码模板
         Args:
@@ -121,7 +121,7 @@ class EmailManger(object):
         target_dict = {
             "email": email,
             "auth_code": auth_code,
-            "agreement": PikaGlobalVarEnum.AGREE_MENT,
+            "agreement": PikaGlobalVarEnum.AGREEMENT,
             "form": PikaGlobalVarEnum.BIG_HUMP_APP_NAME,
             "valid_time": valid_time,
             "send_time": redis_time,
@@ -130,7 +130,7 @@ class EmailManger(object):
 
     @staticmethod
     def get_security_code_template(username, emp_no, auth_code, valid_time,
-                                   redis_time=Moment.get_now_time("%Y-%m-%d %H:%M:%S")):
+                                   redis_time=Moment.get_now_time(PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS)):
         """
         获取验证码模板
         Args:
@@ -147,7 +147,7 @@ class EmailManger(object):
             "username": username,
             "emp_no": emp_no,
             "auth_code": auth_code,
-            "agreement": PikaGlobalVarEnum.AGREE_MENT,
+            "agreement": PikaGlobalVarEnum.AGREEMENT,
             "form": PikaGlobalVarEnum.BIG_HUMP_APP_NAME,
             "valid_time": valid_time,
             "send_time": redis_time,
@@ -156,7 +156,7 @@ class EmailManger(object):
 
     @staticmethod
     def reset_ewd_template(username, new_password, valid_time,
-                           send_time=Moment.get_now_time("%Y-%m-%d %H:%M:%S")):
+                           send_time=Moment.get_now_time(PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS)):
         """
         重置密码邮件模板
         Args:
@@ -175,7 +175,7 @@ class EmailManger(object):
             "username": username,
             "new_password": new_password,
             "valid_time": valid_time,
-            "agreement": PikaGlobalVarEnum.AGREE_MENT,
+            "agreement": PikaGlobalVarEnum.AGREEMENT,
             "form": PikaGlobalVarEnum.BIG_HUMP_APP_NAME,
             "send_time": send_time,
             "root_email": PikaGlobalVarEnum.PL_EMAIL,
@@ -185,7 +185,8 @@ class EmailManger(object):
     @staticmethod
     def reset_encrypt_template(
             username, security_question, encrypted_answers, valid_time,
-            send_time=Moment.get_now_time("%Y-%m-%d %H:%M:%S")
+            send_time=Moment.get_now_time(
+                PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS)
     ):
         """
         重置密保邮件模板
@@ -208,7 +209,7 @@ class EmailManger(object):
             "security_question": security_question,
             "encrypted_answers": encrypted_answers,
             "valid_time": valid_time,
-            "agreement": PikaGlobalVarEnum.AGREE_MENT,
+            "agreement": PikaGlobalVarEnum.AGREEMENT,
             "form": PikaGlobalVarEnum.BIG_HUMP_APP_NAME,
             "send_time": send_time,
             "root_email": PikaGlobalVarEnum.PL_EMAIL,
@@ -266,7 +267,7 @@ class EmailManger(object):
                 # email_cursor.set_debuglevel(1)
             except Exception as e:
                 raise ThirdException(
-                    code=ExcCodeEnum.SEND_EMAIL_ERROR, detail=f"发送邮件失败，错误原因：{e}")
+                    code=ExcCodeEnum.SEND_EMAIL_ERROR, detail=f"发送邮件失败,错误原因：{e}")
             else:
                 return True
             finally:
@@ -275,7 +276,7 @@ class EmailManger(object):
                 except Exception as e:
                     raise ThirdException(
                         code=ExcCodeEnum.EMAIL_CURSOR_ERROR,
-                        detail=f"关闭邮件游标失败，错误原因{e}",
+                        detail=f"关闭邮件游标失败,错误原因{e}",
                     )
         else:
             raise ValidException(

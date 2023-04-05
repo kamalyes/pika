@@ -10,29 +10,32 @@
 @Desc    :  None
 """
 from datetime import datetime
-
+from uuid import uuid4
 from sqlalchemy import INT, Column, DATETIME, String, BOOLEAN
 from sqlalchemy import SMALLINT
 from sqlalchemy import TEXT
-
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
+from app.core.handler.sqlbin_uuid import BinaryUUID
 from app.models import Base
 
 
 class ApiTestResultModel(Base):
     __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_test_result'
     __table_args__ = {"comment": "测试结果表"}
-    id = Column(INT, primary_key=True)
+    id = Column(BinaryUUID,
+                default=uuid4, primary_key=True)
     directory_id = None
-    report_id = Column(INT, index=True, comment="报告id")
-    case_id = Column(INT, index=True, comment="用例id")
-    case_name = Column(String(ByteSizeEnum.LENGTH_32), comment="用例名称")
+    report_id = Column(BinaryUUID,
+                       default=uuid4, index=True, comment="报告id")
+    case_id = Column(BinaryUUID,
+                     default=uuid4, index=True, comment="用例id")
+    case_name = Column(String(ByteSizeEnum.LENGTH_50), comment="用例名称")
     status = Column(SMALLINT, comment="对应状态 0: 成功 1: 失败 2: 出错 3: 跳过")
     start_date = Column(DATETIME, nullable=False, default=None, comment="开始时间")
     finished_date = Column(DATETIME, nullable=False, default=None, comment="结束时间")
     case_log = Column(TEXT, comment="测试日志")
-    retry = Column(INT, default=0, comment="重试次数，预留字段")
+    retry = Column(INT, default=0, comment="重试次数,预留字段")
     status_code = Column(INT, comment="http状态码")
     url = Column(TEXT, comment="URL")
     body = Column(TEXT, comment="body")
@@ -40,20 +43,22 @@ class ApiTestResultModel(Base):
     request_headers = Column(TEXT, comment="请求headers")
     request_params = Column(TEXT, comment="请求参数")
     cookies = Column(TEXT, comment="请求参数")
-    data_name = Column(String(ByteSizeEnum.LENGTH_24))
-    data_id = Column(INT)
+    data_name = Column(String(ByteSizeEnum.LENGTH_50))
+    data_id = Column(BinaryUUID,
+                     default=uuid4)
     cost = Column(String(ByteSizeEnum.LENGTH_12), nullable=False, comment="花费时间")
     asserts = Column(TEXT, comment="断言")
     response_headers = Column(TEXT, comment="响应头部")
     response = Column(TEXT, comment="返回参数")
-    delete_flag = Column(BOOLEAN, server_default="0", comment="删除标识 1：已删除，0：未删除")
+    delete_flag = Column(BOOLEAN, server_default="0",
+                         comment="删除标识 1：已删除,0：未删除")
 
-    def __init__(self, report_id: int, case_id: int, case_name: str, status: int,
+    def __init__(self, report_id: str, case_id: str, case_name: str, status: int,
                  case_log: str, start_date: datetime, finished_date: datetime,
                  url: str, body: str, request_method: str, request_headers: str, cost: str,
                  asserts: str, response_headers: str, response: str,
                  status_code: int, cookies: str, retry: int = None,
-                 request_params: str = '', data_name: str = '', data_id: int = None
+                 request_params: str = None, data_name: str = None, data_id: str = None
                  ):
         self.report_id = report_id
         self.case_id = case_id

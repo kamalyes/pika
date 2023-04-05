@@ -69,7 +69,7 @@ class ApiTestCaseDataDao(PikaWrapper):
             raise SystemException(detail=f"编辑测试数据失败, {str(e)}")
 
     @classmethod
-    async def delete_testcase_data(cls, id: int, operator: str):
+    async def delete_testcase_data(cls, id: str, operator: str):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -85,7 +85,7 @@ class ApiTestCaseDataDao(PikaWrapper):
             raise SystemException(detail=f"删除测试数据失败, {str(e)}")
 
     @classmethod
-    async def list_testcase_data(cls, case_id: int):
+    async def list_testcase_data(cls, case_id: str):
         ans = defaultdict(list)
         try:
             async with async_session() as session:
@@ -101,7 +101,7 @@ class ApiTestCaseDataDao(PikaWrapper):
             raise SystemException(detail=f"查询测试数据失败, {str(e)}")
 
     @classmethod
-    async def list_testcase_data_by_env(cls, env: int, case_id: int) -> List[ApiTestCaseDataModel]:
+    async def list_testcase_data_by_env(cls, env: str, case_id: str) -> List[ApiTestCaseDataModel]:
         try:
             async with async_session() as session:
                 sql = select(ApiTestCaseDataModel).where(ApiTestCaseDataModel.case_id == case_id,

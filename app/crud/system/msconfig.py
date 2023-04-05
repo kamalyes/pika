@@ -13,7 +13,7 @@
 import yaml
 from app.core.handler.exceres import SystemException
 
-from app.enums.SysvarEnum import ValidTimeEnum
+from app.enums.SysVarEnum import ValidTimeEnum
 from app.middleware.xredis import RedisHelper
 from config import PikaAppConfig
 

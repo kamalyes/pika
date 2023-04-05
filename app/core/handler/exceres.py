@@ -9,9 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-
 from fastapi import status, HTTPException
-
 from app.enums.SysCodeEnum import ExcCodeEnum
 
 
@@ -82,7 +80,7 @@ class DbExecuteException(Exception):
 class RedisException(Exception):
     def __init__(
             self,
-            code: int = ExcCodeEnum.REDIS_ERROR,
+            code: int = ExcCodeEnum.REDIS_OPERATION_ERROR,
             detail: str = "Redis operation failed",
             status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
     ):

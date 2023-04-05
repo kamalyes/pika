@@ -41,7 +41,7 @@ class AsyncDbSession:
             raise ValidException(detail=f"批量任务最大仅支持{max_begin_number}条")
 
     @staticmethod
-    async def delete(ids: List, do_sql: Any, message: str = ""):
+    async def delete(ids: List, do_sql: Any, message: str = None):
         """
         db删除数据
         Args:
@@ -66,7 +66,7 @@ class AsyncDbSession:
                 error_ids.append({"start_index": start_index - 1, "start_value": start_value,
                                   "end_index": end_index, "end_value": end_value})
         if len(error_ids) > 0:
-            return PikaResponse.failed(code=ExcCodeEnum.VAR_ERROR, detail="参数错误，请检查格式是否为,进行分割！",
+            return PikaResponse.failed(code=ExcCodeEnum.VAR_ERROR, detail="参数错误,请检查格式是否为,进行分割！",
                                        data={"error_values": error_ids})
         async with async_db_session_generator() as session:
             async with session.begin():

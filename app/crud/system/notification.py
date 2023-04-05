@@ -37,7 +37,7 @@ class PikaNotificationDao(PikaWrapper):
 
         """
         ninety_days = datetime.now() - timedelta(days=90)
-        # 1. 当消息类型不为广播类型时，正常查询
+        # 1. 当消息类型不为广播类型时,正常查询
         if msg_type == MessageTypeEnum.others:
             ans = await cls.select_list(msg_status=msg_status, receiver=receiver, msg_type=msg_type,
                                         condition=[NotificationModel.create_date > ninety_days])
@@ -67,7 +67,7 @@ class PikaNotificationDao(PikaWrapper):
                 ans = []
                 last_month = datetime.now() - timedelta(days=30)
                 for notify, read in result:
-                    # 如果非广播类型，直接
+                    # 如果非广播类型,直接
                     if notify.msg_type == MessageTypeEnum.others:
                         if notify.msg_status == msg_status:
                             ans.append(notify)
@@ -82,7 +82,7 @@ class PikaNotificationDao(PikaWrapper):
         return ans
 
     @classmethod
-    async def delete_message(cls, session, msg_id: List[int], receiver: int):
+    async def delete_message(cls, session, msg_id: List[str], receiver: str):
         async with session.begin():
             await session.execute(
                 update(NotificationModel).where(

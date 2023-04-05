@@ -9,18 +9,21 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
+from uuid import uuid4
 from sqlalchemy import INT, Column, UniqueConstraint
-
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
+from app.core.handler.sqlbin_uuid import BinaryUUID
 from app.models.basic import LargeBaseModel
 
 
 class ApiTestPlanFollowUserRelModel(LargeBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_testplan_follow_user_rel"
-    __table_args__ = (UniqueConstraint('emp_no', 'plan_id'), {"comment": "测试计划关注用户表"})
+    __table_args__ = (UniqueConstraint('emp_no', 'plan_id'),
+                      {"comment": "测试计划关注用户表"})
 
     emp_no = Column(INT, nullable=False, comment="员工编号")
-    plan_id = Column(INT, nullable=False, comment="计划id")
+    plan_id = Column(BinaryUUID,
+                     default=uuid4, nullable=False, comment="计划id")
 
     def __init__(self, plan_id, emp_no):
         super().__init__(operator=emp_no)

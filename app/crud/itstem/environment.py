@@ -11,10 +11,9 @@
 """
 
 from sqlalchemy import select, desc
-
 from app.core.handler.exceres import KeyExistException, KeyUndefinedException, SystemException, ValidException
 from app.crud import PikaWrapper, PikaMdWrapper
-from app.models import async_session
+from app.models import async_db_session_generator, async_session
 from app.models.environment import EnvironmentModel
 from app.schema.environment import EnvironmentSchema
 
@@ -23,7 +22,7 @@ from app.schema.environment import EnvironmentSchema
 class EnvironmentDao(PikaWrapper):
 
     @classmethod
-    async def query_env(cls, id: int):
+    async def query_env(cls, id: str):
         """
         环境id
         Args:
@@ -42,13 +41,13 @@ class EnvironmentDao(PikaWrapper):
 
     @classmethod
     async def insert_env(cls, data: EnvironmentSchema, emp_no):
-        async with async_session() as session:
+        async with async_db_session_generator() as session:
             async with session.begin():
                 query = await session.execute(
                     select(EnvironmentModel).where(EnvironmentModel.name == data.name,
                                                    EnvironmentModel.delete_flag == 0))
                 if query.scalars().first() is not None:
-                    raise KeyExistException(detail=f"添加失败，环境名称：{data.name}已存在")
+                    raise KeyExistException(detail=f"添加失败,环境名称：{data.name}已存在")
                 env = EnvironmentModel(**data.dict(), operator=emp_no)
                 session.add(env)
 
@@ -73,6 +72,6 @@ class EnvironmentDao(PikaWrapper):
                 data = await session.execute(sql)
                 return data.scalars().all(), total
         except Exception as e:
-            err = f"获取环境数据失败，失败原因： {str(e)}"
+            err = f"获取环境数据失败,失败原因： {str(e)}"
             cls.__log__.error(err)
             raise SystemException(detail=err)

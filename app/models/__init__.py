@@ -12,6 +12,7 @@
 from contextlib import contextmanager, asynccontextmanager
 from typing import AsyncGenerator, AsyncIterator
 from urllib import parse
+import uuid
 
 import aioredis
 from sqlalchemy import create_engine
@@ -76,7 +77,7 @@ async def async_db_session_generator() -> AsyncGenerator:
         await session.rollback()
         raise DbExecuteException(
             code=ExcCodeEnum.SQL_OPERATION_ERROR,
-            detail=f"数据操作失败，错误原因：{sql_exc}",
+            detail=f"数据操作失败,错误原因：{sql_exc}",
         )
     finally:
         await session.close()
@@ -99,14 +100,15 @@ class DatabaseHelper(object):
         password = parse.quote_plus(password)
         key = f"{host}:{port}:{database}:{username}:{password}:{database}"
         connection = self.connections.get(key)
-        # 先判断是否已经有connection了，如果有则直接返回
+        # 先判断是否已经有connection了,如果有则直接返回
         if connection is not None:
             return connection
         # 获取sqlalchemy需要的jdbc url
         jdbc_url = DatabaseHelper.get_jdbc_url(
             sql_type, host, port, username, password, database)
         # 创建异步引擎
-        eg = create_async_engine(jdbc_url, pool_recycle=PikaAppConfig.MYSQL_POOL_RECYCLE)
+        eg = create_async_engine(
+            jdbc_url, pool_recycle=PikaAppConfig.MYSQL_POOL_RECYCLE)
         ss = sessionmaker(bind=eg, class_=AsyncSession)
         # 将数据缓存起来
         data = dict(engine=eg, session=ss)

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python 3.9.11
 """
-@File    :  dept.py
+@File    :  department.py
 @Time    :  2022/9/15 11:01
 @Author  :  YuYanQing
 @Version :  1.0
@@ -14,16 +14,14 @@ from typing import Optional
 from fastapi import Body
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.schema.base import BaseQuerySchema, BaseOnlyDescSchema
+from app.schema.base import BaseIPdSchema, BaseQuerySchema
 
 
-class DepartmentFormSchema(BaseOnlyDescSchema):
-    id: Optional[int] = Body(0, title="部门id")
+class DepartmentFormSchema(BaseIPdSchema):
     sort_id: Optional[int] = Body(0, title="排序id")
     organization_id: Optional[int] = Body(..., title="组织id", gt=0)
     name: Optional[str] = Body(..., title="部门名称", min_length=2,
                                max_length=ByteSizeEnum.LENGTH_255)
-    parent_id: Optional[int] = Body(0, title="父序号")
 
 
 class QueryDepartmentInSchema(DepartmentFormSchema, BaseQuerySchema):

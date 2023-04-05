@@ -21,24 +21,24 @@ class ConnectionManager:
     def get_clients(self):
         return {key: True for key in self.active_connections.keys()}
 
-    async def connect(self, websocket: WebSocket, client_id: int) -> None:
+    async def connect(self, websocket: WebSocket, operator: str) -> None:
         await websocket.accept()
-        exist: WebSocket = self.active_connections.get(client_id)
+        exist: WebSocket = self.active_connections.get(operator)
         if exist:
             await exist.close()
-            self.active_connections[client_id]: WebSocket = websocket
+            self.active_connections[operator]: WebSocket = websocket
         else:
-            self.active_connections[client_id]: WebSocket = websocket
-            self.log.debug(F"websocket: 用户[{client_id}]建立连接成功！")
+            self.active_connections[operator]: WebSocket = websocket
+            self.log.debug(F"websocket: 用户[{operator}]建立连接成功！")
 
-    def disconnect(self, client_id: int) -> None:
-        del self.active_connections[client_id]
-        self.log.debug(F"websocket: 用户[{client_id}] 已安全断开！")
+    def disconnect(self, operator: str) -> None:
+        del self.active_connections[operator]
+        self.log.debug(F"websocket: 用户[{operator}] 已安全断开！")
 
     @staticmethod
     async def pusher(sender: WebSocket, message: MsgType) -> None:
         """
-        根据不同的消息类型，调用不同方法发送消息
+        根据不同的消息类型,调用不同方法发送消息
         Args:
             sender:
             message:
@@ -108,7 +108,7 @@ class ConnectionManager:
                 else:
                     await self.send_personal_message(emp_no, msg)
             else:
-                # 说明不是桌面消息，直接给出消息数量即可
+                # 说明不是桌面消息,直接给出消息数量即可
                 if emp_no == ConnectionManager.broadcast:
                     await self.broadcast(WebSocketMessage.msg_count())
                 else:

@@ -15,14 +15,14 @@ import re
 import time
 from collections import defaultdict
 from datetime import datetime
-from typing import List, Any
+from typing import List, Any, Union
 
 from app.core.constructor.case_constructor import TestCaseConstructor
 from app.core.constructor.http_constructor import HttpConstructor
 from app.core.constructor.python_constructor import PythonConstructor
 from app.core.constructor.redis_constructor import RedisConstructor
 from app.core.constructor.sql_constructor import SqlConstructor
-from app.core.handler.exceres import KeyUndefinedException, ValidException
+from app.core.handler.exceres import KeyUndefinedException, ValidException, SystemException
 from app.core.handler.logger import PikaLogger
 from app.core.notice.dingtalk import DingTalk
 from app.core.notice.email import EmailManger
@@ -44,7 +44,7 @@ from app.enums.ConstructorEnum import ConstructorTypeEnum
 from app.enums.GconfigEnum import GConfigTypeEnum, GConfigParserEnum
 from app.enums.NoticeEnum import NoticeTypeEnum
 from app.enums.RequestBodyEnum import ReqBodyTypeEnum
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.middleware.async_ask import AsyncRequest
 from app.models.api_test_case import ApiTestCaseModel
 from app.models.api_testcase_asserts import ApiTestCaseAssertsModel
@@ -94,10 +94,7 @@ class Executor(object):
         return None
 
     def append(self, content, end=False):
-        if end:
-            self.logger.append(content, end)
-        else:
-            self.logger.append(content, end)
+        self.logger.append(content, end)
 
     @case_log
     async def parse_gconfig(self, data, type_, env, *fields):
@@ -200,7 +197,8 @@ class Executor(object):
                 else:
                     result = result.get(branch)
                 if result is None:
-                    raise KeyUndefinedException(f"变量路径: {v}不存在, 请检查JSON或路径!")
+                    raise KeyUndefinedException(
+                        detail=f"变量路径: {v}不存在, 请检查JSON或路径!")
             if field_name == "request_headers":
                 new_value = json.loads(result)
             elif not isinstance(result, str):
@@ -232,7 +230,7 @@ class Executor(object):
                     new_field = field_origin.replace(k, v)
                     setattr(data, c.name, new_field)
                     self.append(
-                        "替换流程变量成功，字段: [{}]: \n\n[{}] -> [{}]\n".format(c.name, k, v))
+                        "替换流程变量成功,字段: [{}]: \n\n[{}] -> [{}]\n".format(c.name, k, v))
         except Exception as e:
             Executor.log.error(f"替换变量失败, error: {str(e)}")
             raise SystemException(detail=f"替换变量失败, error: {str(e)}")
@@ -250,7 +248,7 @@ class Executor(object):
         return await ApiTestCaseDao.async_select_constructor(case_id)
 
     async def execute_constructors(
-        self, env: int, path, case_info, params, req_params, constructors: List[ConstructorModel], asserts, suffix=False
+        self, env: str, path, case_info, params, req_params, constructors: List[ConstructorModel], asserts, suffix=False
     ):
         """
         开始构造数据
@@ -332,7 +330,7 @@ class Executor(object):
             result[d.name] = p(response_info, d.expression, idx=d.match_index)
         return result
 
-    async def run(self, env: int, case_id: int, params_pool: dict = None, request_param: dict = None, path="主case"):
+    async def run(self, env: str, case_id: str, params_pool: dict = None, request_param: dict = None, path: str = "主case"):
         """
         开始执行测试用例
         Args:
@@ -426,12 +424,8 @@ class Executor(object):
             out_dict = self.extract_out_parameters(
                 response_info, out_parameters)
 
-            # 替换主变量
+            # 替换变量
             case_params.update(out_dict)
-
-            # 写入response
-            # req_params["response"] = res.get("response", "")
-
             self.replace_asserts(asserts, req_params, case_params)
             self.replace_constructors(constructors, req_params, case_params)
 
@@ -532,13 +526,13 @@ class Executor(object):
     async def run_with_test_data(
         env,
         data,
-        report_id,
-        case_id,
+        report_id: str,
+        case_id: str,
         params_pool: dict = None,
         request_param: dict = None,
         path="主case",
-        name: str = "",
-        data_id: int = None,
+        name: str = None,
+        data_id: str = None,
         retry_minutes: int = 0,
     ):
         """
@@ -569,7 +563,7 @@ class Executor(object):
                 status = 2
             else:
                 status = 0 if result.get("status") else 1
-            # 若status不为0，代表case执行失败，走重试逻辑
+            # 若status不为0,代表case执行失败,走重试逻辑
             if status != 0 and i < retry_times:
                 await asyncio.sleep(60 * retry_minutes)
                 continue
@@ -612,7 +606,7 @@ class Executor(object):
             break
 
     @staticmethod
-    async def run_single(env: int, data, report_id, case_id, params_pool: dict = None, path="主case", retry_minutes=0):
+    async def run_single(env: str, data, report_id, case_id, params_pool: dict = None, path="主case", retry_minutes=0):
         """
 
         Args:
@@ -680,7 +674,7 @@ class Executor(object):
         return body
 
     @case_log
-    def my_assert(self, asserts: List, json_format: bool) -> [str, bool]:
+    def my_assert(self, asserts: List, json_format: bool) -> Union[str, bool]:
         """
         断言验证
         Args:
@@ -699,7 +693,7 @@ class Executor(object):
             try:
                 # 解析预期/实际结果
                 expected = self.translate(item.expected)
-                # 判断请求返回是否是json格式，如果不是则不进行loads操作
+                # 判断请求返回是否是json格式,如果不是则不进行loads操作
                 actually = self.translate(item.actually)
                 status, err = self.ops(item.assert_type, expected, actually)
                 result[item.id] = {"status": status, "msg": err}
@@ -712,7 +706,7 @@ class Executor(object):
         return json.dumps(result, ensure_ascii=False), ok
 
     @case_log
-    def ops(self, assert_type: str, exp, act) -> (bool, str):
+    def ops(self, assert_type: str, exp, act) -> Union[bool, str]:
         """
         通过断言类型进行校验
         Args:
@@ -774,7 +768,7 @@ class Executor(object):
             return False, data
         if assert_type == "text_in":
             if isinstance(act, str):
-                # 如果b是string，则不转换
+                # 如果b是string,则不转换
                 if exp in act:
                     return True, f"预期结果: {exp} 文本包含于 实际结果: {act}【✔】"
                 return False, f"预期结果: {exp} 文本不包含于 实际结果: {act}【❌】"
@@ -914,7 +908,7 @@ class Executor(object):
 
     @staticmethod
     @lock("test_plan")
-    async def run_test_plan(plan_id: int, executor: int = 0):
+    async def run_test_plan(plan_id: str, executor: str = None):
         """
         通过测试计划id执行测试计划
         Args:
@@ -942,7 +936,7 @@ class Executor(object):
                 *(
                     Executor.run_multiple(
                         executor,
-                        int(e),
+                        e,
                         case_list,
                         mode=1,
                         retry_minutes=plan.retry_minutes,
@@ -956,26 +950,26 @@ class Executor(object):
             await ApiTestPlanDao.update_test_plan_state(plan.id, 0)
             users = await UserDao.list_user_touch(*receiver)
             await Executor.notice(env, plan, project, report_dict, users)
-            if executor != 0:
+            if executor is not None:
                 await ws_manage.notify(executor, title="测试计划执行完毕", content=f"请前往测试报告页面查看细节")
         except Exception as e:
-            Executor.log.exception(f"执行测试计划: 【{plan.name}】失败: {str(e)}")
+            Executor.log.Exception(detail=f"执行测试计划: 【{plan.name}】失败: {str(e)}")
             Executor.log.error(f"执行测试计划: 【{plan.name}】失败: {str(e)}")
 
     @staticmethod
     async def run_multiple(
-        executor: int,
-        env: int,
-        case_list: List[int],
+        executor: str,
+        env: str,
+        case_list: List[str],
         mode=0,
-        plan_id: int = None,
+        plan_id: str = None,
         ordered=False,
         report_dict: dict = None,
         retry_minutes: int = 0,
     ):
         try:
             current_env = await EnvironmentDao.query_env(env)
-            if executor != 0:
+            if executor is not None:
                 # 说明不是系统执行
                 user = await UserDao.query_user(executor)
                 name = user.name if user is not None else "未知"
@@ -1013,10 +1007,11 @@ class Executor(object):
             # step5: 回写数据到报告
             report = await ApiTestReportDao.end(report_id, ok, fail, error, skip, 3, cost)
             if report_dict is not None:
+                format_ytdhms = PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS
                 report_dict[env] = {
                     "report_url": f"{PikaAppConfig.PIKA_SERVER_URL}/#/record/report/{report_id}",
-                    "start_date": report.start_date.strftime("%Y-%m-%d %H:%M:%S"),
-                    "finished_date": report.finished_date.strftime("%Y-%m-%d %H:%M:%S"),
+                    "start_date": report.start_date.strftime(format_ytdhms),
+                    "finished_date": report.finished_date.strftime(format_ytdhms),
                     "success": ok,
                     "failed": fail,
                     "total": ok + fail + error + skip,

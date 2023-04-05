@@ -10,7 +10,6 @@
 @Desc    :  None
 """
 import json
-
 from app.utils.decorator import SingletonDecorator
 
 
@@ -76,3 +75,4 @@ class JsonCompare(object):
                 return string
             except:
                 return string
+                raise

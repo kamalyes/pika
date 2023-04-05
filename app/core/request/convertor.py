@@ -11,7 +11,6 @@
 """
 
 from typing import List
-
 from app.schema.request import RequestInfoSchema
 
 

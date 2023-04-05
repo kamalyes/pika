@@ -10,7 +10,6 @@
 @Desc    :  None
 """
 import json
-
 from app.core.constructor.constructor import ConstructorAbstract
 from app.core.handler.exceres import SystemException
 from app.crud.itstem.database import DbConfigDao

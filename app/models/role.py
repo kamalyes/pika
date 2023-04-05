@@ -9,22 +9,29 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  角色配置表
 """
+from uuid import uuid4
 from sqlalchemy import Column, Integer, String
-
+from app.core.handler.sqlbin_uuid import BinaryUUID
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import TimestampBaseModel
 
 
 class RoleModel(TimestampBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_role'
     __table_args__ = {"comment": "角色表"}
-    id = Column(Integer(), nullable=False, primary_key=True, autoincrement=True)
-    name = Column(String(ByteSizeEnum.LENGTH_64), nullable=True, comment='菜单名称', index=True)
-    role_type = Column(Integer, server_default='10', nullable=False, comment='权限类型，10菜单权限，20用户组权限', index=True)
-    menus = Column(String(ByteSizeEnum.LENGTH_255), nullable=True, comment='菜单列表', index=True)
-    status = Column(Integer, server_default='10', nullable=True, comment='状态 10 启用 20 禁用')
-    description = Column(String(ByteSizeEnum.LENGTH_600), default=None, comment="备注信息")
+    id = Column(BinaryUUID,
+                default=uuid4, nullable=False, primary_key=True)
+    name = Column(String(ByteSizeEnum.LENGTH_64),
+                  nullable=True, comment='菜单名称', index=True)
+    role_type = Column(Integer, server_default='10', nullable=False,
+                       comment='权限类型,10菜单权限,20用户组权限', index=True)
+    menus = Column(String(ByteSizeEnum.LENGTH_255),
+                   nullable=True, comment='菜单列表', index=True)
+    status = Column(Integer, server_default='10',
+                    nullable=True, comment='状态 10 启用 20 禁用')
+    description = Column(String(ByteSizeEnum.LENGTH_600),
+                         default=None, comment="备注信息")
 
     def __init__(self, id=None, name=None, role_type=None, menus=None, status=None, description=None, operator=None):
         super().__init__(operator=operator)

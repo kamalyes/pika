@@ -29,7 +29,7 @@ class TestCaseConstructor(ConstructorAbstract):
                 raise ValidException(detail="未获取到前/后置条件的用例id, 请检查前置条件")
             testcase, err = await ApiTestCaseDao.async_query_test_case(case_id)
             if err:
-                raise KeyUndefinedException(f"用例: [{case_id}]不存在:")
+                raise KeyUndefinedException(detail=f"用例: [{case_id}]不存在:")
             executor.append(
                 f"当前路径: {path}, 第{index + 1}条{ConstructorAbstract.get_name(constructor)}")
             # 说明是case

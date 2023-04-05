@@ -11,7 +11,7 @@
 """
 from sqlalchemy import SMALLINT, Column, VARCHAR, INT
 
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
 
 

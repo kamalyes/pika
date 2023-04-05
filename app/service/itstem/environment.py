@@ -29,7 +29,7 @@ async def insert_environment(data: EnvironmentSchema, user_info=Depends(Permissi
 
 
 @router.delete("/environment/delete", summary="删除环境配置")
-async def delete_environment(id: int, user_info=Depends(Permission(RoleEnum.ADMIN)),
+async def delete_environment(id: str, user_info=Depends(Permission(RoleEnum.ADMIN)),
                              session=Depends(async_db_session_iterator)):
     await EnvironmentDao.delete_record_by_id(session=session, operator=user_info['emp_no'], value=id, log=True)
     return PikaResponse.success()
@@ -44,7 +44,7 @@ async def update_environment(data: EnvironmentSchema, user_info=Depends(Permissi
 
 @router.get("/environment/list", summary="查询环境配置列表")
 async def list_environment(paging: BaseOnlyPagingSchema = Depends(),
-                           name: str = "", exactly=False,
+                           name: str = None, exactly=False,
                            user_info=Depends(Permission())):
     data, total = await EnvironmentDao.list_env(paging.page_index, paging.page_size, name, exactly)
     return PikaResponse.success_with_size(data=data, total=total)

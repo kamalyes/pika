@@ -40,7 +40,7 @@ async def insert_redis_config(form: RedisConfigSchema,
 
 
 @router.delete("/redis/delete", summary="删除redis配置")
-async def delete_redis_config(id: int, background_tasks: BackgroundTasks,
+async def delete_redis_config(id: str, background_tasks: BackgroundTasks,
                               user_info=Depends(Permission(RoleEnum.ADMIN)),
                               session=Depends(async_db_session_iterator)):
     try:
@@ -72,7 +72,7 @@ async def update_redis_config(form: RedisConfigSchema,
 
 
 @router.get("/redis/list", summary="查询redis配置列表")
-async def list_redis_config(name: str = '', addr: str = '', env: int = None,
+async def list_redis_config(name: str = None, addr: str = None, env: str = None,
                             cluster: bool = None,
                             user_info=Depends(Permission(RoleEnum.MANAGER))):
     try:

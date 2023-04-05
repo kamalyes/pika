@@ -9,11 +9,11 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from sqlalchemy import Column, INT, String, UniqueConstraint
+from sqlalchemy import Column, String, UniqueConstraint
 from sqlalchemy import ForeignKey
-
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.core.handler.sqlbin_uuid import BinaryUUID
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import NormBaseModel
 from app.models.user import UserModel
 
@@ -28,7 +28,7 @@ class PikaSecurityRelIssues(NormBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_user_security"
     __table_args__ = {"comment": "用户密保问题表"}
     uid = Column(
-        INT,
+        BinaryUUID,
         ForeignKey(UserModel.id, ondelete="cascade", onupdate="cascade"),
         nullable=False,
         comment="员工编号",

@@ -9,8 +9,8 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-
-from datetime import datetime
+from custard.time import Moment
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 
 
 class CaseLog(object):
@@ -19,12 +19,14 @@ class CaseLog(object):
         self.log = list()
 
     def append(self, content, end=True):
+        format_ytdhms = Moment.get_now_time(
+            PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS)
         if end:
             self.log.append(
-                "[{}]: 步骤结束 -> {}".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), content))
+                "[{}]: 步骤结束 -> {}".format(format_ytdhms, content))
         else:
             self.log.append(
-                "[{}]: 步骤开始 -> {}".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), content))
+                "[{}]: 步骤开始 -> {}".format(format_ytdhms, content))
 
     def o_append(self, content):
         """

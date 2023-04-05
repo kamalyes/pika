@@ -11,7 +11,6 @@
 """
 
 from sqlalchemy import select
-
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
 from app.models.gateway import GatewayModel
@@ -30,5 +29,5 @@ class GatewayDao(PikaWrapper):
             query_result = await session.execute(query_sql)
             data = query_result.scalars().first()
             if data is None:
-                raise KeyUndefinedException(f"此环境没有网关配置: {name}")
+                raise KeyUndefinedException(detail=f"此环境没有网关配置: {name}")
             return data.address

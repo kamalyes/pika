@@ -28,7 +28,7 @@ class PikaRecorder(object):
     async def response(self, flow):
         if "pika.fun" in flow.request.url or flow.request.method.lower() == "options" or \
                 flow.request.url.endswith(("js", "css", "ttf", "jpg", "svg", "gif")):
-            # 如果是Pika，options请求，js等url直接拒绝
+            # 如果是Pika,options请求,js等url直接拒绝
             return
         addr = flow.client_conn.address[0]
         # flow.response.headers["X-Forwarded-For"] = addr
@@ -38,7 +38,7 @@ class PikaRecorder(object):
         data = json.loads(record)
         pattern = re.compile(data.get("regex"))
         if re.findall(pattern, flow.request.url):
-            # 说明已开启录制开关，记录状态
+            # 说明已开启录制开关,记录状态
             request_data = RequestInfoSchema(flow)
             dump_data = request_data.dumps()
             await RedisHelper.cache_record(addr, dump_data)

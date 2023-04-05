@@ -13,7 +13,7 @@
 import logging
 from pprint import pformat
 import sys
-from typing import List
+from typing import List, Optional
 import os
 import time
 from loguru import logger
@@ -21,104 +21,107 @@ from pydantic import BaseSettings
 from loguru._defaults import LOGURU_FORMAT
 from custard.core import DataHand, System
 
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
 class BaseConfig(BaseSettings):
     # MySQL config
-    MYSQL_HOST: str = "pika_mysql"
-    MYSQL_PORT: int = 3306
-    MYSQL_USER: str = "root"
-    MYSQL_ROOT_PASSWORD: str = ""
-    MYSQL_DATABASE_NAME: str = ""
-    MYSQL_CHARSET: str = "utf8mb4"
-    MYSQL_TIME_ZONE: str = "Asia/Shanghai"
-    MYSQL_POOL_RECYCLE: int = 1500
-    MYSQL_ASYNC_POOL_RECYCLE: int = 1500
+    MYSQL_HOST: Optional[str] = "pika_mysql"
+    MYSQL_PORT: Optional[int] = 3306
+    MYSQL_USER: Optional[str] = "root"
+    MYSQL_ROOT_PASSWORD: Optional[str] = None
+    MYSQL_DATABASE_NAME: Optional[str] = None
+    MYSQL_CHARSET: Optional[str] = "utf8mb4"
+    MYSQL_COLLATE = "utf8mb4_general_ci"
+    MYSQL_TIME_ZONE: Optional[str] = "Asia/Shanghai"
+    MYSQL_POOL_RECYCLE: Optional[int] = 1500
+    MYSQL_ASYNC_POOL_RECYCLE: Optional[int] = 1500
     TABLE_TAG = "__table_args__"
 
     # Redis config
-    REDIS_ENABLE_FLAG: bool = True
-    REDIS_HOST: str = "pika_redis"
-    REDIS_PORT: int = 6379
-    REDIS_DB_INDEX: int = 0
-    REDIS_PASSWORD: str = ""
-    REDIS_ENCODING: str = "utf-8"
-    REDIS_DECODE_RESPONSES: bool = True  # 获取中文数据可以直接 decode python unicode
-    REDIS_TARGET_MAX_MEMORY: str = "572978192"
-    REDIS_MAX_CONNECTIONS: int = 100
-    REDIS_DECODE_RESPONSES: bool = True
+    REDIS_ENABLE_FLAG: Optional[bool] = True
+    REDIS_HOST: Optional[str] = "pika_redis"
+    REDIS_PORT: Optional[int] = 6379
+    REDIS_DB_INDEX: Optional[int] = 0
+    REDIS_PASSWORD: Optional[str] = None
+    REDIS_ENCODING: Optional[str] = "utf-8"
+    # 获取中文数据可以直接 decode python unicode
+    REDIS_DECODE_RESPONSES: Optional[bool] = True
+    REDIS_TARGET_MAX_MEMORY: Optional[str] = "572978192"
+    REDIS_MAX_CONNECTIONS: Optional[int] = 100
+    REDIS_DECODE_RESPONSES: Optional[bool] = True
     # Redis连接信息
     REDIS_NODES: List = []
 
     # sqlalchemy
-    SQLALCHEMY_DATABASE_URI: str = ""
+    SQLALCHEMY_DATABASE_URI: Optional[str] = None
     # 异步URI
-    ASYNC_SQLALCHEMY_URI: str = ""
+    ASYNC_SQLALCHEMY_URI: Optional[str] = None
 
     # JWT
-    JWT_SECRET_KEY: str = ""
-    JWT_MD5_SALT: str = ""
-    JWT_MPOP: bool = False
+    JWT_SECRET_KEY: Optional[str] = None
+    JWT_MD5_SALT: Optional[str] = None
+    JWT_MPOP: Optional[bool] = False
 
     # oss
-    OSS_TYPE: str = "aliyun"
-    OSS_ACCESS_KEY_ID: str = ""
-    OSS_ACCESS_KEY_SECRET: str = ""
-    OSS_BUCKET_NAME: str = ""
-    OSS_ENDPOINT: str = ""
-    STATIC_QINIU_URL: str = ""
-    OSS_QINIU_URL: str = ""
+    OSS_TYPE: Optional[str] = "aliyun"
+    OSS_ACCESS_KEY_ID: Optional[str] = None
+    OSS_ACCESS_KEY_SECRET: Optional[str] = None
+    OSS_BUCKET_NAME: Optional[str] = None
+    OSS_ENDPOINT: Optional[str] = None
+    STATIC_QINIU_URL: Optional[str] = None
+    OSS_QINIU_URL: Optional[str] = None
 
     # Email
-    EMAIL_SENDER: str = ""  # 发件人邮箱
-    EMAIL_PASSWORD: str = ""  # 发件人邮箱授权码
-    EMAIL_HOST: str = ""  # 邮箱host
-    EMAIL_PORT: int = 465  # 端口号
+    EMAIL_SENDER: Optional[str] = None  # 发件人邮箱
+    EMAIL_PASSWORD: Optional[str] = None  # 发件人邮箱授权码
+    EMAIL_HOST: Optional[str] = None  # 邮箱host
+    EMAIL_PORT: Optional[int] = 465  # 端口号
 
     # Yapi
-    YAPI_ACCESS_KEY_ID: str = ""
-    YAPI_ACCESS_KEY_SECRET: str = ""
+    YAPI_ACCESS_KEY_ID: Optional[str] = None
+    YAPI_ACCESS_KEY_SECRET: Optional[str] = None
 
     # Mock server
-    MITMPROXY_ENABLE_FLAG: bool = False
-    MITMPROXY_PROXY_HOST: str = '0.0.0.0'
-    MITMPROXY_PROXY_PORT: int = 7778
+    MITMPROXY_ENABLE_FLAG: Optional[bool] = False
+    MITMPROXY_PROXY_HOST: Optional[str] = '0.0.0.0'
+    MITMPROXY_PROXY_PORT: Optional[int] = 7778
 
     # Supervisor
-    SUPERVISOR_DEBUG: bool = True
-    SUPERVISOR_LOGLEVEL: str = 'info'
-    SUPERVISOR_THREAD_NUM: int = 2
-    SUPERVISOR_WORKER_CLASS: str = 'uvicorn.workers.UvicornWorker'
-    SUPERVISOR_FORWARDED_ALLOW_IPS: str  = "*"
-    SUPERVISOR_X_FORWARDED_FOR_HEADER: str = 'X-FORWARDED-FOR'
-    SUPERVISOR_DAEMON: bool = False
-    SUPERVISOR_TIMEOUT: int = 60
-    SUPERVISOR_WORKER_CONNECTIONS: int = 5000
-    SUPERVISOR_PIDFILE: str = '/var/run/gunicorn.pid'
-    SUPERVISOR_ACCESSLOG: str = '/var/log/gunicorn_acess.log'
-    SUPERVISOR_ERRORLOG: str = '/var/log/gunicorn_error.log'
+    SUPERVISOR_DEBUG: Optional[bool] = True
+    SUPERVISOR_LOGLEVEL: Optional[str] = 'info'
+    SUPERVISOR_THREAD_NUM: Optional[int] = 2
+    SUPERVISOR_WORKER_CLASS: Optional[str] = 'uvicorn.workers.UvicornWorker'
+    SUPERVISOR_FORWARDED_ALLOW_IPS: Optional[str] = "*"
+    SUPERVISOR_X_FORWARDED_FOR_HEADER: Optional[str] = 'X-FORWARDED-FOR'
+    SUPERVISOR_DAEMON: Optional[bool] = False
+    SUPERVISOR_TIMEOUT: Optional[int] = 60
+    SUPERVISOR_WORKER_CONNECTIONS: Optional[int] = 5000
+    SUPERVISOR_PIDFILE: Optional[str] = '/var/run/gunicorn.pid'
+    SUPERVISOR_ACCESSLOG: Optional[str] = '/var/log/gunicorn_acess.log'
+    SUPERVISOR_ERRORLOG: Optional[str] = '/var/log/gunicorn_error.log'
     
     # System
-    ENVIRONMENT: str = "dev"
-    PIKA_BACKEND_HOST: str = "0.0.0.0"
-    PIKA_BACKEND_PORT: int = 7777
-    PIKA_FRONTEND_URL: str = 'http://unknown(.env未声明)'
-    CASE_RETRY_TIMES: int = 1
-    WORKSPACES_PATH: str = os.path.dirname(os.path.abspath(__file__))
-    TEMPLATE_PATH: str = f"{WORKSPACES_PATH}/templates"
-    MARKDOWN_PATH: str = f"{WORKSPACES_PATH}/templates/markdown/test_report.md"
-    OUTPUT_PATH: str = f"{WORKSPACES_PATH}/output"
-    LOGS_PATH: str = f"{WORKSPACES_PATH}/logs"
-    DAO_PATH: str = f"{WORKSPACES_PATH}/app/crud"
-    REQUIREMENTS: str = System.get_depend_libs(file_path=f"{WORKSPACES_PATH}/requirements.txt")
+    ENVIRONMENT: Optional[str] = "dev"
+    PIKA_BACKEND_HOST: Optional[str] = "0.0.0.0"
+    PIKA_BACKEND_PORT: Optional[int] = 7777
+    PIKA_FRONTEND_URL: Optional[str] = 'http://unknown(.env未声明)'
+    CASE_RETRY_TIMES: Optional[int] = 1
+    WORKSPACES_PATH: Optional[str] = os.path.dirname(os.path.abspath(__file__))
+    TEMPLATE_PATH: Optional[str] = f"{WORKSPACES_PATH}/templates"
+    MARKDOWN_PATH: Optional[str] = f"{WORKSPACES_PATH}/templates/markdown/test_report.md"
+    OUTPUT_PATH: Optional[str] = f"{WORKSPACES_PATH}/output"
+    LOGS_PATH: Optional[str] = f"{WORKSPACES_PATH}/logs"
+    DAO_PATH: Optional[str] = f"{WORKSPACES_PATH}/app/crud"
+    REQUIREMENTS: Optional[str] = System.get_depend_libs(
+        file_path=f"{WORKSPACES_PATH}/requirements.txt")
     
     # 日志相关
     LOCAL_DATE = time.strftime("%Y-%m-%d", time.localtime(time.time()))
     LOGS_DIR_NAME = time.strftime("%Y-%m-%d", time.localtime(time.time()))
-    LOGS_PATH: str = f"{WORKSPACES_PATH}/logs"
+    LOGS_PATH: Optional[str] = f"{WORKSPACES_PATH}/logs"
     LOG_GENERAL_DIR = os.path.join(LOGS_PATH, LOGS_DIR_NAME)
     INFO_LOG_FILE = os.path.join(LOG_GENERAL_DIR, f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-info.log")
     ERROR_LOG_FILE = os.path.join(LOG_GENERAL_DIR, f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-error.log")
@@ -192,7 +195,7 @@ class InterceptHandler(logging.Handler):
 
     @staticmethod
     def make_filter(name):
-        # 过滤操作，当日志要选择对应的日志文件的时候，通过filter进行筛选
+        # 过滤操作,当日志要选择对应的日志文件的时候,通过filter进行筛选
         def filter_(record):
             return record["extra"].get("name") == name
 
@@ -201,7 +204,7 @@ class InterceptHandler(logging.Handler):
     @staticmethod
     def format_record(record: dict) -> str:
         """
-        这里的代码是copy的，记录日志格式的
+        这里的代码是copy的,记录日志格式的
         Custom format for loguru loggers.
         Uses pformat for log any data like request/response body during debug.
         Works with logging if loguru handler it.
@@ -227,12 +230,10 @@ class InterceptHandler(logging.Handler):
         for uvicorn_logger in loggers:
             uvicorn_logger.handlers = []
 
-        # 这里的操作是为了改变uvicorn默认的logger，使之采用loguru的logger
+        # 这里的操作是为了改变uvicorn默认的logger,使之采用loguru的logger
         # change handler for default uvicorn log
         intercept_handler = InterceptHandler()
         logging.getLogger("uvicorn").handlers = [intercept_handler]
-        # logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-        # logging.basicConfig(level=logging.INFO)
         logger.add(
             PikaAppConfig.INFO_LOG_FILE,
             enqueue=True,
@@ -249,7 +250,7 @@ class InterceptHandler(logging.Handler):
             filter=InterceptHandler.make_filter(PikaAppConfig.ERROR_LOG_FILE),
         )
 
-        # 配置loguru的日志句柄，sink代表输出的目标
+        # 配置loguru的日志句柄,sink代表输出的目标
         logger.configure(
             handlers=[
                 {

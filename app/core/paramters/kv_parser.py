@@ -25,7 +25,7 @@ class HeaderParser(Parser):
         return json.loads(data.get("response_headers"))
 
     @classmethod
-    def parse(cls, source: dict, expression: str = "", idx: str = None) -> Any:
+    def parse(cls, source: dict, expression: str = None, idx: str = None) -> Any:
         if not source or not expression:
             raise CaseParametersException(
                 f"parse out parameters failed, source or expression is empty")
@@ -34,7 +34,7 @@ class HeaderParser(Parser):
             results = jsonpath.jsonpath(source, expression)
             if results is False:
                 if not source and expression == "$..*":
-                    # 说明想要全匹配并且没数据，直接返回data
+                    # 说明想要全匹配并且没数据,直接返回data
                     return source
                 raise CaseParametersException(
                     "jsonpath match failed, please check your response or jsonpath.")

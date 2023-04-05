@@ -10,11 +10,12 @@
 @Desc    :  请求网关地址表
 """
 
-from sqlalchemy import Column, INT, String, UniqueConstraint
-
+from uuid import uuid4
+from sqlalchemy import Column, String, UniqueConstraint
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
+from app.core.handler.sqlbin_uuid import BinaryUUID
 
 
 class GatewayModel(LargeBaseModel):
@@ -22,7 +23,8 @@ class GatewayModel(LargeBaseModel):
     __table_args__ = (
         UniqueConstraint('env', 'name'), {"comment": "请求网关地址表"}
     )
-    env = Column(INT, comment='对应环境id')
+    env = Column(BinaryUUID,
+                 default=uuid4, comment='对应环境id')
     name = Column(String(ByteSizeEnum.LENGTH_50), comment="网关名称")
     address = Column(String(ByteSizeEnum.LENGTH_128), comment="网关地址")
 

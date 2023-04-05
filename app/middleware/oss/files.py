@@ -11,24 +11,19 @@
 """
 import random
 import time
+from typing import Union
 
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 
 
 class OssFile(object):
     _base_path = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}'
 
-    async def create_file(self, filepath: str, content, base_path: str = None) -> (str, int):
+    async def create_file(self, filepath: str, content, base_path: str = None) -> Union[str, int]:
         raise NotImplementedError
-
-    # async def update_file(self, filepath: str, content, base_path: str = None):
-    #     raise NotImplementedError
 
     async def delete_file(self, filepath: str, base_path: str = None):
         raise NotImplementedError
-
-    # async def list_file(self):
-    #     raise NotImplementedError
 
     async def download_file(self, filepath, base_path: str = None):
         raise NotImplementedError

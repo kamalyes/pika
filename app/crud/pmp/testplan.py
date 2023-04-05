@@ -31,8 +31,8 @@ from app.schema.base import BaseOnlyPagingSchema
 class ApiTestPlanDao(PikaWrapper):
 
     @classmethod
-    async def list_test_plan(cls, paging, project_id: int = None, name: str = '',
-                             priority: str = '',
+    async def list_test_plan(cls, paging, project_id: str = None, name: str = None,
+                             priority: str = None,
                              operator_identity: str = None, operator: str = None,
                              follow: bool = None):
         try:
@@ -45,7 +45,7 @@ class ApiTestPlanDao(PikaWrapper):
                     # 找出用户能看到的项目
                     projects = await ProjectDao.list_project_id_by_user(session, operator, operator_identity)
                     if projects is None:
-                        # 说明用户一个项目都没有，不需要继续查询了
+                        # 说明用户一个项目都没有,不需要继续查询了
                         return [], 0
                     if len(projects) > 0:
                         cls.where(projects, ApiTestPlanModel.project_id.in_(
@@ -73,7 +73,7 @@ class ApiTestPlanDao(PikaWrapper):
                         .outerjoin(ApiTestPlanFollowUserRelModel,
                                    ApiTestPlanFollowUserRelModel.plan_id == ApiTestPlanModel.id).where(
                         *conditions, or_(ApiTestPlanFollowUserRelModel.id is None,
-                                         ApiTestPlanFollowUserRelModel.delete_date != 0))
+                                         ApiTestPlanFollowUserRelModel.delete_date is not None))
                 result, total = await cls.pagination(paging.page_index, paging.page_size, session, sql, False)
                 return result, total
         except Exception as e:
@@ -129,11 +129,11 @@ class ApiTestPlanDao(PikaWrapper):
                                            old, plan.id,
                                            changed))
         except Exception as e:
-            cls.__log__.exception(f"编辑测试计划失败: {str(e)}")
+            cls.__log__.Exception(detail=f"编辑测试计划失败: {str(e)}")
             raise SystemException(detail=f"编辑失败: {str(e)}")
 
     @staticmethod
-    async def update_test_plan_state(id: int, state: int):
+    async def update_test_plan_state(id: str, state: int):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -152,7 +152,7 @@ class ApiTestPlanDao(PikaWrapper):
             raise SystemException(detail=f"编辑失败: {str(e)}")
 
     @staticmethod
-    async def query_test_plan(id: int) -> ApiTestPlanModel:
+    async def query_test_plan(id: str) -> ApiTestPlanModel:
         try:
             async with async_session() as session:
                 sql = select(ApiTestPlanModel).where(ApiTestPlanModel.delete_flag == 0,
@@ -164,7 +164,7 @@ class ApiTestPlanDao(PikaWrapper):
             raise SystemException(detail=f"获取测试计划失败: {str(e)}")
 
     # @classmethod
-    # async def delete_test_plan(cls, id: int, user: int):
+    # async def delete_test_plan(cls, id: str, user: int):
     #     try:
     #         async with async_session() as session:
     #             async with session.begin():
@@ -179,7 +179,7 @@ class ApiTestPlanDao(PikaWrapper):
     #         raise SystemException(detail=f"删除失败: {str(e)}")
 
     @staticmethod
-    async def follow_test_plan(plan_id: int, operator: str):
+    async def follow_test_plan(plan_id: str, operator: str):
         """
         关注测试计划
         Args:
@@ -203,7 +203,7 @@ class ApiTestPlanDao(PikaWrapper):
                 session.add(model)
 
     @staticmethod
-    async def unfollow_test_plan(plan_id: int, operator: str):
+    async def unfollow_test_plan(plan_id: str, operator: str):
         """
         取关测试计划
         Args:

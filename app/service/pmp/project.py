@@ -32,7 +32,7 @@ async def insert_project(data: ProjectSchema, escarole=Depends(Permission(RoleEn
 
 
 @router.delete("/delete", summary="删除项目")
-async def delete_project(project_id: int, escarole=Depends(Permission(RoleEnum.MANAGER, True)),
+async def delete_project(project_id: str, escarole=Depends(Permission(RoleEnum.MANAGER, True)),
                          session=Depends(async_db_session_iterator)):
     operator, operator_identity = escarole
     try:
@@ -61,7 +61,7 @@ async def update_project(data: ProjectEditSchema, escarole=Depends(Permission(es
 
 
 @router.get("/query", summary="查询项目")
-async def query_project(project_id: int, escarole=Depends(Permission(escarole=True))):
+async def query_project(project_id: str, escarole=Depends(Permission(escarole=True))):
     try:
         operator, operator_identity = escarole
         result = dict()
@@ -74,7 +74,7 @@ async def query_project(project_id: int, escarole=Depends(Permission(escarole=Tr
 
 
 @router.get("/list", summary="查询/获取项目列表")
-async def list_project(paging: BaseOnlyPagingSchema = Depends(), name: str = "",
+async def list_project(paging: BaseOnlyPagingSchema = Depends(), name: str = None,
                        escarole=Depends(Permission(escarole=True))):
     operator, operator_identity = escarole
     result, total = await ProjectDao.list_project(operator, operator_identity, paging, name)
@@ -82,7 +82,7 @@ async def list_project(paging: BaseOnlyPagingSchema = Depends(), name: str = "",
 
 
 @router.post("/avatar/{project_id}", summary="上传项目头像")
-async def update_project_avatar(project_id: int, file: UploadFile = File(...),
+async def update_project_avatar(project_id: str, file: UploadFile = File(...),
                                 escarole=Depends(Permission(escarole=True))):
     try:
         operator, operator_identity = escarole

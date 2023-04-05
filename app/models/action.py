@@ -14,7 +14,7 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy import ForeignKey
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import NormBaseModel
 from app.models.menu import MenuModel
 from app.models.user import UserModel
@@ -36,12 +36,12 @@ class RoleAction(NormBaseModel):
         nullable=False,
     )
     menu_id = Column(
-        Integer,
+        String(ByteSizeEnum.LENGTH_32),
         ForeignKey(MenuModel.id, ondelete="cascade", onupdate="cascade"),
         comment="对应menu_config表中的id",
     )
     control_id = Column(
-        Integer,
+        String(ByteSizeEnum.LENGTH_32),
         ForeignKey(ActionControlModel.id, ondelete="cascade", onupdate="cascade"),
         nullable=False,
         comment="权限控制id",

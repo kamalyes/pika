@@ -12,7 +12,6 @@
 import json
 import time
 from datetime import datetime
-
 from custard.json import JsonEncoder
 from sqlalchemy import select, MetaData, text, and_
 from sqlalchemy.exc import ResourceClosedError
@@ -21,7 +20,7 @@ from app.core.handler.exceres import KeyExistException, KeyUndefinedException, S
 from app.core.handler.jsonres import PikaResponse
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.itstem.environment import EnvironmentDao
-from app.enums.SysvarEnum import ValidTimeEnum
+from app.enums.SysVarEnum import ValidTimeEnum
 from app.middleware.xredis import RedisHelper
 from app.models import async_session, db_helper
 from app.models.database import DatabaseModel
@@ -32,7 +31,7 @@ from app.schema.database import DatabaseSchema
 @PikaMdWrapper(DatabaseModel)
 class DbConfigDao(PikaWrapper):
     @classmethod
-    async def list_database(cls, name: str = "", database: str = "", env: int = None):
+    async def list_database(cls, name: str = None, database: str = None, env: str = None):
         """
         通过name, database, env获取数据库配置列表
         Args:
@@ -93,7 +92,7 @@ class DbConfigDao(PikaWrapper):
             raise SystemException(detail="编辑数据库配置失败")
 
     @classmethod
-    async def delete_database(cls, id: int, operator: str):
+    async def delete_database(cls, id: str, operator: str):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -112,7 +111,7 @@ class DbConfigDao(PikaWrapper):
             raise SystemException(detail="删除数据库配置失败")
 
     @classmethod
-    async def query_database(cls, id: int):
+    async def query_database(cls, id: str):
         try:
             async with async_session() as session:
                 result = await session.execute(
@@ -125,7 +124,7 @@ class DbConfigDao(PikaWrapper):
             raise SystemException(detail="获取数据库配置失败")
 
     @classmethod
-    async def query_database_by_env_and_name(cls, env: int, name: str):
+    async def query_database_by_env_and_name(cls, env: str, name: str):
         try:
             async with async_session() as session:
                 result = await session.execute(
@@ -222,7 +221,7 @@ class DbConfigDao(PikaWrapper):
                 )
 
     @classmethod
-    async def online_sql(cls, id: int, sql: str):
+    async def online_sql(cls, id: str, sql: str):
         try:
             query = await DbConfigDao.query_database(id)
             if query is None:
@@ -256,7 +255,7 @@ class DbConfigDao(PikaWrapper):
                     raise SystemException(detail=f"执行sql失败: {e}")
 
     @classmethod
-    async def execute_sql(cls, env: int, name: str, sql: str):
+    async def execute_sql(cls, env: str, name: str, sql: str):
         try:
             query = await DbConfigDao.query_database_by_env_and_name(env, name)
             if query is None:

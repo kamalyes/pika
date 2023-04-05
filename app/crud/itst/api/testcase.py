@@ -11,7 +11,7 @@
 """
 import json
 from datetime import datetime, timedelta
-from typing import List, Dict
+from typing import List, Dict, Union
 
 from sqlalchemy import desc, func, and_, asc
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -57,7 +57,7 @@ class ApiTestCaseDao(PikaWrapper):
         )
 
     @classmethod
-    async def list_testcase(cls, paging, directory_id: int = None, name: str = "", operator: str = None):
+    async def list_testcase(cls, paging, directory_id: str = None, name: str = None, operator: str = None):
         try:
             filters = [ApiTestCaseModel.delete_flag == 0]
             if directory_id:
@@ -78,7 +78,7 @@ class ApiTestCaseDao(PikaWrapper):
             raise SystemException(detail=f"获取测试用例失败: {str(e)}")
 
     @classmethod
-    async def get_test_case_by_directory_id(cls, directory_id: int):
+    async def get_test_case_by_directory_id(cls, directory_id: str):
         try:
             async with async_session() as session:
                 sql = (
@@ -99,17 +99,17 @@ class ApiTestCaseDao(PikaWrapper):
             raise SystemException(detail=f"获取测试用例失败: {str(e)}")
 
     @classmethod
-    async def get_case_children(cls, case_id: int):
+    async def get_case_children(cls, case_id: str):
         data = await ApiTestCaseAssertsDao.list_test_case_asserts(case_id)
         return [dict(key=f"asserts_{d.id}", title=d.name, case_id=case_id) for d in data]
 
     @classmethod
-    async def get_case_children_length(cls, case_id: int):
+    async def get_case_children_length(cls, case_id: str):
         data = await ApiTestCaseAssertsDao.list_test_case_asserts(case_id)
         return len(data)
 
     @classmethod
-    async def _insert(cls, session, case_id: int, operator: str, form: TestCaseInfoSchema, **fields: tuple):
+    async def _insert(cls, session, case_id: str, operator: str, form: TestCaseInfoSchema, **fields: tuple):
         for field, model_info in fields.items():
             md, model = model_info
             field_data = getattr(form, field)
@@ -144,7 +144,7 @@ class ApiTestCaseDao(PikaWrapper):
         if query.scalars().first() is not None:
             raise KeyExistException(detail="用例名称已存在")
         cs = ApiTestCaseModel(**data.case.dict(), operator=operator)
-        # 添加case，之后添加其他数据
+        # 添加case,之后添加其他数据
         session.add(cs)
         await session.flush()
         session.expunge(cs)
@@ -192,7 +192,7 @@ class ApiTestCaseDao(PikaWrapper):
             raise SystemException(detail=f"编辑用例失败: {str(e)}")
 
     @classmethod
-    async def query_test_case(cls, case_id: int) -> dict:
+    async def query_test_case(cls, case_id: str) -> dict:
         """
 
         Args:
@@ -302,7 +302,7 @@ class ApiTestCaseDao(PikaWrapper):
         return step_case
 
     @classmethod
-    async def async_query_test_case(cls, case_id) -> [ApiTestCaseModel, str]:
+    async def async_query_test_case(cls, case_id) -> Union[ApiTestCaseModel, str]:
         """
 
         Args:
@@ -326,7 +326,7 @@ class ApiTestCaseDao(PikaWrapper):
             return None, f"查询用例失败: {str(e)}"
 
     @classmethod
-    async def list_testcase_tree(cls, projects: List[ProjectModel]) -> [List, dict]:
+    async def list_testcase_tree(cls, projects: List[ProjectModel]) -> Union[List, dict]:
         """
 
         Args:
@@ -372,7 +372,7 @@ class ApiTestCaseDao(PikaWrapper):
             raise SystemException(detail="获取用例列表失败")
 
     @classmethod
-    async def select_constructor(cls, case_id: int) -> List[ConstructorModel]:
+    async def select_constructor(cls, case_id: str) -> List[ConstructorModel]:
         """
         通过case_id获取用例构造数据
         Args:
@@ -392,7 +392,7 @@ class ApiTestCaseDao(PikaWrapper):
             cls.__log__.error(f"查询构造数据失败: {str(e)}")
 
     @classmethod
-    async def async_select_constructor(cls, case_id: int) -> List[ConstructorModel]:
+    async def async_select_constructor(cls, case_id: str) -> List[ConstructorModel]:
         """
         异步获取用例构造数据
         Args:
@@ -414,7 +414,7 @@ class ApiTestCaseDao(PikaWrapper):
             cls.__log__.error(f"查询构造数据失败: {str(e)}")
 
     @classmethod
-    async def collect_data(cls, case_id: int, data: List):
+    async def collect_data(cls, case_id: str, data: List):
         """
         收集以case_id为前置条件的数据(后置暂时不支持)
         Args:
@@ -453,7 +453,7 @@ class ApiTestCaseDao(PikaWrapper):
             temp = dict(id=f"constructor_{c.id}",
                         label=f"{c.name}", children=list())
             if c.type == ConstructorTypeEnum.testcase:
-                # 说明是用例，继续递归
+                # 说明是用例,继续递归
                 temp["label"] = "[CASE]: " + temp["label"]
                 json_data = json.loads(c.constructor_json)
                 await cls.collect_data(json_data.get("case_id"), temp.get("children"))
@@ -489,7 +489,7 @@ class ApiTestCaseDao(PikaWrapper):
             parent.get("children").append(temp)
 
     @classmethod
-    async def get_xmind_data(cls, case_id: int):
+    async def get_xmind_data(cls, case_id: str):
         """
 
         Args:
@@ -540,7 +540,6 @@ class ApiTestCaseDao(PikaWrapper):
         ans = dict()
         async with async_session() as session:
             async with session.begin():
-                # date_ = func.date_format(ApiTestCaseModel.create_date, "%Y-%m-%d")
                 sql = (
                     select(ApiTestCaseModel.create_date,
                            func.count(ApiTestCaseModel.id))

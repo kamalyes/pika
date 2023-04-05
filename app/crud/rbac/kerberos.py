@@ -104,7 +104,7 @@ class KerberosDao(PikaWrapper):
                         msg = "修改失败"
                     else:
                         msg = "部分修改成功"
-                    return PikaResponse.success(code=ExcCodeEnum.MYSQL_ERROR,
+                    return PikaResponse.success(code=ExcCodeEnum.SQL_OPERATION_ERROR,
                                                 message=f'{msg},详情请查阅返回值！',
                                                 data={"success": success, "failed": failed,
                                                       "not_funded": not_funded})

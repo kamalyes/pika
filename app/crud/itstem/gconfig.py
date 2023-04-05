@@ -12,9 +12,8 @@
 
 from sqlalchemy import select
 from app.core.handler.exceres import KeyExistException, SystemException
-
 from app.crud import PikaWrapper, PikaMdWrapper
-from app.enums.SysvarEnum import ValidTimeEnum
+from app.enums.SysVarEnum import ValidTimeEnum
 from app.middleware.xredis import RedisHelper
 from app.models import async_session
 from app.models.gconfig import GConfigModel
@@ -36,7 +35,7 @@ class GConfigDao(PikaWrapper):
                                                    GConfigModel.delete_flag == 0))
                     data = query.scalars().first()
                     if data is not None:
-                        raise KeyExistException(f"变量: {data.key}已存在")
+                        raise KeyExistException(detail=f"变量: {data.key}已存在")
                     config = GConfigModel(**form.dict(), operator=operator)
                     session.add(config)
         except Exception as e:
@@ -45,7 +44,7 @@ class GConfigDao(PikaWrapper):
 
     @staticmethod
     @RedisHelper.cache("dao", ValidTimeEnum.DAO_TIME.value, True)
-    async def async_get_gconfig_by_key(key: str, env: int) -> GConfigModel:
+    async def async_get_gconfig_by_key(key: str, env: str) -> GConfigModel:
         try:
             filters = [GConfigModel.key == key, GConfigModel.delete_flag == 0,
                        GConfigModel.enabled_flag is True,

@@ -47,9 +47,6 @@ class TencentCos(OssFile):
         key = self.get_real_path(filepath, base_path)
         self.client.delete_object(self.bucket, key)
 
-    def list_file(self):
-        pass
-
     @awaitable
     def download_file(self, filepath, base_path: str = None):
         key = self.get_real_path(filepath, base_path)

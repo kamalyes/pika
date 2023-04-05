@@ -11,17 +11,12 @@
 """
 
 from typing import Optional
-
 from fastapi import Query, Body
-from pydantic import BaseModel
-
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.schema.base import BaseBatchDelIdsSchema, BaseQuerySchema
+from app.schema.base import BaseBatchDelIdsSchema, BaseOnlyEmpNoSchema, BaseOnlyIdSchema, BaseOnlyIterateIdSchema, BasePPdSchema, BaseQuerySchema
 
 
-class EditIterateSchema(BaseModel):
-    iterate_id: Optional[int] = Body(0, title="迭代id")
-    project_id: Optional[int] = Body(..., title="项目id")
+class EditIterateSchema(BasePPdSchema):
     name: Optional[str] = Body(..., title="名称", max_length=ByteSizeEnum.LENGTH_30)
     description: Optional[str] = Body(None, title="描述", max_length=ByteSizeEnum.LENGTH_255)
     is_private: Optional[int] = Body(0, title="是否私有 1：私有 0：公开")
@@ -36,7 +31,6 @@ class DelIterateSchema(BaseBatchDelIdsSchema):
 
 
 class QueryIterateSchema(BaseQuerySchema):
-    id: Optional[int] = Query(None, title="迭代id")
     name: Optional[str] = Query(None, title="迭代名称", max_length=ByteSizeEnum.LENGTH_30)
     is_private: Optional[int] = Query(0, title="是否私有 1：私有 0：公开")
     enabled_flag: Optional[int] = Query(None, title="禁用/启用 1：启用、0：禁用")
@@ -45,10 +39,8 @@ class QueryIterateSchema(BaseQuerySchema):
         orm_mode = True
 
 
-class EditUserIterateRelSchema(BaseModel):
+class EditUserIterateRelSchema(BaseOnlyIterateIdSchema, BaseOnlyEmpNoSchema):
     iterate_rel_id: Optional[int] = Body(None, title="迭代关联id")
-    iterate_id: Optional[int] = Body(None, title="迭代id")
-    emp_no: Optional[int] = Body(None, title="员工编号")
     description: Optional[str] = Body(None, title="描述", max_length=ByteSizeEnum.LENGTH_255)
 
     class Config:

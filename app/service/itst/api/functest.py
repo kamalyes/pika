@@ -11,8 +11,6 @@
 """
 
 from typing import Any
-
-# from app.crud.itst.func.testcase import FuncCaseDao
 from fastapi import APIRouter, Depends
 from custard.pagination import LimitOffsetPage, add_pagination
 from sqlalchemy.ext.asyncio import AsyncSession

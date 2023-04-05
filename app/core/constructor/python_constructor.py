@@ -10,9 +10,7 @@
 @Desc    :  None
 """
 import json
-
 from awaits.awaitable import awaitable
-
 from app.core.constructor.constructor import ConstructorAbstract
 from app.core.handler.exceres import SystemException
 from app.models.constructor import ConstructorModel

@@ -31,7 +31,7 @@ class MenuDao:
                 MenuModel.parent_id == request.parent_id,
                 MenuModel.name == request.name,
                 MenuModel.title == request.title,
-                MenuModel.isHide == request.isHide,
+                MenuModel.is_hide == request.is_hide,
                 MenuModel.create_emp_no.like(f"%{request.create_emp_no}%"),
                 MenuModel.update_emp_no.like(f"%{request.update_emp_no}%"),
                 and_(MenuModel.create_date >= request.create_date,
@@ -95,9 +95,9 @@ class MenuDao:
                 await MenuDao.insert_menu(index, operator)
 
     @staticmethod
-    async def deleted(id: int):
+    async def deleted(id: str):
         menu = MenuModel.get(id)
         menus = MenuModel.get_menu_by_parent(id)
         if menus:
-            raise ValueError("当前菜单下管理的子菜单，不能删除！")
+            raise ValueError("当前菜单下管理的子菜单,不能删除！")
         menu.delete() if menu else ...

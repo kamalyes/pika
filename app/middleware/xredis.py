@@ -16,7 +16,7 @@ import inspect
 import json
 import pickle
 from random import Random
-from typing import Tuple
+from typing import Any, Tuple
 
 from awaits.awaitable import awaitable
 from loguru import logger
@@ -24,13 +24,13 @@ from redis import ConnectionPool, StrictRedis
 # noinspection PyPackageRequirements
 from rediscluster import RedisCluster, ClusterConnectionPool
 
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.exceptions.thirdparty.RedisException import RedisException
 from config import PikaAppConfig
 
 
 class PikaRedisManager(object):
-    """非线程安全，可能存在问题
+    """非线程安全,可能存在问题
     """
     _cluster_pool = dict()
     _pool = dict()
@@ -47,7 +47,7 @@ class PikaRedisManager(object):
         return StrictRedis(connection_pool=pool, decode_responses=True)
 
     @staticmethod
-    def delete_client(redis_id: int, cluster: bool):
+    def delete_client(redis_id: str, cluster: bool):
         """
         根据redis_id和是否是集群删除客户端
         Args:
@@ -63,7 +63,7 @@ class PikaRedisManager(object):
             PikaRedisManager._pool.pop(redis_id)
 
     @staticmethod
-    def get_cluster_client(redis_id: int, address: str):
+    def get_cluster_client(redis_id: str, address: str):
         """
         获取redis集群客户端
         Args:
@@ -81,7 +81,7 @@ class PikaRedisManager(object):
         return client
 
     @staticmethod
-    def get_single_node_client(redis_id: int, address: str, password: str, db: int):
+    def get_single_node_client(redis_id: str, address: str, password: str, db: int):
         """
         获取redis单实例客户端
         Args:
@@ -97,7 +97,7 @@ class PikaRedisManager(object):
         if node is not None:
             return node
         if ":" not in address:
-            raise RedisException(detail="redis连接未包含端口号，请检查配置")
+            raise RedisException(detail="redis连接未包含端口号,请检查配置")
         host, port = address.split(":")
         pool = ConnectionPool(host=host, port=port, db=db, max_connections=100, password=password,
                               decode_responses=True)
@@ -106,7 +106,7 @@ class PikaRedisManager(object):
         return client
 
     @staticmethod
-    def refresh_redis_client(redis_id: int, address: str, password: str, db: str):
+    def refresh_redis_client(redis_id: str, address: str, password: str, db: str):
         """
         刷新redis客户端
         Args:
@@ -125,7 +125,7 @@ class PikaRedisManager(object):
         PikaRedisManager._pool[redis_id] = client
 
     @staticmethod
-    def refresh_redis_cluster(redis_id: int, addr: str):
+    def refresh_redis_cluster(redis_id: str, addr: str):
         PikaRedisManager._cluster_pool[redis_id] = PikaRedisManager.get_cluster(
             addr)
 
@@ -144,13 +144,13 @@ class PikaRedisManager(object):
             startup_nodes = [{"host": n.split(":")[0], "port": n.split(":")[
                 1]} for n in nodes if ":" in n]
             if len(startup_nodes) == 0:
-                raise RedisException(detail="找不到集群节点，请检查配置")
+                raise RedisException(detail="找不到集群节点,请检查配置")
             pool = ClusterConnectionPool(startup_nodes=startup_nodes, max_connections=100,
                                          decode_responses=True)
             client = RedisCluster(connection_pool=pool, decode_responses=True)
             return client
         except Exception as e:
-            raise RedisException(f"获取Redis连接失败, {e}")
+            raise RedisException(detail=f"获取Redis连接失败, {e}")
 
 
 class RedisHelper(object):
@@ -303,10 +303,10 @@ class RedisHelper(object):
     def get_key(_redis_key: str, args_key: bool = True, *args, **kwargs):
         if not args_key:
             return f"{RedisHelper.prefix}:{_redis_key}"
-        filter_args = [a for a in args if not str(a).startswith(
-            ('<class', '<sqlalchemy', '(<sqlalchemy'))]
+        filter_keys = ('<class', '<sqlalchemy', '(<sqlalchemy')
+        filter_args = [key for key in args if not str(key).startswith(filter_keys)]
         for v in kwargs.values():
-            if v and not str(v).startswith(('<class', '<sqlalchemy', '(<sqlalchemy')):
+            if v and not str(v).startswith(filter_keys):
                 filter_args.append(str(v))
         return f"{RedisHelper.prefix}:{_redis_key}" \
                f"{':' + ':'.join(str(a) for a in filter_args) if len(filter_args) > 0 else ''}"
@@ -388,7 +388,7 @@ class RedisHelper(object):
     @staticmethod
     def up_cache(*key: str, key_and_suffix: Tuple = None):
         """
-        redis缓存key，套了此方法，会自动执行更新数据操作后删除缓存
+        redis缓存key,套了此方法,会自动执行更新数据操作后删除缓存
         Args:
             *key:
             key_and_suffix: 要删除的key和key组成规则
@@ -413,13 +413,13 @@ class RedisHelper(object):
                                                                       args,
                                                                       key_and_suffix[1])
                         RedisHelper.pika_redis_client.delete(current_key)
-                    # 更新数据，删除缓存
+                    # 更新数据,删除缓存
                     return new_data
 
                 return wrapper
             else:
                 @functools.wraps(func)
-                def wrapper(*args, **kwargs):
+                def wrapper(*args, **kwargs) -> Any:
                     new_data = func(*args, **kwargs)
                     if not PikaAppConfig.REDIS_ENABLE_FLAG:
                         return new_data

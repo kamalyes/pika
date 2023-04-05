@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python 3.9.11
 """
-@File    :  GconfigEnum.py
+@File    :  gconfig.py
 @Time    :  2022/7/7 15:21 PM
 @Author  :  YuYanQing
 @Version :  1.0
@@ -9,16 +9,18 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :   全局变量
 """
+from uuid import uuid4
 from sqlalchemy import INT, Column, String, TEXT, UniqueConstraint
-
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.enums.SysvarEnum import PikaGlobalVarEnum
+from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
+from app.core.handler.sqlbin_uuid import BinaryUUID
 
 
 class GConfigModel(LargeBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_gconfig'
-    env = Column(INT, comment="环境")
+    env = Column(BinaryUUID,
+                 default=uuid4, comment="环境")
     key = Column(String(ByteSizeEnum.LENGTH_56), comment="key")
     value = Column(TEXT, comment="变量")
     key_type = Column(INT, nullable=False, comment="参数类型 0: string 1: json 2: yaml")

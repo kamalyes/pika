@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python 3.9.11
 """
-@File    :  DatabaseEnum.py
+@File    :  database.py
 @Time    :  2022/6/18 7:18 PM
 @Author  :  YuYanQing
 @Version :  1.0
@@ -13,11 +13,10 @@ from typing import Optional
 
 from pydantic import BaseModel, validator
 
-from app.schema.base import PikaBaseModel
+from app.schema.base import PikaBaseModel, BaseOnlyIdSchema
 
 
-class DatabaseSchema(BaseModel):
-    id: Optional[int] = None
+class DatabaseSchema(BaseOnlyIdSchema):
     name: Optional[str]
     host: Optional[str]
     port: Optional[int] = None
@@ -25,7 +24,7 @@ class DatabaseSchema(BaseModel):
     password: Optional[str]
     database: Optional[str]
     sql_type: int
-    env: int
+    env: str
 
     # noinspection PyMethodParameters
     @validator("name", "host", "port", "username", "password", "sql_type", "env")
