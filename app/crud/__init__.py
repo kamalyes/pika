@@ -416,7 +416,7 @@ class PikaWrapper(object):
 
     @classmethod
     @RedisHelper.up_cache("dao")
-    async def delete_record_by_id(cls, session, operator: str, value: int, key='id',
+    async def delete_record_by_id(cls, session, operator: str, value: str, key='id',
                                   log=False, description=None,
                                   session_begin=False):
         """

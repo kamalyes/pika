@@ -1,4 +1,39 @@
 {
+  "editor.fontSize": 18,
+  "editor.links": false,
+  "editor.tabSize": 2,
+  "window.zoomLevel": 0.12, // 窗口大小，字体大小等
+  "files.autoSave": "off",
+  "[dockerfile]": {
+    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+  },
+  "[dockercompose]": {
+    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+  },
+
+  /*以下为git&文件头配置*/
+  "github.copilot.enable": {
+    "*": false,
+    "yaml": false,
+    "plaintext": false,
+    "markdown": false,
+    "python": true,
+    "java": false
+  },
+  "git.confirmSync": false,
+  "fileheader.LastModifiedBy": "YuYanQing",
+  "fileheader.Author": "YuYanQing",
+  "git.autofetch": true,
+  "git.autorefresh": false, // git 更新，
+  "git.detectSubmodules": false, // git 检测模块
+  "search.exclude": {
+    // 不需要搜索的文件夹
+    "**/.idea": true
+  },
+  /*其它配置*/
+  "cSpell.userWords": ["antlr", "kamalyes"],
+  "workbench.iconTheme": "vscode-icons",
+  "terminal.integrated.defaultProfile.windows": "Command Prompt",
   "cSpell.words": [
     "ACCESSLOG",
     "acess",
@@ -77,5 +112,5 @@
     "xredis",
     "Yapi",
     "YTDHMS"
-  ]
+  ],
 }
