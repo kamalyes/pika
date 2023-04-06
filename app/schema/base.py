@@ -72,7 +72,7 @@ class BaseOnlyIterateIdSchema(BaseModel):
 
 class BaseOnlyDirectoryIdSchema(BaseModel):
     directory_id: Optional[str] = Body(
-        None, title="所属目录id", max_length=ByteSizeEnum.LENGTH_32)
+        None, title="所属目录id", max_length=ByteSizeEnum.LENGTH_36)
 
 
 class BaseOnlyNameSchema(BaseModel):
