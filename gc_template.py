@@ -27,6 +27,7 @@ WORKER_CONNECTIONS = PikaAppConfig.SUPERVISOR_WORKER_CONNECTIONS
 PIDFILE = PikaAppConfig.SUPERVISOR_PIDFILE
 ACCESSLOG = PikaAppConfig.SUPERVISOR_ACCESSLOG
 ERRORLOG = PikaAppConfig.SUPERVISOR_ERRORLOG
+CONF_HOME = './conf'
 
 class Template:
   
@@ -60,17 +61,19 @@ class Template:
       }
       loader = FileSystemLoader(search_path)
       merge_data = Environment(loader=loader).get_template(template).render(replace_dict)
-      with open(template.replace('_template',''), 'w', encoding='utf-8') as f:
+      file_path = f'{CONF_HOME}/{template.replace("_template","")}'
+      with open(file_path, 'w', encoding='utf-8') as f:
         f.writelines(merge_data)
+      return file_path
     
     @classmethod
     def generate_supervisor(cls, search_path: str='./', template: str='supervisor_template.conf'):
-      commod = f'-b {BIND} -w {WORKERS} -k {WORKER_CLASS} --log-level {LOGLEVEL} --access-logfile "{ACCESSLOG}" --error-logfile "{ERRORLOG}"'
       loader = FileSystemLoader(search_path)
+      gunicorn_path = cls.generate_gunicorn()
+      commod = f'-c {gunicorn_path}'
       merge_data = Environment(loader=loader).get_template(template).render({"pika_command":commod})
-      with open(f'./conf/{template.replace("_template","")}', 'w', encoding='utf-8') as f:
+      with open(f'{CONF_HOME}/{template.replace("_template","")}', 'w', encoding='utf-8') as f:
         f.writelines(merge_data)
         
 if __name__ == '__main__':
-  Template.generate_gunicorn()
   Template.generate_supervisor()

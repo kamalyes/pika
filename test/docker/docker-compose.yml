@@ -1,71 +1,20 @@
 version: "3"
 services:
-  mysql:
-    image: mysql:${MYSQL_VERSION}
-    container_name: mysql
-    privileged: true
-    restart: always
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "mysqladmin",
-          "ping",
-          "-h",
-          "localhost",
-          "-uroot",
-          "-p${MYSQL_ROOT_PASSWORD}"
-        ]
-      interval: 6s
-      timeout: 5s
-      retries: 50
-    environment:
-      TZ: Asia/Shanghai
-      MYSQL_DATABASE: ${MYSQL_DATABASE_NAME}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    ports:
-      - ${MYSQL_PORT}:3306
-    volumes:
-      - ${VOLUMES_BASE}/conf/my.cnf:/etc/mysql/conf.d/my.cnf
-      - ${VOLUMES_BASE}/bin/mysql:/docker-entrypoint-initdb.d/
-      - ${VOLUMES_BASE}/data/mysql:/var/lib/mysql
-    networks:
-      - pika-network
-
-  redis:
-    image: redis:${REDIS_VERSION}
-    container_name: redis
-    privileged: true
-    restart: always
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 6s
-      timeout: 5s
-      retries: 50
-    environment:
-      TZ: "Asia/Shanghai"
-    ports:
-      - ${REDIS_PORT}:6379
-    volumes:
-      - ${VOLUMES_BASE}/conf/redis.conf:/etc/redis/redis.conf
-      - ${VOLUMES_BASE}/data/redis:/data
-    command: redis-server /etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
-    networks:
-      - pika-network
-
   pika:
-    image: kamalyes/pika-testing:latest
+    image: kamalyes/pika:latest
     container_name: pika
     restart: always
     privileged: true
     ports:
-      - ${PIKA_BACKEND_PORT}:7777
+      - 7777:7777
+      - 7778:7778
+      - 9001:9001
     environment:
       - TZ=Asia/Shanghai
+      # 数据库配置
     volumes:
-      - ${VOLUMES_BASE}/logs:/opt/pika/logs
-      - ${VOLUMES_BASE}/conf/.env:/opt/pika/conf/.env
-      - ${VOLUMES_BASE}/conf/supervisor.conf:/opt/pika/conf/supervisor.conf
+      - ./logs:/opt/pika/logs
+      - ./.env:/opt/pika/conf/.env
     networks:
       - pika-network
 

@@ -47,6 +47,7 @@
     "asyncsql",
     "authcode",
     "backref",
+    "commod",
     "dbconfig",
     "DINGDING",
     "dingtalk",
