@@ -14,7 +14,7 @@ from sqlalchemy import Column, String, Integer, Text
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
-
+from app.core.handler.sqlbin_uuid import BinaryUUID
 from app.models.basic import LargeBaseModel
 
 
