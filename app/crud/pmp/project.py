@@ -253,22 +253,6 @@ class ProjectRoleDao(PikaWrapper):
             raise SystemException(detail="获取项目失败")
 
     @classmethod
-    def query_number_count_by_emp_no(cls, emp_no):
-        """
-        通过emp_no查询旗下所有的用户数
-        Args:
-            emp_no:
-
-        Returns:
-
-        """
-        return select(func.count(ProjectRoleModel.member_no)) \
-            .outerjoin(ProjectModel, and_(ProjectModel.delete_flag == 0,
-                                          ProjectModel.id == ProjectRoleModel.project_id)).where(
-            or_(ProjectModel.owner == emp_no, ProjectRoleModel.member_no == emp_no)).group_by(
-            ProjectRoleModel.project_id)
-
-    @classmethod
     async def list_role(cls, project_id: str) -> List[ProjectRoleModel]:
         try:
             async with async_session() as session:
