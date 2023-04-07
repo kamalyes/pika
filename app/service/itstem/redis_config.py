@@ -44,7 +44,7 @@ async def delete_redis_config(id: str, background_tasks: BackgroundTasks,
                               user_info=Depends(Permission(RoleEnum.ADMIN)),
                               session=Depends(async_db_session_iterator)):
     try:
-        ans = await PikaRedisConfigDao.delete_record_by_id(session, user_info['emp_no'], id, False)
+        ans = await PikaRedisConfigDao.delete_record_by_id(session=session, operator=user_info['emp_no'], value=id, log=True)
         if ans:
             # 更新缓存
             background_tasks.add_task(
