@@ -17,11 +17,14 @@ from app.exceptions.business.CaseException import CaseParametersException
 
 
 class RegexParser(Parser):
+    @classmethod
+    def get_source(cls, source: dict):
+        return source.get("response")
 
-    @staticmethod
-    def parse(source: dict, expression: str = None, idx: str = None) -> Any:
+    @classmethod
+    def parse(cls, source: dict, expression: str = "", idx: str = None) -> Any:
         try:
-            source = source.get("response")
+            source = cls.get_source(source)
             if not source or not expression:
                 raise CaseParametersException(
                     f"parse out parameters failed, source or expression is empty")
@@ -39,3 +42,8 @@ class RegexParser(Parser):
         except Exception as err:
             raise CaseParametersException(
                 f"parse regex text error, please check regex or text: {err}")
+            
+class BodyRegexParser(RegexParser):
+    @classmethod
+    def get_source(cls, source: dict):
+        return source.get("request_data")
