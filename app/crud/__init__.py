@@ -374,7 +374,7 @@ class PikaWrapper(object):
                                    key=model.id, description=description))
             return now
         except Exception as e:
-            cls.__log__.Exception(
+            cls.__log__.exception(
                 detail=f"更新{cls.__model__.__name__}记录失败: \n{e}")
             raise DbException(detail=f"更新失败,\n{e}")
 
@@ -411,7 +411,7 @@ class PikaWrapper(object):
                                    description=description))
                 return original
         except Exception as e:
-            cls.__log__.Exception(
+            cls.__log__.exception(
                 detail=f"删除{cls.__model__.__name__}记录失败: \n{e}")
             raise DbException(detail=f"删除失败,\n{e}")
 
@@ -444,7 +444,7 @@ class PikaWrapper(object):
             async with session.begin():
                 return await cls._inner_delete(**mode)
         except Exception as e:
-            cls.__log__.Exception(
+            cls.__log__.exception(
                 detail=f"删除{cls.__model__.__name__}记录失败: \n{e}")
             raise DbException(detail=f"删除失败,\n{e}")
 
@@ -470,7 +470,7 @@ class PikaWrapper(object):
                                        changed={},
                                        key=id_, description=description))
         except Exception as e:
-            cls.__log__.Exception(detail=f"删除{cls.__model__}记录失败, error: {e}")
+            cls.__log__.exception(detail=f"删除{cls.__model__}记录失败, error: {e}")
             raise DbException(detail="删除记录失败")
 
     @classmethod

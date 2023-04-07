@@ -129,7 +129,7 @@ class ApiTestPlanDao(PikaWrapper):
                                            old, plan.id,
                                            changed))
         except Exception as e:
-            cls.__log__.Exception(detail=f"编辑测试计划失败: {str(e)}")
+            cls.__log__.exception(detail=f"编辑测试计划失败: {str(e)}")
             raise SystemException(detail=f"编辑失败: {str(e)}")
 
     @staticmethod

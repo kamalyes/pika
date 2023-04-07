@@ -83,7 +83,7 @@ class PikaLogger(object):
             filename=file_name,
         ).debug(message)
 
-    def exception(self, message: str):
+    def exception(self, detail: str):
         file_name, line, func, _, _ = inspect.getframeinfo(
             inspect.currentframe().f_back
         )
@@ -93,7 +93,7 @@ class PikaLogger(object):
             line=line,
             business=self.business,
             filename=file_name,
-        ).exception(message)
+        ).exception(detail)
 
     @staticmethod
     def delete_log(days=None):
