@@ -45,7 +45,7 @@ class ApiTestReportModel(Base):
     mode = Column(SMALLINT, default=0,
                   comment="case执行模式 0: 普通, 1: 测试集, 2: pipeline, 3: 其他")
     delete_flag = Column(BOOLEAN, server_default="0",
-                         comment="删除标识 1：已删除,0：未删除")
+                         comment="删除标识 1:已删除,0:未删除")
 
     def __init__(self, executor: str, env: str, success_count: int = 0, failed_count: int = 0,
                  error_count: int = 0, skipped_count: int = 0, status: int = 0, mode: int = 0,

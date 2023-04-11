@@ -150,7 +150,7 @@ ln -s /usr/local/python3/bin/pip3 /usr/bin/pip3
 2. 安装nodejs
 ```
 https://nodejs.org/download/release/v16.9.1/
-# 若出现如下错误：则需执行提权或重新安装yarn
+# 若出现如下错误:则需执行提权或重新安装yarn
 npm@8.19.3 D:\Program Files\NodeJs16.19.0\node_modules\npm
 npm ERR! code EPERM
 npm ERR! syscall mkdir
@@ -166,15 +166,15 @@ npm ERR! You can rerun the command with `--loglevel=verbose` to see the logs in 
 3. clone项目
 
 ```bash
-后端：git clone git@github.com:kamalyes/pika.git
-前端：git clone git@github.com:kamalyes/pikaWeb.git
+后端:git clone git@github.com:kamalyes/pika.git
+前端:git clone git@github.com:kamalyes/pikaWeb.git
 ```
 
 4. 修改配置文件
 
 ```bash
-后端：修改conf/.env中ENVIRONMENT变量
-前端：修改config.js
+后端:修改conf/.env中ENVIRONMENT变量
+前端:修改config.js
 ```
 
 5. 数据库时区不对
@@ -209,12 +209,12 @@ npm ERR! You can rerun the command with `--loglevel=verbose` to see the logs in 
 ### Git提交规范
 
 ```
-feat 适用场景：全是新增功能,在旧功能基础上做改动（包含新增,删除）
-fix 适用场景：修复bug,包含测试环境和生产环境
-refactor 适用场景：重构任何功能,重构前和重构后输入和输出需要完全不变,如果有变化,在改动的部分请使用`feat`
-test 适用场景：增加单元测试时
-style 适用场景：修改代码格式,代码逻辑完全不变
-docs 适用场景：编写注释或者使用文档
+feat 适用场景:全是新增功能,在旧功能基础上做改动（包含新增,删除）
+fix 适用场景:修复bug,包含测试环境和生产环境
+refactor 适用场景:重构任何功能,重构前和重构后输入和输出需要完全不变,如果有变化,在改动的部分请使用`feat`
+test 适用场景:增加单元测试时
+style 适用场景:修改代码格式,代码逻辑完全不变
+docs 适用场景:编写注释或者使用文档
 emoji	emoji代码	commit说明
 🎨 (调色板)	:art:	改进代码结构/代码格式
 ⚡️ (闪电)	:zap:	提升性能

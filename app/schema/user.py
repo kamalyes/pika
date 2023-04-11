@@ -80,7 +80,7 @@ class OAuth2LoginSchema:
             self,
             dynamic_code: Optional[str] = Form(None, title="动态码",
                                                max_length=ByteSizeEnum.LENGTH_06),
-            grant_type: Optional[str] = Form(..., title="授权方式, account：用户名/员工编号、email：邮箱验证码",
+            grant_type: Optional[str] = Form(..., title="授权方式, account:用户名/员工编号、email:邮箱验证码",
                                              max_length=ByteSizeEnum.LENGTH_255),
             username: Optional[str] = Form(
                 None, title="用户名", max_length=ByteSizeEnum.LENGTH_16),
@@ -167,14 +167,14 @@ class QuerySecuritySchema(BaseOnlyIdSchema):
 
 
 class GetVerifyCodeSchema(BaseModel):
-    models: Optional[int] = Body(1, title="模式：（1：忘记密码）")
+    models: Optional[int] = Body(1, title="模式:（1:忘记密码）")
 
     class Config:
         orm_mode = True
 
 
 class EmailVerifyCodeSchema(BaseModel):
-    model: Optional[int] = Body(3, title="模型：2：邮箱登录使用,3：用户注册时使用")
+    model: Optional[int] = Body(3, title="模型:2:邮箱登录使用,3:用户注册时使用")
     email: Optional[str] = Body(None, title="邮箱地址")
 
     class Config:
@@ -182,7 +182,7 @@ class EmailVerifyCodeSchema(BaseModel):
 
 
 class ForgetPwdSchema(BaseModel):
-    alter_type: Optional[int] = Body(1, title="验证方式：（1：邮箱验证码, 2：密保）")
+    alter_type: Optional[int] = Body(1, title="验证方式:（1:邮箱验证码, 2:密保）")
     verify_code: Optional[str] = Body(
         None, title="验证码", max_length=ByteSizeEnum.LENGTH_06)
     security: List[ItemSecuritySchema] = Body(None, title="密保信息")

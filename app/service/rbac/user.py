@@ -64,14 +64,16 @@ async def logout(request: Request, oauth2_logout: OAuth2TokenSchema = Depends())
 
 @router.post("/add", dependencies=[], name="添加用户 （管理员操作）")
 async def create_user(request: AddUserSchema,
-                      user_info=Depends(Permission(RoleEnum.MANAGER.value))):
-    return await UserDao.add_user(request, user_info)
+                      escarole=Depends(Permission(RoleEnum.MANAGER.value,escarole=True))):
+    emp_no, role = escarole
+    return await UserDao.add_user(request, operator=emp_no)
 
 
-@router.post("/info/update", summary="用户更新自己相关资料")
+@router.post("/info/update", summary="更新用户资料")
 async def update_user_info(modify_user_info: ModifyUserInfoSchema,
-                           user_info=Depends(Permission())):
-    return await UserDao.update_user_info(modify_user_info, user_info)
+                           escarole=Depends(Permission(escarole=True))):
+    emp_no, role = escarole
+    return await UserDao.update_user_info(modify_user_info, operator=emp_no)
 
 
 @router.get("/alluser", summary="查询所有用户信息")

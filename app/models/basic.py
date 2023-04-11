@@ -20,9 +20,9 @@ class LargeBaseModel(Base):
     id = Column(BinaryUUID,
                 primary_key=True, default=uuid4, comment="id")
     enabled_flag = Column(BOOLEAN, server_default="1",
-                          comment="启用标识 1：启用,0：禁用")
+                          comment="启用标识 1:启用,0:禁用")
     delete_flag = Column(BOOLEAN, server_default="0",
-                         comment="删除标识 1：已删除,0：未删除")
+                         comment="删除标识 1:已删除,0:未删除")
     create_emp_no = Column(String(ByteSizeEnum.LENGTH_20), comment="创建者emp_no")
     update_emp_no = Column(String(ByteSizeEnum.LENGTH_20), comment="修改者emp_no")
     create_date = Column(

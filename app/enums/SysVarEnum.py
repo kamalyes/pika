@@ -38,10 +38,10 @@ class PikaGlobalVarEnum:
 
 class ValidTimeEnum(IntEnum):
     DF_VALID_TIME = 15 * 60  # 默认全局有效期
-    LOGIN_LOCK_TIME = 60 * 60 * 1  # 登录锁：默认是1小时
+    LOGIN_LOCK_TIME = 60 * 60 * 1  # 登录锁:默认是1小时
     ERR_PWD_COUNT = 5  # 错误密码次数
     MAX_CODE_NUM = 5  # 限制一定频率下只能请求xx次前端动态码
-    AUTH_VALID_TIME = 60 * 60 * 24 * 15  # AUTH有效期：默认是15天
+    AUTH_VALID_TIME = 60 * 60 * 24 * 15  # AUTH有效期:默认是15天
     DYNAMIC_CODE_VALID_TIME = 2 * 60  # 前端动态码有效期（登录时防爬虫机制）
     AUTH_CODE_VALID_TIME = 5 * 60  # 鉴权验证码有效期（修改资料、密码等操作使用）
     SYSTEM_CONFIG_VALID_TIME = 24 * 3600

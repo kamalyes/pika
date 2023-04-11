@@ -75,7 +75,7 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                     new_assert = ApiTestCaseAssertsModel(
                         **form.dict(), operator=operator)
                     session.add(new_assert)
-                    # TODO bug：Could not refresh instance '<ApiTestCaseAssertsModel at 0x155e8af9be0>
+                    # TODO bug:Could not refresh instance '<ApiTestCaseAssertsModel at 0x155e8af9be0>
                     await session.flush()
                     await session.refresh(new_assert)
                     session.expunge(new_assert)

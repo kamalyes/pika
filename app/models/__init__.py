@@ -77,7 +77,7 @@ async def async_db_session_generator() -> AsyncGenerator:
         await session.rollback()
         raise DbExecuteException(
             code=ExcCodeEnum.SQL_OPERATION_ERROR,
-            detail=f"数据操作失败,错误原因：{sql_exc}",
+            detail=f"数据操作失败,错误原因:{sql_exc}",
         )
     finally:
         await session.close()

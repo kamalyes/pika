@@ -7,7 +7,7 @@
 @Version :  1.0
 @Contact :  mryu168@163.com
 @License :  (C)Copyright 2022-2026
-@Desc    : 　None
+@Desc    :  None
 """
 import random
 from typing import Any
@@ -142,7 +142,7 @@ class UserDao(PikaWrapper):
                                                Moment.get_now_time(PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS))
         except Exception as e:
             raise SystemException(
-                code=ExcCodeEnum.FIELD_TYPE_ERROR, detail=f"密码有效期对比失败！具体错误原因：{e}")
+                code=ExcCodeEnum.FIELD_TYPE_ERROR, detail=f"密码有效期对比失败！具体错误原因:{e}")
         if compare_time is False:
             raise AuthException(
                 code=ExcCodeEnum.PASSWORD_HAS_EXPIRED, detail="密码已过期,请修改后进行登录！")
@@ -334,7 +334,7 @@ class UserDao(PikaWrapper):
         """
         user_ip = await client_ip(request)
         if oauth2_login.email is None:
-            raise ValidException(detail="字段：email不能为空")
+            raise ValidException(detail="字段:email不能为空")
         async with async_db_session_generator() as session:
             async with session.begin():
                 sql = select(UserModel).where(
@@ -425,12 +425,12 @@ class UserDao(PikaWrapper):
             raise AuthException()
 
     @classmethod
-    async def add_user(cls, request, user_info):
+    async def add_user(cls, request, operator):
         """
         添加用户
         Args:
             request:
-            user_info:
+            operator:
         Returns:
         """
         await regex_register_str(email=request.email)
@@ -447,19 +447,18 @@ class UserDao(PikaWrapper):
             user_admin = SysUserAdminModel(uid=user.id, emp_no=user.emp_no, is_activate=1,
                                            password=pwd,
                                            pwd_valid_date=PikaGlobalVarEnum.PWD_VALID_DATE,
-                                           create_emp_no=user_info.get(
-                                               "emp_no", None),
+                                           create_emp_no=operator,
                                            registration_date=Moment.get_now_time(PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS))
             session.add(user_admin)
             return PikaResponse.success(data=user, message=PromptEnum.REGISTER_SUCCEED.value)
 
     @classmethod
-    async def update_user_info(cls, modify_user_info, user_info):
+    async def update_user_info(cls, modify_user_info, operator):
         """
         更新用户信息
         Args:
             modify_user_info:
-            user_info:
+            operator:
         Returns:
         """
         await regex_register_str(email=modify_user_info.email,
@@ -481,7 +480,7 @@ class UserDao(PikaWrapper):
                     and_(or_(UserModel.email == modify_user_info.email,
                              UserModel.mobile == modify_user_info.mobile,
                              UserModel.plane == modify_user_info.plane),
-                         UserModel.emp_no != user_info.get("emp_no")))
+                         UserModel.emp_no != operator))
                 sel_res = await session.execute(sel_sql)
                 exists_users = sel_res.scalars().first()
                 if exists_users:
@@ -489,8 +488,7 @@ class UserDao(PikaWrapper):
                                                exists_username=exists_users.username,
                                                email=modify_user_info.email,
                                                exists_email=exists_users.email)
-                sql = update(UserModel).where(UserModel.id == user_info.get("uid")).values(
-                    update_info)
+                sql = update(UserModel).where(UserModel.emp_no == operator).values(update_info)
                 await session.execute(sql)
         return PikaResponse.success()
 
@@ -511,7 +509,7 @@ class UserDao(PikaWrapper):
             ))
         else:
             return PikaResponse.failed(code=ExcCodeEnum.VAR_ERROR,
-                                       detail=f"query_type值不对,仅可传0：全部数据,1：条件查询")
+                                       detail=f"query_type值不对,仅可传0:全部数据,1:条件查询")
 
     @staticmethod
     async def rand_dynamic_code(request):

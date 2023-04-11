@@ -47,7 +47,7 @@ class EnvironmentDao(PikaWrapper):
                     select(EnvironmentModel).where(EnvironmentModel.name == data.name,
                                                    EnvironmentModel.delete_flag == 0))
                 if query.scalars().first() is not None:
-                    raise KeyExistException(detail=f"添加失败,环境名称：{data.name}已存在")
+                    raise KeyExistException(detail=f"添加失败,环境名称:{data.name}已存在")
                 env = EnvironmentModel(**data.dict(), operator=emp_no)
                 session.add(env)
 
@@ -72,6 +72,6 @@ class EnvironmentDao(PikaWrapper):
                 data = await session.execute(sql)
                 return data.scalars().all(), total
         except Exception as e:
-            err = f"获取环境数据失败,失败原因： {str(e)}"
+            err = f"获取环境数据失败,失败原因: {str(e)}"
             cls.__log__.error(err)
             raise SystemException(detail=err)

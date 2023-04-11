@@ -105,7 +105,7 @@ class ProjectDao(PikaWrapper):
                     select(ProjectModel).where(ProjectModel.name == name,
                                                ProjectModel.delete_flag == 0))
                 if data.scalars().first() is not None:
-                    err = f"新增项目: {name}失败, 失败原因：项目已存在"
+                    err = f"新增项目: {name}失败, 失败原因:项目已存在"
                     cls.__log__.error(err)
                     raise KeyExistException(detail=err)
                 pr = ProjectModel(name, app, owner, operator, description, private, dingtalk_url,

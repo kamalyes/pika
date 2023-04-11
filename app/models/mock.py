@@ -29,10 +29,10 @@ class MockModel(LargeBaseModel):
                     comment='请求方式')
     headers = Column(Text, comment='headers')
     match_type = Column(Integer, server_default='0',
-                        comment='类型：0：default,1：mockjs,2：faker')
+                        comment='类型:0:default,1:mockjs,2:faker')
     content_type = Column(String(ByteSizeEnum.LENGTH_30),
                           server_default='application/json')
     response_templates = Column(
         String(ByteSizeEnum.LENGTH_600), default=None, comment="响应模版")
     status_code = Column(Integer, server_default='200',
-                         comment='http 响应状态码：200（默认）')
+                         comment='http 响应状态码:200（默认）')

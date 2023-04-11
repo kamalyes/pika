@@ -76,7 +76,7 @@ class EmailManger(object):
         Args:
             username:
             emp_no:
-            events_key:  操作事件 0：密码泄露 1：爬虫机制 2：密码快过期需要修改
+            events_key:  操作事件 0:密码泄露 1:爬虫机制 2:密码快过期需要修改
             send_time:
 
         Returns:
@@ -267,7 +267,7 @@ class EmailManger(object):
                 # email_cursor.set_debuglevel(1)
             except Exception as e:
                 raise ThirdException(
-                    code=ExcCodeEnum.SEND_EMAIL_ERROR, detail=f"发送邮件失败,错误原因：{e}")
+                    code=ExcCodeEnum.SEND_EMAIL_ERROR, detail=f"发送邮件失败,错误原因:{e}")
             else:
                 return True
             finally:

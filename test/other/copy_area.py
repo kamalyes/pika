@@ -2,10 +2,10 @@
 # !/usr/bin/env python 3.7
 # Python version 2.7.16 or 3.7.6
 """
-# FileName： copy_area.py
+# FileName: copy_area.py
 # Author : YuYanQing
 # Desc: 
-# Date： 2022/1/21 13:16 
+# Date: 2022/1/21 13:16 
 """
 import time
 

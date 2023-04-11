@@ -127,7 +127,7 @@ class PikaFastApi:
         """
 
         def __register(module_obj):
-            """注册路由,module_obj： 模块对象"""
+            """注册路由,module_obj: 模块对象"""
             if hasattr(module_obj, router_name):
                 router_obj = getattr(module_obj, router_name)
                 if no_depends in module_obj.__name__:
@@ -348,14 +348,14 @@ class PikaFastApi:
         pika = FastAPI(
             title=title,
             description=f"""
-    ### 背景：
+    ### 背景:
         1.对于新手使用第一代的ProtocolTest编写纯YAML版的复杂用例的操作及维护性不太友好/以及二代ViteBate写着写着不想写的落寞
         2.大市场环境影响; 平台规范化管理
         3.对于自己在行四年期间的总结
         4.重点是学习React + Antd 更进一步加深对fastapi的理解
-    - 前端：`React + Antd + UmiJs`
+    - 前端:`React + Antd + UmiJs`
     - 后端: requirements: {requirements}
-    - 运行环境：{System.get_platform_info()}""",
+    - 运行环境:{System.get_platform_info()}""",
             version="0.0.1",
             openapi_url="/openapi.json",
             docs_url="/docs",

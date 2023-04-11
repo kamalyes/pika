@@ -60,7 +60,7 @@ class RoleDao:
                         .where(RoleModel.id == id).values(**request.__dict__, operator=operator)
                     await session.execute(update_role_info_sql)
         except ValueError as err:
-            err_msg = f"更新/写入失败,错误原因：{err}"
+            err_msg = f"更新/写入失败,错误原因:{err}"
             cls.__log__.error(err_msg)
             raise SystemException(detail=err_msg)
 
