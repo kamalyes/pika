@@ -1,42 +1,31 @@
-import uuid
-from sqlalchemy.types import TypeDecorator, BINARY
-from sqlalchemy.dialects.postgresql import UUID as psqlUUID
+# -*- coding:utf-8 -*-
+# !/usr/bin/env python 3.9.11
+"""
+@File    :  sqlbin_uuid.py
+@Time    :  2022/7/7 15:21 PM
+@Author  :  YuYanQing
+@Version :  1.0
+@Contact :  mryu168@163.com
+@License :  (C)Copyright 2022-2026
+@Desc    :  None
+"""
+
+from app.enums.ByteSizeEnum import ByteSizeEnum
+from sqlalchemy.types import TypeDecorator, String
+
+ENABLE_DB_TYPE = ['postgresql','mysql']
 
 class BinaryUUID(TypeDecorator):
     """
-    Platform-independent GUID type.
-    Uses Postgresql's UUID type, otherwise uses
-    BINARY(16), to store UUID.
-
+    Platform-independent UUID type.
     """
-    impl = BINARY
+    impl = String
 
     def load_dialect_impl(self, dialect):
-        if dialect.name == 'postgresql':
-            return dialect.type_descriptor(psqlUUID())
-        else:
-            return dialect.type_descriptor(BINARY(16))
+        return dialect.type_descriptor(String(ByteSizeEnum.LENGTH_64))
 
     def process_bind_param(self, value, dialect):
-        if value is None:
-            return value
-        else:
-            if not isinstance(value, uuid.UUID):
-                if isinstance(value, bytes):
-                    value = uuid.UUID(bytes=value)
-                elif isinstance(value, int):
-                    value = uuid.UUID(int=value)
-                elif isinstance(value, str):
-                    value = uuid.UUID(value)
-        if dialect.name == 'postgresql':
-            return str(value)
-        else:
-            return value.bytes
+        return value if value is None else str(value)
 
     def process_result_value(self, value, dialect):
-        if value is None:
-            return value
-        if dialect.name == 'postgresql':
-            return uuid.UUID(value)
-        else:
-            return uuid.UUID(bytes=value)
+        return value if value is None else str(value)
