@@ -424,7 +424,7 @@ class ApiTestCaseDao(PikaWrapper):
         Returns:
 
         """
-        # 先获取数据构造器（前置条件）
+        # 先获取数据构造器(前置条件)
         pre = dict(id=f"pre_{case_id}", label="前置条件", children=list())
         suffix = dict(id=f"suffix_{case_id}", label="后置条件", children=list())
         await cls.collect_constructor(case_id, pre, suffix)

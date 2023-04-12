@@ -29,7 +29,7 @@ async def add_funccase(request: EditFuncCaseSchema, escarole=Depends(Permission(
     return await FuncCaseDao.add_funccase(request=request, emp_no=emp_no)
 
 
-@router.delete("/funccase/delete", summary="删除功能测试用例（软删）")
+@router.delete("/funccase/delete", summary="删除功能测试用例(软删)")
 async def delete_funccase(request: DelFuncCaseSchema = Depends(),
                           escarole=Depends(Permission(escarole=True))):
     emp_no, role = escarole

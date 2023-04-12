@@ -31,7 +31,7 @@ async def add_mock_deploy(request: EditMockSchema):
     return await MockDao.add_mock_deploy(request=request)
 
 
-@router.delete("/mock/delete", summary="删除mock配置（软删）")
+@router.delete("/mock/delete", summary="删除mock配置(软删)")
 async def delete_mock_deploy(request: DelMockSchema = Depends(),
                              escarole=Depends(Permission(escarole=True))):
     emp_no, role = escarole

@@ -27,7 +27,7 @@ class ConstructorDao(PikaWrapper):
     @classmethod
     async def list_constructor(cls, case_id: str) -> List[ConstructorModel]:
         """
-        根据用例id获取数据构造器列表（包括前后置条件）
+        根据用例id获取数据构造器列表(包括前后置条件)
         Args:
             case_id:
 

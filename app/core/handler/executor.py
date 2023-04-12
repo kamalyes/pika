@@ -890,7 +890,7 @@ class Executor(object):
                     if int(m) == NoticeTypeEnum.EMAIL:
                         content = EmailManger.test_report_template(
                             plan_name=plan.name, **report_dict[e])
-                        subject = f"【{report_dict[e].get('env')}】测试计划【{plan.name}】执行完毕（{report_dict[e].get('plan_result')}）"
+                        subject = f"【{report_dict[e].get('env')}】测试计划【{plan.name}】执行完毕({report_dict[e].get('plan_result')})"
                         return EmailManger.send_email(content=content, subject=subject, addressee=[r.get("email") for r in users])
                     if int(m) == NoticeTypeEnum.DINGDING:
                         report_dict[e]["result_color"] = "#67C23A" if report_dict[e]["plan_result"] == "通过" else "#E6A23C"

@@ -167,7 +167,7 @@ class QuerySecuritySchema(BaseOnlyIdSchema):
 
 
 class GetVerifyCodeSchema(BaseModel):
-    models: Optional[int] = Body(1, title="模式:（1:忘记密码）")
+    models: Optional[int] = Body(1, title="模式:(1:忘记密码)")
 
     class Config:
         orm_mode = True
@@ -182,7 +182,7 @@ class EmailVerifyCodeSchema(BaseModel):
 
 
 class ForgetPwdSchema(BaseModel):
-    alter_type: Optional[int] = Body(1, title="验证方式:（1:邮箱验证码, 2:密保）")
+    alter_type: Optional[int] = Body(1, title="验证方式:(1:邮箱验证码, 2:密保)")
     verify_code: Optional[str] = Body(
         None, title="验证码", max_length=ByteSizeEnum.LENGTH_06)
     security: List[ItemSecuritySchema] = Body(None, title="密保信息")

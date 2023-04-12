@@ -34,4 +34,4 @@ class MockModel(LargeBaseModel):
     response_templates = Column(
         String(ByteSizeEnum.LENGTH_600), default=None, comment="响应模版")
     status_code = Column(INT, server_default='200',
-                         comment='http 响应状态码:200（默认）')
+                         comment='http 响应状态码:200(默认)')

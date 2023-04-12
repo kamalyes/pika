@@ -60,7 +60,7 @@ class ProjectRoleModel(LargeBaseModel):
         String(ByteSizeEnum.LENGTH_20),
         ForeignKey(UserModel.emp_no, ondelete="cascade", onupdate="cascade"),
         nullable=False,
-        comment="项目成员编号（用户编号）")
+        comment="项目成员编号(用户编号)")
     project_id = Column(BinaryUUID,
                         default=uuid4, index=True, comment="项目id")
     project_role = Column(INT, server_default="0", index=True, comment="角色")

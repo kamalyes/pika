@@ -209,7 +209,7 @@ npm ERR! You can rerun the command with `--loglevel=verbose` to see the logs in 
 ### Git提交规范
 
 ```
-feat 适用场景:全是新增功能,在旧功能基础上做改动（包含新增,删除）
+feat 适用场景:全是新增功能,在旧功能基础上做改动(包含新增,删除)
 fix 适用场景:修复bug,包含测试环境和生产环境
 refactor 适用场景:重构任何功能,重构前和重构后输入和输出需要完全不变,如果有变化,在改动的部分请使用`feat`
 test 适用场景:增加单元测试时

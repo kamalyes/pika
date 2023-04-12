@@ -40,7 +40,7 @@ async def register(request: Request, register_model: RegisterUserSchema):
     return await UserDao.register_user(request, register_model)
 
 
-@router.post("/login/", summary="（编号、用户名）及密码登录", include_in_schema=True)
+@router.post("/login/", summary="(编号、用户名)及密码登录", include_in_schema=True)
 async def login(request: Request, oauth2_login: OAuth2LoginSchema = Depends()):
     if oauth2_login.grant_type == "account":
         return await UserDao.account_login(request, oauth2_login)
@@ -50,7 +50,7 @@ async def login(request: Request, oauth2_login: OAuth2LoginSchema = Depends()):
         raise ValidException(detail="暂不支持该model！")
 
 
-@router.post("/verifytoken", summary="验证Token（用于刷新时使用）")
+@router.post("/verifytoken", summary="验证Token(用于刷新时使用)")
 async def login(request: OAuth2TokenSchema = Depends()):
     user_info = await UserDao.verify_token(request)
     return PikaResponse.success(message="Authentication success",
@@ -62,7 +62,7 @@ async def logout(request: Request, oauth2_logout: OAuth2TokenSchema = Depends())
     return await UserDao.account_logout(request, oauth2_logout)
 
 
-@router.post("/add", dependencies=[], name="添加用户 （管理员操作）")
+@router.post("/add", dependencies=[], name="添加用户 (管理员操作)")
 async def create_user(request: AddUserSchema,
                       escarole=Depends(Permission(RoleEnum.MANAGER.value,escarole=True))):
     emp_no, role = escarole
@@ -112,7 +112,7 @@ async def send_verify_code(request: GetVerifyCodeSchema, user_info=Depends(Permi
     return await UserDao.get_verifycode(request, user_info)
 
 
-@router.post("/pwd/forget", summary="忘记密码？通过（邮箱验证码/密保）重置密码")
+@router.post("/pwd/forget", summary="忘记密码？通过(邮箱验证码/密保)重置密码")
 async def forget_pwd(request: ForgetPwdSchema = Depends(), user_info=Depends(Permission())):
     alter_type_list = [1, 2]
     if request.alter_type == alter_type_list[0]:
@@ -138,7 +138,7 @@ async def add_security(request: EditSecuritySchema = Depends(), user_info=Depend
     return await UserDao.add_security(request=request, user_info=user_info)
 
 
-@router.delete("/security/empty", summary="清空密保问题（非软删）")
+@router.delete("/security/empty", summary="清空密保问题(非软删)")
 async def delete_security(security_ids: DelSecuritySchema = Depends(),
                           user_info=Depends(Permission())):
     return await UserDao.empty_security(request=security_ids, emp_no=user_info["emp_no"])

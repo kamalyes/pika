@@ -30,9 +30,9 @@ class MenuModel(LargeBaseModel):
     title = Column(String(ByteSizeEnum.LENGTH_255),
                    nullable=True, comment='title', index=True)
     is_link = Column(SMALLINT, nullable=True,
-                     comment='开启外链条件,`1、is_link: true 2、链接地址不为空（meta.is_link） 3、is_iframe: false`')
+                     comment='开启外链条件,`1、is_link: true 2、链接地址不为空(meta.is_link) 3、is_iframe: false`')
     is_hide = Column(SMALLINT, nullable=True, default=False,
-                     comment='菜单是否隐藏（菜单不显示在界面,但可以进行跳转）')
+                     comment='菜单是否隐藏(菜单不显示在界面,但可以进行跳转)')
     is_keepalive = Column(SMALLINT, nullable=True,
                           default=True, comment='菜单是否缓存')
     is_affix = Column(SMALLINT, nullable=True, default=False, comment='固定标签')

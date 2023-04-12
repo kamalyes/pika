@@ -30,7 +30,7 @@ async def add_encrypt_issue(security: EditKerberosItemSchema = Depends(),
     return await KerberosDao.add_encrypt_issue(security=security, emp_no=user_info["emp_no"])
 
 
-@router.delete("/issue/delete", summary="删除推荐的密保问题（非软删,谨慎操作）")
+@router.delete("/issue/delete", summary="删除推荐的密保问题(非软删,谨慎操作)")
 async def delete_encrypt_issue(request: DelKerberosSchema = Depends(),
                                user_info=Depends(Permission())):
     return await KerberosDao.delete_encrypt_issue(request=request)

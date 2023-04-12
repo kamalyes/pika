@@ -33,7 +33,7 @@ async def add_sensitive_word(request: SensitiveWordGlobalSchema,
     return await SensitiveWordDao.add_sensitive_word(request=request, emp_no=emp_no)
 
 
-@router.delete("/sensitive_word/delete", summary="删除敏感词（软删）")
+@router.delete("/sensitive_word/delete", summary="删除敏感词(软删)")
 async def delete_sensitive_word(request: DelSensitiveWordSchema = Depends(),
                                 escarole=Depends(Permission(escarole=True))):
     emp_no, role = escarole
@@ -63,7 +63,7 @@ async def add_alias_word(request: EditAliasWordSchema,
     return await AliasWordDao.add_alias_word(request=request, emp_no=emp_no)
 
 
-@router.delete("/alias_word/delete", summary="删除化名词（软删）")
+@router.delete("/alias_word/delete", summary="删除化名词(软删)")
 async def delete_alias_word(request: DelAliasWordSchema = Depends(),
                             escarole=Depends(Permission(escarole=True))):
     emp_no, role = escarole

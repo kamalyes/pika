@@ -46,7 +46,7 @@ class HarConvertor(Convertor):
             if not entries:
                 raise HarConvertException(detail="entries数据为空")
             for entry in entries:
-                # 如果是fetch或xhr接口,说明是http请求（暂不支持js)
+                # 如果是fetch或xhr接口,说明是http请求(暂不支持js)
                 if entry.get("_resourceType").lower() in ("fetch", "xhr"):
                     request_data = entry.get("request")
                     response_data = entry.get("response")

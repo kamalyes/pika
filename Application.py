@@ -119,7 +119,7 @@ class PikaFastApi:
         :param package_path: 路由包所在路径,默认相对路径router包
         :param router_name: APIRouter实例名称,需所有实例统一,默认router
         :param is_init: 是否在包中的__init__.py中导入了所有APIRouter实例,默认是
-        :param no_depends: 不需要依赖注入的模块（py文件）名,默认common
+        :param no_depends: 不需要依赖注入的模块(py文件)名,默认common
         :param depends: 依赖注入列表 默认为None
         :return: 默认None
         """

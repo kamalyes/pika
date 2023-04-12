@@ -7,5 +7,5 @@
 @Version :  1.0
 @Contact :  mryu168@163.com
 @License :  (C)Copyright 2022-2026
-@Desc    :  access authorization control （访问权限控制）
+@Desc    :  access authorization control (访问权限控制)
 """

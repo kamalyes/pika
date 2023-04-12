@@ -25,7 +25,7 @@ class PikaOperationDao(PikaWrapper):
     @classmethod
     async def count_user_activities(cls, operator, start_date: datetime, finished_date: datetime):
         """
-        根据开始/结束时间 获取用户的活动日历（操作记录的数量）
+        根据开始/结束时间 获取用户的活动日历(操作记录的数量)
         Args:
             operator:
             start_date:

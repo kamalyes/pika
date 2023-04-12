@@ -24,7 +24,7 @@ class MockGlobalSchema(BaseLargeEditSchema, BaseOnlyProjectIdSchema):
         "0", title="类型:0:default,1:mockjs,2:faker")
     content_type: Optional[str] = Body(None, title="content_type")
     response_templates: Optional[str] = Body(..., title="响应模版")
-    status_code: Optional[str] = Body('200', title='http 响应状态码:200（默认）')
+    status_code: Optional[str] = Body('200', title='http 响应状态码:200(默认)')
 
 
 class EditMockSchema(MockGlobalSchema):
