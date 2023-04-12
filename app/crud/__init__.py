@@ -496,10 +496,6 @@ class PikaWrapper(object):
         model.key = model.id if key is None else key
         table_tag = getattr(model, PikaAppConfig.TABLE_TAG, False)
         model.tag = table_tag.get('comment','') if table_tag  else '未设置'
-        try:
-            diff_data = json.dumps(diff_data, ensure_ascii=False)
-        except Exception as e:
-            cls.__log__.warning(f"changed参数转换失败,model={cls.__model__}\tdiff_data={diff_data}, error: {e}")
         model.diff_data = diff_data
         session.add(model)
         
@@ -514,7 +510,7 @@ class PikaWrapper(object):
         Returns:
 
         """
-        change, add, remove = {}, {}, {}
+        change, add, remove ,= {}, {}, {}
         diff_result = list(diff(before, changed))
         for index in diff_result:
             left, middle, right = index[0], index[1], index[2]
@@ -526,8 +522,11 @@ class PikaWrapper(object):
             elif left == "remove":
                 for item in right:
                     remove[item[0]] = item[1]
-        join_diff = {"change": change, "add": add, "remove": remove}
-        diff_data = json.dumps(join_diff, ensure_ascii=False)
+        diff_data = {"change": change, "add": add, "remove": remove}
+        try:
+            diff_data = json.dumps(diff_data, ensure_ascii=False)
+        except Exception as e:
+            cls.__log__.warning(f"changed参数转换失败,model={cls.__model__}\tdiff_data={diff_data}, error: {e}")
         return diff_data
 
     @classmethod

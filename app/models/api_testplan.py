@@ -30,8 +30,7 @@ class ApiTestPlanModel(LargeBaseModel):
     __table_args__ = {"comment": "测试计划表"}
     project_id = Column(BinaryUUID,
                         default=uuid4, nullable=False, comment="测试计划执行环境, 可以多选")
-    env = Column(BinaryUUID, ForeignKey(
-        EnvironmentModel.id, ondelete="cascade", onupdate="cascade"), comment="环境id")
+    env_list = Column(TEXT, nullable=False, comment="环境id")
     name = Column(String(ByteSizeEnum.LENGTH_50),
                   nullable=False, comment="名称")
     priority = Column(String(ByteSizeEnum.LENGTH_03),
@@ -47,11 +46,11 @@ class ApiTestPlanModel(LargeBaseModel):
                            default=0, comment="重试时间 单次case失败重试间隔,默认2分钟")
     state = Column(SMALLINT, default=0, comment="测试计划是否正在执行中 0: 未开始 1: 运行中")
 
-    def __init__(self, project_id, env, case_list, name, priority, cron, ordered, pass_rate,
+    def __init__(self, project_id, env_list, case_list, name, priority, cron, ordered, pass_rate,
                  receiver, msg_type,
                  operator, state=0, retry_minutes=0, id=None):
         super().__init__(id=id, operator=operator)
-        self.env = ",".join(map(str, env))
+        self.env_list = ",".join(map(str, env_list))
         self.case_list = ",".join(map(str, case_list))
         self.name = name
         self.project_id = project_id

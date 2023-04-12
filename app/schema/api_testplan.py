@@ -18,7 +18,7 @@ from app.schema.base import BaseOnlyProjectIdSchema, PikaBaseModel, BaseQuerySch
 class ApiTestPlanSchema(BaseOnlyIdSchema, BaseOnlyProjectIdSchema):
     name: str
     priority: str
-    env: List[str]
+    env_list: List[str]
     cron: str
     ordered: bool
     case_list: List[str]
@@ -28,7 +28,7 @@ class ApiTestPlanSchema(BaseOnlyIdSchema, BaseOnlyProjectIdSchema):
     retry_minutes: int = 0
 
     # noinspection PyMethodParameters
-    @validator("case_list", "env", "cron", "ordered", "priority", "name", "pass_rate")
+    @validator("case_list", "env_list", "cron", "ordered", "priority", "name", "pass_rate")
     def name_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)
 
@@ -36,7 +36,7 @@ class ApiTestPlanSchema(BaseOnlyIdSchema, BaseOnlyProjectIdSchema):
 class QueryApiTestPlanInSchema(BaseOnlyProjectIdSchema, BaseQuerySchema):
     name: str = Body(None, title="name")
     priority: str = Body(None, title="等级")
-    env: List[str] = Body(None, title="环境")
+    env_list: List[str] = Body(None, title="环境")
     cron: str = Body(None, title="corn表达式")
     ordered: bool = Body(None, title="排序")
     case_list: List[str] = Body(None, title="并行/串行(是否顺序执行)")

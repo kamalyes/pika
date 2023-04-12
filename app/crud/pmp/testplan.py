@@ -104,7 +104,7 @@ class ApiTestPlanDao(PikaWrapper):
             raise SystemException(detail=f"添加失败: {str(e)}")
 
     @classmethod
-    async def update_test_plan(cls, plan: ApiTestPlanSchema, user: int, log=True):
+    async def update_test_plan(cls, plan: ApiTestPlanSchema, operator: str, log=True):
         try:
             async with async_session() as session:
                 async with session.begin():
@@ -114,20 +114,18 @@ class ApiTestPlanDao(PikaWrapper):
                     data = query.scalars().first()
                     if data is None:
                         raise KeyUndefinedException(detail="测试计划不存在")
-                    old = deepcopy(data)
-                    plan.env = ",".join(map(str, plan.env))
+                    before = deepcopy(data)
+                    plan.env_list = ",".join(map(str, plan.env_list))
                     plan.receiver = ",".join(map(str, plan.receiver))
                     plan.case_list = ",".join(map(str, plan.case_list))
                     plan.msg_type = ",".join(map(str, plan.msg_type))
-                    changed = cls.update_model(data, plan, user)
+                    cls.update_model(data, plan, operator)
                     await session.flush()
                     session.expunge(data)
                 if log:
                     async with session.begin():
                         await asyncio.create_task(
-                            cls.insert_log(session, user, SqlOperationTypeEnum.ONLY_UPDATE.value, data,
-                                           old, plan.id,
-                                           changed))
+                            cls.insert_log(session, operator=operator, mode=SqlOperationTypeEnum.ONLY_UPDATE, before=before.__dict__, changed=plan.__dict__))
         except Exception as e:
             cls.__log__.exception(detail=f"编辑测试计划失败: {str(e)}")
             raise SystemException(detail=f"编辑失败: {str(e)}")
@@ -144,9 +142,9 @@ class ApiTestPlanDao(PikaWrapper):
                     if data is None:
                         raise KeyUndefinedException(detail="测试计划不存在")
                     data.state = state
-                    # await session.flush()
-                    # session.expunge(data)
-                    # return data
+                    await session.flush()
+                    session.expunge(data)
+                    return data
         except Exception as e:
             ApiTestPlanDao.__log__.error(f"编辑测试计划失败: {str(e)}")
             raise SystemException(detail=f"编辑失败: {str(e)}")
@@ -163,20 +161,20 @@ class ApiTestPlanDao(PikaWrapper):
             ApiTestPlanDao.__log__.error(f"获取测试计划失败: {str(e)}")
             raise SystemException(detail=f"获取测试计划失败: {str(e)}")
 
-    # @classmethod
-    # async def delete_test_plan(cls, id: str, user: int):
-    #     try:
-    #         async with async_session() as session:
-    #             async with session.begin():
-    #                 query = await session.execute(
-    #                     select(ApiTestPlanModel).where(ApiTestPlanModel.id == id, ApiTestPlanModel.delete_flag == 0))
-    #                 data = query.scalars().first()
-    #                 if data is None:
-    #                     raise SystemException(detail="测试计划不存在")
-    #                 cls.delete_model(data, user)
-    #     except Exception as e:
-    #         cls.__log__.error(f"删除测试计划失败: {str(e)}")
-    #         raise SystemException(detail=f"删除失败: {str(e)}")
+    @classmethod
+    async def delete_test_plan(cls, id: str, operator: str):
+        try:
+            async with async_session() as session:
+                async with session.begin():
+                    query = await session.execute(
+                        select(ApiTestPlanModel).where(ApiTestPlanModel.id == id, ApiTestPlanModel.delete_flag == 0))
+                    data = query.scalars().first()
+                    if data is None:
+                        raise SystemException(detail="测试计划不存在")
+                    cls.delete_model(data, operator)
+        except Exception as e:
+            cls.__log__.error(f"删除测试计划失败: {str(e)}")
+            raise SystemException(detail=f"删除失败: {str(e)}")
 
     @staticmethod
     async def follow_test_plan(plan_id: str, operator: str):
@@ -194,7 +192,7 @@ class ApiTestPlanDao(PikaWrapper):
                 sql = select(ApiTestPlanFollowUserRelModel).where(
                     ApiTestPlanFollowUserRelModel.delete_flag == 0,
                     ApiTestPlanFollowUserRelModel.plan_id == plan_id,
-                    ApiTestPlanFollowUserRelModel.operator == operator)
+                    ApiTestPlanFollowUserRelModel.emp_no == operator)
                 data = await session.execute(sql)
                 ans = data.scalars().first()
                 if ans is not None:
@@ -218,7 +216,7 @@ class ApiTestPlanDao(PikaWrapper):
                 sql = select(ApiTestPlanFollowUserRelModel).where(
                     ApiTestPlanFollowUserRelModel.delete_flag == 0,
                     ApiTestPlanFollowUserRelModel.plan_id == plan_id,
-                    ApiTestPlanFollowUserRelModel.operator == operator)
+                    ApiTestPlanFollowUserRelModel.emp_no == operator)
                 data = await session.execute(sql)
                 ans = data.scalars().first()
                 if ans is None:

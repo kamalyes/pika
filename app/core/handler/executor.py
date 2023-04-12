@@ -926,7 +926,7 @@ class Executor(object):
             # 设置为running
             await ApiTestPlanDao.update_test_plan_state(plan.id, 1)
             project, _ = await ProjectDao.query_project(plan.project_id)
-            env = list(map(int, plan.env.split(",")))
+            env = list(map(int, plan.env_list.split(",")))
             case_list = list(map(int, plan.case_list.split(",")))
             receiver = list(map(int, plan.receiver.split(",")
                             if plan.receiver else []))

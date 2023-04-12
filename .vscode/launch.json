@@ -13,7 +13,8 @@
             "cwd": "${fileDirname}",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}${pathSeparator}${env:PYTHONPATH}"
-            }
+            },
+            "justMyCode": false
         }
     ]
 }

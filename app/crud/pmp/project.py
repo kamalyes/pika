@@ -388,7 +388,7 @@ class ProjectRoleDao(PikaWrapper):
                 async with session.begin():
                     await asyncio.create_task(
                         cls.insert_log(session=session, operator=operator,
-                                       mode=SqlOperationTypeEnum.ONLY_UPDATE.value,
+                                       mode=SqlOperationTypeEnum.ONLY_UPDATE,
                                        before=old,
                                        changed=changed))
         except Exception as e:
@@ -423,7 +423,7 @@ class ProjectRoleDao(PikaWrapper):
                 async with session.begin():
                     await asyncio.create_task(
                         cls.insert_log(session=session, operator=operator,
-                                       mode=SqlOperationTypeEnum.ONLY_DELETE.value, before=role,
+                                       mode=SqlOperationTypeEnum.ONLY_DELETE, before=role,
                                        key=prole_id))
         except Exception as e:
             cls.__log__.error(f"删除用户角色失败: {e}")
