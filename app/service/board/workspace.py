@@ -12,10 +12,12 @@
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends
-
+from app.utils.ws_manager import ws_manage
+from app.crud.itst.api.testcase import ApiTestCaseDao
+from app.crud.board.statistics import DashboardDao
 from app.core.handler.jsonres import PikaResponse
 from app.crud.itst.api.testcase import ApiTestCaseDao
-from app.crud.pmp.project import ProjectDao, ProjectRoleDao
+from app.crud.pmp.project import ProjectDao
 from app.crud.pmp.testplan import ApiTestPlanDao
 from app.models import async_db_session_iterator
 from app.service import Permission
@@ -42,3 +44,14 @@ async def query_follow_testplan(user_info=Depends(Permission())):
     operator = user_info['emp_no']
     ans = await ApiTestPlanDao.query_user_follow_test_plan(operator)
     return PikaResponse.success(data=ans)
+
+@router.get("/statistics", description="获取统计数据", summary="获取平台统计数据")
+async def query_follow_testplan(user_info=Depends(Permission())):
+    end = datetime.today()
+    start = datetime.today() - timedelta(days=6)
+    rank = await ApiTestCaseDao.query_user_case_rank()
+    count, data = await DashboardDao.get_statistics_data(start, end)
+    report_data = await DashboardDao.get_report_statistics(start, end)
+    online = ws_manage.get_clients()
+    return PikaResponse.success(
+        dict(count=count, data=data, rank=rank, clients=online, report=report_data))

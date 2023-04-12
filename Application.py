@@ -51,7 +51,6 @@ from app.middleware.xredis import RedisHelper
 from app.models import async_redis, async_create_table
 from app.service.ask import http_router
 from app.service.ask import mock_router
-from app.service.board import statistics_router
 from app.service.board import workspace_router
 from app.service.itst import testcase_router
 from app.service.itst import testplan_router
@@ -72,7 +71,6 @@ from app.service.rbac import menus_router
 from app.service.rbac import organization_router
 from app.service.rbac import roles_router
 from app.service.rbac import user_router
-from app.service.system import history_router
 from app.service.system import lexicon_router
 from app.service.system import mini_oss_router
 from app.service.system import msconfig_router
@@ -409,9 +407,6 @@ class PikaFastApi:
         pika.include_router(msconfig_router, prefix="/system", tags=["系统全局配置"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
-        pika.include_router(history_router, prefix="/system", tags=["访问记录"],
-                            dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
         pika.include_router(notice_router, prefix="/notification", tags=["消息通知"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
@@ -423,9 +418,6 @@ class PikaFastApi:
                                           Depends(RateLimiter(counts=20, minutes=1))])
         # workspace
         pika.include_router(workspace_router, prefix="/workspace", tags=["工作台"],
-                            dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
-        pika.include_router(statistics_router, prefix="/workspace", tags=["视图"],
                             dependencies=[Depends(PikaFastApi.request_info),
                                           Depends(RateLimiter(counts=20, minutes=1))])
         # itst
