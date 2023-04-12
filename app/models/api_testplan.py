@@ -43,8 +43,8 @@ class ApiTestPlanModel(LargeBaseModel):
     receiver = Column(TEXT, comment="通知人 目前只有邮箱,后续用户表可能要完善手机号字段,为了通知")
     msg_type = Column(TEXT, comment="通知方式 0: 邮件 1: 钉钉 2: 企业微信 3: 飞书 支持多选")
     retry_minutes = Column(SMALLINT, nullable=False,
-                           default=0, comment="重试时间 单次case失败重试间隔,默认2分钟")
-    state = Column(SMALLINT, default=0, comment="测试计划是否正在执行中 0: 未开始 1: 运行中")
+                           server_default="0", comment="重试时间 单次case失败重试间隔,默认2分钟")
+    state = Column(SMALLINT, server_default="0", comment="测试计划是否正在执行中 0: 未开始 1: 运行中")
 
     def __init__(self, project_id, env_list, case_list, name, priority, cron, ordered, pass_rate,
                  receiver, msg_type,

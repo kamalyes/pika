@@ -11,7 +11,7 @@ MsgType = TypeVar('MsgType', str, dict, bytes)
 
 
 class ConnectionManager:
-    BROADCAST = -1
+    BROADCAST = "-1"
     logger = PikaLogger("wss_manager")
 
     def __init__(self):
@@ -87,11 +87,11 @@ class ConnectionManager:
         msg = dict(type=msg_type, record_msg=record_msg)
         await self.send_personal_message(emp_no, msg)
 
-    async def notify(self, emp_no, title=None, content=None, notice: NotificationModel = None):
+    async def notify(self, operator, title=None, content=None, notice: NotificationModel = None):
         """
         根据user_id推送对应的
         Args:
-            emp_no:
+            operator:
             title:
             content:
             notice:
@@ -103,16 +103,16 @@ class ConnectionManager:
             # 判断是否为桌面通知
             if title is not None:
                 msg = WebSocketMessage.desktop_msg(title, content)
-                if emp_no == ConnectionManager.BROADCAST:
+                if operator == ConnectionManager.BROADCAST:
                     await self.broadcast(msg)
                 else:
-                    await self.send_personal_message(emp_no, msg)
+                    await self.send_personal_message(operator, msg)
             else:
                 # 说明不是桌面消息,直接给出消息数量即可
-                if emp_no == ConnectionManager.broadcast:
+                if operator == ConnectionManager.broadcast:
                     await self.broadcast(WebSocketMessage.msg_count())
                 else:
-                    await self.send_personal_message(emp_no, WebSocketMessage.msg_count())
+                    await self.send_personal_message(operator, WebSocketMessage.msg_count())
             # 判断是否要落入推送表
             if notice is not None:
                 await PikaNotificationDao.insert(notice)

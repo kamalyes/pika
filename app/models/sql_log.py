@@ -20,7 +20,7 @@ class SQLHistoryModel(LargeBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_sql_history"
     __table_args__ = {"comment": "sql执行历史表"}
     sql = Column(String(1024), comment="sql语句")
-    elapsed = Column(INT, comment="请求耗时")
+    elapsed = Column(INT, server_default="0", comment="请求耗时")
     database_id = Column(BinaryUUID,
                          default=uuid4, comment="操作数据库id")
 

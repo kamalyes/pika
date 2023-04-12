@@ -11,7 +11,7 @@
 """
 
 from uuid import uuid4
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, SMALLINT, INT, String
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.core.handler.sqlbin_uuid import BinaryUUID
@@ -29,14 +29,14 @@ class MenuModel(LargeBaseModel):
                        nullable=True, comment='组件路径')
     title = Column(String(ByteSizeEnum.LENGTH_255),
                    nullable=True, comment='title', index=True)
-    is_link = Column(Integer, nullable=True,
+    is_link = Column(SMALLINT, nullable=True,
                      comment='开启外链条件,`1、is_link: true 2、链接地址不为空（meta.is_link） 3、is_iframe: false`')
-    is_hide = Column(Integer, nullable=True, default=False,
+    is_hide = Column(SMALLINT, nullable=True, default=False,
                      comment='菜单是否隐藏（菜单不显示在界面,但可以进行跳转）')
-    is_keepalive = Column(Integer, nullable=True,
+    is_keepalive = Column(SMALLINT, nullable=True,
                           default=True, comment='菜单是否缓存')
-    is_affix = Column(Integer, nullable=True, default=False, comment='固定标签')
-    is_iframe = Column(Integer, nullable=True, default=False, comment='是否内嵌')
+    is_affix = Column(SMALLINT, nullable=True, default=False, comment='固定标签')
+    is_iframe = Column(SMALLINT, nullable=True, default=False, comment='是否内嵌')
     roles = Column(String(ByteSizeEnum.LENGTH_64),
                    nullable=True, default=False, comment='权限')
     icon = Column(String(ByteSizeEnum.LENGTH_64),
@@ -45,8 +45,8 @@ class MenuModel(LargeBaseModel):
                        default=uuid4, nullable=True, comment='父级菜单id')
     redirect = Column(String(ByteSizeEnum.LENGTH_255),
                       nullable=True, comment='重定向路由')
-    sort = Column(Integer, nullable=True, comment='排序')
-    menu_type = Column(Integer, nullable=True, comment='菜单类型')
+    sort = Column(INT, server_default="0", nullable=True, comment='排序')
+    menu_type = Column(SMALLINT, nullable=True, comment='菜单类型')
     active_menu = Column(String(ByteSizeEnum.LENGTH_255),
                          nullable=True, comment='显示页签')
 

@@ -10,10 +10,8 @@
 @Desc    :  访问权限配置表
 """
 
-from sqlalchemy import Column, Integer, String
-from sqlalchemy import ForeignKey
+from sqlalchemy import Column, String, ForeignKey
 from app.core.handler.sqlbin_uuid import BinaryUUID
-
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import NormBaseModel

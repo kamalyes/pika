@@ -10,7 +10,7 @@
 @Desc    :  None
 """
 from sqlalchemy import ForeignKey
-from sqlalchemy import INT, Column, DATETIME, String
+from sqlalchemy import SMALLINT, Column, DATETIME, String
 from sqlalchemy.orm import relationship, backref
 from app.core.handler.sqlbin_uuid import BinaryUUID
 from app.enums.ByteSizeEnum import ByteSizeEnum
@@ -36,10 +36,10 @@ class SysUserAdminModel(LargeBaseModel):
     )
     password = Column(String(ByteSizeEnum.LENGTH_255), comment="密码")
     pwd_valid_date = Column(DATETIME, server_default=None, comment="密码有效截止时间")
-    is_activate = Column(INT, server_default="0", comment="激活状态,0:未激活、1:激活")
+    is_activate = Column(SMALLINT, server_default="0", comment="激活状态,0:未激活、1:激活")
     private_key = Column(String(ByteSizeEnum.LENGTH_255), comment="令牌")
     open_id = Column(String(ByteSizeEnum.LENGTH_255), comment="开放者平台id")
-    err_pwd_count = Column(INT, server_default="0", comment="错误密码登录的次数")
+    err_pwd_count = Column(SMALLINT, server_default="0", comment="错误密码登录的次数")
     registration_ip = Column(String(ByteSizeEnum.LENGTH_30), comment="注册时所在IP")
     registration_date = Column(DATETIME, comment="注册时间")
     last_login_ip = Column(

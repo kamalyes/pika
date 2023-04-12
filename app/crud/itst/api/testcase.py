@@ -513,7 +513,6 @@ class ApiTestCaseDao(PikaWrapper):
         """
         查询用户case数量和排名
         Returns:
-
         """
         ans = dict()
         sql = await cls.generate_sql()

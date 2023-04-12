@@ -1,13 +1,13 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python 3.9.11
 """
-@File    :  constructor.py
-@Time    :  2022/7/7 15:21 PM
-@Author  :  YuYanQing
-@Version :  1.0
-@Contact :  mryu168@163.com
-@License :  (C)Copyright 2022-2026
-@Desc    :  数据构造器表, 包含前置条件和后置条件
+@File    : constructor.py
+@Time    : 2022/7/7 15:21 PM
+@Author  : YuYanQing
+@Version : 1.0
+@Contact : mryu168@163.com
+@License : (C)Copyright 2022-2026
+@Desc    : 数据构造器表, 包含前置条件和后置条件
 """
 from uuid import uuid4
 from sqlalchemy import Column, INT, String, BOOLEAN, UniqueConstraint, TEXT, select, desc
@@ -19,8 +19,8 @@ from app.core.handler.sqlbin_uuid import BinaryUUID
 
 class ConstructorModel(LargeBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_constructor'
-    __table_args__ = (UniqueConstraint('case_id', 'suffix', 'name'), {"comment": "数据构造器表"})
-    type = Column(INT, default=0, comment="0: testcase 1: sqlscript 2: redis 3: py脚本 4: 其它")
+    __table_args__ = (UniqueConstraint('case_id', 'suffix', 'name'), {"comment":"数据构造器表"})
+    type = Column(INT, server_default="0", comment="0:testcase 1:sqlscript 2:redis 3:py脚本 4:其它")
     name = Column(String(ByteSizeEnum.LENGTH_50), comment="名称")
     enabled_flag = Column(BOOLEAN, default=True, nullable=False)
     constructor_json = Column(TEXT, nullable=False)
@@ -28,7 +28,7 @@ class ConstructorModel(LargeBaseModel):
     case_id = Column(BinaryUUID, default=uuid4,
                      nullable=False, comment="所属用例id")
     public = Column(BOOLEAN, default=False, comment="是否共享")
-    index = Column(INT, comment="前置条件顺序")
+    index = Column(INT, server_default="0", comment="前置条件顺序")
     suffix = Column(BOOLEAN, default=False, comment="是否是后置条件,默认为否")
 
     def __init__(self, type, name, enabled_flag, constructor_json, case_id, public,
@@ -58,4 +58,4 @@ class ConstructorModel(LargeBaseModel):
         return query.index + 1
 
     def __str__(self):
-        return f"[{'后置条件' if self.suffix else '前置条件'}: {self.name}]({self.id}))"
+        return f"[{'后置条件' if self.suffix else '前置条件'}:{self.name}]({self.id}))"

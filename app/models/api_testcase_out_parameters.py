@@ -10,7 +10,7 @@
 @Desc    :  None
 """
 from uuid import uuid4
-from sqlalchemy import Column, String, INT, UniqueConstraint
+from sqlalchemy import Column, String, SMALLINT, UniqueConstraint
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
@@ -25,7 +25,7 @@ class ApiTestCaseOutParametersModel(LargeBaseModel):
                      default=uuid4, nullable=False, comment="用例id")
     name = Column(String(ByteSizeEnum.LENGTH_50),
                   nullable=False, comment="参数名")
-    source = Column(INT, nullable=False, default=0,
+    source = Column(SMALLINT, nullable=False, server_default="0",
                     comment="来源类型 0: Body(TEXT) 1: Body(JSON) 2: Header 3: Cookie 4: HTTP状态码")
     expression = Column(String(ByteSizeEnum.LENGTH_128), comment="表达式")
     match_index = Column(String(ByteSizeEnum.LENGTH_16),

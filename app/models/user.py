@@ -9,7 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from sqlalchemy import Column, String, INT, UniqueConstraint
+from sqlalchemy import Column, String, SMALLINT, UniqueConstraint
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
@@ -29,7 +29,7 @@ class UserModel(NormBaseModel):
     )
     roles = Column(String(ByteSizeEnum.LENGTH_255), server_default="0", comment='用户角色')
     avatar = Column(String(ByteSizeEnum.LENGTH_255), comment="头像")
-    gender = Column(INT, server_default="0", comment="性别:0-未填写,1-男,2-女")
+    gender = Column(SMALLINT, server_default="0", comment="性别:0-未填写,1-男,2-女")
     plane = Column(String(ByteSizeEnum.LENGTH_16), comment="座机")
     mobile = Column(String(ByteSizeEnum.LENGTH_16), comment="手机号码")
     email = Column(String(ByteSizeEnum.LENGTH_255), comment="邮箱地址")

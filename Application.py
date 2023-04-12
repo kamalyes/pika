@@ -610,7 +610,6 @@ async def websocket_endpoint(websocket: WebSocket, emp_no: str):
                 'type': 3
             })
             await asyncio.sleep(50)
-
     await ws_manage.connect(websocket, emp_no)
     try:
         # 定义特殊值的回复,配合前端实现确定连接,心跳检测等逻辑
@@ -627,7 +626,7 @@ async def websocket_endpoint(websocket: WebSocket, emp_no: str):
         if len(msg_records) > 0:
             await websocket.send_json(WebSocketMessage.msg_count(len(msg_records), True))
         # 发送心跳包
-        asyncio.create_task(send_heartbeat())
+        # asyncio.create_task(send_heartbeat())
         while True:
             data: str = await websocket.receive_text()
             du = data.upper()

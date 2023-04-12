@@ -35,14 +35,14 @@ class ApiTestReportModel(Base):
                      default=uuid4, index=True, nullable=True, comment="测试集合id,预留字段")
     start_date = Column(DATETIME, nullable=False, comment="开始时间")
     finished_date = Column(DATETIME, comment="结束时间")
-    success_count = Column(INT, nullable=False, default=0, comment="成功数量")
-    error_count = Column(INT, nullable=False, default=0, comment="错误数量")
-    failed_count = Column(INT, nullable=False, default=0, comment="失败数量")
-    skipped_count = Column(INT, nullable=False, default=0, comment="跳过数量")
+    success_count = Column(INT, nullable=False, server_default="0", comment="成功数量")
+    error_count = Column(INT, nullable=False, server_default="0", comment="错误数量")
+    failed_count = Column(INT, nullable=False, server_default="0", comment="失败数量")
+    skipped_count = Column(INT, nullable=False, server_default="0", comment="跳过数量")
     status = Column(SMALLINT, nullable=False,
                     comment="执行状态 0: pending, 1: running, 2: stopped, 3: finished",
                     index=True)
-    mode = Column(SMALLINT, default=0,
+    mode = Column(SMALLINT, server_default="0",
                   comment="case执行模式 0: 普通, 1: 测试集, 2: pipeline, 3: 其他")
     delete_flag = Column(BOOLEAN, server_default="0",
                          comment="删除标识 1:已删除,0:未删除")

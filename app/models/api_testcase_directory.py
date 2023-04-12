@@ -25,7 +25,7 @@ class ApiTestCaseDirectoryModel(LargeBaseModel):
                   nullable=False, comment="目录名称")
     project_id = Column(BinaryUUID,
                         default=uuid4, index=True, comment="项目id")
-    parent = Column(INT, comment="目录上级目录,如果没有则为None")
+    parent = Column(INT, server_default="0", comment="目录上级目录,如果没有则为None")
 
     def __init__(self, form: ApiTestCaseDirectorySchema, operator):
         super().__init__(operator=operator)

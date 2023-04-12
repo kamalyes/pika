@@ -10,7 +10,7 @@
 @Desc    :  None
 """
 from uuid import uuid4
-from sqlalchemy import Column, Integer, String, UniqueConstraint
+from sqlalchemy import Column, INT, String, UniqueConstraint
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import NormBaseModel
@@ -25,7 +25,7 @@ class DepartmentModel(NormBaseModel):
                   nullable=False, comment="部门名称")
     organization_id = Column(BinaryUUID,
                              default=uuid4, nullable=False, comment="组织id")
-    sort_id = Column(Integer, server_default="0", comment="排序id")
+    sort_id = Column(INT, server_default="0", comment="排序id")
     parent_id = Column(BinaryUUID, default=uuid4,  comment="父序号")
 
     def __init__(self, name, organization_id, sort_id, parent_id, operator, id=None, description=None):

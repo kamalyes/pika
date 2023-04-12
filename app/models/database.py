@@ -33,7 +33,7 @@ class DatabaseModel(LargeBaseModel):
                       nullable=False, comment="登录密码")
     database = Column(String(ByteSizeEnum.LENGTH_36),
                       nullable=True, comment="连接数据库名称")
-    sql_type = Column(INT, nullable=False,
+    sql_type = Column(INT, server_default="0", nullable=False,
                       comment="0: mysql 1: postgresql 2: mongo")
     env_info: EnvironmentModel
 

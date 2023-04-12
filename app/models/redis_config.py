@@ -34,7 +34,7 @@ class RedisModel(LargeBaseModel):
                       nullable=False, comment="用户名")
     password = Column(String(ByteSizeEnum.LENGTH_200),
                       nullable=False, comment="用户密码")
-    db = Column(INT, nullable=False, comment="库号")
+    db = Column(INT,  server_default="0", nullable=False, comment="库号")
     cluster = Column(Boolean, default=False, nullable=False,
                      comment="是否是集群,默认为false,集群可不输入用户密码")
 

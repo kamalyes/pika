@@ -9,8 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :   全局变量
 """
-from uuid import uuid4
-from sqlalchemy import INT, Column, ForeignKey, String, TEXT, UniqueConstraint
+from sqlalchemy import SMALLINT, Column, ForeignKey, String, TEXT, UniqueConstraint
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
@@ -24,7 +23,7 @@ class GConfigModel(LargeBaseModel):
         EnvironmentModel.id, ondelete="cascade", onupdate="cascade"), comment="环境id")
     key = Column(String(ByteSizeEnum.LENGTH_56), comment="key")
     value = Column(TEXT, comment="变量")
-    key_type = Column(INT, nullable=False, comment="参数类型 0: string 1: json 2: yaml")
+    key_type = Column(SMALLINT, nullable=False, comment="参数类型 0: string 1: json 2: yaml")
 
     __table_args__ = (
         UniqueConstraint('env', 'key'),

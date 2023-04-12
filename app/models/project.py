@@ -63,7 +63,7 @@ class ProjectRoleModel(LargeBaseModel):
         comment="项目成员编号（用户编号）")
     project_id = Column(BinaryUUID,
                         default=uuid4, index=True, comment="项目id")
-    project_role = Column(INT, index=True, comment="角色")
+    project_role = Column(INT, server_default="0", index=True, comment="角色")
     relationship(UserModel, backref=backref("children", cascade="all, delete"))
 
     def __init__(self, member_no, project_id, project_role, operator):

@@ -11,11 +11,8 @@
 """
 
 from uuid import uuid4
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
+from sqlalchemy import Column, SMALLINT, String
 from app.core.handler.sqlbin_uuid import BinaryUUID
-
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel, NormBaseModel
@@ -27,7 +24,7 @@ class IterateModel(LargeBaseModel):
     project_id = Column(BinaryUUID,
                         default=uuid4, nullable=False, comment="被关联的项目id")
     project_name = Column(String(ByteSizeEnum.LENGTH_30), comment="迭代名称", nullable=False)
-    is_private = Column(Integer, server_default="0", comment="是否私有 1:私有 0:公开", nullable=False)
+    is_private = Column(SMALLINT, server_default="0", comment="是否私有 1:私有 0:公开", nullable=False)
 
 
 class PikaIterateRel(NormBaseModel):

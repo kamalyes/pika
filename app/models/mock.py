@@ -10,8 +10,7 @@
 @Desc    :  None
 """
 from uuid import uuid4
-from sqlalchemy import Column, String, Integer, Text
-
+from sqlalchemy import Column, String, INT, Text, SMALLINT
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.core.handler.sqlbin_uuid import BinaryUUID
@@ -28,11 +27,11 @@ class MockModel(LargeBaseModel):
     method = Column(String(ByteSizeEnum.LENGTH_16), nullable=False, server_default='GET',
                     comment='请求方式')
     headers = Column(Text, comment='headers')
-    match_type = Column(Integer, server_default='0',
+    match_type = Column(SMALLINT, server_default='0',
                         comment='类型:0:default,1:mockjs,2:faker')
     content_type = Column(String(ByteSizeEnum.LENGTH_30),
                           server_default='application/json')
     response_templates = Column(
         String(ByteSizeEnum.LENGTH_600), default=None, comment="响应模版")
-    status_code = Column(Integer, server_default='200',
+    status_code = Column(INT, server_default='200',
                          comment='http 响应状态码:200（默认）')
