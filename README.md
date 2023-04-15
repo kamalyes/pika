@@ -31,14 +31,14 @@ export LESSCHARSET=utf-8
 CREATE DATABASE `pika` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci
 docker-compose --env-file ./conf/.env -f docker-compose.yml up -d
 ```
-3. 修改mysql密码验证方式
+3. 授予远程权限
 ```bash
 mysql> use mysql;
 Reading table information for completion of table and column names
 You can turn off this feature to get a quicker startup with -A
 
 Database changed
-mysql> select host, user from user;  # 判断root是否存在一个,如果有两个先删除
+mysql> select host, user from user;  # 判断root是否存在
 +-----------+------------------+
 | host      | user             |
 +-----------+------------------+
@@ -50,17 +50,10 @@ mysql> select host, user from user;  # 判断root是否存在一个,如果有两
 +-----------+------------------+
 5 rows in set (0.00 sec)
 
-mysql> delete from user where host="%" and user="root";
-Query OK, 1 row affected (0.00 sec)
-
-mysql> update user set host = '%' where user = 'root';
-Query OK, 1 row affected (0.01 sec)
-Rows matched: 1  Changed: 1  Warnings: 0
-
-mysql> FLUSH PRIVILEGES; #  刷新权限
+mysql> alter user 'root'@'%' identified with mysql_native_password by 'Q1PhiW1F39Gx'; # 授予远程权限
 Query OK, 0 rows affected (0.01 sec)
 
-mysql> alter user 'root'@'%' identified with mysql_native_password by 'Q1PhiW1F39Gx'; # 授予远程权限
+mysql> FLUSH PRIVILEGES; #  刷新权限
 Query OK, 0 rows affected (0.01 sec)
 ```
 

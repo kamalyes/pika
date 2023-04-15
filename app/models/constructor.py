@@ -10,9 +10,10 @@
 @Desc    : 数据构造器表, 包含前置条件和后置条件
 """
 from uuid import uuid4
-from sqlalchemy import Column, INT, String, BOOLEAN, UniqueConstraint, TEXT, select, desc
+from sqlalchemy import Column, INT, String, BOOLEAN, ForeignKey, UniqueConstraint, TEXT, select, desc
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
+from app.models.api_test_case import ApiTestCaseModel
 from app.models.basic import LargeBaseModel
 from app.core.handler.sqlbin_uuid import BinaryUUID
 
@@ -25,8 +26,8 @@ class ConstructorModel(LargeBaseModel):
     enabled_flag = Column(BOOLEAN, default=True, nullable=False)
     constructor_json = Column(TEXT, nullable=False)
     value = Column(String(ByteSizeEnum.LENGTH_16), comment="返回值")
-    case_id = Column(BinaryUUID, default=uuid4,
-                     nullable=False, comment="所属用例id")
+    case_id = Column(BinaryUUID, ForeignKey(
+        ApiTestCaseModel.id, ondelete="cascade", onupdate="cascade"), nullable=False, comment="所属用例id")
     public = Column(BOOLEAN, default=False, comment="是否共享")
     index = Column(INT, server_default="0", comment="前置条件顺序")
     suffix = Column(BOOLEAN, default=False, comment="是否是后置条件,默认为否")

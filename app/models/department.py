@@ -26,7 +26,7 @@ class DepartmentModel(NormBaseModel):
     organization_id = Column(BinaryUUID,
                              default=uuid4, nullable=False, comment="组织id")
     sort_id = Column(INT, server_default="0", comment="排序id")
-    parent_id = Column(BinaryUUID, default=uuid4,  comment="父序号")
+    parent_id = Column(BinaryUUID, comment="父序号")
 
     def __init__(self, name, organization_id, sort_id, parent_id, operator, id=None, description=None):
         super().__init__(id=id, operator=operator, description=description)

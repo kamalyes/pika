@@ -437,12 +437,12 @@ class ApiTestCaseDao(PikaWrapper):
         data.append(suffix)
 
     @classmethod
-    async def collect_constructor(cls, case_id, parent, suffix):
+    async def collect_constructor(cls, case_id, parent_id, suffix):
         """
 
         Args:
             case_id:
-            parent:
+            parent_id:
             suffix:
 
         Returns:
@@ -469,15 +469,15 @@ class ApiTestCaseDao(PikaWrapper):
             if c.suffix:
                 suffix.get("children").append(temp)
             else:
-                parent.get("children").append(temp)
+                parent_id.get("children").append(temp)
 
     @classmethod
-    async def collect_asserts(cls, case_id, parent):
+    async def collect_asserts(cls, case_id, parent_id):
         """
 
         Args:
             case_id:
-            parent:
+            parent_id:
 
         Returns:
 
@@ -486,7 +486,7 @@ class ApiTestCaseDao(PikaWrapper):
         for a in asserts:
             temp = dict(id=f"assert_{a.id}",
                         label=f"{a.name}", children=list())
-            parent.get("children").append(temp)
+            parent_id.get("children").append(temp)
 
     @classmethod
     async def get_xmind_data(cls, case_id: str):

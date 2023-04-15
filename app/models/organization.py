@@ -22,7 +22,7 @@ class OrganizationModel(NormBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_organization"
     __table_args__ = (UniqueConstraint('name', 'parent_id'), {"comment": "组织机构表"})
     name = Column(String(ByteSizeEnum.LENGTH_255), nullable=False, comment="用户组名称")
-    parent_id = Column(BinaryUUID, default=uuid4, comment="父序号")
+    parent_id = Column(BinaryUUID, comment="父序号")
     sort_id = Column(INT, server_default="0", comment="排序id")
 
     def __init__(self, name, parent_id, sort_id, operator, id=None, description=None):

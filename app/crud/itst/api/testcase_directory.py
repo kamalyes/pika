@@ -11,6 +11,7 @@
 """
 from collections import defaultdict
 from datetime import datetime
+from typing import Tuple
 
 from custard.time import Moment
 from sqlalchemy import select, asc, or_
@@ -44,7 +45,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                 sql = (
                     select(ApiTestCaseDirectoryModel)
                     .where(ApiTestCaseDirectoryModel.delete_flag == 0, ApiTestCaseDirectoryModel.project_id == project_id)
-                    .order_by(asc(ApiTestCaseDirectoryModel.name))
+                    .order_by(asc(ApiTestCaseDirectoryModel.update_date))
                 )
                 result = await session.execute(sql)
                 return result.scalars().all()
@@ -60,7 +61,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                     sql = select(ApiTestCaseDirectoryModel).where(
                         ApiTestCaseDirectoryModel.delete_flag == 0,
                         ApiTestCaseDirectoryModel.name == form.name,
-                        ApiTestCaseDirectoryModel.parent == form.parent,
+                        ApiTestCaseDirectoryModel.parent_id == form.parent_id,
                         ApiTestCaseDirectoryModel.id == form.project_id,
                     )
                     result = await session.execute(sql)
@@ -128,7 +129,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
             raise SystemException(detail=f"删除目录失败: {e}")
 
     @classmethod
-    async def get_directory_tree(cls, project_id: str, case_node=None, move: bool = False) -> (list, dict):
+    async def get_directory_tree(cls, project_id: str, case_node=None, move: bool = False) -> Tuple[list, dict]:
         """
         通过项目获取目录树
         Args:
@@ -145,7 +146,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
         case_map = dict()
         parent_map = defaultdict(list)
         for directory in res:
-            if directory.parent is None:
+            if directory.parent_id is None:
                 # 如果没有父亲,说明是最底层数据
                 ans.append(
                     dict(
@@ -157,7 +158,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                     )
                 )
             else:
-                parent_map[directory.parent].append(directory.id)
+                parent_map[directory.parent_id].append(directory.id)
             ans_map[directory.id] = directory
         # 获取到所有数据信息
         for r in ans:
@@ -167,10 +168,10 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
         return ans, case_map
 
     @classmethod
-    async def get_directory(cls, ans_map: dict, parent_map, parent, children, case_map, case_node=None, move=False):
-        current = parent_map.get(parent)
+    async def get_directory(cls, ans_map: dict, parent_map, parent_id, children, case_map, case_node=None, move=False):
+        current = parent_map.get(parent_id)
         if case_node is not None:
-            nodes, cs = await case_node(parent)
+            nodes, cs = await case_node(parent_id)
             children.extend(nodes)
             case_map.update(cs)
         if current is None:
@@ -204,15 +205,15 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                 select(ApiTestCaseDirectoryModel)
                 .where(
                     ApiTestCaseDirectoryModel.delete_flag == 0,
-                    or_(ApiTestCaseDirectoryModel.parent == directory_id,
-                        ApiTestCaseDirectoryModel.parent is not None),
+                    or_(ApiTestCaseDirectoryModel.parent_id == directory_id,
+                        ApiTestCaseDirectoryModel.parent_id is not None),
                 )
                 .order_by(asc(ApiTestCaseDirectoryModel.name))
             )
             result = await session.execute(sql)
             data = result.scalars().all()
             for d in data:
-                parent_map[d.parent].append(d.id)
+                parent_map[d.parent_id].append(d.id)
             son = parent_map.get(directory_id)
             cls.get_sub_son(parent_map, son, ans)
             return ans

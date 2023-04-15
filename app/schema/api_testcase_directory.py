@@ -14,13 +14,11 @@ from fastapi import Body
 from pydantic import BaseModel, validator
 from app.enums.ByteSizeEnum import ByteSizeEnum
 
-from app.schema.base import BaseOnlyDirectoryIdSchema, BaseOnlyIdSchema, BaseOnlyProjectIdSchema, PikaBaseModel
+from app.schema.base import BaseOnlyDirectoryIdSchema, BaseOnlyIdSchema, BaseOnlyParentIdSchema, BaseOnlyProjectIdSchema, PikaBaseModel
 
 
-class ApiTestCaseDirectorySchema(BaseOnlyIdSchema, BaseOnlyProjectIdSchema):
+class ApiTestCaseDirectorySchema(BaseOnlyIdSchema, BaseOnlyProjectIdSchema, BaseOnlyParentIdSchema):
     name: str
-    parent: Optional[str] = Body(
-        None, title="parent", max_length=ByteSizeEnum.LENGTH_32)
 
     # noinspection PyMethodParameters
     @validator("name")
