@@ -9,7 +9,6 @@
 @License : (C)Copyright 2022-2026
 @Desc    : 数据构造器表, 包含前置条件和后置条件
 """
-from uuid import uuid4
 from sqlalchemy import Column, INT, String, BOOLEAN, ForeignKey, UniqueConstraint, TEXT, select, desc
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum

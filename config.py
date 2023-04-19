@@ -34,6 +34,7 @@ class BaseConfig(BaseSettings):
     MYSQL_ROOT_PASSWORD: Optional[str] = None
     MYSQL_DATABASE_NAME: Optional[str] = None
     MYSQL_CHARSET: Optional[str] = "utf8mb4"
+    MYSQL_ECHO: Optional[bool] = False
     MYSQL_COLLATE = "utf8mb4_general_ci"
     MYSQL_TIME_ZONE: Optional[str] = "Asia/Shanghai"
     MYSQL_POOL_RECYCLE: Optional[int] = 1500
@@ -56,6 +57,7 @@ class BaseConfig(BaseSettings):
     REDIS_NODES: List = []
 
     # sqlalchemy
+    SQLALCHEMY_PICKLE_PROTOCOL: Optional[int] = 3 # pickle.HIGHEST_PROTOCOL
     SQLALCHEMY_DATABASE_URI: Optional[str] = None
     # 异步URI
     ASYNC_SQLALCHEMY_URI: Optional[str] = None

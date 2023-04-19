@@ -10,7 +10,6 @@
 @Desc    :  组织
 """
 
-from uuid import uuid4
 from sqlalchemy import Column, INT, String, UniqueConstraint
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum

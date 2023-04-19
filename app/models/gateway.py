@@ -9,8 +9,6 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  请求网关地址表
 """
-
-from uuid import uuid4
 from sqlalchemy import Column, ForeignKey, String, UniqueConstraint
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum

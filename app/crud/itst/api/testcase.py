@@ -48,8 +48,7 @@ class ApiTestCaseDao(PikaWrapper):
                    func.count(ApiTestCaseModel.id))
             .outerjoin(
                 SysUserAdminModel,
-                and_(SysUserAdminModel.delete_flag == 0,
-                     ApiTestCaseModel.create_emp_no == SysUserAdminModel.emp_no),
+                and_(ApiTestCaseModel.create_emp_no == SysUserAdminModel.emp_no),
             )
             .where(ApiTestCaseModel.delete_flag == 0)
             .group_by(ApiTestCaseModel.create_emp_no)
@@ -509,6 +508,7 @@ class ApiTestCaseDao(PikaWrapper):
 
     @classmethod
     @RedisHelper.cache("rank")
+    @db_connect
     async def query_user_case_list(cls, session: AsyncSession = None) -> Dict[str, List]:
         """
         查询用户case数量和排名

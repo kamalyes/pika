@@ -93,7 +93,6 @@ def db_connect(transaction: Transaction = False):
                 # 这边调用cls本身的log参数,写入日志+抛出异常
                 cls.__log__.error(f"操作Model: {cls.__model__.__name__}失败: {e}")
                 raise DbException(f"操作数据库失败: {e}")
-
         return wrap
 
     def decorator(func):

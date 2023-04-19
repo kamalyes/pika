@@ -9,7 +9,6 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  数据库配置表
 """
-from uuid import uuid4
 from sqlalchemy import ForeignKey, UniqueConstraint, Column, INT, String
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum

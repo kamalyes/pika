@@ -15,6 +15,7 @@ import asyncio
 from mimetypes import guess_type
 import os
 from os.path import isfile
+import traceback
 
 import uvicorn
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
@@ -322,10 +323,11 @@ class PikaFastApi:
             Returns:
 
             """
+            exc_result = str(exc) if PikaAppConfig.ENVIRONMENT == 'production' else traceback.format_exc() 
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content=dict(code=ExcCodeEnum.UNKNOWN_ERROR,
-                             detail="unknown error: " + str(exc)),
+                             detail="unknown error: " + exc_result),
             )
 
     # noinspection PyShadowingNames
@@ -579,7 +581,7 @@ def init_scheduler():
     job_store = {
         'default': SQLAlchemyJobStore(url=PikaAppConfig.SQLALCHEMY_DATABASE_URI,
                                       engine_options=engine_options,
-                                      pickle_protocol=3)
+                                      pickle_protocol=PikaAppConfig.SQLALCHEMY_PICKLE_PROTOCOL)
     }
     scheduler = AsyncIOScheduler()
     Scheduler.init(scheduler)

@@ -9,7 +9,6 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  redis配置
 """
-from uuid import uuid4
 from sqlalchemy import Column, INT, ForeignKey, String, Boolean, UniqueConstraint
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum

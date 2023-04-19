@@ -10,6 +10,26 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-import sys
+import gettext
+import os
 
-sys.path.append(__file__)
+from app.core.handler.translation import i18n
+__version__ = "0.0.1"
+
+APP_BASE_HOME = os.path.dirname(os.path.abspath(__file__))
+LOCALE_HOME = os.path.join(APP_BASE_HOME, "locale")
+
+i18n.load_translations(
+    {
+        "zh_CN": gettext.translation(
+            domain="messages",
+            localedir=LOCALE_HOME,
+            languages=["zh_CN"],
+        ),
+        "en_GB": gettext.translation(
+            domain="messages",
+            localedir=LOCALE_HOME,
+            languages=["en_GB"],
+        ),
+    }
+)

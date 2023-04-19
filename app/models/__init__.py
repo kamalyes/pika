@@ -33,14 +33,16 @@ from config import PikaAppConfig
 engine = create_engine(
     PikaAppConfig.SQLALCHEMY_DATABASE_URI,
     pool_recycle=PikaAppConfig.MYSQL_POOL_RECYCLE,
-    encoding=PikaAppConfig.MYSQL_CHARSET)
+    encoding=PikaAppConfig.MYSQL_CHARSET,
+    echo=PikaAppConfig.MYSQL_ECHO)
 sync_session = sessionmaker(engine, autocommit=False)
 
 # 异步engine
 async_engine = create_async_engine(
     PikaAppConfig.ASYNC_SQLALCHEMY_URI,
     pool_recycle=PikaAppConfig.MYSQL_POOL_RECYCLE,
-    encoding=PikaAppConfig.MYSQL_CHARSET)
+    encoding=PikaAppConfig.MYSQL_CHARSET,
+    echo=PikaAppConfig.MYSQL_ECHO)
 async_session = sessionmaker(
     async_engine, expire_on_commit=False, class_=AsyncSession)
 
