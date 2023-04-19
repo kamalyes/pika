@@ -16,7 +16,7 @@ from app.core.handler.exceres import KeyUndefinedException
 from app.middleware.oss.files import OssFile
 
 
-class AliyunOss(OssFile):
+class AliyunOssClient(OssFile):
 
     def __init__(self, access_key_id: str, access_key_secret: str, endpoint: str, bucket: str):
         auth = oss2.Auth(access_key_id=access_key_id,
@@ -24,13 +24,13 @@ class AliyunOss(OssFile):
         self.bucket = oss2.Bucket(auth, endpoint, bucket)
 
     @awaitable
-    def create_file(self, filepath: str, content: bytes, base_path: str = None):
+    def upload_file(self, filepath: str, content: bytes, base_path: str = None):
         key = self.get_real_path(filepath, base_path)
         response = self.bucket.put_object(key, content)
         return response.resp.response.url, len(content)
 
     @awaitable
-    def delete_file(self, filepath: str, base_path: str = None):
+    def remove_file(self, filepath: str, base_path: str = None):
         key = self.get_real_path(filepath, base_path)
         self.bucket.delete_object(key)
 

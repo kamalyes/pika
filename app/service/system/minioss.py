@@ -20,7 +20,7 @@ async def create_oss_file(filepath: str, file: UploadFile = File(...),
         file_content = await file.read()
         client = OssClient.get_oss_client()
         # oss上传 WARNING: 可能存在数据不同步的问题,oss成功本地失败
-        file_url, file_size = await client.create_file(filepath, file_content)
+        file_url, file_size = await client.upload_file(filepath, file_content)
         # 本地数据也要备份一份
         model = OssFileModel(operator=user_info['emp_no'], file_path=filepath, view_url=file_url,
                              file_size=OssFileModel.get_size(file_size))
@@ -45,7 +45,7 @@ async def upload_avatar(file: UploadFile = File(...),
         suffix = file.filename.split(".")[-1]
         filepath = f"user_{user_info['emp_no']}.{suffix}"
         client = OssClient.get_oss_client()
-        file_url, _ = await client.create_file(filepath, file_content, base_path="avatar")
+        file_url, _ = await client.upload_file(filepath, file_content, base_path="avatar")
         await UserDao.update_avatar(emp_no=user_info['emp_no'], avatar=file_url)
         return PikaResponse.success(data=file_url)
     except Exception as e:
@@ -72,7 +72,7 @@ async def delete_oss_file(filepath: str, user_info=Depends(Permission(RoleEnum.M
             raise KeyUndefinedException(detail="文件不存在或已被删除")
         await PikaOssDao.delete_record_by_id(session, user_info["emp_no"], record.id, log=True)
         client = OssClient.get_oss_client()
-        await client.delete_file(filepath)
+        await client.remove_file(filepath)
         return PikaResponse.success()
     except Exception as e:
         return PikaResponse.failed(detail=f"删除失败: {e}")

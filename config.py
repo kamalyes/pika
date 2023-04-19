@@ -75,6 +75,7 @@ class BaseConfig(BaseSettings):
     OSS_ENDPOINT: Optional[str] = None
     STATIC_QINIU_URL: Optional[str] = None
     OSS_QINIU_URL: Optional[str] = None
+    OSS_SECURE: Optional[bool] = False
 
     # Email
     EMAIL_SENDER: Optional[str] = None  # 发件人邮箱

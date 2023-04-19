@@ -11,10 +11,11 @@
 """
 from app.core.handler.exceres import ValidException
 from app.enums.OssEnum import MiniOssTypeEnum
-from app.middleware.oss.aliyun import AliyunOss
+from app.middleware.oss.aliyun import AliyunOssClient
 from app.middleware.oss.files import OssFile
-from app.middleware.oss.qiniu import QiniuOss
-from app.middleware.oss.tencent import TencentCos
+from app.middleware.oss.minio import MinioOssClient
+from app.middleware.oss.qiniu import QiniuOssClient
+from app.middleware.oss.tencent import TencentCosClient
 from config import PikaAppConfig
 
 
@@ -34,10 +35,14 @@ class OssClient(object):
             bucket_name = PikaAppConfig.OSS_BUCKET_NAME
             endpoint = PikaAppConfig.OSS_ENDPOINT
             if oss_type == MiniOssTypeEnum.ALIYUN.value:
-                return AliyunOss(access_key_id, access_key_secret, endpoint, bucket_name)
+                return AliyunOssClient(access_key_id, access_key_secret, endpoint, bucket_name)
             if oss_type == MiniOssTypeEnum.QINIU.value:
-                return QiniuOss(access_key_id, access_key_secret, bucket_name)
+                static_qiniu_url = PikaAppConfig.STATIC_QINIU_URL
+                return QiniuOssClient(access_key_id, access_key_secret, bucket_name, static_qiniu_url)
             if oss_type == MiniOssTypeEnum.TENCENT.value:
-                return TencentCos(access_key_id, access_key_secret, endpoint, bucket_name)
+                return TencentCosClient(access_key_id, access_key_secret, endpoint, bucket_name)
+            if oss_type == MiniOssTypeEnum.MINIO.value:
+                secure = PikaAppConfig.OSS_SECURE
+                return MinioOssClient(access_key_id, access_key_secret, bucket_name, endpoint, secure)
             raise ValidException(detail="不支持的oss类型")
         return OssClient._client

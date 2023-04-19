@@ -21,11 +21,12 @@ from app.middleware.oss import OssFile
 from config import PikaAppConfig
 
 
-class QiniuOss(OssFile):
+class QiniuOssClient(OssFile):
 
-    def __init__(self, access_key_id: str, access_key_secret: str, bucket: str):
+    def __init__(self, access_key_id: str, access_key_secret: str, bucket: str, static_qiniu_url:str):
         self.auth = Auth(access_key_id, access_key_secret)
         self.bucket = bucket
+        self.static_qiniu_url = static_qiniu_url
         self.bucket_manager = BucketManager(self.auth)
 
     @staticmethod
@@ -35,19 +36,18 @@ class QiniuOss(OssFile):
         return stream
 
     @awaitable
-    def create_file(self, filepath: str, content: bytes, base_path: str = None):
+    def upload_file(self, filepath: str, content: bytes, base_path: str = None):
         key = self.get_real_path(filepath, base_path)
         token = self.auth.upload_token(self.bucket, key, 3600)
         file_name = os.path.basename(filepath)
-        ret, info = put_stream(token, key, QiniuOss._convert_to_stream(content), file_name,
+        ret, info = put_stream(token, key, QiniuOssClient._convert_to_stream(content), file_name,
                                len(content))
         if ret['key'] != key:
             raise SystemException(detail="上传失败")
-        return QiniuOss.get_url(key), len(content)
+        return QiniuOssClient.get_url(key), len(content)
 
-    @staticmethod
-    def get_url(key):
-        return f"{PikaAppConfig.STATIC_QINIU_URL}/{key}"
+    def get_url(self, key):
+        return f"{self.static_qiniu_url}/{key}"
 
     @awaitable
     def update_file(self, filepath: str, content: bytes, base_path: str = None):
@@ -59,7 +59,7 @@ class QiniuOss(OssFile):
             raise SystemException(detail="更新失败")
 
     @awaitable
-    def delete_file(self, filepath: str, base_path: str = None):
+    def remove_file(self, filepath: str, base_path: str = None):
         key = self.get_real_path(filepath, base_path)
         self.bucket_manager.delete(self.bucket, key)
 
@@ -87,7 +87,7 @@ class QiniuOss(OssFile):
                     return path, real_filename
 
     async def get_file_object(self, filepath):
-        key = self.get_real_path(filepath, QiniuOss._base_path)
+        key = self.get_real_path(filepath, QiniuOssClient._base_path)
         exists, _ = self.bucket_manager.stat(self.bucket, key)
         if exists is None:
             raise KeyUndefinedException(detail="文件不存在")

@@ -17,3 +17,4 @@ class MiniOssTypeEnum(Enum):
     GITEE = "gitee"
     QINIU = "qiniu"
     TENCENT = "tencent"
+    MINIO = 'minio'

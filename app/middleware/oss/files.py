@@ -19,10 +19,10 @@ from app.enums.SysVarEnum import PikaGlobalVarEnum
 class OssFile(object):
     _base_path = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}'
 
-    async def create_file(self, filepath: str, content, base_path: str = None) -> Union[str, int]:
+    async def upload_file(self, filepath: str, content, base_path: str = None) -> Union[str, int]:
         raise NotImplementedError
 
-    async def delete_file(self, filepath: str, base_path: str = None):
+    async def remove_file(self, filepath: str, base_path: str = None):
         raise NotImplementedError
 
     async def download_file(self, filepath, base_path: str = None):

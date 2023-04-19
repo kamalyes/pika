@@ -90,7 +90,7 @@ async def update_project_avatar(project_id: str, file: UploadFile = File(...),
         suffix = file.filename.split(".")[-1]
         filepath = f"project_{project_id}.{suffix}"
         client = OssClient.get_oss_client()
-        file_url, _ = await client.create_file(filepath, file_content, base_path="avatar")
+        file_url, _ = await client.upload_file(filepath, file_content, base_path="avatar")
         await ProjectDao.update_avatar(project_id, operator, operator_identity, file_url)
         return PikaResponse.success(data=file_url)
     except Exception as e:

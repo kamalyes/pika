@@ -17,7 +17,7 @@ from app.core.handler.exceres import SystemException
 from app.middleware.oss import OssFile
 
 
-class TencentCos(OssFile):
+class TencentCosClient(OssFile):
 
     def __init__(self, access_key_id: str, access_key_secret: str, region: str, bucket: str):
         self.bucket = bucket
@@ -25,7 +25,7 @@ class TencentCos(OssFile):
         self.client = CosS3Client(self.config)
 
     @awaitable
-    def create_file(self, filepath: str, content: bytes, base_path: str = None):
+    def upload_file(self, filepath: str, content: bytes, base_path: str = None):
         try:
             key = self.get_real_path(filepath, base_path)
             self.client.put_object(
@@ -40,10 +40,10 @@ class TencentCos(OssFile):
 
     @awaitable
     def update_file(self, filepath: str, content: bytes, base_path: str = None):
-        return self.create_file(filepath, content, base_path)
+        return self.upload_file(filepath, content, base_path)
 
     @awaitable
-    def delete_file(self, filepath: str, base_path: str = None):
+    def remove_file(self, filepath: str, base_path: str = None):
         key = self.get_real_path(filepath, base_path)
         self.client.delete_object(self.bucket, key)
 
