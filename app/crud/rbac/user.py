@@ -13,7 +13,7 @@ import random
 from typing import Any
 
 from custard.core import MockHelper, Kerberos, DataHand
-from custard.core.factory import fake
+from uuid import uuid4
 from custard.pagination.async_sqlalchemy import paginate
 from custard.time import Moment
 from sqlalchemy import or_, select, func, and_, update, delete, distinct
@@ -176,7 +176,7 @@ class UserDao(PikaWrapper):
         target_value = {
             "emp_no": kwargs["emp_no"], "password": kwargs["password"]}
         try:
-            uuid4_ = str(fake.uuid4).upper()
+            uuid4_ = str(uuid4().hex).upper()
             jwt_encode_result = Kerberos.jwt_encode(secret_key=PikaAppConfig.JWT_SECRET_KEY,
                                                     target_value=target_value,
                                                     seconds=kwargs["valid_time"])

@@ -26,9 +26,9 @@ class OAuth2TokenSchema:
     def __init__(
             self,
             emp_no: Optional[str] = Header(
-                None, title="用户编码", max_length=ByteSizeEnum.LENGTH_16),
+                ..., title="用户编码", max_length=ByteSizeEnum.LENGTH_20),
             token: Optional[str] = Header(
-                None, title="token", max_length=ByteSizeEnum.LENGTH_600),
+                ..., title="token", max_length=ByteSizeEnum.LENGTH_600),
     ):
         self.emp_no = emp_no
         self.token = token
