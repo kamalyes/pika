@@ -14,13 +14,11 @@ import json
 from collections import defaultdict
 from json import JSONDecodeError
 from typing import List
-
 from loguru import logger
-
 from app.enums.CaseStatusEnum import CaseStatus
 from app.enums.ConstructorEnum import ConstructorTypeEnum
 from app.enums.RequestBodyEnum import ReqBodyTypeEnum
-from app.enums.RequestTypeEnum import RequestType
+from app.enums.ProtocolEnum import ProtocolTypeEnum
 from app.exceptions.convert.GenerateException import GenerateException
 from app.schema.api_testcase import TestCaseSchema
 from app.schema.constructor import IndexConstructorSchema
@@ -57,7 +55,7 @@ class CaseGenerator(object):
         return False
 
     @staticmethod
-    def get_body_type(headers):
+    def get_content_type(headers):
         """
         获取body类型
         Args:
@@ -90,12 +88,12 @@ class CaseGenerator(object):
             name = f"http请求_{r + 1}"
             constructor_json = json.dumps(
                 dict(
-                    body=requests[r].body,
+                    request_body=requests[r].request_body,
                     headers=requests[r].request_headers,
                     base_path=None,
                     url=requests[r].url,
                     request_method=requests[r].request_method,
-                    body_type=CaseGenerator.get_body_type(
+                    content_type=CaseGenerator.get_content_type(
                         requests[r].request_headers),
                 ),
                 ensure_ascii=False,
@@ -129,10 +127,10 @@ class CaseGenerator(object):
             directory_id=directory_id,
             name=name,
             url=last.url,
-            request_type=RequestType.http.value,
-            body=last.body,
+            protocolType=ProtocolTypeEnum.http.value,
+            request_body=last.request_body,
             request_method=last.request_method,
-            body_type=CaseGenerator.get_body_type(last.request_headers).value,
+            content_type=CaseGenerator.get_content_type(last.request_headers).value,
             request_headers=json.dumps(
                 last.request_headers, ensure_ascii=False),
             case_type=0,
@@ -198,11 +196,10 @@ class CaseGenerator(object):
         CaseGenerator.analysis_body(request, ans, f"{var_name}.response")
 
     @staticmethod
-    def dfs(body, path: str, ans: dict, headers: bool = False):
+    def dfs(request_body, path: str, ans: dict, headers: bool = False):
         """
-
         Args:
-            body:
+            request_body:
             path:
             ans:
             headers:
@@ -210,27 +207,27 @@ class CaseGenerator(object):
         Returns:
 
         """
-        if isinstance(body, list):
-            for i in range(len(body)):
+        if isinstance(request_body, list):
+            for i in range(len(request_body)):
                 c_path = f"{path}.{i}"
-                CaseGenerator.dfs(body[i], c_path, ans, headers)
-        elif isinstance(body, dict):
-            for k, v in body.items():
+                CaseGenerator.dfs(request_body[i], c_path, ans, headers)
+        elif isinstance(request_body, dict):
+            for k, v in request_body.items():
                 c_path = f"{path}.{k}"
                 CaseGenerator.dfs(v, c_path, ans, headers)
         else:
             if not headers or not CaseGenerator.ignore(path):
                 # 如果是bool值,需要特殊处理一下,因为Python get False/True会变成get 0 1
-                if body is not None:
-                    if isinstance(body, bool):
-                        ans[str(body)].append(path)
+                if request_body is not None:
+                    if isinstance(request_body, bool):
+                        ans[str(request_body)].append(path)
                     else:
-                        ans[body].append(path)
+                        ans[request_body].append(path)
 
     @staticmethod
     def analysis_body(request: RequestInfoSchema, ans: dict, var_name: str = None):
         """
-        解析body
+        解析request_body
         Args:
             request:
             ans:
@@ -239,15 +236,15 @@ class CaseGenerator(object):
         Returns:
 
         """
-        if request.body:
+        if request.request_body:
             try:
-                body = json.loads(request.response_content)
-                CaseGenerator.dfs(body, var_name, ans)
+                request_body = json.loads(request.response_content)
+                CaseGenerator.dfs(request_body, var_name, ans)
             except JSONDecodeError:
-                # 可能body不是JSON,跳过
+                # 可能request_body不是JSON,跳过
                 pass
             except Exception as e:
-                raise GenerateException(detail=f"解析接口body变量出错: {e}")
+                raise GenerateException(detail=f"解析接口request_body变量出错: {e}")
 
     @staticmethod
     def analysis_headers(request: RequestInfoSchema, ans: dict, var_name: str = None):
@@ -286,7 +283,7 @@ class CaseGenerator(object):
     @staticmethod
     def replace_body(request: RequestInfoSchema, ans: dict, replaced: list):
         """
-        替换body
+        替换request_body
         Args:
             request:
             ans:
@@ -295,26 +292,26 @@ class CaseGenerator(object):
         Returns:
 
         """
-        if request.body:
+        if request.request_body:
             try:
-                data = json.loads(request.body)
+                data = json.loads(request.request_body)
                 var_type = list()
                 CaseGenerator.dfs_replace(data, ans, var_type, replaced)
                 result = json.dumps(data, ensure_ascii=False)
                 for v in var_type:
                     result = result.replace(f'"{v}"', f"{v}")
-                request.body = result
+                request.request_body = result
             except JSONDecodeError:
                 pass
             except Exception as e:
                 logger.error(f"转换body变量失败: {e}")
 
     @staticmethod
-    def dfs_replace(body, ans: dict, var_type: list, replaced: list):
+    def dfs_replace(request_body, ans: dict, var_type: list, replaced: list):
         """
 
         Args:
-            body:
+            request_body:
             ans:
             var_type:
             replaced:
@@ -322,26 +319,26 @@ class CaseGenerator(object):
         Returns:
 
         """
-        if isinstance(body, dict):
-            for k, v in body.items():
+        if isinstance(request_body, dict):
+            for k, v in request_body.items():
                 string, value = CaseGenerator.dfs_replace(
                     v, ans, var_type, replaced)
                 if value is not None:
-                    body[k] = "${%s}" % value
+                    request_body[k] = "${%s}" % value
                     if not string:
                         var_type.append("${%s}" % value)
-        elif isinstance(body, list):
-            for i in range(len(body)):
+        elif isinstance(request_body, list):
+            for i in range(len(request_body)):
                 string, value = CaseGenerator.dfs_replace(
-                    body[i], ans, var_type, replaced)
+                    request_body[i], ans, var_type, replaced)
                 if value is not None:
-                    body[i] = "${%s}" % value
+                    request_body[i] = "${%s}" % value
                     if not string:
                         var_type.append("${%s}" % value)
         else:
-            body_str = body
-            if isinstance(body, bool):
-                body_str = str(body)
+            body_str = request_body
+            if isinstance(request_body, bool):
+                body_str = str(request_body)
             if ans.get(body_str):
                 replaced.append("%s => ${%s}" %
                                 (body_str, ans.get(body_str)[0]))

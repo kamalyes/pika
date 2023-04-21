@@ -21,8 +21,8 @@ from app.schema.base import PikaBaseModel
 class HttpRequestSchema(BaseModel):
     method: Optional[str] = None
     url: Optional[str] = None
-    body: Optional[str] = None
-    body_type: ReqBodyTypeEnum = ReqBodyTypeEnum.none
+    request_body: Optional[str] = None
+    content_type: ReqBodyTypeEnum = ReqBodyTypeEnum.none
     headers: dict = {}
 
     # noinspection PyMethodParameters

@@ -10,16 +10,15 @@
 @Desc    :  None
 """
 import json
-
+from aiohttp.client_exceptions import ClientProxyConnectionError, InvalidURL
+from urllib.parse import urlparse
 import aiohttp
 from aiohttp import FormData
-from custard.core import RegEx
 from custard.time import Moment
-
 from app.enums.RequestBodyEnum import ReqBodyTypeEnum
 from app.middleware.oss import OssClient
 from config import PikaAppConfig
-from app.core.handler.exceres import SystemException, ValidException
+from app.core.handler.exceres import SystemException
 
 class AsyncRequest(object):
     def __init__(self, url: str, timeout=15, **kwargs):
@@ -38,29 +37,33 @@ class AsyncRequest(object):
         return kwargs.get("data")
 
     async def invoke(self, method: str):
-        start_date = Moment.get_now_time("13timestamp")
-        async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar(unsafe=True)) as session:
-            async with session.request(
-                method, self.url, timeout=self.timeout, proxy=self.proxy, ssl=False, **self.kwargs
-            ) as resp:
-                # if resp.status != 200: # 当http状态码不为200的时候给出提示
-                #     return await self.collect(False, self.get_data(self.kwargs), resp.status, msg="http状态码不为200")
-                finished_date = Moment.get_now_time("13timestamp")
-                cost = "%.0fms" % ((finished_date - start_date) / 1000)
-                # print("invoke请求耗时", start_date, finished_date)
-                response, json_format = await AsyncRequest.get_resp(resp)
-                cookie = self.get_cookie(session)
-                return await self.collect(
-                    True,
-                    self.get_data(self.kwargs),
-                    resp.status,
-                    response,
-                    resp.headers,
-                    resp.request_info.headers,
-                    elapsed=cost,
-                    cookies=cookie,
-                    json_format=json_format,
-                )
+        try:
+            async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar(unsafe=True)) as session:
+                start_date = Moment.get_now_time("13timestamp")
+                async with session.request(
+                    method, self.url, timeout=self.timeout, proxy=self.proxy, ssl=False, **self.kwargs
+                ) as resp:
+                    # if resp.status != 200: # 当http状态码不为200的时候给出提示
+                    #     return await self.collect(False, self.get_data(self.kwargs), resp.status, msg="http状态码不为200")
+                    finished_date = Moment.get_now_time("13timestamp")
+                    cost_ = int("%.0f" % (finished_date - start_date))
+                    cost = "%.3fs"%(cost_ / 1000) if cost_ > 1000 else f'{cost_}ms'
+                    # print("invoke请求耗时", start_date, finished_date)
+                    response, json_format = await AsyncRequest.get_resp(resp)
+                    cookie = self.get_cookie(session)
+                    return await self.collect(
+                        True,
+                        self.get_data(self.kwargs),
+                        resp.status,
+                        response,
+                        resp.headers,
+                        resp.request_info.headers,
+                        elapsed=cost,
+                        cookies=cookie,
+                        json_format=json_format,
+                    )
+        except ClientProxyConnectionError as err:
+            raise SystemException(detail=f'invoke失败,{err}')
 
     async def download(self):
         async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar(unsafe=True)) as session:
@@ -68,34 +71,39 @@ class AsyncRequest(object):
                 if resp.status != 200:
                     raise SystemException(detail="download file failed")
                 return await resp.content.read()
-
-    @staticmethod
-    async def client(url: str, body_type: ReqBodyTypeEnum = ReqBodyTypeEnum.json, timeout=15, **kwargs):
+    
+    @classmethod
+    async def probe(cls, url):
         if url.startswith("localhost"):
             url = f"http://{url}"
-        else:
-            if RegEx.match_url(url) is False:
-                raise ValidException(detail="请输入正确的url, 记得带上http哦")
+        try:
+            urlparse(url)
+        except InvalidURL as error:
+             raise SystemException(detail=f"{error}")
+
+    @classmethod
+    async def client(cls, url: str, content_type: ReqBodyTypeEnum = ReqBodyTypeEnum.json, timeout=15, **kwargs):
+        await cls.probe(url)
         headers = kwargs.get("headers", {})
-        if body_type == ReqBodyTypeEnum.json:
+        if content_type == ReqBodyTypeEnum.json:
             if "Content-Type" not in headers:
                 headers["Content-Type"] = "application/json; charset=UTF-8"
             # 新增json校验,修复史诗级bug: json被额外序列化
             try:
-                body = kwargs.get("body")
-                if body:
-                    body = json.loads(body)
+                request_body = kwargs.get("request_body")
+                if request_body:
+                    request_body = json.loads(request_body)
             except Exception as e:
                 raise SystemException(detail=f"json格式不正确: {e}")
-            r = AsyncRequest(url, headers=headers, timeout=timeout, json=body)
-        elif body_type == ReqBodyTypeEnum.form:
+            r = AsyncRequest(url, headers=headers, timeout=timeout, json=request_body)
+        elif content_type == ReqBodyTypeEnum.form:
             try:
-                body = kwargs.get("body")
+                request_body = kwargs.get("request_body")
                 form_data = None
-                if body:
+                if request_body:
                     form_data = FormData()
                     # 因为存储的是字符串,所以需要反序列化
-                    items = json.loads(body)
+                    items = json.loads(request_body)
                     for item in items:
                         # 如果是文本类型,直接添加key-value
                         if item.get("type") == "TEXT":
@@ -107,13 +115,13 @@ class AsyncRequest(object):
                 r = AsyncRequest(url, headers=headers, data=form_data, timeout=timeout)
             except Exception as e:
                 raise SystemException(detail=f"解析form-data失败: {str(e)}")
-        elif body_type == ReqBodyTypeEnum.x_form:
-            body = kwargs.get("body", "{}")
-            body = json.loads(body)
-            r = AsyncRequest(url, headers=headers, data=body, timeout=timeout)
+        elif content_type == ReqBodyTypeEnum.x_form:
+            request_body = kwargs.get("request_body", "{}")
+            request_body = json.loads(request_body)
+            r = AsyncRequest(url, headers=headers, data=request_body, timeout=timeout)
         else:
             # 暂时未支持其他类型
-            r = AsyncRequest(url, headers=headers, timeout=timeout, data=kwargs.get("body"))
+            r = AsyncRequest(url, headers=headers, timeout=timeout, data=kwargs.get("request_body"))
         return r
 
     @staticmethod
@@ -128,12 +136,11 @@ class AsyncRequest(object):
             return data, False
 
     @staticmethod
-    def get_request_data(body):
-        request_body = body
-        if isinstance(body, bytes):
+    def get_request_data(request_body):
+        if isinstance(request_body, bytes):
             request_body = request_body.decode()
-        if isinstance(body, FormData):
-            request_body = str(body)
+        if isinstance(request_body, FormData):
+            request_body = str(request_body)
         if isinstance(request_body, str) or request_body is None:
             return request_body
         return json.dumps(request_body, ensure_ascii=False, indent=4)

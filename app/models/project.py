@@ -11,7 +11,7 @@
 """
 
 from uuid import uuid4
-from sqlalchemy import INT, Column, String, BOOLEAN, ForeignKey, UniqueConstraint
+from sqlalchemy import INT, Column, String, BOOLEAN, ForeignKey, UniqueConstraint, DATETIME
 from sqlalchemy.orm import relationship, backref
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
@@ -61,8 +61,9 @@ class ProjectRoleModel(LargeBaseModel):
         ForeignKey(UserModel.emp_no, ondelete="cascade", onupdate="cascade"),
         nullable=False,
         comment="项目成员编号(用户编号)")
-    project_id = Column(BinaryUUID,
-                        default=uuid4, index=True, comment="项目id")
+    project_id = Column(BinaryUUID, 
+                       ForeignKey(ProjectModel.id, ondelete="cascade", onupdate="cascade"),
+                       index=True, comment="项目id")
     project_role = Column(INT, server_default="0", index=True, comment="角色")
     relationship(UserModel, backref=backref("children", cascade="all, delete"))
 
@@ -71,3 +72,15 @@ class ProjectRoleModel(LargeBaseModel):
         self.member_no = member_no
         self.project_id = project_id
         self.project_role = project_role
+
+class ProjectIterModel(LargeBaseModel):
+    __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_project_iter'
+    __table_args__ = {"comment": "项目迭代版本关联表"}
+    name = Column(String(ByteSizeEnum.LENGTH_16),
+                  unique=True, index=True, comment="迭代版本名称")
+    project_id = Column(BinaryUUID, 
+                       ForeignKey(ProjectModel.id, ondelete="cascade", onupdate="cascade"),
+                       index=True, comment="项目id")
+    start_date = Column(DATETIME, nullable=False, default=None, comment="开始时间")
+    publish_time = Column(DATETIME, nullable=False, default=None, comment="发布时间")
+    end_time = Column(DATETIME, nullable=False, default=None, comment="结束时间")

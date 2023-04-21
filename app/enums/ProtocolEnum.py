@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python 3.9.11
 """
-@File    :  RequestTypeEnum.py
+@File    :  ProtocolTypeEnum.py
 @Time    :  2022/7/7 15:21 PM
 @Author  :  YuYanQing
 @Version :  1.0
@@ -12,7 +12,7 @@
 from enum import IntEnum
 
 
-class RequestType(IntEnum):
+class ProtocolTypeEnum(IntEnum):
     http = 1
     grpc = 2
     dubbo = 3

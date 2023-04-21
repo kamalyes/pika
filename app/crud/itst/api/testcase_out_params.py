@@ -9,7 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-import time
+from custard.time import Moment
 from datetime import datetime
 from typing import List
 
@@ -82,7 +82,7 @@ class ApiTestCaseOutParametersDao(PikaWrapper):
                         await session.execute(
                             update(ApiTestCaseOutParametersModel)
                             .where(ApiTestCaseOutParametersModel.id.in_(should_remove))
-                            .values(delete_flag=int(time.time() * 1000))
+                            .values(delete_flag=1, delete_date=Moment.get_now_time())
                         )
             return result
         except Exception as e:

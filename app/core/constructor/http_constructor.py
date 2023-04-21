@@ -32,9 +32,9 @@ class HttpConstructor(ConstructorAbstract):
             headers = data.get("headers")
             if isinstance(headers, str):
                 headers = json.loads(data.get("headers"))
-            client = await AsyncRequest.client(url=url, body_type=data.get("body_type"),
+            client = await AsyncRequest.client(url=url, content_type=data.get("content_type"),
                                                headers=headers,
-                                               body=data.get("body"))
+                                               request_body=data.get("request_body"))
             resp = await client.invoke(data.get("request_method"))
             executor.append(f"当前{ConstructorAbstract.get_name(constructor)}类型为http, url: {url}")
             if constructor.value:

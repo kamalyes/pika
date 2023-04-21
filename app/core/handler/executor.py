@@ -65,7 +65,7 @@ class Executor(object):
     el_exp = r"\$\{(.+?)\}"
     pattern = re.compile(el_exp)
     # 需要替换全局变量的字段
-    fields = ["body", "url", "request_headers"]
+    fields = ["request_body", "url", "request_headers"]
 
     def __init__(self, log: CaseLog = None):
         if log is None:
@@ -307,9 +307,9 @@ class Executor(object):
         Returns:
 
         """
-        if case_info.body_type == ReqBodyTypeEnum.none:
+        if case_info.content_type == ReqBodyTypeEnum.none:
             return
-        if case_info.body_type == ReqBodyTypeEnum.json:
+        if case_info.content_type == ReqBodyTypeEnum.json:
             if "Content-Type" not in headers:
                 headers["Content-Type"] = "application/json; charset=UTF-8"
 
@@ -398,10 +398,10 @@ class Executor(object):
             else:
                 headers = dict()
 
-            body = case_info.body if case_info.body != "" else None
+            request_body = case_info.request_body if case_info.request_body != "" else None
 
             # Step8: 替换请求参数
-            body = self.replace_body(request_param, body, case_info.body_type)
+            request_body = self.replace_body(request_param, request_body, case_info.content_type)
 
             # Step9: 替换base_path
             if case_info.base_path:
@@ -411,12 +411,12 @@ class Executor(object):
             response_info["url"] = case_info.url
 
             # Step9: 完成http请求
-            request_obj = await AsyncRequest.client(url=case_info.url, body_type=case_info.body_type, headers=headers, body=body)
+            request_obj = await AsyncRequest.client(url=case_info.url, content_type=case_info.content_type, headers=headers, request_body=request_body)
             res = await request_obj.invoke(method)
             self.append(
                 f"http请求过程\n\nRequest Method: {case_info.request_method}\n\n"
                 f"Request Headers:\n{headers}\n\nUrl: {case_info.url}"
-                f"\n\nBody:\n{body}\n\nResponse:\n{res.get('response', '未获取到返回值')}"
+                f"\n\nRequest Body:\n{request_body}\n\nResponse:\n{res.get('response', '未获取到返回值')}"
             )
             response_info.update(res)
 
@@ -465,7 +465,9 @@ class Executor(object):
                         setattr(cls, f, fd)
 
     def replace_args(
-        self, params, data: ApiTestCaseModel, constructors: List[ConstructorModel], asserts: List[ApiTestCaseAssertsModel]
+        self, params, data: ApiTestCaseModel, 
+        constructors: List[ConstructorModel],
+        asserts: List[ApiTestCaseAssertsModel]
     ):
         """
         替换参数
@@ -492,7 +494,7 @@ class Executor(object):
         Returns:
 
         """
-        self.replace_cls(params, data, "request_headers", "body", "url")
+        self.replace_cls(params, data, "request_headers", "request_body", "url")
 
     def replace_constructors(self, constructors: List[ConstructorModel], *params: dict):
         """
@@ -570,7 +572,7 @@ class Executor(object):
             asserts = result.get("asserts")
             url = result.get("url")
             case_logs = result.get("logs")
-            body = result.get("request_data")
+            request_body = result.get("request_data")
             status_code = result.get("status_code")
             request_method = result.get("request_method")
             request_headers = result.get("request_headers")
@@ -589,7 +591,7 @@ class Executor(object):
                 start_date,
                 finished_date,
                 url,
-                body,
+                request_body,
                 request_method,
                 request_headers,
                 cost,
@@ -646,32 +648,32 @@ class Executor(object):
             )
 
     @case_log
-    def replace_body(self, req_params, body, body_type=1):
+    def replace_body(self, req_params, request_body, content_type=1):
         """
         根据传入的构造参数进行参数替换
         Args:
             req_params:
-            body:
-            body_type:
+            request_body:
+            content_type:
 
         Returns:
 
         """
-        if body_type != ReqBodyTypeEnum.json:
+        if content_type != ReqBodyTypeEnum.json:
             self.append("当前请求数据不为json, 跳过替换")
-            return body
+            return request_body
         try:
-            if body:
-                data = json.loads(body)
+            if request_body:
+                data = json.loads(request_body)
                 if req_params is not None:
                     for k, v in req_params.items():
                         if data.get(k) is not None:
                             data[k] = v
                 return json.dumps(data, ensure_ascii=False)
-            self.append(f"body为空, 不进行替换")
+            self.append(f"request_body为空, 不进行替换")
         except Exception as e:
-            self.append(f"替换请求body失败, {e}")
-        return body
+            self.append(f"替换请求request_body失败, {e}")
+        return request_body
 
     @case_log
     def my_assert(self, asserts: List, json_format: bool) -> Union[str, bool]:

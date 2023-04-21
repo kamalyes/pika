@@ -39,7 +39,7 @@ class ApiTestPlanModel(LargeBaseModel):
                   nullable=False, comment="cron表达式")
     case_list = Column(TEXT, nullable=False, comment="用例列表")
     ordered = Column(BOOLEAN, default=False, comment="并行/串行(是否顺序执行)")
-    pass_rate = Column(SMALLINT, default=70, comment="通过率低于这个数会自动发通知")
+    pass_rate = Column(SMALLINT, server_default='70', comment="通过率低于这个数会自动发通知")
     receiver = Column(TEXT, comment="通知人 目前只有邮箱,后续用户表可能要完善手机号字段,为了通知")
     msg_type = Column(TEXT, comment="通知方式 0: 邮件 1: 钉钉 2: 企业微信 3: 飞书 支持多选")
     retry_minutes = Column(SMALLINT, nullable=False,

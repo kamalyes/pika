@@ -19,14 +19,14 @@ from pydantic import BaseModel
 from app.core.handler.exceres import SystemException
 from app.enums.ByteSizeEnum import ByteSizeEnum
 
-body = TypeVar("body", bytes, str)
+request_body = TypeVar("request_body", bytes, str)
 
 
 class RequestInfoSchema(BaseModel):
     url: Optional[str] = Body(
         None, name='url', max_length=ByteSizeEnum.LENGTH_256)
-    body: Optional[str] = Body(
-        None, name='body', max_length=ByteSizeEnum.LENGTH_2W)
+    request_body: Optional[str] = Body(
+        None, name='request_body', max_length=ByteSizeEnum.LENGTH_2W)
     request_method: Optional[str] = Body(
         None, name='请求方式', max_length=ByteSizeEnum.LENGTH_12)
     request_headers: Optional[dict] = Body(None, name='请求头部信息')
@@ -45,7 +45,7 @@ class RequestInfoSchema(BaseModel):
                      request_headers=dict(flow.request.headers),
                      response_headers=dict(flow.response.headers),
                      response_content=self.get_response(flow.response),
-                     body=self.get_body(flow.request),
+                     request_body=self.get_body(flow.request),
                      cookies=dict(flow.response.cookies),
                      request_cookies=dict(flow.request.cookies),
                      ))

@@ -27,26 +27,20 @@ class ApiTestReportModel(Base):
     __table_args__ = {"comment": "测试报告表"}
     id = Column(BinaryUUID,
                 default=uuid4, primary_key=True)
-    executor = Column(String(ByteSizeEnum.LENGTH_16),
-                      server_default="0", index=True, comment="执行人 0则为CPU")
-    env = Column(BinaryUUID, ForeignKey(
-        EnvironmentModel.id, ondelete="cascade", onupdate="cascade"), comment="环境id")
+    executor = Column(String(ByteSizeEnum.LENGTH_16), server_default="0", index=True, comment="执行人 0则为CPU")
+    env = Column(BinaryUUID, ForeignKey(EnvironmentModel.id, ondelete="cascade", onupdate="cascade"), comment="环境id")
     cost = Column(String(ByteSizeEnum.LENGTH_08), comment="花费时间")
-    plan_id = Column(BinaryUUID, ForeignKey(
-        ApiTestPlanModel.id, ondelete="cascade", onupdate="cascade"), nullable=False, index=True, comment="测试集合id,预留字段")
+    plan_id = Column(BinaryUUID, ForeignKey(ApiTestPlanModel.id, ondelete="cascade", onupdate="cascade"),
+                     nullable=False, index=True, comment="测试集合id,预留字段")
     start_date = Column(DATETIME, nullable=False, comment="开始时间")
     finished_date = Column(DATETIME, comment="结束时间")
     success_count = Column(INT, nullable=False, server_default="0", comment="成功数量")
     error_count = Column(INT, nullable=False, server_default="0", comment="错误数量")
     failed_count = Column(INT, nullable=False, server_default="0", comment="失败数量")
     skipped_count = Column(INT, nullable=False, server_default="0", comment="跳过数量")
-    status = Column(SMALLINT, nullable=False,
-                    comment="执行状态 0: pending, 1: running, 2: stopped, 3: finished",
-                    index=True)
-    mode = Column(SMALLINT, server_default="0",
-                  comment="case执行模式 0: 普通, 1: 测试集, 2: pipeline, 3: 其他")
-    delete_flag = Column(BOOLEAN, server_default="0",
-                         comment="删除标识 1:已删除,0:未删除")
+    status = Column(SMALLINT, nullable=False, comment="执行状态 0: pending, 1: running, 2: stopped, 3: finished", index=True)
+    mode = Column(SMALLINT, server_default="0", comment="case执行模式 0: 普通, 1: 测试集, 2: pipeline, 3: 其他")
+    delete_flag = Column(BOOLEAN, server_default="0", comment="删除标识 1:已删除,0:未删除")
 
     def __init__(self, executor: str, env: str, success_count: int = 0, failed_count: int = 0,
                  error_count: int = 0, skipped_count: int = 0, status: int = 0, mode: int = 0,

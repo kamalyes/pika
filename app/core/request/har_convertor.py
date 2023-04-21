@@ -55,7 +55,7 @@ class HarConvertor(Convertor):
                         # 由于不符合预期的url,所以过滤掉
                         continue
                     info = RequestInfoSchema(url=url, response_data=entry.get("response"),
-                                             body=HarConvertor.get_body(
+                                             request_body=HarConvertor.get_body(
                                                  request_data),
                                              status_code=response_data.get(
                                                  "status"),

@@ -150,7 +150,6 @@ class EnvConfig(BaseConfig):
 
 
 PikaAppConfig = EnvConfig()
-PikaAppConfig.ENVIRONMENT = os.environ.get("PIKA_ENV", "dev")
 
 # init redis
 PikaAppConfig.REDIS_NODES = [

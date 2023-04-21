@@ -28,7 +28,7 @@ class ApiTestResultDao(PikaWrapper):
     @classmethod
     async def insert_report(cls, report_id: str, case_id: str, case_name: str, status: int,
                             case_log: str, start_date: datetime, finished_date: datetime,
-                            url: str, body: str, request_method: str, request_headers: str,
+                            url: str, request_body: str, request_method: str, request_headers: str,
                             cost: str,
                             asserts: str, response_headers: str, response: str,
                             status_code: int, cookies: str, retry: int = None,
@@ -39,7 +39,7 @@ class ApiTestResultDao(PikaWrapper):
                 async with session.begin():
                     result = ApiTestResultModel(report_id, case_id, case_name, status,
                                                 case_log, start_date, finished_date,
-                                                url, body, request_method, request_headers, cost,
+                                                url, request_body, request_method, request_headers, cost,
                                                 asserts, response_headers, response, status_code,
                                                 cookies, retry, request_params, data_name, data_id)
                     session.add(result)

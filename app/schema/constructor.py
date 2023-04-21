@@ -11,9 +11,8 @@
 """
 from typing import Optional
 from fastapi import Body
-from pydantic import BaseModel, validator
+from pydantic import validator
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.exceptions.business.ParamsException import VariablesNullError
 from app.schema.base import BaseOnlyDelSchema, BaseOnlyIdSchema, PikaBaseModel
 
 
