@@ -20,28 +20,18 @@ from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
 from app.models.api_test_case import ApiTestCaseModel
 from app.models.api_test_result import ApiTestResultModel
+from app.schema.api_testcase_result import ApiTestCaseResultSchema
 
 
 @PikaMdWrapper(ApiTestResultModel)
 class ApiTestResultDao(PikaWrapper):
 
     @classmethod
-    async def insert_report(cls, report_id: str, case_id: str, case_name: str, status: int,
-                            case_log: str, start_date: datetime, finished_date: datetime,
-                            url: str, request_body: str, request_method: str, request_headers: str,
-                            cost: str,
-                            asserts: str, response_headers: str, response: str,
-                            status_code: int, cookies: str, retry_times: int = None,
-                            request_params: str = None, data_name: str = None, data_id: str = None,
-                            ) -> None:
+    async def insert_report(cls, request: ApiTestCaseResultSchema) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():
-                    result = ApiTestResultModel(report_id, case_id, case_name, status,
-                                                case_log, start_date, finished_date,
-                                                url, request_body, request_method, request_headers, cost,
-                                                asserts, response_headers, response, status_code,
-                                                cookies, retry_times, request_params, data_name, data_id)
+                    result = ApiTestResultModel(**request.__dict__)
                     session.add(result)
                     await session.flush()
         except Exception as e:

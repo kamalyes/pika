@@ -52,6 +52,7 @@ from app.models.api_testcase_out_parameters import ApiTestCaseOutParametersModel
 from app.models.api_testplan import ApiTestPlanModel
 from app.models.constructor import ConstructorModel
 from app.models.project import ProjectModel
+from app.schema.api_testcase_result import ApiTestCaseResultSchema
 from app.utils.case_logger import CaseLog
 from app.utils.decorator import case_log, lock
 from app.utils.gconfig_parser import StringGConfigParser, JSONGConfigParser, YamlGConfigParser
@@ -439,13 +440,13 @@ class Executor(object):
             response_info["asserts"] = asserts
             # 日志输出, 如果不是主用例则不记录
             if self._main:
-                response_info["logs"] = self.logger.join()
+                response_info["case_log"] = self.logger.join()
             return response_info, None
         except Exception as e:
             Executor.log.exception("执行用例失败: \n")
             self.append(f"执行用例失败: {str(e)}")
             if self._main:
-                response_info["logs"] = self.logger.join()
+                response_info["case_log"] = self.logger.join()
             return response_info, f"执行用例失败: {str(e)}"
 
     @staticmethod
@@ -533,7 +534,7 @@ class Executor(object):
         params_pool: dict = None,
         request_param: dict = None,
         path="主case",
-        name: str = None,
+        data_name: str = None,
         data_id: str = None,
         retry_minutes: int = 0,
     ):
@@ -547,7 +548,7 @@ class Executor(object):
             params_pool:
             request_param:
             path:
-            name:
+            data_name:
             data_id:
             retry_minutes:
 
@@ -571,7 +572,7 @@ class Executor(object):
                 continue
             asserts = result.get("asserts")
             url = result.get("url")
-            case_logs = result.get("logs")
+            case_log = result.get("case_log")
             request_body = result.get("request_data")
             status_code = result.get("status_code")
             request_method = result.get("request_method")
@@ -580,31 +581,13 @@ class Executor(object):
             case_name = result.get("case_name")
             response_headers = result.get("response_headers")
             cookies = result.get("cookies")
-            req = json.dumps(request_param, ensure_ascii=False)
+            request_params = json.dumps(request_param, ensure_ascii=False)
             data[case_id].append(status)
-            await ApiTestResultDao.insert_report(
-                report_id,
-                case_id,
-                case_name,
-                status,
-                case_logs,
-                start_date,
-                finished_date,
-                url,
-                request_body,
-                request_method,
-                request_headers,
-                cost,
-                asserts,
-                response_headers,
-                response,
-                status_code,
-                cookies,
-                0,
-                req,
-                name,
-                data_id,
-            )
+            api_testcase_result = ApiTestCaseResultSchema(
+                 case_id, report_id, case_name, status,  case_log, start_date, finished_date,url,
+                request_body, request_method, request_headers, cost, asserts, response_headers,
+                response, status_code, cookies, retry_times, request_params, data_name, data_id)
+            await ApiTestResultDao.insert_report(api_testcase_result)
             break
 
     @staticmethod
