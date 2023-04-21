@@ -60,12 +60,9 @@ async def insert_test_plan(form: ApiTestPlanSchema,
 @router.post("/update", summary="更新定时任务&测试计划")
 async def update_test_plan(form: ApiTestPlanSchema,
                            user_info=Depends(Permission(RoleEnum.MANAGER))):
-    try:
-        await ApiTestPlanDao.update_test_plan(form, user_info['emp_no'], True)
-        Scheduler.edit_test_plan(form.id, form.name, form.cron)
-        return PikaResponse.success()
-    except Exception as e:
-        return PikaResponse.failed(detail=str(e))
+    await ApiTestPlanDao.update_test_plan(form, user_info['emp_no'], True)
+    Scheduler.edit_test_plan(form.id, form.name, form.cron)
+    return PikaResponse.success()
 
 
 @router.get("/delete", summary="删除定时任务&测试计划")

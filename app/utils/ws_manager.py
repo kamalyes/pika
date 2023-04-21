@@ -89,7 +89,7 @@ class ConnectionManager:
 
     async def notify(self, operator, title=None, content=None, notice: NotificationModel = None):
         """
-        根据user_id推送对应的
+        根据emp_no推送对应的
         Args:
             operator:
             title:

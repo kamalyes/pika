@@ -742,10 +742,11 @@ class UserDao(PikaWrapper):
 
     @classmethod
     @RedisHelper.cache("user_detail", ValidTimeEnum.USER_DETAIL_TIME.value)
-    async def query_user(cls, id: str):
+    async def query_user(cls, emp_no: str):
         async with async_session() as session:
             query_sql = select(UserModel) \
-                .outerjoin(SysUserAdminModel, UserModel.id == SysUserAdminModel.uid).where(UserModel.id == id)
+                .outerjoin(SysUserAdminModel, UserModel.id == SysUserAdminModel.uid) \
+                .where(UserModel.emp_no == emp_no)
             query_result = await session.execute(query_sql)
             return query_result.scalars().first()
 

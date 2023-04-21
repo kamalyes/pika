@@ -14,6 +14,7 @@ from custard.time import Moment
 from copy import deepcopy
 from sqlalchemy import select, and_, or_, null
 from app.core.handler.exceres import KeyExistException, KeyUndefinedException, SystemException
+from app.core.handler.jsonres import PikaModelEncoder
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.pmp.project import ProjectDao
 from app.enums.OperationEnum import SqlOperationTypeEnum
@@ -119,9 +120,10 @@ class ApiTestPlanDao(PikaWrapper):
                     await session.flush()
                     session.expunge(data)
                 if log:
+                    before_, changed_  = PikaModelEncoder.model_to_dict(before), PikaModelEncoder.model_to_dict(plan)
                     async with session.begin():
                         await asyncio.create_task(
-                            cls.insert_log(session, operator=operator, mode=SqlOperationTypeEnum.ONLY_UPDATE, before=before.__dict__, changed=plan.__dict__))
+                            cls.insert_log(session, operator=operator, mode=SqlOperationTypeEnum.ONLY_UPDATE, before=before_, changed=changed_))
         except Exception as e:
             cls.__log__.exception(detail=f"编辑测试计划失败: {str(e)}")
             raise SystemException(detail=f"编辑失败: {str(e)}")

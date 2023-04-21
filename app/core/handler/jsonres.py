@@ -36,11 +36,10 @@ class PikaJsonEncoder(JSONEncoder):
             return o.decode(encoding='utf-8')
         return self.default(o)
 
-
-class PikaResponse:
-
-    @staticmethod
-    def model_to_dict(obj, *ignore: str):
+class PikaModelEncoder:
+    
+    @classmethod
+    def model_to_dict(cls, obj, *ignore: str):
         """
         将orm模型转换为dict
         Args:
@@ -64,9 +63,9 @@ class PikaResponse:
             else:
                 result[c.name] = val
         return result
-
-    @staticmethod
-    def json_serialize(obj):
+    
+    @classmethod
+    def json_serialize(cls, obj):
         """
         json序列化
         Args:
@@ -89,45 +88,63 @@ class PikaResponse:
                 ans[k] = o
         return ans
 
-    @staticmethod
-    def dict_model_to_dict(obj):
+    @classmethod
+    def dict_model_to_dict(cls, obj):
         for k, v in obj.items():
             if isinstance(v, dict):
-                PikaResponse.dict_model_to_dict(v)
+                cls.dict_model_to_dict(v)
             elif isinstance(v, list):
-                obj[k] = PikaResponse.model_to_list(v)
+                obj[k] = cls.model_to_list(v)
             else:
-                obj[k] = PikaResponse.model_to_dict(v)
+                obj[k] = cls.model_to_dict(v)
         return obj
 
-    @staticmethod
-    def parse_sql_result(data: list):
+    @classmethod
+    def parse_sql_result(cls, data: list):
         columns = []
         if len(data) > 0:
             columns = list(data[0].keys())
-        return columns, [PikaResponse.json_serialize(obj) for obj in data]
+        return columns, [cls.json_serialize(obj) for obj in data]
 
-    @staticmethod
-    def model_to_list(data: list, *ignore: str):
-        return [PikaResponse.model_to_dict(x, *ignore) for x in data]
+    @classmethod
+    def model_to_list(cls, data: list, *ignore: str):
+        return [cls.model_to_dict(x, *ignore) for x in data]
 
-    @staticmethod
-    def encode_json(data: Any, *exclude: str):
+
+    @classmethod
+    def encode_json(cls, data: Any, *exclude: str):
         return jsonable_encoder(data, exclude=exclude, custom_encoder={
             datetime: lambda x: x.strftime(
                 PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS)
         })
+    
+    @classmethod
+    def json_required(cls, func):
+        """
+        此装饰器可以装饰所有post请求 避免处理非json数据报错
+        """
 
-    @staticmethod
-    def records(data: list, code=status.HTTP_200_OK, message="操作成功"):
-        return dict(code=code, message=message, data=PikaResponse.model_to_list(data))
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            json_dict = Request.json()
+            if json_dict is None:
+                return PikaResponse.failed(code=400, detail='json is required')
+            return func(*args, **kwargs)
 
-    @staticmethod
-    def success(data=None, code=status.HTTP_200_OK, message="操作成功", exclude=()):
-        return PikaResponse.encode_json(dict(code=code, message=message, data=data), *exclude)
+        return wrapper
 
-    @staticmethod
+class PikaResponse(PikaModelEncoder):
+    @classmethod
+    def records(cls, data: list, code=status.HTTP_200_OK, message="操作成功"):
+        return dict(code=code, message=message, data=cls.model_to_list(data))
+
+    @classmethod
+    def success(cls, data=None, code=status.HTTP_200_OK, message="操作成功", exclude=()):
+        return cls.encode_json(dict(code=code, message=message, data=data), *exclude)
+
+    @classmethod
     def success_with_size(
+            cls,
             *,
             code: Union[int, str] = status.HTTP_200_OK,
             status_code: Union[int, str] = status.HTTP_200_OK,
@@ -159,8 +176,9 @@ class PikaResponse:
             ),
         )
 
-    @staticmethod
+    @classmethod
     def failed(
+            cls,
             *,
             code: Union[int, str] = status.HTTP_500_INTERNAL_SERVER_ERROR,
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -183,8 +201,9 @@ class PikaResponse:
             content=jsonable_encoder({"code": code, "detail": detail, "data": data}),
         )
 
-    @staticmethod
+    @classmethod
     def custom(
+            cls,
             *,
             code: Union[int, str] = status.HTTP_201_CREATED,
             status_code: Union[int, str] = status.HTTP_201_CREATED,
@@ -210,26 +229,13 @@ class PikaResponse:
             ),
         )
 
-    @staticmethod
-    def file(filepath, filename):
+    @classmethod
+    def file(cls, filepath, filename):
         return FileResponse(filepath, filename=filename,
                             background=BackgroundTask(lambda: os.remove(filepath)))
 
-    @staticmethod
-    def forbidden():
+    @classmethod
+    def forbidden(cls):
         return dict(code=403, msg="对不起, 你没有权限")
 
 
-def json_required(func):
-    """
-    此装饰器可以装饰所有post请求 避免处理非json数据报错
-    """
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        json_dict = Request.json()
-        if json_dict is None:
-            return PikaResponse.failed(code=400, detail='json is required')
-        return func(*args, **kwargs)
-
-    return wrapper
