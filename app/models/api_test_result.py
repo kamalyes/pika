@@ -33,7 +33,7 @@ class ApiTestResultModel(ApiGBaseModel):
     start_date = Column(DATETIME, nullable=False, default=None, comment="开始时间")
     finished_date = Column(DATETIME, nullable=False, default=None, comment="结束时间")
     case_log = Column(TEXT, comment="测试日志")
-    retry = Column(INT, server_default="0", comment="重试次数,预留字段")
+    retry_times = Column(INT, server_default="0", comment="重试次数,预留字段")
     status_code = Column(INT, server_default="0", comment="http状态码")
     cookies = Column(TEXT, comment="请求参数")
     data_name = Column(String(ByteSizeEnum.LENGTH_50))
@@ -45,7 +45,7 @@ class ApiTestResultModel(ApiGBaseModel):
                  case_log: str, start_date: datetime, finished_date: datetime,
                  url: str, request_body: str, request_method: str, request_headers: str, cost: str,
                  asserts: str, response_headers: str, response: str,
-                 status_code: int, cookies: str, retry: int = None,
+                 status_code: int, cookies: str, retry_times: int = None,
                  request_params: str = None, data_name: str = None, data_id: str = None,
                  operator=None, protocol=None, tag=None, id=None, delete_flag = 0
                  ):
@@ -60,7 +60,7 @@ class ApiTestResultModel(ApiGBaseModel):
         self.case_log = case_log
         self.start_date = start_date
         self.finished_date = finished_date
-        self.retry = retry
+        self.retry_times = retry_times
         self.status_code = status_code
         self.cost = cost
         self.asserts = asserts

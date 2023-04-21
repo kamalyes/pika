@@ -493,7 +493,7 @@ class PikaWrapper(object):
         model.key = model.id if key is None else key
         table_tag = getattr(model, PikaAppConfig.TABLE_TAG, False)
         model.tag = table_tag.get('comment','') if table_tag  else '未设置'
-        model.diff_data = diff_data
+        model.diff_data = str(diff_data)
         session.add(model)
         
     @classmethod

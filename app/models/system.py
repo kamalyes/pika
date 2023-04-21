@@ -10,7 +10,7 @@
 @Desc    :  系统
 """
 
-from sqlalchemy import Column, ForeignKey, String, Text, DateTime, SMALLINT, INT
+from sqlalchemy import Column, ForeignKey, String, Text, DateTime, SMALLINT, TEXT
 from app.core.handler.sqlbin_uuid import BinaryUUID
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
@@ -41,7 +41,7 @@ class SysRecordModel(NormBaseModel):
 class OperationLogModel(MinBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_operation_log'
     __table_args__ = {"comment": "操作记录表"}
-    diff_data = Column(String(ByteSizeEnum.LENGTH_1000), nullable=True, comment="diff_data")
+    diff_data = Column(TEXT, nullable=True, comment="diff_data")
     tag = Column(String(ByteSizeEnum.LENGTH_1000), comment="操作table_args")
     mode = Column(SMALLINT, comment="操作类型")
     key = Column(String(ByteSizeEnum.LENGTH_50), nullable=True, comment="关键id,可能是目录id,case_id或者其他id")

@@ -31,7 +31,7 @@ class ApiTestResultDao(PikaWrapper):
                             url: str, request_body: str, request_method: str, request_headers: str,
                             cost: str,
                             asserts: str, response_headers: str, response: str,
-                            status_code: int, cookies: str, retry: int = None,
+                            status_code: int, cookies: str, retry_times: int = None,
                             request_params: str = None, data_name: str = None, data_id: str = None,
                             ) -> None:
         try:
@@ -41,7 +41,7 @@ class ApiTestResultDao(PikaWrapper):
                                                 case_log, start_date, finished_date,
                                                 url, request_body, request_method, request_headers, cost,
                                                 asserts, response_headers, response, status_code,
-                                                cookies, retry, request_params, data_name, data_id)
+                                                cookies, retry_times, request_params, data_name, data_id)
                     session.add(result)
                     await session.flush()
         except Exception as e:
