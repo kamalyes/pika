@@ -15,8 +15,6 @@ import functools
 import json
 from datetime import datetime
 from typing import List, TypeVar, Callable, Any, Iterable
-import uuid
-
 from dictdiffer import diff
 from custard.time import Moment
 from sqlalchemy import select, update, delete

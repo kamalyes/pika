@@ -276,14 +276,14 @@ class ApiTestCaseDao(PikaWrapper):
         # 获取用例的前后置步骤和出参
         out = select(ApiTestCaseOutParametersModel).where(
             ApiTestCaseOutParametersModel.case_id.in_(
-                cs_list), ApiTestCaseOutParametersModel.delete_date == 0
+                cs_list), ApiTestCaseOutParametersModel.delete_flag == 0
         )
         parameters = await session.execute(out)
         for p in parameters.scalars().all():
             var_list.append(
                 dict(stepName=name_dict[p.case_id], name="${%s}" % p.name))
         sql = select(ConstructorModel).where(ConstructorModel.case_id.in_(
-            cs_list), ConstructorModel.delete_date == 0)
+            cs_list), ConstructorModel.delete_flag == 0)
         steps = await session.execute(sql)
         for s in steps.scalars().all():
             if s.value:

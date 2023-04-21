@@ -44,4 +44,4 @@ class QueryApiTestPlanInSchema(BaseOnlyProjectIdSchema, BaseQuerySchema):
     receiver: List[int] = Body(list(), title="消息接收人, 系统消息则该字段为空")
     msg_type: List[int] = Body(list(), title="消息类型 1: 系统消息 2: 其他消息")
     retry_minutes: int = Body(None, title="重试时间")
-    follow: Optional[bool] = Body(False, title="是否关注")
+    follow: Optional[bool] = Body(None, title="是否关注")

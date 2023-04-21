@@ -10,12 +10,10 @@
 @Desc    :  None
 """
 import asyncio
-import time
+from custard.time import Moment
 from copy import deepcopy
-
 from sqlalchemy import select, and_, or_, null
 from app.core.handler.exceres import KeyExistException, KeyUndefinedException, SystemException
-
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.pmp.project import ProjectDao
 from app.enums.OperationEnum import SqlOperationTypeEnum
@@ -24,8 +22,6 @@ from app.models.api_test_report import ApiTestReportModel
 from app.models.api_testplan import ApiTestPlanModel
 from app.models.testplan_follow_user import ApiTestPlanFollowUserRelModel
 from app.schema.api_testplan import ApiTestPlanSchema
-from app.schema.base import BaseOnlyPagingSchema
-
 
 @PikaMdWrapper(ApiTestPlanModel)
 class ApiTestPlanDao(PikaWrapper):
@@ -73,7 +69,7 @@ class ApiTestPlanDao(PikaWrapper):
                         .outerjoin(ApiTestPlanFollowUserRelModel,
                                    ApiTestPlanFollowUserRelModel.plan_id == ApiTestPlanModel.id).where(
                         *conditions, or_(ApiTestPlanFollowUserRelModel.id is None,
-                                         ApiTestPlanFollowUserRelModel.delete_date is not None))
+                                         ApiTestPlanFollowUserRelModel.delete_flag == 0))
                 result, total = await cls.pagination(paging.page_index, paging.page_size, session, sql, False)
                 return result, total
         except Exception as e:
@@ -190,15 +186,17 @@ class ApiTestPlanDao(PikaWrapper):
         async with async_session() as session:
             async with session.begin():
                 sql = select(ApiTestPlanFollowUserRelModel).where(
-                    ApiTestPlanFollowUserRelModel.delete_flag == 0,
                     ApiTestPlanFollowUserRelModel.plan_id == plan_id,
                     ApiTestPlanFollowUserRelModel.emp_no == operator)
                 data = await session.execute(sql)
                 ans = data.scalars().first()
                 if ans is not None:
-                    raise SystemException(detail="已关注过此测试计划")
-                model = ApiTestPlanFollowUserRelModel(plan_id, operator)
-                session.add(model)
+                    ans.delete_flag = 0
+                    ans.delete_date = None
+                else:
+                    model = ApiTestPlanFollowUserRelModel(plan_id, operator)
+                    session.add(model)
+                    
 
     @staticmethod
     async def unfollow_test_plan(plan_id: str, operator: str):
@@ -221,7 +219,8 @@ class ApiTestPlanDao(PikaWrapper):
                 ans = data.scalars().first()
                 if ans is None:
                     raise SystemException(detail="已取关过此测试计划")
-                ans.delete_date = int(time.time() * 1000)
+                ans.delete_flag = 1
+                ans.delete_date = Moment.get_now_time()
 
     @staticmethod
     async def query_user_follow_test_plan(operator: str):
