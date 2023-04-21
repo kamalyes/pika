@@ -928,9 +928,9 @@ class Executor(object):
             # 设置为running
             await ApiTestPlanDao.update_test_plan_state(plan.id, 1)
             project, _ = await ProjectDao.query_project(plan.project_id)
-            env = list(map(int, plan.env_list.split(",")))
-            case_list = list(map(int, plan.case_list.split(",")))
-            receiver = list(map(int, plan.receiver.split(",")
+            env = list(map(str, plan.env_list.split(",")))
+            case_list = list(map(str, plan.case_list.split(",")))
+            receiver = list(map(str, plan.receiver.split(",")
                             if plan.receiver else []))
             # 聚合报告dict
             report_dict = dict()
@@ -955,7 +955,7 @@ class Executor(object):
             if executor is not None:
                 await ws_manage.notify(executor, title="测试计划执行完毕", content=f"请前往测试报告页面查看细节")
         except Exception as e:
-            Executor.log.Exception(detail=f"执行测试计划: 【{plan.name}】失败: {str(e)}")
+            Executor.log.exception(detail=f"执行测试计划: 【{plan.name}】失败: {str(e)}")
             Executor.log.error(f"执行测试计划: 【{plan.name}】失败: {str(e)}")
 
     @staticmethod
@@ -974,9 +974,9 @@ class Executor(object):
             if executor is not None:
                 # 说明不是系统执行
                 user = await UserDao.query_user(executor)
-                name = user.name if user is not None else "未知"
+                executor = user.username if user is not None else "未知"
             else:
-                name = "CPU"
+                executor = "CPU"
             st = time.perf_counter()
             # step1: 新增测试报告数据
             report_id = await ApiTestReportDao.start(executor, env, mode, plan_id=plan_id)
@@ -1011,7 +1011,7 @@ class Executor(object):
             if report_dict is not None:
                 format_ytdhms = PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS
                 report_dict[env] = {
-                    "report_url": f"{PikaAppConfig.PIKA_SERVER_URL}/#/record/report/{report_id}",
+                    "report_url": f"{PikaAppConfig.PIKA_FRONTEND_URL}/#/record/report/{report_id}",
                     "start_date": report.start_date.strftime(format_ytdhms),
                     "finished_date": report.finished_date.strftime(format_ytdhms),
                     "success": ok,
@@ -1019,7 +1019,7 @@ class Executor(object):
                     "total": ok + fail + error + skip,
                     "error": error,
                     "skip": skip,
-                    "executor": name,
+                    "executor": executor,
                     "cost": cost,
                     "plan_result": "通过" if ok + fail + error + skip > 0 and fail + error == 0 else "未通过",
                     "env": current_env.name,

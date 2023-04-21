@@ -33,9 +33,9 @@ class ApiTestReportDao(PikaWrapper):
         try:
             async with async_session() as session:
                 async with session.begin():
-                    report = ApiTestReportModel(
-                        executor, env, mode=mode, plan_id=plan_id)
+                    report = ApiTestReportModel(executor, env, mode=mode, plan_id=plan_id)
                     session.add(report)
+                    await session.flush()
                     return report.id
         except Exception as e:
             cls.__log__.error(f"新增报告失败, error: {e}")

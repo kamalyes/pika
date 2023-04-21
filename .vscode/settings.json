@@ -111,6 +111,7 @@
     "fput",
     "functest",
     "gconfig",
+    "getpid",
     "GITEE",
     "gunicorn",
     "Iframe",
