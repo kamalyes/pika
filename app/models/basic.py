@@ -15,111 +15,68 @@ from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.core.handler.sqlbin_uuid import BinaryUUID
 from app.models import Base
 
-class LargeBaseModel(Base):
-    id = Column(BinaryUUID,
-                primary_key=True, default=uuid4, comment="id")
-    enabled_flag = Column(BOOLEAN, server_default="1",
-                          comment="启用标识 1:启用,0:禁用")
-    delete_flag = Column(BOOLEAN, server_default="0",
-                         comment="删除标识 1:已删除,0:未删除")
-    create_emp_no = Column(String(ByteSizeEnum.LENGTH_20), comment="创建者emp_no")
-    update_emp_no = Column(String(ByteSizeEnum.LENGTH_20), comment="修改者emp_no")
-    create_date = Column(
-        DATETIME,
-        nullable=False,
-        server_default=text("CURRENT_TIMESTAMP"),
-        comment="创建日期",
-    )
-    update_date = Column(
-        DATETIME,
-        nullable=True,
-        server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
-        comment="修改时间",
-    )
-    delete_date = Column(DATETIME, nullable=True, comment="删除时间")
+class OnlyPrimaryKeyAndDesc(Base):
+    id = Column(BinaryUUID, primary_key=True, default=uuid4, comment="id")
     description = Column(String(ByteSizeEnum.LENGTH_600), default=None, comment="备注信息")
     __abstract__ = True
-
-    def __init__(self, id=None, operator=None, description=None, delete_date=None, enabled_flag=True,
-                 delete_flag=False):
+    def __init__(self, id=None, description=None):
         self.id = id
-        self.create_emp_no = operator
-        self.update_emp_no = operator
-        self.enabled_flag = enabled_flag
-        self.delete_flag = delete_flag
-        if isinstance(delete_date, DATETIME):
-            self.delete_date = delete_date
         self.description = description
 
 
-class NormBaseModel(Base):
-    id = Column(BinaryUUID,
-                primary_key=True, default=uuid4, comment="id")
-    description = Column(String(ByteSizeEnum.LENGTH_600), default=None, comment="备注信息")
-    create_emp_no = Column(String(ByteSizeEnum.LENGTH_20), comment="创建者emp_no")
-    update_emp_no = Column(String(ByteSizeEnum.LENGTH_20), comment="修改者emp_no")
-    create_date = Column(
-        DATETIME,
-        nullable=False,
-        server_default=text("CURRENT_TIMESTAMP"),
-        comment="创建日期",
-    )
-    update_date = Column(
-        DATETIME,
-        nullable=True,
-        server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
-        comment="修改时间",
-    )
-    __abstract__ = True
-
-    def __init__(self, id=None, description=None, operator=None):
-        self.id = id
-        self.create_emp_no = operator
-        self.update_emp_no = operator
-        self.description = description
-
-
-class TimestampBaseModel(Base):
-    create_emp_no = Column(String(ByteSizeEnum.LENGTH_20), comment="创建者emp_no")
-    update_emp_no = Column(String(ByteSizeEnum.LENGTH_20), comment="修改者emp_no")
-    create_date = Column(
-        DATETIME,
-        nullable=False,
-        server_default=text("CURRENT_TIMESTAMP"),
-        comment="创建日期",
-    )
-    update_date = Column(
-        DATETIME,
-        nullable=True,
-        server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
-        comment="修改时间",
-    )
-    __abstract__ = True
-
-    def __init__(self, id=None, description=None, operator=None):
-        self.id = id
-        self.create_emp_no = operator
-        self.update_emp_no = operator
-        self.description = description
-
-
-class MinBaseModel(Base):
-    id = Column(BinaryUUID,
-                primary_key=True, default=uuid4, comment="id")
-    description = Column(String(ByteSizeEnum.LENGTH_600), default=None, comment="备注信息")
+class MinBaseModel(OnlyPrimaryKeyAndDesc):
     operator = Column(String(ByteSizeEnum.LENGTH_20), comment="操作者emp_no")
     operator_date = Column(
         DATETIME,
         nullable=True,
         server_default=text("CURRENT_TIMESTAMP"),
-        comment="创建日期",
+        comment="操作时间",
     )
     __abstract__ = True
 
     def __init__(self, id=None, operator=None, description=None):
-        self.id = id
+        super().__init__(id=id, description=description)
         self.operator = operator
-        self.description = description
+
+
+class NormBaseModel(OnlyPrimaryKeyAndDesc):
+    create_emp_no = Column(String(ByteSizeEnum.LENGTH_20), comment="创建者emp_no")
+    update_emp_no = Column(String(ByteSizeEnum.LENGTH_20), comment="修改者emp_no")
+    create_date = Column(
+        DATETIME,
+        nullable=False,
+        server_default=text("CURRENT_TIMESTAMP"),
+        comment="创建日期",
+    )
+    update_date = Column(
+        DATETIME,
+        nullable=True,
+        server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
+        comment="修改时间",
+    )
+    __abstract__ = True
+
+    def __init__(self, id=None, description=None, operator=None):
+        super().__init__(id=id, description=description)
+        self.create_emp_no = operator
+        self.update_emp_no = operator
+
+class LargeBaseModel(NormBaseModel):
+    enabled_flag = Column(BOOLEAN, server_default="1",
+                          comment="启用标识 1:启用,0:禁用")
+    delete_flag = Column(BOOLEAN, server_default="0",
+                         comment="删除标识 1:已删除,0:未删除")
+    delete_date = Column(DATETIME, nullable=True, comment="删除时间")
+    __abstract__ = True
+
+    def __init__(self, id=None, operator=None, description=None, delete_date=None, enabled_flag=True,
+                 delete_flag=False):
+        super().__init__(id=id, operator=operator, description=description)
+        self.enabled_flag = enabled_flag
+        self.delete_flag = delete_flag
+        if isinstance(delete_date, DATETIME):
+            self.delete_date = delete_date
+
 
 class ApiGBaseModel(LargeBaseModel):
     url = Column(TEXT, comment="请求URL")

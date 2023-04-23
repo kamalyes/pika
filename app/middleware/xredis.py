@@ -272,18 +272,19 @@ class RedisHelper(object):
 
     @staticmethod
     @awaitable
-    def async_delete_prefix(key: str):
+    def async_delete_prefix(key: str, traverse_del_num=99):
         """
         根据前缀删除数据
         Args:
             key:
-
+            traverse_del_num:
         Returns:
-
         """
-        for k in RedisHelper.pika_redis_client.scan_iter(f"{key}*"):
-            RedisHelper.pika_redis_client.delete(k)
-            logger.bind(name=None).info(f"delete redis key: {k}")
+        key_name = f'{key}*'
+        while RedisHelper.pika_redis_client.zcard(key_name) > 0:
+            # 判断集合中是否有元素，如有有则删除排行0-99的元素
+            RedisHelper.pika_redis_client.zremrangebyrank(key_name, 0, traverse_del_num)
+            logger.bind(name=None).info(f"delete redis key: {key_name}")
 
     @staticmethod
     def delete_prefix(key: str):

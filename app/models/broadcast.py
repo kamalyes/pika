@@ -21,8 +21,7 @@ from app.models import Base
 class BroadcastReadUserModel(Base):
     __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_broadcast_read_user'
     __table_args__ = {"comment": "消息已读表"}
-    id = Column(BinaryUUID,
-                default=uuid4, primary_key=True)
+    id = Column(BinaryUUID, default=uuid4, primary_key=True)
     notification_id = Column(BinaryUUID,
                              default=uuid4, comment="对应消息id", index=True)
     read_user = Column(String(ByteSizeEnum.LENGTH_20),

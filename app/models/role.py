@@ -14,14 +14,12 @@ from sqlalchemy import Column, SMALLINT, String
 from app.core.handler.sqlbin_uuid import BinaryUUID
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
-from app.models.basic import TimestampBaseModel
+from app.models.basic import NormBaseModel
 
 
-class RoleModel(TimestampBaseModel):
+class RoleModel(NormBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_role'
     __table_args__ = {"comment": "角色表"}
-    id = Column(BinaryUUID,
-                default=uuid4, nullable=False, primary_key=True)
     name = Column(String(ByteSizeEnum.LENGTH_64),
                   nullable=True, comment='菜单名称', index=True)
     role_type = Column(SMALLINT, server_default='10', nullable=False,
@@ -30,8 +28,6 @@ class RoleModel(TimestampBaseModel):
                    nullable=True, comment='菜单列表', index=True)
     status = Column(SMALLINT, server_default='10',
                     nullable=True, comment='状态 10 启用 20 禁用')
-    description = Column(String(ByteSizeEnum.LENGTH_600),
-                         default=None, comment="备注信息")
 
     def __init__(self, id=None, name=None, role_type=None, menus=None, status=None, description=None, operator=None):
         super().__init__(operator=operator)

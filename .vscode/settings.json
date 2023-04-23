@@ -176,6 +176,8 @@
     "xmind",
     "xredis",
     "Yapi",
-    "YTDHMS"
+    "YTDHMS",
+    "zcard",
+    "zremrangebyrank"
   ],
 }

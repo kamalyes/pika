@@ -30,7 +30,7 @@ async def execute_sql(data: OnlineSqlSchema, escarole=Depends(Permission(escarol
     try:
         result, elapsed = await DbConfigDao.online_sql(data.id, data.sql)
         columns, result = PikaResponse.parse_sql_result(result)
-        await SQLHistoryDao.insert(model=SQLHistoryModel(data.sql, elapsed, data.id, operator))
+        await SQLHistoryDao.insert(model=SQLHistoryModel(data.sql, elapsed, data.id,  operator))
         return PikaResponse.success(data=dict(result=result, columns=columns, elapsed=elapsed))
     except Exception as err:
         return PikaResponse.failed(detail=str(err))

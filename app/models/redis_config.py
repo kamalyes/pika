@@ -29,8 +29,8 @@ class RedisModel(LargeBaseModel):
                   nullable=False, comment="redis名称")
     addr = Column(String(ByteSizeEnum.LENGTH_128),
                   nullable=False, comment="连接地址")
-    username = Column(String(ByteSizeEnum.LENGTH_36),
-                      nullable=False, comment="用户名")
+    username = Column(String(ByteSizeEnum.LENGTH_200),
+                      nullable=True, comment="用户名")
     password = Column(String(ByteSizeEnum.LENGTH_200),
                       nullable=False, comment="用户密码")
     db = Column(INT,  server_default="0", nullable=False, comment="库号")
