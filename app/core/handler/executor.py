@@ -170,8 +170,7 @@ class Executor(object):
                     new_value = parse(cf.value, v)
                     new_field = field_origin.replace("${%s}" % v, new_value)
                     setattr(data, field, new_field)
-                    self.append(
-                        "替换全局变量成功, 字段: [{}]:\n\n[{}] -> [{}]\n".format(field, "${%s}" % v, new_value))
+                    self.append("替换全局变量成功, 字段: [{}]:\n\n[{}] -> [{}]\n".format(field, "${%s}" % v, new_value))
                     field_origin = new_field
             self.append("获取{}字段: [{}]中的el表达式".format(name, field), True)
         except Exception as e:
@@ -310,7 +309,7 @@ class Executor(object):
         if construct is None:
             self.append(f"构造方法类型: {constructor.type} 不合法, 请检查")
             return
-        await construct.run(self, env, index, path, params, req_params, constructor, executor_class=Executor)
+        await construct.run(self, env=env, index=index, path=path, params=params, req_params=req_params, constructor=constructor, executor_class=Executor)
 
     def add_header(self, case_info, headers):
         """
@@ -1015,4 +1014,4 @@ class Executor(object):
                 }
             return report_id
         except Exception as e:
-            raise SystemException(detail=f"批量执行用例失败: {e}")
+            raise Exception(f"批量执行用例失败: {e}")

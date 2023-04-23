@@ -11,7 +11,6 @@
 """
 import json
 from app.core.constructor.constructor import ConstructorAbstract
-from app.core.handler.exceres import SystemException
 from app.crud.itstem.gateway import GatewayDao
 from app.middleware.async_ask import AsyncRequest
 from app.models.constructor import ConstructorModel
@@ -19,11 +18,11 @@ from app.models.constructor import ConstructorModel
 
 class HttpConstructor(ConstructorAbstract):
 
-    @staticmethod
-    async def run(executor, env, index, path, params, req_params, constructor: ConstructorModel,
-                  **kwargs):
+    @classmethod
+    async def run(cls, executor, env, index, path, params, constructor: ConstructorModel, **kwargs):
         try:
-            executor.append(f"当前路径: {path}, 第{index + 1}条{HttpConstructor.get_name(constructor)}")
+            constructor_type_ = cls.get_name(constructor)
+            executor.append(f"当前路径: {path}, 第{index + 1}条{constructor_type_}")
             data = json.loads(constructor.constructor_json)
             url = data.get("url")
             if data.get("base_path"):
@@ -36,11 +35,9 @@ class HttpConstructor(ConstructorAbstract):
                                                headers=headers,
                                                request_body=data.get("request_body"))
             resp = await client.invoke(data.get("request_method"))
-            executor.append(f"当前{ConstructorAbstract.get_name(constructor)}类型为http, url: {url}")
+            executor.append(f"当前{constructor_type_}类型为http, url: {url}")
             if constructor.value:
                 params[constructor.value] = resp
-            executor.append(
-                f"当前{ConstructorAbstract.get_name(constructor)}返回变量: {constructor.value}\n返回值:\n {resp}\n")
+            executor.append(f"当前{constructor_type_}返回变量: {constructor.value}\n返回值:\n {resp}\n")
         except Exception as e:
-            raise SystemException(detail=
-                f"{path}->{constructor.name} 第{index + 1}个{HttpConstructor.get_name(constructor)}执行失败: {e}")
+            raise Exception(f"{path}->{constructor.name} 第{index + 1}个{constructor_type_}执行失败: {e}")

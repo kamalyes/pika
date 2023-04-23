@@ -11,11 +11,8 @@
 """
 from abc import ABC
 
-from app.models.constructor import ConstructorModel
-
-
 class ConstructorAbstract(ABC):
 
-    @staticmethod
-    def get_name(constructor):
+    @classmethod
+    def get_name(cls, constructor):
         return '前置条件' if not constructor.suffix else '后置条件'

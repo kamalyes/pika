@@ -17,13 +17,12 @@ from app.service import Permission
 
 router = APIRouter()
 
-
 @router.post("/pyscript", summary="Python脚本")
-def execute_py_script(data: PyScriptSchema, user_info=Depends(Permission())):
+def execute_py_script(request: PyScriptSchema, user_info=Depends(Permission())):
     try:
         loc = dict()
-        exec(data.command, loc)
-        value = loc.get(data.value)
+        exec(request.command, loc)
+        value = loc.get(request.value)
         return PikaResponse.success(data=value)
     except Exception as err:
         return PikaResponse.failed(detail=str(err))

@@ -69,7 +69,7 @@ class ApiTestReportDao(PikaWrapper):
                     data = await session.execute(sql)
                     report = data.scalars().first()
                     if report is None:
-                        raise SystemException(detail="更新报告失败")
+                        raise Exception("更新报告失败")
                     report.status = status
                     report.success_count = success_count
                     report.failed_count = failed_count

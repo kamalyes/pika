@@ -10,15 +10,13 @@
 @Desc    :  None
 """
 from typing import Optional
-
 from pydantic import BaseModel, validator
-
 from app.schema.base import PikaBaseModel
 
 
 class PyScriptSchema(BaseModel):
-    command: Optional[str]
-    value: Optional[str]
+    command: str
+    value: str
 
     # noinspection PyMethodParameters
     @validator("command")

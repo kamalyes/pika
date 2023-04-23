@@ -12,17 +12,17 @@
 import json
 
 from app.core.constructor.constructor import ConstructorAbstract
-from app.core.handler.exceres import KeyUndefinedException, SystemException, ValidException
+from app.core.handler.exceres import KeyUndefinedException, ValidException
 from app.crud.itst.api.testcase import ApiTestCaseDao
 from app.models.constructor import ConstructorModel
 
 
 class TestCaseConstructor(ConstructorAbstract):
 
-    @staticmethod
-    async def run(executor, env, index, path, params, req_params, constructor: ConstructorModel,
-                  **kwargs):
+    @classmethod
+    async def run(cls, executor, env, index, path, params, req_params, constructor: ConstructorModel, **kwargs):
         try:
+            constructor_name = cls.get_name(constructor)
             data = json.loads(constructor.constructor_json)
             case_id = data.get("constructor_case_id")
             if not case_id:
@@ -30,21 +30,18 @@ class TestCaseConstructor(ConstructorAbstract):
             testcase, err = await ApiTestCaseDao.query_test_case(case_id)
             if err:
                 raise KeyUndefinedException(detail=f"用例: [{case_id}]不存在:")
-            executor.append(
-                f"当前路径: {path}, 第{index + 1}条{ConstructorAbstract.get_name(constructor)}")
+            executor.append(content=f"当前路径: {path}, 第{index + 1}条{constructor_name}")
             # 说明是case
             executor_class = kwargs.get('executor_class')(executor.logger)
             new_param = data.get("params")
             if new_param:
                 temp = json.loads(new_param)
                 req_params.update(temp)
-            result, err = await executor_class.run(env, case_id, params, req_params,
-                                                   f"{path}->{testcase.name}")
+            result, err = await executor_class.run(env, case_id, params, req_params, f"{path}->{testcase.name}")
             if err:
                 raise Exception(err)
             if not result["status"]:
                 raise Exception(f"断言失败, 断言数据: {result.get('asserts', 'unknown')}")
             params[constructor.value] = result
         except Exception as e:
-            raise SystemException(detail=
-                f"{path}->{constructor.name} 第{index + 1}个{ConstructorAbstract.get_name(constructor)}执行失败: {e}")
+            raise Exception(f"{path}->{constructor.name} 第{index + 1}个{constructor_name}执行失败: {e}")
