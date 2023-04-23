@@ -54,12 +54,12 @@ async def execute_case(env: str, case_id: str, user_info=Depends(Permission())):
         test_data = await ApiTestCaseDataDao.list_testcase_data_by_env(env, case_id)
         ans = dict()
         if not test_data:
-            result, _ = await executor.run(env, case_id)
+            result, _ = await executor.run(env=env, case_id=case_id)
             ans["默认数据"] = result
         else:
             for data in test_data:
                 params = json.loads(data.json_data)
-                result, _ = await executor.run(env, case_id, request_param=params)
+                result, _ = await executor.run(env=env, case_id=case_id, request_param=params)
                 ans[data.name] = result
         return PikaResponse.success(ans)
     except JSONDecodeError:

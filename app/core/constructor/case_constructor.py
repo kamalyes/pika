@@ -26,7 +26,7 @@ class TestCaseConstructor(ConstructorAbstract):
             case_id = data.get("constructor_case_id")
             if not case_id:
                 raise Exception("未获取到前/后置条件的用例id, 请检查前置条件")
-            testcase, err = await ApiTestCaseDao.async_query_test_case(case_id)
+            testcase, err = await ApiTestCaseDao.query_test_case(case_id)
             if err:
                 raise Exception(f"用例: [{case_id}]不存在:")
             executor.append(

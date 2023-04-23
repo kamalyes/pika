@@ -204,7 +204,7 @@ class ApiTestCaseDao(PikaWrapper):
                 result = await session.execute(sql)
                 data = result.scalars().first()
                 if data is None:
-                    raise KeyUndefinedException(detail="用例不存在")
+                    raise Exception("用例不存在")
                 # 获取断言部分
                 asserts = await ApiTestCaseAssertsDao.async_list_test_case_asserts(data.id)
                 # 获取数据构造器
@@ -212,9 +212,7 @@ class ApiTestCaseDao(PikaWrapper):
                 constructors_case = await ApiTestCaseDao.query_test_case_by_constructors(constructors)
                 test_data = await ApiTestCaseDataDao.list_testcase_data(case_id)
                 parameters = await ApiTestCaseOutParametersDao.select_list(
-                    case_id=case_id, _sort=(
-                        asc(ApiTestCaseOutParametersModel.id),)
-                )
+                    case_id=case_id, _sort=(asc(ApiTestCaseOutParametersModel.id),))
                 return dict(
                     asserts=asserts,
                     constructors=constructors,
@@ -239,8 +237,7 @@ class ApiTestCaseDao(PikaWrapper):
         """
         try:
             # 找到所有用例名称为
-            constructors = [json.loads(x.constructor_json).get(
-                "case_id") for x in constructors if x.type == 0]
+            constructors = [json.loads(x.constructor_json).get("case_id") for x in constructors if x.type == 0]
             async with async_session() as session:
                 sql = select(ApiTestCaseModel).where(ApiTestCaseModel.id.in_(
                     constructors), ApiTestCaseModel.delete_flag == 0)
@@ -298,7 +295,7 @@ class ApiTestCaseDao(PikaWrapper):
         return step_case
 
     @classmethod
-    async def async_query_test_case(cls, case_id) -> Union[ApiTestCaseModel, str]:
+    async def query_test_case(cls, case_id) -> Union[ApiTestCaseModel, str]:
         """
 
         Args:
@@ -309,10 +306,8 @@ class ApiTestCaseDao(PikaWrapper):
         """
         try:
             async with async_session() as session:
-                result = await session.execute(
-                    select(ApiTestCaseModel).where(ApiTestCaseModel.id ==
-                                                   case_id, ApiTestCaseModel.delete_flag == 0)
-                )
+                sql = select(ApiTestCaseModel).where(ApiTestCaseModel.id ==case_id, ApiTestCaseModel.delete_flag == 0)
+                result = await session.execute(sql)
                 data = result.scalars().first()
                 if data is None:
                     return None, "用例不存在"
@@ -379,16 +374,17 @@ class ApiTestCaseDao(PikaWrapper):
         """
         try:
             async with async_session() as session:
-                query = await session.execute(
-                    select(ConstructorModel).where(
-                        ConstructorModel.case_id == case_id, ConstructorModel.delete_flag == 0)
-                ).order_by(desc(ConstructorModel.create_date))
-                return query.scalars().all()
+                sql = select(ConstructorModel) \
+                .where(ConstructorModel.case_id == case_id,
+                       ConstructorModel.delete_flag == 0) \
+                .order_by(ConstructorModel.index)
+                data = await session.execute(sql)
+                return data.scalars().all()
         except Exception as e:
             cls.__log__.error(f"查询构造数据失败: {str(e)}")
 
     @classmethod
-    async def async_select_constructor(cls, case_id: str) -> List[ConstructorModel]:
+    async def select_constructor(cls, case_id: str) -> List[ConstructorModel]:
         """
         异步获取用例构造数据
         Args:
@@ -444,7 +440,7 @@ class ApiTestCaseDao(PikaWrapper):
         Returns:
 
         """
-        constructors = await cls.async_select_constructor(case_id)
+        constructors = await cls.select_constructor(case_id)
         for c in constructors:
             temp = dict(id=f"constructor_{c.id}",
                         label=f"{c.name}", children=list())

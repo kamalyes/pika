@@ -13,31 +13,27 @@ from custard.time import Moment
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 
 
-class CaseLog(object):
+class CaseLog:
 
     def __init__(self):
         self.log = list()
 
-    def append(self, content, end=True):
-        format_ytdhms = Moment.get_now_time(
-            PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS)
-        if end:
-            self.log.append(
-                "[{}]: 步骤结束 -> {}".format(format_ytdhms, content))
-        else:
-            self.log.append(
-                "[{}]: 步骤开始 -> {}".format(format_ytdhms, content))
-
-    def o_append(self, content):
+    def append(self, content, func_info=None, end=False):
         """
-        原始append
+        添加日志
         Args:
-            content:
-
-        Returns:
-
+            content (_type_): 文本内容
+            func_info (_type_): func信息
+            end (bool, optional): 是否结束语 Defaults to True.
         """
-        self.log.append(content)
+        format_ytdhms = Moment.get_now_time(PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS)
+        incident_info = f'[{format_ytdhms}]: 步骤{"结束" if end else "开始"} -> {func_info} {content}'
+        self.log.append(incident_info)
 
     def join(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
         return "\n".join(self.log)

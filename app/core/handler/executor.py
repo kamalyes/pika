@@ -95,7 +95,7 @@ class Executor(object):
         return None
 
     def append(self, content, end=False):
-        self.logger.append(content, end)
+        self.logger.append(content=content, end=end)
 
     @case_log
     async def parse_gconfig(self, data, type_, env, *fields):
@@ -130,6 +130,20 @@ class Executor(object):
         if key_type == GConfigParserEnum.yaml:
             return YamlGConfigParser.parse
         raise ValidException(detail=f"全局变量类型: {key_type}不合法, 请检查!")
+    
+    # noinspection PyMethodMayBeStatic
+    def get_el_expression(self, string: str):
+        """
+        获取字符串中的el表达式
+        Args:
+            string:
+
+        Returns:
+
+        """
+        if string is None:
+            return []
+        return re.findall(Executor.pattern, string)
 
     async def parse_field(self, data, field, name, env):
         """
@@ -246,7 +260,7 @@ class Executor(object):
         Returns:
 
         """
-        return await ApiTestCaseDao.async_select_constructor(case_id)
+        return await ApiTestCaseDao.select_constructor(case_id)
 
     async def execute_constructors(
         self, env: str, path, case_info, params, req_params, constructors: List[ConstructorModel], asserts, suffix=False
@@ -356,7 +370,7 @@ class Executor(object):
             req_params = dict()
 
         try:
-            case_info, err = await ApiTestCaseDao.async_query_test_case(case_id)
+            case_info, err = await ApiTestCaseDao.query_test_case(case_id)
             if err:
                 return response_info, err
             response_info["case_id"] = case_info.id
@@ -565,7 +579,7 @@ class Executor(object):
             else:
                 result, err = await executor.run(env, case_id, params_pool, request_param, path)
             finished_date = datetime.now()
-            cost = "{}s".format((finished_date - start_date).seconds)
+            cost = f"{(finished_date - start_date).seconds}s"
             if err is not None:
                 status = 2
             else:
@@ -576,7 +590,7 @@ class Executor(object):
                 continue
             asserts = result.get("asserts")
             url = result.get("url")
-            case_log = result.get("case_log")
+            case_log_ = result.get("case_log")
             request_body = result.get("request_data")
             status_code = result.get("status_code")
             request_method = result.get("request_method")
@@ -587,7 +601,7 @@ class Executor(object):
             cookies = result.get("cookies")
             request_params = json.dumps(request_param, ensure_ascii=False)
             api_testcase_result = ApiTestCaseResultSchema(
-                case_id, report_id, case_name, status,  case_log, start_date, finished_date,url,
+                case_id, report_id, case_name, status,  case_log_, start_date, finished_date,url,
                 request_body, request_method, request_headers, cost, asserts, response_headers,
                 response, status_code, cookies, retry_times, request_params, data_name)
             if retry_id is not None:
@@ -777,20 +791,6 @@ class Executor(object):
                 return True, f"预期结果: {exp} 文本包含于 实际结果: {act}【❌】"
             return False, f"预期结果: {exp} 文本不包含于 实际结果: {act}【✔】"
         return False, "不支持的断言方式💔"
-
-    # noinspection PyMethodMayBeStatic
-    def get_el_expression(self, string: str):
-        """
-        获取字符串中的el表达式
-        Args:
-            string:
-
-        Returns:
-
-        """
-        if string is None:
-            return []
-        return re.findall(Executor.pattern, string)
 
     @case_log
     def translate(self, data):

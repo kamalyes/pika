@@ -12,17 +12,14 @@
 import asyncio
 import functools
 import os
-from datetime import datetime
 from functools import wraps
-from typing import Coroutine
-from custard.time import Moment
 from redlock import RedLock, RedLockError
-from app.enums.SysVarEnum import PikaGlobalVarEnum
 
 from config import PikaAppConfig
 
 
 class SingletonDecorator:
+    """单例装饰器"""
     def __init__(self, cls):
         self.cls = cls
         self.instance = None
@@ -34,45 +31,38 @@ class SingletonDecorator:
 
 
 def case_log(func):
-    format_ytdhms = Moment.get_now_time(
-        PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS)
-    if asyncio.iscoroutine(func):
-        @wraps(func)
-        async def wrapper(*args, **kw):
-            self = args[0]
-            doc = func.__doc__
-            self.logger.o_append(
-                "[{}]: 步骤开始 -> {}".format(format_ytdhms,
-                                          doc.strip() if doc else func.__name__, get_str(args, kw)))
+    """_summary_
+    Args:
+        func (_type_): _description_
+    Returns:
+        _type_: _description_
+    """
+    @wraps(func)
+    async def wrapper(*args, **kw):
+        self = args[0]
+        doc = func.__doc__
+        func_info = doc.strip() if doc else func.__name__
+        print("asyncio.iscoroutinefunction",asyncio.iscoroutine(func), asyncio.iscoroutinefunction(func), func_info)
+        self.logger.append(content=get_str(args, kw), func_info=func_info)
+        if asyncio.iscoroutinefunction(func):
             returns = await func(*args, **kw)
-            self.logger.o_append(
-                "[{}]: 步骤结束 -> {} {}".format(format_ytdhms,
-                                             doc.strip() if doc else func.__name__,
-                                             get_returns(returns)))
-            return returns
-    else:
-        @wraps(func)
-        def wrapper(*args, **kw):
-            self = args[0]
-            doc = func.__doc__
-            self.logger.o_append(
-                "[{}]: 步骤开始 -> {}".format(format_ytdhms,
-                                          doc.strip() if doc else func.__name__, get_str(args, kw)))
+        else:
             returns = func(*args, **kw)
-            if not isinstance(returns, Coroutine):
-                self.logger.o_append(
-                    "[{}]: 步骤结束 -> {} {}".format(format_ytdhms,
-                                                 doc.strip() if doc else func.__name__,
-                                                 get_returns(returns)))
-            else:
-                self.logger.o_append(
-                    "[{}]: 步骤结束 -> {}".format(format_ytdhms,
-                                              doc.strip() if doc else func.__name__))
-            return returns
+        self.logger.append(content=get_returns(returns), func_info=func_info, end=True)
+        return returns
     return wrapper
 
 
 def get_str(args, kwargs):
+    """_summary_
+
+    Args:
+        args (_type_): _description_
+        kwargs (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     result = []
     # 这里从1索引开始,是因为args[0]是self, 也就注定了case_log只能在Executor方法下使用
     for i, a in enumerate(args[1:], start=1):
@@ -89,6 +79,14 @@ def get_str(args, kwargs):
 
 
 def get_returns(obj):
+    """_summary_
+
+    Args:
+        obj (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     if not obj:
         return ""
     if callable(obj):
