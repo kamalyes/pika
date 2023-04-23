@@ -92,7 +92,7 @@ async def delete_testcase(id_list: List[str], user_info=Depends(Permission()), s
 @router.get("/query", summary="查询测试用例")
 async def query_testcase(case_id: str, user_info=Depends(Permission())):
     try:
-        data = await ApiTestCaseDao.query_test_case(case_id)
+        data = await ApiTestCaseDao.query_test_case_info(case_id)
         return PikaResponse.success(data=PikaResponse.dict_model_to_dict(data))
     except Exception as e:
         return PikaResponse.failed(detail=str(e))

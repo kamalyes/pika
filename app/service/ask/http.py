@@ -83,7 +83,7 @@ async def re_run_case(env:str, case_id:str, data_id:str, retry_id:str, report_id
 
 
 @router.post("/request/run/async", summary="异步执行用例")
-async def execute_case(env: str, case_id: List[str], user_info=Depends(Permission())):
+async def async_execute_case(env: str, case_id: List[str], user_info=Depends(Permission())):
     data = dict()
     # s = time.perf_counter()
     await asyncio.gather(*(run_single(env, c, data) for c in case_id))
@@ -93,7 +93,7 @@ async def execute_case(env: str, case_id: List[str], user_info=Depends(Permissio
 
 
 @router.post("/request/run/sync", summary="同步执行用例")
-async def execute_case(env: str, case_id: List[str], user_info=Depends(Permission())):
+async def sync_execute_case(env: str, case_id: List[str], user_info=Depends(Permission())):
     data = dict()
     task_id = uuid.uuid5(uuid.NAMESPACE_URL, "task")
     # s = time.perf_counter()

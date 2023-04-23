@@ -11,7 +11,7 @@
 """
 
 from sqlalchemy import select
-from app.core.handler.exceres import SystemException
+from app.core.handler.exceres import KeyExistException, SystemException
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.enums.SysVarEnum import ValidTimeEnum
 from app.middleware.xredis import RedisHelper
@@ -44,7 +44,7 @@ class GConfigDao(PikaWrapper):
 
     @staticmethod
     @RedisHelper.cache("dao", ValidTimeEnum.DAO_TIME.value, True)
-    async def get_gconfig_by_key(key: str, env: str) -> GConfigModel:
+    async def async_get_gconfig_by_key(key: str, env: str) -> GConfigModel:
         try:
             filters = [GConfigModel.key == key, GConfigModel.delete_flag == 0,
                        GConfigModel.enabled_flag is True,

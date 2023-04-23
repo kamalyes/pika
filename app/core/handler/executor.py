@@ -130,7 +130,7 @@ class Executor(object):
         if key_type == GConfigParserEnum.yaml:
             return YamlGConfigParser.parse
         raise ValidException(detail=f"全局变量类型: {key_type}不合法, 请检查!")
-    
+
     # noinspection PyMethodMayBeStatic
     def get_el_expression(self, string: str):
         """
@@ -260,7 +260,7 @@ class Executor(object):
         Returns:
 
         """
-        return await ApiTestCaseDao.select_constructor(case_id)
+        return await ApiTestCaseDao.async_select_constructor(case_id)
 
     async def execute_constructors(
         self, env: str, path, case_info, params, req_params, constructors: List[ConstructorModel], asserts, suffix=False

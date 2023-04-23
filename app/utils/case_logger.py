@@ -13,7 +13,7 @@ from custard.time import Moment
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 
 
-class CaseLog:
+class CaseLog(object):
 
     def __init__(self):
         self.log = list()

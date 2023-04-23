@@ -188,7 +188,7 @@ class ApiTestCaseDao(PikaWrapper):
             raise SystemException(detail=f"编辑用例失败: {str(e)}")
 
     @classmethod
-    async def query_test_case(cls, case_id: str) -> dict:
+    async def query_test_case_info(cls, case_id: str) -> dict:
         """
 
         Args:
@@ -384,7 +384,7 @@ class ApiTestCaseDao(PikaWrapper):
             cls.__log__.error(f"查询构造数据失败: {str(e)}")
 
     @classmethod
-    async def select_constructor(cls, case_id: str) -> List[ConstructorModel]:
+    async def async_select_constructor(cls, case_id: str) -> List[ConstructorModel]:
         """
         异步获取用例构造数据
         Args:
@@ -440,7 +440,7 @@ class ApiTestCaseDao(PikaWrapper):
         Returns:
 
         """
-        constructors = await cls.select_constructor(case_id)
+        constructors = await cls.async_select_constructor(case_id)
         for c in constructors:
             temp = dict(id=f"constructor_{c.id}",
                         label=f"{c.name}", children=list())
@@ -490,7 +490,7 @@ class ApiTestCaseDao(PikaWrapper):
         Returns:
 
         """
-        data = await cls.query_test_case(case_id)
+        data = await cls.query_test_case_info(case_id)
         cs = data.get("case")
         # 开始解析测试数据
         result = dict(id=f"case_{case_id}", label=f"{cs.name}({cs.id})")
