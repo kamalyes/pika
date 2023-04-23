@@ -1,16 +1,82 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: kamalyes <mryu168@163.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en_GB\n"
+"X-Generator: Poedit 3.0\n"
+
 # Chinese (Simplified, China) translations for PROJECT.
 # Copyright (C) 2023 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <mryu168@163.com>, 2023.
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: mryu168@163.com\n"
-"POT-Creation-Date: 2023-03-03 08:56+0800\n"
-"PO-Revision-Date: 2023-03-03 08:57+0800\n"
-"Last-Translator: FULL NAME <mryu168@163.com>\n"
-"Language: zh_Hans_CN\n"
-"Language-Team: zh_Hans_CN <LL@li.org>\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.12.1\n"
+msgid "Add Association"
+msgstr "Assoziation hinzufügen"
+
+msgid "Are you sure you want to add the association?"
+msgstr "Sind Sie sicher, dass Sie die Assoziation hinzufügen wollen?"
+
+msgid "Remove Association"
+msgstr "Assoziation entfernen"
+
+msgid "Are you sure you want to remove the association?"
+msgstr "Sind Sie sicher, dass Sie die Assoziation entfernen wollen?"
+
+msgid "SHOWING ${items|count} OF ${total} RESULT(S)"
+msgstr "Zeige ${items|count} von ${total} Resultate"
+
+msgid "Filter"
+msgstr "Filter"
+
+msgid "Clear"
+msgstr "Löschen"
+
+msgid "Reset"
+msgstr "Zurücksetzen"
+
+msgid "Search"
+msgstr "Suchen"
+
+msgid "Create"
+msgstr "Erstellen"
+
+msgid "Bulk Create"
+msgstr "Massenhaft erstellen"
+
+msgid "Update"
+msgstr "Aktualisieren"
+
+msgid "Bulk Update"
+msgstr "Massenhaft aktualisieren"
+
+msgid "Bulk Delete"
+msgstr "Massenhaft löschen"
+
+msgid "Are you sure you want to delete the selected rows?"
+msgstr "Sind Sie sicher, dass Sie die ausgewählten Zeilen löschen wollen?"
+
+msgid "Delete"
+msgstr "Löschen"
+
+msgid "Are you sure you want to delete row ${%s}?"
+msgstr "Sind Sie sicher, dass Sie die Zeile ${%s} löschen wollen?"
+
+msgid "Custom form actions"
+msgstr "Benutzerdefinierte Formular-Aktionen"
+
+msgid "Home"
+msgstr "Home"
+
+msgid "YES"
+msgstr "JA"
+
+msgid "NO"
+msgstr "NEIN"
+
+msgid "View"
+msgstr "Anzeigen"

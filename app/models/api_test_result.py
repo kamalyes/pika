@@ -11,14 +11,14 @@
 """
 from datetime import datetime
 from uuid import uuid4
-from sqlalchemy import INT, Column, DATETIME, String, BOOLEAN
+from sqlalchemy import INT, Column, DATETIME, String, ForeignKey
 from sqlalchemy import SMALLINT
 from sqlalchemy import TEXT
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.core.handler.sqlbin_uuid import BinaryUUID
+from app.models.api_testcase_data import ApiTestCaseDataModel
 from app.models.basic import ApiGBaseModel
-
 
 class ApiTestResultModel(ApiGBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_test_result'
@@ -37,7 +37,8 @@ class ApiTestResultModel(ApiGBaseModel):
     status_code = Column(INT, server_default="0", comment="http状态码")
     cookies = Column(TEXT, comment="请求参数")
     data_name = Column(String(ByteSizeEnum.LENGTH_50))
-    data_id = Column(BinaryUUID,default=uuid4)
+    data_id = Column(BinaryUUID, ForeignKey(ApiTestCaseDataModel.id, ondelete="cascade", onupdate="cascade"),
+                     nullable=False, default=None, comment="testcase_data_id")
     cost = Column(String(ByteSizeEnum.LENGTH_12), nullable=False, comment="花费时间")
     asserts = Column(TEXT, comment="断言")
 

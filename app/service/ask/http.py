@@ -69,14 +69,14 @@ async def execute_case(env: str, case_id: str, user_info=Depends(Permission())):
 
 
 @router.get("/request/retry", summary="根据测试数据重新运行测试用例")
-async def re_run_case(env: str, case_id: str, data_id: str, user_info=Depends(Permission())):
+async def re_run_case(env:str, case_id:str, data_id:str, retry_id:str, report_id:str, user_info=Depends(Permission())):
     try:
         executor = Executor()
         params = dict()
         test_data = await ApiTestCaseDataDao.query_record(id=data_id)
         if test_data is not None:
             params = json.loads(test_data.json_data)
-        result, _ = await executor.run(env, case_id, request_param=params)
+        result = await executor.run_with_test_data(env=env, case_id=case_id, report_id=report_id, request_param=params, retry_id=retry_id)
         return PikaResponse.success(result)
     except JSONDecodeError:
         return PikaResponse.failed(detail="测试数据不为合法的JSON")

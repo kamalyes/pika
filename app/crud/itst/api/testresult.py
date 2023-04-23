@@ -9,13 +9,10 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from datetime import datetime
 from typing import List
-
-from sqlalchemy import asc
+from sqlalchemy import asc, update, and_
 from sqlalchemy.future import select
 from app.core.handler.exceres import SystemException
-
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
 from app.models.api_test_case import ApiTestCaseModel
@@ -25,19 +22,25 @@ from app.schema.api_testcase_result import ApiTestCaseResultSchema
 
 @PikaMdWrapper(ApiTestResultModel)
 class ApiTestResultDao(PikaWrapper):
-
     @classmethod
-    async def insert_report(cls, request: ApiTestCaseResultSchema) -> None:
+    async def edit_report(cls, request: ApiTestCaseResultSchema, retry_id:str=None, case_id:str=None) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():
-                    result = ApiTestResultModel(**request.__dict__)
-                    session.add(result)
+                    if retry_id is not None:
+                        sql = update(cls.__model__).where( \
+                            and_(ApiTestResultModel.id == retry_id, ApiTestResultModel.case_id == case_id) ) \
+                            .values(**request.__dict__)
+                        await session.execute(sql)
+                    else:
+                        result = ApiTestResultModel(**request.__dict__)
+                        session.add(result)
                     await session.flush()
+                    return request
         except Exception as e:
             cls.__log__.error(f"新增测试结果失败, error: {e}")
             raise SystemException(detail="新增测试结果失败")
-
+        
     @classmethod
     async def list(cls, report_id: str) -> List[ApiTestResultModel]:
         try:

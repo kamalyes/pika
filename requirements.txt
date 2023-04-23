@@ -36,3 +36,4 @@ dicttoxml~=1.7.16
 python-multipart~=0.0.5
 lxml~=4.9.0
 faker>=17.6.0
+minio~=7.1.10

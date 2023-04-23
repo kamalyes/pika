@@ -25,11 +25,13 @@ i18n.load_translations(
             domain="messages",
             localedir=LOCALE_HOME,
             languages=["zh_CN"],
+            fallback=True
         ),
         "en_GB": gettext.translation(
             domain="messages",
             localedir=LOCALE_HOME,
             languages=["en_GB"],
+            fallback=True
         ),
     }
 )

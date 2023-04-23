@@ -16,7 +16,7 @@ import time
 from collections import defaultdict
 from datetime import datetime
 from typing import List, Any, Union
-
+from app.models import async_session
 from app.core.constructor.case_constructor import TestCaseConstructor
 from app.core.constructor.http_constructor import HttpConstructor
 from app.core.constructor.python_constructor import PythonConstructor
@@ -528,21 +528,21 @@ class Executor(object):
     @staticmethod
     async def run_with_test_data(
         env,
-        data,
-        report_id: str,
-        case_id: str,
+        result_data: dict = None, 
+        report_id: str = None,
+        case_id: str = None,
         params_pool: dict = None,
         request_param: dict = None,
         path="主case",
         data_name: str = None,
         data_id: str = None,
         retry_minutes: int = 0,
+        retry_id= None,
     ):
         """
-
+        运行测试
         Args:
-            env:
-            data:
+            env: 
             report_id:
             case_id:
             params_pool:
@@ -551,6 +551,7 @@ class Executor(object):
             data_name:
             data_id:
             retry_minutes:
+            retry_id:
 
         Returns:
 
@@ -559,7 +560,10 @@ class Executor(object):
         for i in range(retry_times + 1):
             start_date = datetime.now()
             executor = Executor()
-            result, err = await executor.run(env, case_id, params_pool, request_param, path)
+            if retry_id is not None:
+                result, err = await executor.run(env=env, case_id=case_id, request_param=request_param)
+            else:
+                result, err = await executor.run(env, case_id, params_pool, request_param, path)
             finished_date = datetime.now()
             cost = "{}s".format((finished_date - start_date).seconds)
             if err is not None:
@@ -582,21 +586,23 @@ class Executor(object):
             response_headers = result.get("response_headers")
             cookies = result.get("cookies")
             request_params = json.dumps(request_param, ensure_ascii=False)
-            data[case_id].append(status)
             api_testcase_result = ApiTestCaseResultSchema(
-                 case_id, report_id, case_name, status,  case_log, start_date, finished_date,url,
+                case_id, report_id, case_name, status,  case_log, start_date, finished_date,url,
                 request_body, request_method, request_headers, cost, asserts, response_headers,
-                response, status_code, cookies, retry_times, request_params, data_name, data_id)
-            await ApiTestResultDao.insert_report(api_testcase_result)
-            break
+                response, status_code, cookies, retry_times, request_params, data_name)
+            if retry_id is not None:
+                return await ApiTestResultDao.edit_report(api_testcase_result, retry_id=retry_id, case_id=case_id)
+            result_data[case_id].append(status)
+            api_testcase_result.data_id = data_id
+            return await ApiTestResultDao.edit_report(api_testcase_result)
 
     @staticmethod
-    async def run_single(env: str, data, report_id, case_id, params_pool: dict = None, path="主case", retry_minutes=0):
+    async def run_single(env: str, result_data, report_id, case_id, params_pool: dict = None, path="主case", retry_minutes=0):
         """
 
         Args:
             env:
-            data:
+            result_data:
             report_id:
             case_id:
             params_pool:
@@ -609,14 +615,14 @@ class Executor(object):
         test_data = await ApiTestCaseDataDao.list_testcase_data_by_env(env, case_id)
         if not test_data:
             await Executor.run_with_test_data(
-                env, data, report_id, case_id, params_pool, dict(), path, "默认数据", retry_minutes=retry_minutes
+                env, result_data, report_id, case_id, params_pool, dict(), path, "默认数据", retry_minutes=retry_minutes
             )
         else:
             await asyncio.gather(
                 *(
                     Executor.run_with_test_data(
                         env,
-                        data,
+                        result_data,
                         report_id,
                         case_id,
                         params_pool,

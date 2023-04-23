@@ -12,6 +12,11 @@ class I18N:
         self._language: str = self.set_language()
 
     def load_translations(self, translations: Dict[str, GNUTranslations]):
+        """_summary_
+
+        Args:
+            translations (Dict[str, GNUTranslations]): _description_
+        """
         for language, trans in translations.items():
             if language in self._locales:
                 self._locales[language].add(trans)
@@ -25,17 +30,37 @@ class I18N:
         :param language: the language to try to set
         :return: the language after the successful setting
         """
-        language = language or os.getenv("LANGUAGE") or os.getenv("LANG") or locale.getdefaultlocale()[0] or "en_GB"
+        language = (
+            language
+            or os.getenv("LANGUAGE")
+            or os.getenv("LANG")
+            or locale.getdefaultlocale()[0]
+            or "en_GB"
+        )
         self._language = "zh_CN" if language.lower().startswith("zh") else language
         I18N.gettext.cache_clear()  # clear cache after language has changed
         gc.collect()
         return self._language
 
-    def get_language(self):
+    def get_language(self) -> str:
+        """_summary_
+
+        Returns:
+            str: _description_
+        """
         return self._language
 
     @lru_cache()  # noqa: B019
     def gettext(self, value: str, language: str = None) -> str:
+        """_summary_
+
+        Args:
+            value (str): _description_
+            language (str, optional): _description_. Defaults to None.
+
+        Returns:
+            str: _description_
+        """
         language = language or self._language
         if language in self._locales:
             for trans in self._locales[language]:
