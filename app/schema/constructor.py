@@ -13,10 +13,10 @@ from typing import Optional
 from fastapi import Body
 from pydantic import validator
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.schema.base import BaseOnlyDelSchema, BaseOnlyIdSchema, PikaBaseModel
+from app.schema.base import BaseOnlyCaseIdSchema, BaseOnlyDelSchema, BaseOnlyIdSchema, PikaBaseModel
 
 
-class ConstructorSchema(BaseOnlyIdSchema):
+class ConstructorSchema(BaseOnlyIdSchema, BaseOnlyCaseIdSchema):
     value: Optional[str] = Body(
         None, title="value", max_length=ByteSizeEnum.LENGTH_255)
     type: Optional[int] = Body(
@@ -25,8 +25,6 @@ class ConstructorSchema(BaseOnlyIdSchema):
         None, title="name", max_length=ByteSizeEnum.LENGTH_255)
     constructor_json: Optional[str] = Body("", title="constructor_json")
     enabled_flag: Optional[bool] = Body(True, title="是否可用")
-    case_id: Optional[str] = Body(
-        None, title="所属用例id", max_length=ByteSizeEnum.LENGTH_32)
     public: Optional[bool] = Body(False, title="是否共享")
     suffix: Optional[bool] = Body(False, title="是否是后置条件,默认为否")
 

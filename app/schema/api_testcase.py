@@ -16,7 +16,7 @@ from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.ConvertorEnum import CaseConvertorTypeEnum
 from app.schema.api_testcase_data import ApiTestCaseDataSchema
 from app.schema.api_testcase_out_parameters import ApiTestCaseOutParametersSchema
-from app.schema.base import BaseOnlyDirectoryIdSchema, BaseOnlyIdSchema, PikaBaseModel
+from app.schema.base import BaseOnlyCaseIdSchema, BaseOnlyDirectoryIdSchema, BaseOnlyIdSchema, PikaBaseModel
 from app.schema.constructor import ConstructorSchema
 from app.schema.request import RequestInfoSchema
 
@@ -55,9 +55,8 @@ class TestCaseSchema(BaseOnlyIdSchema, BaseOnlyDirectoryIdSchema):
         return PikaBaseModel.not_empty(v)
 
 
-class TestCaseAssertsSchema(BaseOnlyIdSchema):
+class TestCaseAssertsSchema(BaseOnlyIdSchema, BaseOnlyCaseIdSchema):
     name: str
-    case_id: Optional[str] = None
     assert_type: str
     expected: str
     actually: str

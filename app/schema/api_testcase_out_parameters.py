@@ -14,7 +14,7 @@ from fastapi import Body
 from pydantic import BaseModel, validator
 from app.enums.ByteSizeEnum import ByteSizeEnum
 
-from app.schema.base import PikaBaseModel, BaseOnlyIdSchema
+from app.schema.base import BaseOnlyCaseIdSchema, PikaBaseModel, BaseOnlyIdSchema
 
 
 class ApiTestCaseOutParametersSchema(BaseOnlyIdSchema):
@@ -29,10 +29,8 @@ class ApiTestCaseOutParametersSchema(BaseOnlyIdSchema):
         return PikaBaseModel.not_empty(v)
 
 
-class ApiTestCaseId(BaseModel):
-    case_id: Optional[str] = Body(
-        None, title="case_id", max_length=ByteSizeEnum.LENGTH_32)
-
+class ApiTestCaseId(BaseOnlyCaseIdSchema):
+    pass
 
 class ApiTestCaseParametersSchema(ApiTestCaseOutParametersSchema, ApiTestCaseId):
   pass
