@@ -18,6 +18,7 @@ from app.crud import db_connect, PikaWrapper
 from app.middleware.xredis import RedisHelper
 from app.models.admin import SysUserAdminModel
 from app.models.api_test_case import ApiTestCaseModel
+from app.models.api_test_report import ApiTestReportModel
 from app.models.api_testplan import ApiTestPlanModel
 from app.models.project import ProjectModel
 
@@ -47,7 +48,7 @@ class DashboardDao(PikaWrapper):
     @db_connect
     async def get_report_statistics(cls, start: datetime, end: datetime, session: AsyncSession = None):
         result, idx = await cls.get_date_data(start, end)
-        sql = cls.create_sql(ApiTestPlanModel, start, end, field="create_date")
+        sql = cls.create_sql(ApiTestReportModel, start, end, field="start_date")
         data = await session.execute(sql)
         count, success, failed, skip, error, total, total_pass = 0, 0, 0, 0, 0, 0, 0
         for item in data.scalars().all():

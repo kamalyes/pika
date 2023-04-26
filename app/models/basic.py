@@ -95,7 +95,7 @@ class ApiGBaseModel(LargeBaseModel):
     priority = Column(String(ByteSizeEnum.LENGTH_03), comment="用例优先级: P0-P3")
     __abstract__ = True
     
-    def __init__(self,url=None, id=None, level=1, base_path=None, protocol=None, operator=None,
+    def __init__(self,url=None, id=None, level=1, base_path=None, protocol=1, operator=None,
                  tag=None, priority='P1', order=1, request_body_type=None, request_method=None, 
                  request_headers=None, request_params=None,  request_body=None, response=None, response_headers=None, 
                  delete_flag=0, delete_date=None):
