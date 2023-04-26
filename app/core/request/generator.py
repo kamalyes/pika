@@ -112,13 +112,14 @@ class CaseGenerator(object):
         return constructors
 
     @staticmethod
-    def generate_case(directory_id: str, name: str, last: RequestInfoSchema) -> TestCaseSchema:
+    def generate_case(directory_id: str, name: str, last: RequestInfoSchema, protocol: int) -> TestCaseSchema:
         """
         生成用例
         Args:
             directory_id:
             name:
             last:
+            protocol:
 
         Returns:
 
@@ -127,12 +128,11 @@ class CaseGenerator(object):
             directory_id=directory_id,
             name=name,
             url=last.url,
-            protocolType=ProtocolTypeEnum.http.value,
+            protocol=protocol,
             request_body=last.request_body,
             request_method=last.request_method,
             content_type=CaseGenerator.get_content_type(last.request_headers).value,
-            request_headers=json.dumps(
-                last.request_headers, ensure_ascii=False),
+            request_headers=json.dumps(last.request_headers, ensure_ascii=False),
             case_type=0,
             status=CaseStatus.debugging.value,
             priority="P3",

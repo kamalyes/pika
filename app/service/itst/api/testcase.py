@@ -386,8 +386,7 @@ async def generate_case(form: TestCaseGeneratorSchema, user_info=Depends(Permiss
     if len(form.requests) == 0:
         return PikaResponse.failed(detail="无http请求,请检查参数")
     CaseGenerator.extract_field(form.requests)
-    cs = CaseGenerator.generate_case(
-        form.directory_id, form.name, form.requests[-1])
+    cs = CaseGenerator.generate_case(form.directory_id, form.name, form.requests[-1], form.protocol)
     constructors = CaseGenerator.generate_constructors(form.requests)
     info = TestCaseInfoSchema(constructor=constructors, case=cs)
     async with session.begin():

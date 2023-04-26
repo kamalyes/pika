@@ -77,12 +77,10 @@ class BaseOnlyDirectoryIdSchema(BaseModel):
 
 
 class BaseOnlyNameSchema(BaseModel):
-    name: Optional[str] = Body(..., title="名称",
-                               min_length=2, max_length=ByteSizeEnum.LENGTH_255)
+    name: Optional[str] = Body(..., title="名称", min_length=2, max_length=ByteSizeEnum.LENGTH_255)
 
 class BaseOnlyProtocolSchema(BaseModel):
-    protocol: Optional[str] = Body(..., title=ConstructorTypeEnum.http, 
-                                   min_length=2, max_length=ByteSizeEnum.LENGTH_255) 
+    protocol: Optional[int] = Body(1, title="请求类型 1: http 2: grpc 3: dubbo") 
 
 class BaseOnlyIdsSchema(BaseModel):
     ids: Optional[str] = Body(..., title="ids",

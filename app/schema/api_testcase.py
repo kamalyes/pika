@@ -14,9 +14,10 @@ from fastapi import Body, UploadFile, File
 from pydantic import BaseModel, validator
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.ConvertorEnum import CaseConvertorTypeEnum
+from app.enums.ProtocolEnum import ProtocolTypeEnum
 from app.schema.api_testcase_data import ApiTestCaseDataSchema
 from app.schema.api_testcase_out_parameters import ApiTestCaseOutParametersSchema
-from app.schema.base import BaseOnlyCaseIdSchema, BaseOnlyDirectoryIdSchema, BaseOnlyIdSchema, PikaBaseModel
+from app.schema.base import BaseOnlyCaseIdSchema, BaseOnlyDirectoryIdSchema, BaseOnlyIdSchema, BaseOnlyProtocolSchema, PikaBaseModel
 from app.schema.constructor import ConstructorSchema
 from app.schema.request import RequestInfoSchema
 
@@ -29,7 +30,7 @@ class DeleteTestCaseSchema(BaseModel):
     data: List[str]
 
 
-class TestCaseSchema(BaseOnlyIdSchema, BaseOnlyDirectoryIdSchema):
+class TestCaseSchema(BaseOnlyIdSchema, BaseOnlyDirectoryIdSchema, BaseOnlyProtocolSchema):
     priority: str = Body(None, title="用例优先级: P0-P3",
                          max_length=ByteSizeEnum.LENGTH_03)
     url: str = Body("", title="请求url", max_length=ByteSizeEnum.LENGTH_1W)
@@ -47,7 +48,6 @@ class TestCaseSchema(BaseOnlyIdSchema, BaseOnlyDirectoryIdSchema):
     status: int = Body(0, title="用例状态: 1: 调试中 2: 暂时关闭 3: 正常运作")
     out_parameters: List[ApiTestCaseOutParametersSchema] = Body(
         [], title="用例出参")
-    protocol: int = Body(0, title="请求类型 1: http 2: grpc 3: dubbo")
 
     # noinspection PyMethodParameters
     @validator("priority", "status", "directory_id", "protocol", "url", "name")
@@ -80,7 +80,7 @@ class TestCaseInfoSchema(BaseModel):
         return PikaBaseModel.not_empty(v)
 
 
-class TestCaseGeneratorSchema(BaseOnlyDirectoryIdSchema):
+class TestCaseGeneratorSchema(BaseOnlyDirectoryIdSchema, BaseOnlyProtocolSchema):
     requests: List[RequestInfoSchema]
     name: str
 

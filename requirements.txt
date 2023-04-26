@@ -1,6 +1,6 @@
 --index-url https://pypi.mirrors.ustc.edu.cn/simple
 gunicorn~=20.1.0
-custard>=1.1.1
+custard~=1.1.1
 pypinyin~=0.48.0
 cos-python-sdk-v5~=1.9.20
 dictdiffer~=0.9.0
@@ -34,5 +34,5 @@ beautifulsoup4~=4.11.1
 dicttoxml~=1.7.16
 python-multipart~=0.0.5
 lxml~=4.9.0
-faker>=17.6.0
+faker~=17.6.0
 minio~=7.1.10
