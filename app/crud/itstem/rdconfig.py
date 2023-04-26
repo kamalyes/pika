@@ -29,8 +29,7 @@ class PikaRedisConfigDao(PikaWrapper):
                                                                  redis_config.password,
                                                                  redis_config.db)
             else:
-                client = PikaRedisManager.get_cluster_client(
-                    redis_config.id, redis_config.addr)
+                client = PikaRedisManager.get_cluster_client(redis_config.id, redis_config.addr, redis_config.password)
             return await RedisHelper.execute_command(client, command)
         except Exception as e:
             raise RedisException(detail=f"执行redis命令出错: {e}")

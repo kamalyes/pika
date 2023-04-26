@@ -15,6 +15,7 @@ from fastapi import Body
 from pydantic import BaseModel
 
 from app.enums.ByteSizeEnum import ByteSizeEnum
+from config import PikaAppConfig
 
 
 class DataBaseSchema(BaseModel):
@@ -31,12 +32,12 @@ class RedisSchema(BaseModel):
     host: Optional[str] = Body(..., title="主机地址", max_length=ByteSizeEnum.LENGTH_70)
     port: Optional[str] = Body(..., title="端口", max_length=ByteSizeEnum.LENGTH_56)
     auth: Optional[str] = Body(None, title="密码", max_length=ByteSizeEnum.LENGTH_56)
-    encoding: Optional[str] = Body("utf-8", title="链接的数据库名称", max_length=ByteSizeEnum.LENGTH_56)
-    enable_flag: Optional[bool] = Body(True, title="编码")
+    encoding: Optional[str] = Body(PikaAppConfig.REDIS_ENCODING, title="链接的数据库名称", max_length=ByteSizeEnum.LENGTH_56)
+    enable_flag: Optional[bool] = Body(PikaAppConfig.REDIS_ENABLE_FLAG, title="编码")
     index: Optional[str] = Body(0, title="时区", max_length=ByteSizeEnum.LENGTH_36)
-    decode_responses: Optional[bool] = Body(True, title="时区")
-    target_max_memory: Optional[str] = Body("572978192", title="时区", max_length=ByteSizeEnum.LENGTH_36)
-    max_connections: Optional[str] = Body(100, title="时区", max_length=ByteSizeEnum.LENGTH_36)
+    decode_responses: Optional[bool] = Body(PikaAppConfig.REDIS_DECODE_RESPONSES, title="时区")
+    target_max_memory: Optional[str] = Body(PikaAppConfig.REDIS_TARGET_MAX_MEMORY, title="时区", max_length=ByteSizeEnum.LENGTH_36)
+    max_connections: Optional[str] = Body(PikaAppConfig.REDIS_MAX_CONNECTIONS, title="时区", max_length=ByteSizeEnum.LENGTH_36)
 
 
 class EmailSchema(BaseModel):
@@ -70,7 +71,7 @@ class YapiSchema(BaseModel):
 
 
 class OtherSchema(BaseModel):
-    log_switch: Optional[bool] = Body(True, title="日志开关")
+    PIKA_LOG_SWITCH: Optional[bool] = Body(True, title="日志开关")
 
 
 class MsConfigSchema(BaseModel):

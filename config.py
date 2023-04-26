@@ -11,6 +11,7 @@
 """
 
 import logging
+import multiprocessing
 from pprint import pformat
 import sys
 from typing import List, Optional
@@ -43,6 +44,7 @@ class BaseConfig(BaseSettings):
 
     # Redis config
     REDIS_ENABLE_FLAG: Optional[bool] = True
+    REDIS_CLUSTER_NODE: Optional[str] = None
     REDIS_HOST: Optional[str] = "pika_redis"
     REDIS_PORT: Optional[int] = 6379
     REDIS_DB_INDEX: Optional[int] = 0
@@ -52,7 +54,6 @@ class BaseConfig(BaseSettings):
     REDIS_DECODE_RESPONSES: Optional[bool] = True
     REDIS_TARGET_MAX_MEMORY: Optional[str] = "572978192"
     REDIS_MAX_CONNECTIONS: Optional[int] = 100
-    REDIS_DECODE_RESPONSES: Optional[bool] = True
     # Redis连接信息
     REDIS_NODES: List = []
 
@@ -94,25 +95,41 @@ class BaseConfig(BaseSettings):
 
     # Supervisor
     SUPERVISOR_DEBUG: Optional[bool] = True
+    SUPERVISOR_BIND: Optional[str] = '0.0.0.0'
+    SUPERVISOR_PORT: Optional[int] = 9001
+    SUPERVISOR_USERNAME: Optional[str] = 'pika'
+    SUPERVISOR_PASSWORD: Optional[str] = 'W9Phi9Yh7Wn3s'
     SUPERVISOR_LOGLEVEL: Optional[str] = 'info'
-    SUPERVISOR_THREAD_NUM: Optional[int] = 2
+    SUPERVISOR_LOGFILE_MAXBYTES: Optional[str] = '50MB'
+    SUPERVISOR_LOGFILE_BACKUPS: Optional[int] =10
+    SUPERVISOR_MINFDS: Optional[int] =1024
+    SUPERVISOR_MINPROCS: Optional[int] =200
+    SUPERVISOR_STOPWAITSECS: Optional[int] = 1000
+    SUPERVISOR_STARTSECS: Optional[int] = 10
+    CPU_COUNT = int(multiprocessing.cpu_count())
+    SUPERVISOR_THREAD_NUM: Optional[int] = CPU_COUNT
+    SUPERVISOR_WORKERS: Optional[int] = (CPU_COUNT * 2) + 1
     SUPERVISOR_WORKER_CLASS: Optional[str] = 'uvicorn.workers.UvicornWorker'
     SUPERVISOR_FORWARDED_ALLOW_IPS: Optional[str] = "*"
     SUPERVISOR_X_FORWARDED_FOR_HEADER: Optional[str] = 'X-FORWARDED-FOR'
     SUPERVISOR_DAEMON: Optional[bool] = False
+    SUPERVISOR_REDIRECT_STDERR: Optional[bool] = False
     SUPERVISOR_TIMEOUT: Optional[int] = 60
     SUPERVISOR_WORKER_CONNECTIONS: Optional[int] = 5000
-    SUPERVISOR_PIDFILE: Optional[str] = '/var/run/gunicorn.pid'
-    SUPERVISOR_ACCESSLOG: Optional[str] = '/var/log/gunicorn_acess.log'
-    SUPERVISOR_ERRORLOG: Optional[str] = '/var/log/gunicorn_error.log'
+    SUPERVISOR_UNIX_HTTP_FILE: Optional[str] = '/var/run/supervisor.sock'
+    SUPERVISOR_PIDFILE: Optional[str] = '/var/run/supervisord.pid'
+    SUPERVISOR_LOGFILE: Optional[str] = '/var/run/supervisord.log'
+    SUPERVISOR_ACCESSLOG: Optional[str] = '/var/log/supervisord_acess.log'
+    SUPERVISOR_ERRORLOG: Optional[str] = '/var/log/supervisord_error.log'
     
     # System
     ENVIRONMENT: Optional[str] = "dev"
+    PIKA_RATELIMITER: Optional[int] = 1000
     PIKA_BACKEND_HOST: Optional[str] = "0.0.0.0"
     PIKA_BACKEND_PORT: Optional[int] = 7777
     PIKA_FRONTEND_URL: Optional[str] = 'http://unknown(.env未声明)'
-    CASE_RETRY_TIMES: Optional[int] = 1
-    WORKSPACES_PATH: Optional[str] = os.path.dirname(os.path.abspath(__file__))
+    PIKA_CASE_RETRY_TIMES: Optional[int] = 1
+    WORKSPACES_PATH: Optional[str] = os.path.dirname(os.path.abspath(__file__)).replace('\\','/')
     TEMPLATE_PATH: Optional[str] = f"{WORKSPACES_PATH}/templates"
     MARKDOWN_PATH: Optional[str] = f"{WORKSPACES_PATH}/templates/markdown/test_report.md"
     OUTPUT_PATH: Optional[str] = f"{WORKSPACES_PATH}/output"

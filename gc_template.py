@@ -13,10 +13,11 @@ import multiprocessing
 from config import PikaAppConfig
 from jinja2 import Environment, FileSystemLoader
 
+# gunicorn configuration
 DEBUG = PikaAppConfig.SUPERVISOR_DEBUG
-BIND = f'{PikaAppConfig.PIKA_BACKEND_HOST}:{PikaAppConfig.PIKA_BACKEND_PORT}'
+BIND = [f'{PikaAppConfig.PIKA_BACKEND_HOST}:{PikaAppConfig.PIKA_BACKEND_PORT}']
 LOGLEVEL = PikaAppConfig.SUPERVISOR_LOGLEVEL
-WORKERS = multiprocessing.cpu_count()
+WORKERS = PikaAppConfig.SUPERVISOR_WORKERS
 THREADS = PikaAppConfig.SUPERVISOR_THREAD_NUM
 WORKER_CLASS = PikaAppConfig.SUPERVISOR_WORKER_CLASS
 FORWARDED_ALLOW_IPS = PikaAppConfig.SUPERVISOR_FORWARDED_ALLOW_IPS
@@ -27,6 +28,24 @@ WORKER_CONNECTIONS = PikaAppConfig.SUPERVISOR_WORKER_CONNECTIONS
 PIDFILE = PikaAppConfig.SUPERVISOR_PIDFILE
 ACCESSLOG = PikaAppConfig.SUPERVISOR_ACCESSLOG
 ERRORLOG = PikaAppConfig.SUPERVISOR_ERRORLOG
+
+# supervisor configuration
+WORKSPACES_PATH = PikaAppConfig.WORKSPACES_PATH
+SUPERVISOR_BIND = PikaAppConfig.SUPERVISOR_BIND
+SUPERVISOR_PORT = PikaAppConfig.SUPERVISOR_PORT
+SUPERVISOR_USERNAME = PikaAppConfig.SUPERVISOR_USERNAME
+SUPERVISOR_PASSWORD = PikaAppConfig.SUPERVISOR_PASSWORD
+SUPERVISOR_LOGFILE_MAXBYTES = PikaAppConfig.SUPERVISOR_LOGFILE_MAXBYTES
+SUPERVISOR_LOGFILE_BACKUPS = PikaAppConfig.SUPERVISOR_LOGFILE_BACKUPS
+SUPERVISOR_MINFDS = PikaAppConfig.SUPERVISOR_MINFDS
+SUPERVISOR_MINPROCS = PikaAppConfig.SUPERVISOR_MINPROCS
+SUPERVISOR_LOGFILE = PikaAppConfig.SUPERVISOR_LOGFILE
+SUPERVISOR_UNIX_HTTP_FILE = PikaAppConfig.SUPERVISOR_UNIX_HTTP_FILE
+SUPERVISOR_STARTSECS = PikaAppConfig.SUPERVISOR_STARTSECS
+SUPERVISOR_STOPWAITSECS = PikaAppConfig.SUPERVISOR_STOPWAITSECS
+SUPERVISOR_DAEMON = PikaAppConfig.SUPERVISOR_DAEMON
+SUPERVISOR_REDIRECT_STDERR = PikaAppConfig.SUPERVISOR_REDIRECT_STDERR
+
 CONF_HOME = './conf'
 
 class Template:
@@ -57,7 +76,7 @@ class Template:
         "pidfile" : PIDFILE,
         # 设置访问日志和错误信息日志路径
         "accesslog" : ACCESSLOG,
-        "errorlog" : ERRORLOG 
+        "errorlog" : ERRORLOG,
       }
       loader = FileSystemLoader(search_path)
       merge_data = Environment(loader=loader).get_template(template).render(replace_dict)
@@ -69,9 +88,25 @@ class Template:
     @classmethod
     def generate_supervisor(cls, search_path: str='./', template: str='supervisor_template.conf'):
       loader = FileSystemLoader(search_path)
-      gunicorn_path = cls.generate_gunicorn()
-      commod = f'-c {gunicorn_path}'
-      merge_data = Environment(loader=loader).get_template(template).render({"pika_command":commod})
+      replace_ = {'WORKSPACES_PATH':WORKSPACES_PATH,
+                  'LINUX_OPERATION_USERNAME': 'root', 
+                  'PIKA_RUN_COMMAND':'Application:pika',
+                  'SUPERVISOR_BIND': SUPERVISOR_BIND,
+                  'SUPERVISOR_PORT': SUPERVISOR_PORT,
+                  'SUPERVISOR_USERNAME':SUPERVISOR_USERNAME,
+                  'SUPERVISOR_PASSWORD':SUPERVISOR_PASSWORD,
+                  'SUPERVISOR_LOGFILE_MAXBYTES':SUPERVISOR_LOGFILE_MAXBYTES,
+                  'SUPERVISOR_LOGFILE_BACKUPS':SUPERVISOR_LOGFILE_BACKUPS,
+                  'SUPERVISOR_MINFDS':SUPERVISOR_MINFDS,
+                  'SUPERVISOR_MINPROCS':SUPERVISOR_MINPROCS,
+                  'SUPERVISOR_PIDFILE':PIDFILE,
+                  'SUPERVISOR_LOGFILE': SUPERVISOR_LOGFILE,
+                  'SUPERVISOR_UNIX_HTTP_FILE':SUPERVISOR_UNIX_HTTP_FILE,
+                  'SUPERVISOR_STARTSECS': SUPERVISOR_STARTSECS,
+                  'SUPERVISOR_STOPWAITSECS':SUPERVISOR_STOPWAITSECS,
+                  'SUPERVISOR_DAEMON':str(SUPERVISOR_DAEMON).lower(),
+                  'SUPERVISOR_REDIRECT_STDERR': SUPERVISOR_REDIRECT_STDERR}
+      merge_data = Environment(loader=loader).get_template(template).render(replace_)
       with open(f'{CONF_HOME}/{template.replace("_template","")}', 'w', encoding='utf-8') as f:
         f.writelines(merge_data)
         

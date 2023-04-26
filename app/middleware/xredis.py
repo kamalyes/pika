@@ -22,32 +22,44 @@ from awaits.awaitable import awaitable
 from loguru import logger
 from redis import ConnectionPool, StrictRedis
 # noinspection PyPackageRequirements
-from rediscluster import RedisCluster, ClusterConnectionPool
-
+from custard.rediscluster import RedisCluster, ClusterConnectionPool
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.exceptions.thirdparty.RedisException import RedisException
 from config import PikaAppConfig
 
 
 class PikaRedisManager(object):
-    """非线程安全,可能存在问题
-    """
+    """非线程安全,可能存在问题"""
     _cluster_pool = dict()
     _pool = dict()
 
     @property
-    def client(self):
+    def client(cls):
         pool = ConnectionPool(host=PikaAppConfig.REDIS_HOST,
                               port=PikaAppConfig.REDIS_PORT,
                               db=PikaAppConfig.REDIS_DB_INDEX,
                               max_connections=PikaAppConfig.REDIS_MAX_CONNECTIONS,
                               password=PikaAppConfig.REDIS_PASSWORD,
                               encoding=PikaAppConfig.REDIS_ENCODING,
-                              decode_responses=True)
-        return StrictRedis(connection_pool=pool, decode_responses=True)
+                              decode_responses=PikaAppConfig.REDIS_DECODE_RESPONSES)
+        return StrictRedis(connection_pool=pool, decode_responses=PikaAppConfig.REDIS_DECODE_RESPONSES)
 
-    @staticmethod
-    def delete_client(redis_id: str, cluster: bool):
+    @classmethod
+    def get_redis_nodes(cls, nodes_str: str):
+        startup_nodes = []
+        nodes = nodes_str.split(',') if ',' in nodes_str else [nodes_str]
+        if len(nodes)>0:
+            for node in nodes:
+                host, port = node.split(":")
+                try:
+                    port = port if isinstance(port, int) else int(port)
+                except ValueError as ve:
+                    raise Exception(f'redis端口强转失败{ve}')
+                startup_nodes.append({'host': host, 'port': port})
+        return startup_nodes
+    
+    @classmethod
+    def delete_client(cls, redis_id: str, cluster: bool):
         """
         根据redis_id和是否是集群删除客户端
         Args:
@@ -58,30 +70,31 @@ class PikaRedisManager(object):
 
         """
         if cluster:
-            PikaRedisManager._cluster_pool.pop(redis_id)
+            cls._cluster_pool.pop(redis_id)
         else:
-            PikaRedisManager._pool.pop(redis_id)
+            cls._pool.pop(redis_id)
 
-    @staticmethod
-    def get_cluster_client(redis_id: str, address: str):
+    @classmethod
+    def get_cluster_client(cls, redis_id: str, address: str, password: str):
         """
         获取redis集群客户端
         Args:
             redis_id:
             address:
+            password:
 
         Returns:
 
         """
-        cluster = PikaRedisManager._cluster_pool.get(redis_id)
+        cluster = cls._cluster_pool.get(redis_id)
         if cluster is not None:
             return cluster
-        client = PikaRedisManager.get_cluster(address)
-        PikaRedisManager._cluster_pool[redis_id] = client
+        client = cls.get_cluster(address, password)
+        cls._cluster_pool[redis_id] = client
         return client
 
-    @staticmethod
-    def get_single_node_client(redis_id: str, address: str, password: str, db: int):
+    @classmethod
+    def get_single_node_client(cls, redis_id: str, address: str, password: str, db: int):
         """
         获取redis单实例客户端
         Args:
@@ -93,20 +106,21 @@ class PikaRedisManager(object):
         Returns:
 
         """
-        node = PikaRedisManager._pool.get(redis_id)
+        node = cls._pool.get(redis_id)
         if node is not None:
             return node
         if ":" not in address:
             raise RedisException(detail="redis连接未包含端口号,请检查配置")
         host, port = address.split(":")
-        pool = ConnectionPool(host=host, port=port, db=db, max_connections=100, password=password,
-                              decode_responses=True)
+        pool = ConnectionPool(host=host, port=port, db=db, password=password,
+                              max_connections=PikaAppConfig.REDIS_MAX_CONNECTIONS, 
+                              decode_responses=PikaAppConfig.REDIS_DECODE_RESPONSES)
         client = StrictRedis(connection_pool=pool)
-        PikaRedisManager._pool[redis_id] = client
+        cls._pool[redis_id] = client
         return client
 
-    @staticmethod
-    def refresh_redis_client(redis_id: str, address: str, password: str, db: str):
+    @classmethod
+    def refresh_redis_client(cls, redis_id: str, address: str, password: str, db: str):
         """
         刷新redis客户端
         Args:
@@ -119,61 +133,63 @@ class PikaRedisManager(object):
 
         """
         host, port = address.split(":")
-        pool = ConnectionPool(host=host, port=port, db=db, max_connections=100, password=password,
-                              decode_responses=True)
-        client = StrictRedis(connection_pool=pool, decode_responses=True)
-        PikaRedisManager._pool[redis_id] = client
+        pool = ConnectionPool(host=host, port=port, db=db,  password=password,
+                              max_connections=PikaAppConfig.REDIS_MAX_CONNECTIONS,
+                              decode_responses=PikaAppConfig.REDIS_DECODE_RESPONSES)
+        client = StrictRedis(connection_pool=pool, decode_responses=PikaAppConfig.REDIS_DECODE_RESPONSES)
+        cls._pool[redis_id] = client
 
-    @staticmethod
-    def refresh_redis_cluster(redis_id: str, addr: str):
-        PikaRedisManager._cluster_pool[redis_id] = PikaRedisManager.get_cluster(
-            addr)
+    @classmethod
+    def refresh_redis_cluster(cls, redis_id: str, addr: str, password: str):
+        cls._cluster_pool[redis_id] = cls.get_cluster(addr, password)
 
-    @staticmethod
-    def get_cluster(address: str):
+    @classmethod
+    def get_cluster(cls, address: str, password:str):
         """
         获取集群连接池
         Args:
             address:
+            password:
 
         Returns:
 
         """
-        try:
-            nodes = address.split(',')
-            startup_nodes = [{"host": n.split(":")[0], "port": n.split(":")[
-                1]} for n in nodes if ":" in n]
-            if len(startup_nodes) == 0:
-                raise RedisException(detail="找不到集群节点,请检查配置")
-            pool = ClusterConnectionPool(startup_nodes=startup_nodes, max_connections=100,
-                                         decode_responses=True)
-            client = RedisCluster(connection_pool=pool, decode_responses=True)
-            return client
-        except Exception as e:
-            raise RedisException(detail=f"获取Redis连接失败, {e}")
+        startup_nodes = cls.get_redis_nodes(address)
+        if len(startup_nodes) == 0:
+            raise RedisException(detail="找不到集群节点,请检查配置")
+        pool = ClusterConnectionPool(startup_nodes=startup_nodes,
+                                     max_connections=PikaAppConfig.REDIS_MAX_CONNECTIONS,
+                                     decode_responses=PikaAppConfig.REDIS_DECODE_RESPONSES)
+        client = RedisCluster(connection_pool=pool, password=password)
+        return client
 
 
 class RedisHelper(object):
     prefix = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}"
-    pika_redis_client = PikaRedisManager().client
+    cluster_nodes = PikaAppConfig.REDIS_CLUSTER_NODE
+    password = PikaAppConfig.REDIS_PASSWORD
+    if cluster_nodes is not None:
+        pika_redis_client = PikaRedisManager.get_cluster(cluster_nodes, password)
+    else:
+        pika_redis_client = PikaRedisManager().client
 
-    @staticmethod
+    @classmethod
     @awaitable
-    def execute_command(client, command, *args, **kwargs):
+    def execute_command(cls, client, command, *args, **kwargs):
         return client.execute_command(command, *args, **kwargs)
 
-    @staticmethod
+    @classmethod
     @awaitable
-    def ping():
+    def ping(cls):
         """
         test redis client
         :return:
         """
-        return RedisHelper.pika_redis_client.ping()
+        return cls.pika_redis_client.ping()
 
-    @staticmethod
+    @classmethod
     @awaitable
-    def get_address_record(address: str):
+    def get_address_record(cls, address: str):
         """
         获取ip是否已经开启录制
         Args:
@@ -182,12 +198,12 @@ class RedisHelper(object):
         Returns:
 
         """
-        key = RedisHelper.get_key(f"record:ip:{address}")
-        return RedisHelper.pika_redis_client.get(key)
+        key = cls.get_key(f"record:ip:{address}")
+        return cls.pika_redis_client.get(key)
 
-    @staticmethod
+    @classmethod
     @awaitable
-    def cache_record(address: str, request):
+    def cache_record(cls, address: str, request):
         """
 
         Args:
@@ -197,15 +213,15 @@ class RedisHelper(object):
         Returns:
 
         """
-        key = RedisHelper.get_key(f"record:{address}:requests")
-        RedisHelper.pika_redis_client.rpush(key, request)
-        ttl = RedisHelper.pika_redis_client.ttl(key)
+        key = cls.get_key(f"record:{address}:requests")
+        cls.pika_redis_client.rpush(key, request)
+        ttl = cls.pika_redis_client.ttl(key)
         if ttl < 0:
-            RedisHelper.pika_redis_client.expire(key, 3600)
+            cls.pika_redis_client.expire(key, 3600)
 
-    @staticmethod
+    @classmethod
     @awaitable
-    def set_address_record(operator: str, address: str, regex: str, retain_history=False):
+    def set_address_record(cls, operator: str, address: str, regex: str, retain_history=False):
         """
         设置录制状态
         Args:
@@ -220,15 +236,15 @@ class RedisHelper(object):
         # 默认录制1小时
         value = json.dumps(
             {"operator": operator, "regex": regex}, ensure_ascii=False)
-        RedisHelper.pika_redis_client.set(RedisHelper.get_key(f"record:ip:{address}"), value,
+        cls.pika_redis_client.set(cls.get_key(f"record:ip:{address}"), value,
                                           ex=3600)
         # 清楚上次录制数据
-        RedisHelper.pika_redis_client.delete(
-            RedisHelper.get_key(f"record:{address}:requests"))
+        cls.pika_redis_client.delete(
+            cls.get_key(f"record:{address}:requests"))
 
-    @staticmethod
+    @classmethod
     @awaitable
-    def remove_record_data(address: str, index: int):
+    def remove_record_data(cls, address: str, index: int):
         """
         删除录制数据
         Args:
@@ -238,13 +254,13 @@ class RedisHelper(object):
         Returns:
 
         """
-        key = RedisHelper.get_key(f"record:{address}:requests")
-        RedisHelper.pika_redis_client.lset(key, index, "DELETED")
-        RedisHelper.pika_redis_client.lrem(key, 1, "DELETED")
+        key = cls.get_key(f"record:{address}:requests")
+        cls.pika_redis_client.lset(key, index, "DELETED")
+        cls.pika_redis_client.lrem(key, 1, "DELETED")
 
-    @staticmethod
+    @classmethod
     @awaitable
-    def remove_address_record(address: str):
+    def remove_address_record(cls, address: str):
         """
         停止录制任务
         Args:
@@ -253,11 +269,11 @@ class RedisHelper(object):
         Returns:
 
         """
-        return RedisHelper.pika_redis_client.delete(RedisHelper.get_key(f"record:ip:{address}"))
+        return cls.pika_redis_client.delete(cls.get_key(f"record:ip:{address}"))
 
-    @staticmethod
+    @classmethod
     @awaitable
-    def list_record_data(address: str):
+    def list_record_data(cls, address: str):
         """
         查询录制任务
         Args:
@@ -266,13 +282,13 @@ class RedisHelper(object):
         Returns:
 
         """
-        key = RedisHelper.get_key(f"record:{address}:requests")
-        data = RedisHelper.pika_redis_client.lrange(key, 0, -1)
+        key = cls.get_key(f"record:{address}:requests")
+        data = cls.pika_redis_client.lrange(key, 0, -1)
         return [json.loads(x) for x in data]
 
-    @staticmethod
+    @classmethod
     @awaitable
-    def async_delete_prefix(key: str, traverse_del_num=99):
+    def async_delete_prefix(cls, key: str, traverse_del_num=99):
         """
         根据前缀删除数据
         Args:
@@ -280,14 +296,13 @@ class RedisHelper(object):
             traverse_del_num:
         Returns:
         """
-        key_name = f'{key}*'
-        while RedisHelper.pika_redis_client.zcard(key_name) > 0:
+        while cls.pika_redis_client.zcard(key) > 0:
             # 判断集合中是否有元素，如有有则删除排行0-99的元素
-            RedisHelper.pika_redis_client.zremrangebyrank(key_name, 0, traverse_del_num)
-            logger.bind(name=None).info(f"delete redis key: {key_name}")
+            cls.pika_redis_client.zremrangebyrank(key, 0, traverse_del_num)
+            logger.bind(name=None).info(f"delete redis key: {key}")
 
-    @staticmethod
-    def delete_prefix(key: str):
+    @classmethod
+    def delete_prefix(cls, key: str):
         """
         根据前缀删除数据
         Args:
@@ -296,31 +311,31 @@ class RedisHelper(object):
         Returns:
 
         """
-        for k in RedisHelper.pika_redis_client.scan_iter(f"{key}:*"):
-            RedisHelper.pika_redis_client.delete(k)
+        for k in cls.pika_redis_client.scan_iter(f"{key}:*"):
+            cls.pika_redis_client.delete(k)
             logger.bind(name=None).info(f"delete redis key: {k}")
 
-    @staticmethod
-    def get_key(_redis_key: str, args_key: bool = True, *args, **kwargs):
+    @classmethod
+    def get_key(cls, _redis_key: str, args_key: bool = True, *args, **kwargs):
         if not args_key:
-            return f"{RedisHelper.prefix}:{_redis_key}"
+            return f"{cls.prefix}:{_redis_key}"
         filter_keys = ('<class', '<sqlalchemy', '(<sqlalchemy')
         filter_args = [key for key in args if not str(key).startswith(filter_keys)]
         for v in kwargs.values():
             if v and not str(v).startswith(filter_keys):
                 filter_args.append(str(v))
-        return f"{RedisHelper.prefix}:{_redis_key}" \
+        return f"{cls.prefix}:{_redis_key}" \
                f"{':' + ':'.join(str(a) for a in filter_args) if len(filter_args) > 0 else ''}"
 
-    @staticmethod
-    def get_key_with_suffix(cls_name: str, key: str, args: tuple, key_suffix):
+    @classmethod
+    def get_key_with_suffix(cls, cls_name: str, key: str, args: tuple, key_suffix):
         filter_args = [a for a in args if not str(
             args[0]).startswith('<class')]
         suffix = key_suffix(filter_args)
-        return f"{RedisHelper.prefix}:{cls_name}:{key}:{suffix}"
+        return f"{cls.prefix}:{cls_name}:{key}:{suffix}"
 
-    @staticmethod
-    def cache(key: str, expired_time=30 * 60, args_key=True):
+    @classmethod
+    def cache(cls, key: str, expired_time=30 * 60, args_key=True):
         """
         自动缓存装饰器
         Args:
@@ -343,9 +358,9 @@ class RedisHelper(object):
                         inspect.getframeinfo(inspect.currentframe().f_back)[3][0].split(".")[
                             0].split(
                             " ")[-1]
-                    redis_key = RedisHelper.get_key(
+                    redis_key = cls.get_key(
                         f"{cls_name}:{key}", args_key, *args, **kwargs)
-                    data = RedisHelper.pika_redis_client.get(redis_key)
+                    data = cls.pika_redis_client.get(redis_key)
                     # 缓存已存在
                     if data is not None:
                         return pickle.loads(bytes.fromhex(data))
@@ -353,7 +368,7 @@ class RedisHelper(object):
                     new_data = await func(*args, **kwargs)
                     info = pickle.dumps(new_data)
                     logger.bind(name=None).info(f"set redis key: {redis_key}")
-                    RedisHelper.pika_redis_client.set(
+                    cls.pika_redis_client.set(
                         redis_key, info.hex(), ex=expired_time)
                     return new_data
 
@@ -367,9 +382,9 @@ class RedisHelper(object):
                         inspect.getframeinfo(inspect.currentframe().f_back)[3][0].split(".")[
                             0].split(
                             " ")[-1]
-                    redis_key = RedisHelper.get_key(
+                    redis_key = cls.get_key(
                         f"{cls_name}:{key}", args_key, *args, **kwargs)
-                    data = RedisHelper.pika_redis_client.get(redis_key)
+                    data = cls.pika_redis_client.get(redis_key)
                     # 缓存已存在
                     if data is not None:
                         return pickle.loads(bytes.fromhex(data))
@@ -378,7 +393,7 @@ class RedisHelper(object):
                     info = pickle.dumps(new_data)
                     logger.bind(name=None).info(f"set redis key: {redis_key}")
                     # 添加随机数防止缓存雪崩
-                    RedisHelper.pika_redis_client.set(redis_key, info.hex(),
+                    cls.pika_redis_client.set(redis_key, info.hex(),
                                                       ex=expired_time + Random().randint(10, 59))
                     return new_data
 
@@ -386,8 +401,8 @@ class RedisHelper(object):
 
         return decorator
 
-    @staticmethod
-    def up_cache(*key: str, key_and_suffix: Tuple = None):
+    @classmethod
+    def up_cache(cls, *key: str, key_and_suffix: Tuple = None):
         """
         redis缓存key,套了此方法,会自动执行更新数据操作后删除缓存
         Args:
@@ -407,13 +422,13 @@ class RedisHelper(object):
                         return new_data
                     cls_name = inspect.getframeinfo(inspect.currentframe().f_back)[3][0].split(".")[0].split(" ")[-1]
                     for k in key:
-                        redis_key = f"{RedisHelper.prefix}:{cls_name}:{k}"
-                        await RedisHelper.async_delete_prefix(redis_key)
+                        redis_key = f"{cls.prefix}:{cls_name}:{k}*"
+                        await cls.async_delete_prefix(redis_key)
                     if key_and_suffix is not None:
-                        current_key = RedisHelper.get_key_with_suffix(cls_name, key_and_suffix[0],
+                        current_key = cls.get_key_with_suffix(cls_name, key_and_suffix[0],
                                                                       args,
                                                                       key_and_suffix[1])
-                        RedisHelper.pika_redis_client.delete(current_key)
+                        cls.pika_redis_client.delete(current_key)
                     # 更新数据,删除缓存
                     return new_data
 
@@ -429,13 +444,13 @@ class RedisHelper(object):
                             0].split(
                             " ")[-1]
                     for k in key:
-                        redis_key = f"{RedisHelper.prefix}:{cls_name}:{k}"
-                        RedisHelper.delete_prefix(redis_key)
+                        redis_key = f"{cls.prefix}:{cls_name}:{k}"
+                        cls.delete_prefix(redis_key)
                     if key_and_suffix is not None:
-                        current_key = RedisHelper.get_key_with_suffix(cls_name, key_and_suffix[0],
+                        current_key = cls.get_key_with_suffix(cls_name, key_and_suffix[0],
                                                                       args,
                                                                       key_and_suffix[1])
-                        RedisHelper.pika_redis_client.delete(current_key)
+                        cls.pika_redis_client.delete(current_key)
                     return new_data
 
                 return wrapper

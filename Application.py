@@ -384,94 +384,94 @@ class PikaFastApi:
                                           Depends(RateLimiter(counts=100, minutes=1))])
         pika.include_router(kerberos_router, prefix="/kerberos", tags=["密保问题"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         # rbac
         pika.include_router(organization_router, prefix="/rbac", tags=["组织机构"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         pika.include_router(department_router, prefix="/rbac", tags=["部门"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         pika.include_router(menus_router, prefix="/rbac", tags=["菜单配置"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         pika.include_router(roles_router, prefix="/rbac", tags=["角色配置"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         pika.include_router(access_router, prefix="/rbac", tags=["api活动控制"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
 
         pika.include_router(lexicon_router, prefix="/lexicon", tags=["词库"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         # system
         pika.include_router(msconfig_router, prefix="/system", tags=["系统全局配置"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         pika.include_router(notice_router, prefix="/notification", tags=["消息通知"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         pika.include_router(operation_log_router, prefix="/operation", tags=["操作"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         pika.include_router(mini_oss_router, prefix="/oss", tags=["Oss"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         # workspace
         pika.include_router(workspace_router, prefix="/workspace", tags=["工作台"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         # itst
         pika.include_router(project_router, prefix="/project", tags=["项目"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         pika.include_router(project_role_router, prefix="/project", tags=["项目"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         pika.include_router(testplan_router, prefix="/testplan", tags=["测试计划"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         pika.include_router(testcase_router, prefix="/testcase", tags=["接口测试"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         # pika.include_router(functest_router, prefix="/test", tags=["功能测试"],
         #                     dependencies=[Depends(PikaFastApi.request_info),
-        #                                   Depends(RateLimiter(counts=20, minutes=1))])
+        #                                   Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         pika.include_router(mock_router, prefix="/ask", tags=["ask服务"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         pika.include_router(http_router, prefix="/ask", tags=["ask服务"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
 
         # itstem
         pika.include_router(environment_router, prefix="/itstem", tags=["环境配置"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         pika.include_router(gconfig_router, prefix="/itstem", tags=["全局配置"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         pika.include_router(dbconfig_router, prefix="/itstem", tags=["数据库配置"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         pika.include_router(redis_config_router, prefix="/itstem", tags=["redis配置"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         pika.include_router(gateway_router, prefix="/itstem", tags=["请求网关配置"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
 
         # online
         pika.include_router(sql_router, prefix="/online", tags=["在线工具"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         pika.include_router(script_router, prefix="/online", tags=["在线工具"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         pika.include_router(redis_router, prefix="/online", tags=["在线工具"],
                             dependencies=[Depends(PikaFastApi.request_info),
-                                          Depends(RateLimiter(counts=20, minutes=1))])
+                                          Depends(RateLimiter(counts=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         return pika
 
 

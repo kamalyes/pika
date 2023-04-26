@@ -569,7 +569,7 @@ class Executor(object):
         Returns:
 
         """
-        retry_times = PikaAppConfig.CASE_RETRY_TIMES if retry_minutes > 0 else 0
+        retry_times = PikaAppConfig.PIKA_CASE_RETRY_TIMES if retry_minutes > 0 else 0
         for i in range(retry_times + 1):
             start_date = datetime.now()
             executor = Executor()
