@@ -10,6 +10,7 @@
 @Desc    :  None
 """
 import json
+from app.core.handler.jsonres import PikaJsonEncoder
 from app.utils.decorator import SingletonDecorator
 
 
@@ -71,7 +72,7 @@ class JsonCompare(object):
         except:
             try:
                 if isinstance(string, str):
-                    return json.loads(string)
+                    return PikaJsonEncoder.safe_loads(string)
                 return string
             except:
                 return string

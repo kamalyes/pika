@@ -14,6 +14,7 @@ from functools import lru_cache
 from typing import Any
 
 import jsonpath
+from app.core.handler.jsonres import PikaJsonEncoder
 
 from app.core.paramters.parser import Parser
 from app.exceptions.business.CaseException import CaseParametersException
@@ -49,7 +50,7 @@ class JSONPathParser(Parser):
     @staticmethod
     @lru_cache()
     def get_object(json_str):
-        return json.loads(json_str)
+        return PikaJsonEncoder.safe_loads(json_str)
 
 class BodyJSONPathParser(JSONPathParser):
     @classmethod

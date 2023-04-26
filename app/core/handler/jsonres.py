@@ -9,6 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
+import json
 import os
 from datetime import datetime
 from decimal import Decimal
@@ -35,6 +36,14 @@ class PikaJsonEncoder(JSONEncoder):
         if isinstance(o, bytes):
             return o.decode(encoding='utf-8')
         return self.default(o)
+    
+    @classmethod
+    def safe_loads(cls, value):
+        try:
+            value = json.loads(value)
+        except Exception as e:
+            raise Exception(f"解析JSON字符串并将其转换为Python字典失败: {e}")
+        return value
 
 class PikaModelEncoder:
     

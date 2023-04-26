@@ -13,6 +13,7 @@ import json
 
 import yaml
 from app.core.handler.exceres import SystemException
+from app.core.handler.jsonres import PikaJsonEncoder
 
 from app.core.handler.logger import PikaLogger
 
@@ -29,7 +30,7 @@ class GConfigParser(object):
                 if isinstance(result, str):
                     # 说明需要反序列化
                     try:
-                        result = json.loads(result)
+                        result = PikaJsonEncoder.safe_loads(result)
                     except Exception as e:
                         raise SystemException(
                             detail=f"反序列化失败, result: {result}\nERROR: {e}")
@@ -90,7 +91,7 @@ class StringGConfigParser(GConfigParser):
 class JSONGConfigParser(GConfigParser):
     @staticmethod
     def get_data(value):
-        return json.loads(value)
+        return PikaJsonEncoder.safe_loads(value)
 
     @staticmethod
     def parse(value, jsonpath):

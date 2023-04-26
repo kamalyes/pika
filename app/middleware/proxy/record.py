@@ -12,6 +12,7 @@
 import asyncio
 import json
 import re
+from app.core.handler.jsonres import PikaJsonEncoder
 
 from app.enums.MessageEnum import WebSocketMessageEnum
 from app.middleware.xredis import RedisHelper
@@ -35,7 +36,7 @@ class PikaRecorder(object):
         record = await RedisHelper.get_address_record(addr)
         if not record:
             return
-        data = json.loads(record)
+        data = PikaJsonEncoder.safe_loads(record)
         pattern = re.compile(data.get("regex"))
         if re.findall(pattern, flow.request.url):
             # 说明已开启录制开关,记录状态

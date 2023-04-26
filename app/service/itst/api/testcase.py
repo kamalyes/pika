@@ -4,7 +4,7 @@ from typing import List
 from fastapi import APIRouter, Depends, Request
 
 from app.core.handler.exceres import AuthException, ValidException
-from app.core.handler.jsonres import PikaResponse
+from app.core.handler.jsonres import PikaJsonEncoder, PikaResponse
 from app.core.request import get_convertor
 from app.core.request.generator import CaseGenerator
 from app.crud.itst.api.constructor import ConstructorDao
@@ -368,7 +368,7 @@ async def list_record_data(request: Request, user_info=Depends(Permission())):
     status = False
     regex = ""
     if record is not None:
-        record_data = json.loads(record)
+        record_data = PikaJsonEncoder.safe_loads(record)
         regex = record_data.get("regex", "")
         status = True
     data = await RedisHelper.list_record_data(request.client.host)

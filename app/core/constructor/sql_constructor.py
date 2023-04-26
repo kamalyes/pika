@@ -12,18 +12,19 @@
 import json
 from app.core.constructor.constructor import ConstructorAbstract
 from app.core.handler.exceres import SystemException
+from app.core.handler.jsonres import PikaJsonEncoder
 from app.crud.itstem.database import DbConfigDao
 from app.models.constructor import ConstructorModel
 
 
-class SqlConstructor(ConstructorAbstract):
+class SqlConstructor(ConstructorAbstract, PikaJsonEncoder):
 
     @classmethod
     async def run(cls, executor, env, index, path, params, constructor: ConstructorModel, **kwargs):
         try:
             constructor_type_ = cls.get_name(constructor)
             executor.append(f"当前路径: {path}, 第{index + 1}条{constructor_type_}")
-            data = json.loads(constructor.constructor_json)
+            data = cls.safe_loads(constructor.constructor_json)
             database = data.get("database")
             sql = data.get("sql")
             executor.append(f"当前{constructor_type_}类型为sql, 数据库名: {database}\nsql: {sql}\n")

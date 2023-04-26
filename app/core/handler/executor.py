@@ -16,6 +16,7 @@ import time
 from collections import defaultdict
 from datetime import datetime
 from typing import List, Any, Union
+from app.core.handler.jsonres import PikaJsonEncoder
 from app.models import async_session
 from app.core.constructor.case_constructor import TestCaseConstructor
 from app.core.constructor.http_constructor import HttpConstructor
@@ -201,7 +202,7 @@ class Executor(object):
                 if isinstance(result, str):
                     # 说明需要反序列化
                     try:
-                        result = json.loads(result)
+                        result = PikaJsonEncoder.safe_loads(result)
                     except Exception as e:
                         self.append(f"反序列化失败, result: {result}\nERROR: {e}")
                         break
@@ -214,7 +215,7 @@ class Executor(object):
                     raise KeyUndefinedException(
                         detail=f"变量路径: {v}不存在, 请检查JSON或路径!")
             if field_name == "request_headers":
-                new_value = json.loads(result)
+                new_value = PikaJsonEncoder.safe_loads(result)
             elif not isinstance(result, str):
                 new_value = json.dumps(result, ensure_ascii=False)
             else:
@@ -374,8 +375,8 @@ class Executor(object):
                 return response_info, err
             response_info["case_id"] = case_info.id
             response_info["case_name"] = case_info.name
-            method = case_info.request_method.upper()
-            response_info["request_method"] = method
+            request_method = case_info.request_method.upper()
+            response_info["request_method"] = request_method
 
             # Step1: 替换全局变量
             await self.parse_gconfig(case_info, GConfigTypeEnum.case, env, *Executor.fields)
@@ -408,7 +409,8 @@ class Executor(object):
             await self.parse_params(case_info, case_params)
 
             if case_info.request_headers and case_info.request_headers != "":
-                headers = json.loads(case_info.request_headers)
+                
+                headers = PikaJsonEncoder.safe_loads(case_info.request_headers)
             else:
                 headers = dict()
 
@@ -426,9 +428,9 @@ class Executor(object):
 
             # Step9: 完成http请求
             request_obj = await AsyncRequest.client(url=case_info.url, request_body_type=case_info.request_body_type, headers=headers, request_body=request_body)
-            res = await request_obj.invoke(method)
+            res = await request_obj.invoke(request_method)
             self.append(
-                f"http请求过程\n\nRequest Method: {case_info.request_method}\n\n"
+                f"http请求过程\n\nRequest Method: {request_method}\n\n"
                 f"Request Headers:\n{headers}\n\nUrl: {case_info.url}"
                 f"\n\nRequest Body:\n{request_body}\n\nResponse:\n{res.get('response', '未获取到返回值')}"
             )
@@ -464,7 +466,7 @@ class Executor(object):
 
     @staticmethod
     def get_dict(json_data: str):
-        return json.loads(json_data)
+        return PikaJsonEncoder.safe_loads(json_data)
 
     def replace_cls(self, params: dict, cls, *fields: Any):
         for k, v in params.items():
@@ -666,7 +668,7 @@ class Executor(object):
             return request_body
         try:
             if request_body:
-                data = json.loads(request_body)
+                data = PikaJsonEncoder.safe_loads(request_body)
                 if req_params is not None:
                     for k, v in req_params.items():
                         if data.get(k) is not None:
@@ -801,7 +803,7 @@ class Executor(object):
         Returns:
 
         """
-        return json.loads(data)
+        return PikaJsonEncoder.safe_loads(data)
 
     # noinspection PyMethodMayBeStatic
     def replace_branch(self, branch: str, params: dict):
@@ -843,7 +845,7 @@ class Executor(object):
                 if isinstance(result, str):
                     # 说明需要反序列化
                     try:
-                        result = json.loads(result)
+                        result = PikaJsonEncoder.safe_loads(result)
                     except Exception as e:
                         self.append(f"反序列化失败, result: {result}\nERROR: {e}")
                         break

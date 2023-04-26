@@ -12,11 +12,12 @@
 import json
 from app.core.constructor.constructor import ConstructorAbstract
 from app.core.handler.exceres import SystemException
+from app.core.handler.jsonres import PikaJsonEncoder
 from app.crud.itstem.rdconfig import PikaRedisConfigDao
 from app.models.constructor import ConstructorModel
 
 
-class RedisConstructor(ConstructorAbstract):
+class RedisConstructor(ConstructorAbstract, PikaJsonEncoder):
 
     @classmethod
     async def run(cls, executor, env, index, path, params, constructor: ConstructorModel, **kwargs):
@@ -24,7 +25,7 @@ class RedisConstructor(ConstructorAbstract):
             constructor_type_ = cls.get_name(constructor)
             executor.append(
                 f"当前路径: {path}, 第{index + 1}条{constructor_type_}")
-            data = json.loads(constructor.constructor_json)
+            data = cls.safe_loads(constructor.constructor_json)
             redis = data.get("redis")
             command = data.get("command")
             executor.append(f"当前{constructor_type_}类型为redis, 名称: {redis}\n命令: {command}\n")

@@ -15,6 +15,7 @@ from collections import defaultdict
 from json import JSONDecodeError
 from typing import List
 from loguru import logger
+from app.core.handler.jsonres import PikaJsonEncoder
 from app.enums.CaseStatusEnum import CaseStatus
 from app.enums.ConstructorEnum import ConstructorTypeEnum
 from app.enums.RequestBodyEnum import ReqBodyTypeEnum
@@ -237,7 +238,7 @@ class CaseGenerator(object):
         """
         if request.request_body:
             try:
-                request_body = json.loads(request.response_content)
+                request_body = PikaJsonEncoder.safe_loads(request.response_content)
                 CaseGenerator.dfs(request_body, var_name, ans)
             except JSONDecodeError:
                 # 可能request_body不是JSON,跳过
@@ -293,7 +294,7 @@ class CaseGenerator(object):
         """
         if request.request_body:
             try:
-                data = json.loads(request.request_body)
+                data = PikaJsonEncoder.safe_loads(request.request_body)
                 var_type = list()
                 CaseGenerator.dfs_replace(data, ans, var_type, replaced)
                 result = json.dumps(data, ensure_ascii=False)

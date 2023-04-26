@@ -23,6 +23,7 @@ from loguru import logger
 from redis import ConnectionPool, StrictRedis
 # noinspection PyPackageRequirements
 from custard.rediscluster import RedisCluster, ClusterConnectionPool
+from app.core.handler.jsonres import PikaJsonEncoder
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.exceptions.thirdparty.RedisException import RedisException
 from config import PikaAppConfig
@@ -284,7 +285,7 @@ class RedisHelper(object):
         """
         key = cls.get_key(f"record:{address}:requests")
         data = cls.pika_redis_client.lrange(key, 0, -1)
-        return [json.loads(x) for x in data]
+        return [PikaJsonEncoder.safe_loads(x) for x in data]
 
     @classmethod
     @awaitable

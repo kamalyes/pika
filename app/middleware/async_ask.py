@@ -15,6 +15,7 @@ from urllib.parse import urlparse
 import aiohttp
 from aiohttp import FormData
 from custard.time import Moment
+from app.core.handler.jsonres import PikaJsonEncoder
 from app.enums.RequestBodyEnum import ReqBodyTypeEnum
 from app.middleware.oss import OssClient
 from config import PikaAppConfig
@@ -83,27 +84,23 @@ class AsyncRequest(object):
 
     @classmethod
     async def client(cls, url: str, request_body_type: ReqBodyTypeEnum = ReqBodyTypeEnum.json, timeout=15, **kwargs):
+        request_body = kwargs.get("request_body")
+        headers = kwargs.get("headers",None)
+        content_type_array = [True if key.lower() == "content-type" else False for key, value in headers.items()]
+        if len(content_type_array)> 1:
+            raise Exception(f'Content-Type出现{len(content_type_array)}次,请修改后重试,{headers}')
         await cls.probe(url)
-        headers = kwargs.get("headers", {})
         if request_body_type == ReqBodyTypeEnum.json:
-            if "Content-Type" not in headers:
+            if len(content_type_array) == 1 and not content_type_array:
                 headers["Content-Type"] = "application/json; charset=UTF-8"
-            # 新增json校验,修复史诗级bug: json被额外序列化
-            try:
-                request_body = kwargs.get("request_body")
-                if request_body:
-                    request_body = json.loads(request_body)
-            except Exception as e:
-                raise SystemException(detail=f"json格式不正确: {e}")
+            request_body = PikaJsonEncoder.safe_loads(request_body)
             r = AsyncRequest(url, headers=headers, timeout=timeout, json=request_body)
         elif request_body_type == ReqBodyTypeEnum.form:
             try:
-                request_body = kwargs.get("request_body")
                 form_data = None
                 if request_body:
                     form_data = FormData()
-                    # 因为存储的是字符串,所以需要反序列化
-                    items = json.loads(request_body)
+                    items = PikaJsonEncoder.safe_loads(request_body)
                     for item in items:
                         # 如果是文本类型,直接添加key-value
                         if item.get("type") == "TEXT":
@@ -114,10 +111,9 @@ class AsyncRequest(object):
                             form_data.add_field(item.get("key"), file_object)
                 r = AsyncRequest(url, headers=headers, data=form_data, timeout=timeout)
             except Exception as e:
-                raise SystemException(detail=f"解析form-data失败: {str(e)}")
+                raise Exception(f"解析form-data失败: {str(e)}")
         elif request_body_type == ReqBodyTypeEnum.x_form:
-            request_body = kwargs.get("request_body", "{}")
-            request_body = json.loads(request_body)
+            request_body = PikaJsonEncoder.safe_loads(request_body)
             r = AsyncRequest(url, headers=headers, data=request_body, timeout=timeout)
         else:
             # 暂时未支持其他类型

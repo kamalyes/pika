@@ -17,6 +17,7 @@ from loguru import logger
 from pydantic import BaseModel
 
 from app.core.handler.exceres import SystemException
+from app.core.handler.jsonres import PikaJsonEncoder
 from app.enums.ByteSizeEnum import ByteSizeEnum
 
 request_body = TypeVar("request_body", bytes, str)
@@ -60,7 +61,7 @@ class RequestInfoSchema(BaseModel):
     @classmethod
     def translate_json(cls, text):
         try:
-            return json.dumps(json.loads(text), indent=4, ensure_ascii=False)
+            return json.dumps(PikaJsonEncoder.safe_loads(text), indent=4, ensure_ascii=False)
         except Exception as e:
             logger.bind(name=None).warning(f"解析json格式请求失败: {e}")
             return text

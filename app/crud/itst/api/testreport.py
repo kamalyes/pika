@@ -103,7 +103,7 @@ class ApiTestReportDao(PikaWrapper):
                     ApiTestReportModel.id == report_id)
                 data = await session.execute(sql)
                 if data is None:
-                    raise KeyUndefinedException(detail="报告不存在")
+                    raise Exception("报告不存在")
                 report, plan_name = data.first()
                 test_data = await ApiTestResultDao.list(report_id)
                 return report, test_data, plan_name

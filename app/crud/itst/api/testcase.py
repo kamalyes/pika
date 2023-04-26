@@ -16,6 +16,7 @@ from sqlalchemy import desc, func, and_, asc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.core.handler.exceres import KeyExistException, KeyUndefinedException, SystemException
+from app.core.handler.jsonres import PikaJsonEncoder
 from app.crud import PikaWrapper, PikaMdWrapper, db_connect
 from app.crud.itst.api.constructor import ConstructorDao
 from app.crud.itst.api.testcase_assert import ApiTestCaseAssertsDao
@@ -237,7 +238,7 @@ class ApiTestCaseDao(PikaWrapper):
         """
         try:
             # 找到所有用例名称为
-            constructors = [json.loads(x.constructor_json).get("case_id") for x in constructors if x.type == 0]
+            constructors = [PikaJsonEncoder.safe_loads(x.constructor_json).get("case_id") for x in constructors if x.type == 0]
             async with async_session() as session:
                 sql = select(ApiTestCaseModel).where(ApiTestCaseModel.id.in_(
                     constructors), ApiTestCaseModel.delete_flag == 0)
@@ -284,7 +285,7 @@ class ApiTestCaseDao(PikaWrapper):
                 var_list.append(dict(stepName=s.name, name="${%s}" % s.value))
                 continue
             if s.type == ConstructorTypeEnum.testcase:
-                data = json.loads(s.constructor_json)
+                data = PikaJsonEncoder.safe_loads(s.constructor_json)
                 case_id = data.get("constructor_case_id")
                 if not case_id:
                     continue
@@ -447,7 +448,7 @@ class ApiTestCaseDao(PikaWrapper):
             if c.type == ConstructorTypeEnum.testcase:
                 # 说明是用例,继续递归
                 temp["label"] = "[CASE]: " + temp["label"]
-                json_data = json.loads(c.constructor_json)
+                json_data = PikaJsonEncoder.safe_loads(c.constructor_json)
                 await cls.collect_data(json_data.get("case_id"), temp.get("children"))
             elif c.type == ConstructorTypeEnum.sql:
                 temp["label"] = "[SQL]: " + temp["label"]

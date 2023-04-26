@@ -13,6 +13,7 @@ import json
 from typing import Any
 
 import jsonpath
+from app.core.handler.jsonres import PikaJsonEncoder
 
 from app.core.paramters.parser import Parser
 from app.exceptions.business.CaseException import CaseParametersException
@@ -22,7 +23,7 @@ class HeaderParser(Parser):
 
     @classmethod
     def get_source(cls, data: dict):
-        return json.loads(data.get("response_headers"))
+        return PikaJsonEncoder.safe_loads(data.get("response_headers"))
 
     @classmethod
     def parse(cls, source: dict, expression: str = None, idx: str = None) -> Any:
@@ -49,9 +50,9 @@ class HeaderParser(Parser):
 class CookieParser(HeaderParser):
     @classmethod
     def get_source(cls, data: dict):
-        return json.loads(data.get("cookies"))
+        return PikaJsonEncoder.safe_loads(data.get("cookies"))
 
 class RequestHeaderParser(HeaderParser):
     @classmethod
     def get_source(cls, data: dict):
-        return json.loads(data.get("request_headers"))
+        return PikaJsonEncoder.safe_loads(data.get("request_headers"))

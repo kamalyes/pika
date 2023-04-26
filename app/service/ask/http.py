@@ -9,7 +9,7 @@ from typing import List, Dict
 from fastapi import Depends, APIRouter
 
 from app.core.handler.executor import Executor
-from app.core.handler.jsonres import PikaResponse
+from app.core.handler.jsonres import PikaJsonEncoder, PikaResponse
 from app.crud.itst.api.testcase_data import ApiTestCaseDataDao
 from app.enums.CertEnum import CertType
 from app.middleware.async_ask import AsyncRequest
@@ -57,7 +57,7 @@ async def execute_case(env: str, case_id: str, user_info=Depends(Permission())):
             ans["默认数据"] = result
         else:
             for data in test_data:
-                params = json.loads(data.json_data)
+                params = PikaJsonEncoder.safe_loads(data.json_data)
                 result, _ = await executor.run(env=env, case_id=case_id, request_param=params)
                 ans[data.name] = result
         return PikaResponse.success(ans)
@@ -74,7 +74,7 @@ async def re_run_case(env:str, case_id:str, data_id:str, retry_id:str, report_id
         params = dict()
         test_data = await ApiTestCaseDataDao.query_record(id=data_id)
         if test_data is not None:
-            params = json.loads(test_data.json_data)
+            params = PikaJsonEncoder.safe_loads(test_data.json_data)
         result = await executor.run_with_test_data(env=env, case_id=case_id, report_id=report_id, request_param=params, retry_id=retry_id)
         return PikaResponse.success(result)
     except JSONDecodeError:
@@ -104,7 +104,7 @@ async def sync_execute_case(env: str, case_id: List[str], user_info=Depends(Perm
     return PikaResponse.success(data)
 
 
-@router.post("/request/run/multiple", summary="作为报告执行")
+@router.post("/request/run/multiple", summary="批量执行(作为报告执行)")
 async def execute_as_report(env: str, case_id: List[str], user_info=Depends(Permission())):
     report_id = await Executor.run_multiple(user_info['emp_no'], env, case_id)
     return PikaResponse.success(report_id)

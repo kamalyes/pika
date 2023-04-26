@@ -13,17 +13,19 @@ import json
 
 from app.core.constructor.constructor import ConstructorAbstract
 from app.core.handler.exceres import KeyUndefinedException, ValidException
+from app.core.handler.jsonres import PikaJsonEncoder
 from app.crud.itst.api.testcase import ApiTestCaseDao
 from app.models.constructor import ConstructorModel
 
 
-class TestCaseConstructor(ConstructorAbstract):
+class TestCaseConstructor(ConstructorAbstract, PikaJsonEncoder):
 
     @classmethod
     async def run(cls, executor, env, index, path, params, req_params, constructor: ConstructorModel, **kwargs):
         try:
             constructor_name = cls.get_name(constructor)
-            data = json.loads(constructor.constructor_json)
+            
+            data = cls.safe_loads(constructor.constructor_json)
             case_id = data.get("constructor_case_id")
             if not case_id:
                 raise ValidException(detail="未获取到前/后置条件的用例id, 请检查前置条件")
@@ -35,7 +37,7 @@ class TestCaseConstructor(ConstructorAbstract):
             executor_class = kwargs.get('executor_class')(executor.logger)
             new_param = data.get("params")
             if new_param:
-                temp = json.loads(new_param)
+                temp = cls.safe_loads(new_param)
                 req_params.update(temp)
             result, err = await executor_class.run(env, case_id, params, req_params, f"{path}->{testcase.name}")
             if err:

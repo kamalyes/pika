@@ -12,10 +12,11 @@
 import json
 from awaits.awaitable import awaitable
 from app.core.constructor.constructor import ConstructorAbstract
+from app.core.handler.jsonres import PikaJsonEncoder
 from app.models.constructor import ConstructorModel
 
 
-class PythonConstructor(ConstructorAbstract):
+class PythonConstructor(ConstructorAbstract, PikaJsonEncoder):
 
     @classmethod
     @awaitable
@@ -23,7 +24,7 @@ class PythonConstructor(ConstructorAbstract):
         try:
             constructor_type_ = cls.get_name(constructor)
             executor.append(f"当前路径: {path}, 第{index + 1}条{constructor_type_}")
-            script = json.loads(constructor.constructor_json)
+            script = cls.safe_loads(constructor.constructor_json)
             command = script['command']
             executor.append(f"当前{constructor_type_}类型为python脚本\n{command}")
             loc = dict()

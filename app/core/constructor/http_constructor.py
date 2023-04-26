@@ -11,26 +11,27 @@
 """
 import json
 from app.core.constructor.constructor import ConstructorAbstract
+from app.core.handler.jsonres import PikaJsonEncoder
 from app.crud.itstem.gateway import GatewayDao
 from app.middleware.async_ask import AsyncRequest
 from app.models.constructor import ConstructorModel
 
 
-class HttpConstructor(ConstructorAbstract):
+class HttpConstructor(ConstructorAbstract, PikaJsonEncoder):
 
     @classmethod
     async def run(cls, executor, env, index, path, params, constructor: ConstructorModel, **kwargs):
         try:
             constructor_type_ = cls.get_name(constructor)
             executor.append(f"当前路径: {path}, 第{index + 1}条{constructor_type_}")
-            data = json.loads(constructor.constructor_json)
+            data = cls.safe_loads(constructor.constructor_json)
             url = data.get("url")
             if data.get("base_path"):
                 base_path = await GatewayDao.query_gateway(env, data.get("base_path"))
                 url = f"{base_path}{url}"
             headers = data.get("headers")
             if isinstance(headers, str):
-                headers = json.loads(data.get("headers"))
+                headers = cls.safe_loads(data.get("headers"))
             client = await AsyncRequest.client(url=url, content_type=data.get("content_type"),
                                                headers=headers,
                                                request_body=data.get("request_body"))
