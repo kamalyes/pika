@@ -23,8 +23,7 @@ CERT_URL = "http://mitm.it/cert/"
 
 @router.post("/request/http", summary="发起http请求")
 async def http_request(data: HttpRequestSchema, user_info=Depends(Permission())):
-    r = await AsyncRequest.client(data.url, data.content_type, headers=data.headers,
-                                      request_body=data.request_body)
+    r = await AsyncRequest.client(data.url, data.request_body_type, headers=data.headers, request_body=data.request_body)
     response = await r.invoke(data.method)
     if response.get("status"):
         return PikaResponse.success(response)

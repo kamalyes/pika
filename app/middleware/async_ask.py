@@ -82,10 +82,10 @@ class AsyncRequest(object):
              raise SystemException(detail=f"{error}")
 
     @classmethod
-    async def client(cls, url: str, content_type: ReqBodyTypeEnum = ReqBodyTypeEnum.json, timeout=15, **kwargs):
+    async def client(cls, url: str, request_body_type: ReqBodyTypeEnum = ReqBodyTypeEnum.json, timeout=15, **kwargs):
         await cls.probe(url)
         headers = kwargs.get("headers", {})
-        if content_type == ReqBodyTypeEnum.json:
+        if request_body_type == ReqBodyTypeEnum.json:
             if "Content-Type" not in headers:
                 headers["Content-Type"] = "application/json; charset=UTF-8"
             # 新增json校验,修复史诗级bug: json被额外序列化
@@ -96,7 +96,7 @@ class AsyncRequest(object):
             except Exception as e:
                 raise SystemException(detail=f"json格式不正确: {e}")
             r = AsyncRequest(url, headers=headers, timeout=timeout, json=request_body)
-        elif content_type == ReqBodyTypeEnum.form:
+        elif request_body_type == ReqBodyTypeEnum.form:
             try:
                 request_body = kwargs.get("request_body")
                 form_data = None
@@ -115,7 +115,7 @@ class AsyncRequest(object):
                 r = AsyncRequest(url, headers=headers, data=form_data, timeout=timeout)
             except Exception as e:
                 raise SystemException(detail=f"解析form-data失败: {str(e)}")
-        elif content_type == ReqBodyTypeEnum.x_form:
+        elif request_body_type == ReqBodyTypeEnum.x_form:
             request_body = kwargs.get("request_body", "{}")
             request_body = json.loads(request_body)
             r = AsyncRequest(url, headers=headers, data=request_body, timeout=timeout)

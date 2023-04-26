@@ -321,9 +321,9 @@ class Executor(object):
         Returns:
 
         """
-        if case_info.content_type == ReqBodyTypeEnum.none:
+        if case_info.request_body_type == ReqBodyTypeEnum.none:
             return
-        if case_info.content_type == ReqBodyTypeEnum.json:
+        if case_info.request_body_type == ReqBodyTypeEnum.json:
             if "Content-Type" not in headers:
                 headers["Content-Type"] = "application/json; charset=UTF-8"
 
@@ -415,7 +415,7 @@ class Executor(object):
             request_body = case_info.request_body if case_info.request_body != "" else None
 
             # Step8: 替换请求参数
-            request_body = self.replace_body(request_param, request_body, case_info.content_type)
+            request_body = self.replace_body(request_param, request_body, case_info.request_body_type)
 
             # Step9: 替换base_path
             if case_info.base_path:
@@ -425,7 +425,7 @@ class Executor(object):
             response_info["url"] = case_info.url
 
             # Step9: 完成http请求
-            request_obj = await AsyncRequest.client(url=case_info.url, content_type=case_info.content_type, headers=headers, request_body=request_body)
+            request_obj = await AsyncRequest.client(url=case_info.url, request_body_type=case_info.request_body_type, headers=headers, request_body=request_body)
             res = await request_obj.invoke(method)
             self.append(
                 f"http请求过程\n\nRequest Method: {case_info.request_method}\n\n"
@@ -650,18 +650,18 @@ class Executor(object):
             )
 
     @case_log
-    def replace_body(self, req_params, request_body, content_type=1):
+    def replace_body(self, req_params, request_body, request_body_type=1):
         """
         根据传入的构造参数进行参数替换
         Args:
             req_params:
             request_body:
-            content_type:
+            request_body_type:
 
         Returns:
 
         """
-        if content_type != ReqBodyTypeEnum.json:
+        if request_body_type != ReqBodyTypeEnum.json:
             self.append("当前请求数据不为json, 跳过替换")
             return request_body
         try:

@@ -55,7 +55,7 @@ class CaseGenerator(object):
         return False
 
     @staticmethod
-    def get_content_type(headers):
+    def get_request_body_type(headers):
         """
         获取body类型
         Args:
@@ -64,12 +64,12 @@ class CaseGenerator(object):
         Returns:
 
         """
-        content_type = headers.get("Content-Type", "").lower()
-        if "json" in content_type:
+        request_body_type = headers.get("Content-Type", "").lower()
+        if "json" in request_body_type:
             return ReqBodyTypeEnum.json
-        if "x-www-form" in content_type:
+        if "x-www-form" in request_body_type:
             return ReqBodyTypeEnum.x_form
-        if "form" in content_type:
+        if "form" in request_body_type:
             return ReqBodyTypeEnum.form
         return ReqBodyTypeEnum.none
 
@@ -93,8 +93,7 @@ class CaseGenerator(object):
                     base_path=None,
                     url=requests[r].url,
                     request_method=requests[r].request_method,
-                    content_type=CaseGenerator.get_content_type(
-                        requests[r].request_headers),
+                    request_body_type=CaseGenerator.get_request_body_type(requests[r].request_headers),
                 ),
                 ensure_ascii=False,
             )
@@ -131,7 +130,7 @@ class CaseGenerator(object):
             protocol=protocol,
             request_body=last.request_body,
             request_method=last.request_method,
-            content_type=CaseGenerator.get_content_type(last.request_headers).value,
+            request_body_type=CaseGenerator.get_request_body_type(last.request_headers).value,
             request_headers=json.dumps(last.request_headers, ensure_ascii=False),
             case_type=0,
             status=CaseStatus.debugging.value,

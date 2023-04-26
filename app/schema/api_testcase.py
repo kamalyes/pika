@@ -39,8 +39,7 @@ class TestCaseSchema(BaseOnlyIdSchema, BaseOnlyDirectoryIdSchema, BaseOnlyProtoc
     base_path: str = Body(None, title="请求base_path")
     tag: str = Body(None, title="用例标签", max_length=ByteSizeEnum.LENGTH_64)
     request_body: str = Body(None, title="请求body", max_length=ByteSizeEnum.LENGTH_1W)
-    content_type: int = Body(
-        0, title="请求类型, 0: none 1: json 2: form 3: x-form 4: binary 5: GraphQL")
+    request_body_type: int = Body(0, title="请求类型, 0: none 1: json 2: form 3: x-form 4: binary 5: GraphQL")
     request_headers: str = Body(
         None, title="请求头,可为空", max_length=ByteSizeEnum.LENGTH_15W)
     request_method: str = Body(
