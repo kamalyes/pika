@@ -18,11 +18,11 @@ from app.core.handler.jsonres import PikaJsonEncoder
 from app.core.handler.logger import PikaLogger
 
 
-class GConfigParser(object):
+class GConfigParser(PikaJsonEncoder):
     log = PikaLogger("GConfigParser")
 
-    @staticmethod
-    def get(data, key):
+    @classmethod
+    def get(cls, data, key):
         el_list = key.split(".")
         result = data
         try:
@@ -30,10 +30,9 @@ class GConfigParser(object):
                 if isinstance(result, str):
                     # 说明需要反序列化
                     try:
-                        result = PikaJsonEncoder.safe_loads(result)
+                        result = cls.safe_loads(result)
                     except Exception as e:
-                        raise SystemException(
-                            detail=f"反序列化失败, result: {result}\nERROR: {e}")
+                        raise Exception(f"反序列化失败, result: {result}\nERROR: {e}")
                 if isinstance(branch, int):
                     # 说明路径里面的是数组
                     result = result[int(branch)]
@@ -89,12 +88,12 @@ class StringGConfigParser(GConfigParser):
 
 
 class JSONGConfigParser(GConfigParser):
-    @staticmethod
-    def get_data(value):
-        return PikaJsonEncoder.safe_loads(value)
+    @classmethod
+    def get_data(cls, value):
+        return cls.safe_loads(value)
 
-    @staticmethod
-    def parse(value, jsonpath):
+    @classmethod
+    def parse(cls, value, jsonpath):
         """
         JSON解析器
         Args:

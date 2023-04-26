@@ -15,16 +15,18 @@ from app.utils.decorator import SingletonDecorator
 
 
 @SingletonDecorator
-class JsonCompare(object):
+class JsonCompare(PikaJsonEncoder):
 
-    def compare(self, exp, act):
+    @classmethod
+    def compare(cls, exp, act):
         ans = []
-        self._compare(exp, act, ans, '$')
+        cls._compare(exp, act, ans, '$')
         return ans
-
-    def _compare(self, a, b, ans, path):
-        a = self._to_json(a)
-        b = self._to_json(b)
+    
+    @classmethod
+    def _compare(cls, a, b, ans, path):
+        a = cls._to_json(a)
+        b = cls._to_json(b)
         if type(a) != type(b):
             ans.append(f"{path} 类型不一致, 分别为{type(a)} {type(b)}【❌】")
             return
@@ -33,7 +35,7 @@ class JsonCompare(object):
             for key in a.keys():
                 pt = path + "." + key
                 if key in b.keys():
-                    self._compare(a[key], b[key], ans, pt)
+                    cls._compare(a[key], b[key], ans, pt)
                     keys.append(key)
                 else:
                     ans.append(f"{pt} 在实际结果中不存在【❌】")
@@ -50,7 +52,7 @@ class JsonCompare(object):
                     i += 1
                     j += 1
                     continue
-                self._compare(a[i], b[j], ans, pt)
+                cls._compare(a[i], b[j], ans, pt)
                 i += 1
                 j += 1
             while j < len(b):
@@ -65,14 +67,15 @@ class JsonCompare(object):
                     f"数据不一致: {a} != {b}【❌】")
 
     # noinspection PyMethodMayBeStatic
-    def _to_json(self, string):
+    @classmethod
+    def _to_json(cls, string):
         try:
             float(string)
             return string
         except:
             try:
                 if isinstance(string, str):
-                    return PikaJsonEncoder.safe_loads(string)
+                    return cls.safe_loads(string)
                 return string
             except:
                 return string

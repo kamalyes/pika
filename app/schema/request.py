@@ -23,7 +23,7 @@ from app.enums.ByteSizeEnum import ByteSizeEnum
 request_body = TypeVar("request_body", bytes, str)
 
 
-class RequestInfoSchema(BaseModel):
+class RequestInfoSchema(BaseModel, PikaJsonEncoder):
     url: Optional[str] = Body(
         None, name='url', max_length=ByteSizeEnum.LENGTH_256)
     request_body: Optional[str] = Body(
@@ -61,7 +61,7 @@ class RequestInfoSchema(BaseModel):
     @classmethod
     def translate_json(cls, text):
         try:
-            return json.dumps(PikaJsonEncoder.safe_loads(text), indent=4, ensure_ascii=False)
+            return json.dumps(cls.safe_loads(text), indent=4, ensure_ascii=False)
         except Exception as e:
             logger.bind(name=None).warning(f"解析json格式请求失败: {e}")
             return text

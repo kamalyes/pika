@@ -19,11 +19,11 @@ from app.core.paramters.parser import Parser
 from app.exceptions.business.CaseException import CaseParametersException
 
 
-class HeaderParser(Parser):
+class HeaderParser(Parser, PikaJsonEncoder):
 
     @classmethod
     def get_source(cls, data: dict):
-        return PikaJsonEncoder.safe_loads(data.get("response_headers"))
+        return cls.safe_loads(data.get("response_headers"))
 
     @classmethod
     def parse(cls, source: dict, expression: str = None, idx: str = None) -> Any:
@@ -50,9 +50,9 @@ class HeaderParser(Parser):
 class CookieParser(HeaderParser):
     @classmethod
     def get_source(cls, data: dict):
-        return PikaJsonEncoder.safe_loads(data.get("cookies"))
+        return cls.safe_loads(data.get("cookies"))
 
 class RequestHeaderParser(HeaderParser):
     @classmethod
     def get_source(cls, data: dict):
-        return PikaJsonEncoder.safe_loads(data.get("request_headers"))
+        return cls.safe_loads(data.get("request_headers"))

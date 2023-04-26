@@ -91,6 +91,7 @@ class ApiGBaseModel(LargeBaseModel):
     request_body = Column(TEXT, comment="请求Body")
     response_headers = Column(TEXT, comment="响应头部")
     response = Column(TEXT, comment="返回参数")
+    cost = Column(String(ByteSizeEnum.LENGTH_08), server_default="0", comment="花费时间")
     tag = Column(String(ByteSizeEnum.LENGTH_100), comment='标签')
     priority = Column(String(ByteSizeEnum.LENGTH_03), comment="用例优先级: P0-P3")
     __abstract__ = True

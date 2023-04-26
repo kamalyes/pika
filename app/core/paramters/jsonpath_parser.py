@@ -20,7 +20,7 @@ from app.core.paramters.parser import Parser
 from app.exceptions.business.CaseException import CaseParametersException
 
 
-class JSONPathParser(Parser):
+class JSONPathParser(Parser, PikaJsonEncoder):
     @classmethod
     def get_source(cls, source):
         return source.get("response")
@@ -47,10 +47,10 @@ class JSONPathParser(Parser):
             raise CaseParametersException(
                 f"parse json data error, please check jsonpath or json: {err}")
 
-    @staticmethod
+    @classmethod
     @lru_cache()
-    def get_object(json_str):
-        return PikaJsonEncoder.safe_loads(json_str)
+    def get_object(cls, json_str):
+        return cls.safe_loads(json_str)
 
 class BodyJSONPathParser(JSONPathParser):
     @classmethod

@@ -39,7 +39,6 @@ class ApiTestResultModel(ApiGBaseModel):
     data_name = Column(String(ByteSizeEnum.LENGTH_50))
     data_id = Column(BinaryUUID, ForeignKey(ApiTestCaseDataModel.id, ondelete="cascade", onupdate="cascade"),
                      nullable=False, default=None, comment="testcase_data_id")
-    cost = Column(String(ByteSizeEnum.LENGTH_12), nullable=False, comment="花费时间")
     asserts = Column(TEXT, comment="断言")
 
     def __init__(self, report_id: str, case_id: str, case_name: str, status: int,

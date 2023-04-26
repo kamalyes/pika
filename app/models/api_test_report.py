@@ -29,7 +29,7 @@ class ApiTestReportModel(Base):
                 default=uuid4, primary_key=True)
     executor = Column(String(ByteSizeEnum.LENGTH_16), server_default="0", index=True, comment="执行人 0则为CPU")
     env = Column(BinaryUUID, ForeignKey(EnvironmentModel.id, ondelete="cascade", onupdate="cascade"), comment="环境id")
-    cost = Column(String(ByteSizeEnum.LENGTH_08), comment="花费时间")
+    cost = Column(String(ByteSizeEnum.LENGTH_08), server_default="0", comment="花费时间")
     plan_id = Column(BinaryUUID, ForeignKey(ApiTestPlanModel.id, ondelete="cascade", onupdate="cascade"),
                      nullable=False, index=True, comment="测试集合id,预留字段")
     start_date = Column(DATETIME, nullable=False, comment="开始时间")
@@ -44,7 +44,7 @@ class ApiTestReportModel(Base):
 
     def __init__(self, executor: str, env: str, success_count: int = 0, failed_count: int = 0,
                  error_count: int = 0, skipped_count: int = 0, status: int = 0, mode: int = 0,
-                 plan_id: str = None, finished_date: datetime = None, cost=None):
+                 plan_id: str = None, finished_date: datetime = None, cost=0):
         self.executor = executor
         self.env = env
         self.start_date = datetime.now()

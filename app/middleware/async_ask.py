@@ -21,7 +21,7 @@ from app.middleware.oss import OssClient
 from config import PikaAppConfig
 from app.core.handler.exceres import SystemException
 
-class AsyncRequest(object):
+class AsyncRequest(PikaJsonEncoder):
     def __init__(self, url: str, timeout=15, **kwargs):
         self.url = url
         self.kwargs = kwargs
@@ -47,8 +47,7 @@ class AsyncRequest(object):
                     # if resp.status != 200: # 当http状态码不为200的时候给出提示
                     #     return await self.collect(False, self.get_data(self.kwargs), resp.status, msg="http状态码不为200")
                     finished_date = Moment.get_now_time("13timestamp")
-                    cost_ = int("%.0f" % (finished_date - start_date))
-                    cost = "%.3fs"%(cost_ / 1000) if cost_ > 1000 else f'{cost_}ms'
+                    cost = "%.3f"%(int("%.0f" % (finished_date - start_date)) / 1000)
                     # print("invoke请求耗时", start_date, finished_date)
                     response, json_format = await AsyncRequest.get_resp(resp)
                     cookie = self.get_cookie(session)
@@ -93,14 +92,14 @@ class AsyncRequest(object):
         if request_body_type == ReqBodyTypeEnum.json:
             if len(content_type_array) == 1 and not content_type_array:
                 headers["Content-Type"] = "application/json; charset=UTF-8"
-            request_body = PikaJsonEncoder.safe_loads(request_body)
+            request_body = cls.safe_loads(request_body)
             r = AsyncRequest(url, headers=headers, timeout=timeout, json=request_body)
         elif request_body_type == ReqBodyTypeEnum.form:
             try:
                 form_data = None
                 if request_body:
                     form_data = FormData()
-                    items = PikaJsonEncoder.safe_loads(request_body)
+                    items = cls.safe_loads(request_body)
                     for item in items:
                         # 如果是文本类型,直接添加key-value
                         if item.get("type") == "TEXT":
@@ -113,7 +112,7 @@ class AsyncRequest(object):
             except Exception as e:
                 raise Exception(f"解析form-data失败: {str(e)}")
         elif request_body_type == ReqBodyTypeEnum.x_form:
-            request_body = PikaJsonEncoder.safe_loads(request_body)
+            request_body = cls.safe_loads(request_body)
             r = AsyncRequest(url, headers=headers, data=request_body, timeout=timeout)
         else:
             # 暂时未支持其他类型
