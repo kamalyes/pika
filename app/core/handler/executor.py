@@ -11,7 +11,7 @@
 """
 import asyncio
 import json
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urljoin
 import re
 import time
 from collections import defaultdict
@@ -441,12 +441,12 @@ class Executor(object):
             headers = PikaJsonEncoder.safe_loads(case_info.request_headers)
 
             # Step9: 替换请求参数
-            request_body = self.replace_body(request_param, case_info.request_body, case_info.request_body_type)
+            request_body = await self.replace_body(request_param, case_info.request_body, case_info.request_body_type)
             
             # Step10: 替换base_gateway
             if case_info.base_gateway:
-                base_gateway = await GatewayDao.query_gateway(env, case_info.base_gateway)
-                case_info.url = urlencode(base_gateway.format(case_info.url))
+                base_gateway = await GatewayDao.query_gateway(env, id=case_info.base_gateway)
+                case_info.url = f"{base_gateway if base_gateway else ''}{case_info.url}"
             response_info["url"] = case_info.url
 
             # Step10: 完成http请求

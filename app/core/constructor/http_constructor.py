@@ -9,7 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urljoin
 from app.core.constructor.constructor import ConstructorAbstract
 from app.core.handler.jsonres import PikaJsonEncoder
 from app.crud.itstem.gateway import GatewayDao
@@ -25,10 +25,9 @@ class HttpConstructor(ConstructorAbstract, PikaJsonEncoder):
             constructor_type_ = cls.get_name(constructor)
             executor.append(f"当前路径: {path}, 第{index + 1}条{constructor_type_}")
             data = cls.safe_loads(constructor.constructor_json)
-            base_gateway, url, headers = data.get("base_gateway"), data.get("url"), data.get("headers")
-            base_gateway = await GatewayDao.query_gateway(env, base_gateway)
-            if base_gateway:
-                url = urlencode(base_gateway.format(url))
+            base_gateway_, url_, headers = data.get("base_gateway"), data.get("url"), data.get("headers")
+            base_gateway = await GatewayDao.query_gateway(env, id=base_gateway_)
+            url = f"{base_gateway if base_gateway else ''}{url_}"
             if isinstance(headers, str):
                 headers = cls.safe_loads(headers)
             client = await AsyncRequest.client(url=url, content_type=data.get("content_type"),

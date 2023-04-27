@@ -73,10 +73,8 @@ class AsyncRequest(PikaJsonEncoder):
     async def probe(cls, url):
         if url.startswith("localhost"):
             url = f"http://{url}"
-        try:
-            urlparse(url)
-        except InvalidURL as error:
-             raise Exception(f"{error}")
+        if not url.startswith(("http://", "https://")):
+            raise Exception("请输入正确的url, 记得带上http哦")
 
     @classmethod
     async def client(cls, url: str, request_body_type: ReqBodyTypeEnum = ReqBodyTypeEnum.json, timeout=15, **kwargs):

@@ -10,7 +10,7 @@
 @Desc    :  None
 """
 
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
 from app.models.gateway import GatewayModel
@@ -21,11 +21,12 @@ from app.core.handler.exceres import KeyUndefinedException
 class GatewayDao(PikaWrapper):
 
     @classmethod
-    async def query_gateway(cls, env, name):
+    async def query_gateway(cls, env, name=None, id=None):
         async with async_session() as session:
-            query_sql = select(GatewayModel).where(GatewayModel.delete_flag == 0,
+            query_sql = select(GatewayModel).where(or_(GatewayModel.delete_flag == 0,
                                                    GatewayModel.env == env,
-                                                   GatewayModel.name == name)
+                                                   GatewayModel.name == name,
+                                                   GatewayModel.id == id))
             query_result = await session.execute(query_sql)
             data = query_result.scalars().first()
             if data is None:

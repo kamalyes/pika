@@ -82,7 +82,7 @@ class ApiGBaseModel(LargeBaseModel):
     url = Column(TEXT, comment="请求URL")
     order = Column(INT, server_default="1", comment='排序')
     level = Column(SMALLINT, server_default="1", nullable=False, comment='等级')
-    base_gateway = Column(String(ByteSizeEnum.LENGTH_1000), comment="请求base_gateway")
+    base_gateway = Column(BinaryUUID, nullable=True, comment="请求base_gateway")
     protocol = Column(SMALLINT, server_default="1", comment="请求类型 1: http 2: grpc 3: dubbo")
     request_body_type = Column(SMALLINT, comment="请求类型, 0: none 1: json 2: form 3: x-form 4: binary 5: GraphQL")
     request_method = Column(String(ByteSizeEnum.LENGTH_12), nullable=True, comment="请求方式, 如果非http可为空")
