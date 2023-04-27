@@ -99,7 +99,7 @@ class ApiGBaseModel(LargeBaseModel):
     def __init__(self,url=None, id=None, level=1, base_path=None, protocol=1, operator=None,
                  tag=None, priority='P1', order=1, request_body_type=None, request_method=None, 
                  request_headers=None, request_params=None,  request_body=None, response=None, response_headers=None, 
-                 delete_flag=0, delete_date=None):
+                 delete_flag=0, delete_date=None, cost=0):
         super().__init__(id=id, operator=operator, delete_flag=delete_flag, delete_date=delete_date)
         self.url = url
         self.order = order
@@ -115,3 +115,4 @@ class ApiGBaseModel(LargeBaseModel):
         self.request_body = request_body
         self.response = response
         self.response_headers = response_headers
+        self.cost = cost

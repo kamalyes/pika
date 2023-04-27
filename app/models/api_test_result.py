@@ -52,7 +52,8 @@ class ApiTestResultModel(ApiGBaseModel):
         super().__init__(id=id, operator=operator, protocol=protocol,
                          url=url, tag=tag, request_method=request_method,
                          request_headers=request_headers, response=response, response_headers=response_headers,
-                         request_params=request_params, delete_flag=delete_flag, request_body=request_body)
+                         request_params=request_params, delete_flag=delete_flag, request_body=request_body,
+                         cost=cost)
         self.report_id = report_id
         self.case_id = case_id
         self.case_name = case_name
@@ -62,7 +63,6 @@ class ApiTestResultModel(ApiGBaseModel):
         self.finished_date = finished_date
         self.retry_times = retry_times
         self.status_code = status_code
-        self.cost = cost
         self.asserts = asserts
         self.cookies = cookies
         self.data_name = data_name
