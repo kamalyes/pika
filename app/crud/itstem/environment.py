@@ -11,7 +11,6 @@
 """
 
 from sqlalchemy import select, desc
-from app.core.handler.exceres import KeyExistException, KeyUndefinedException, SystemException, ValidException
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_db_session_generator, async_session
 from app.models.environment import EnvironmentModel
@@ -33,10 +32,9 @@ class EnvironmentDao(PikaWrapper):
         """
         async with async_session() as session:
             ans = await session.execute(
-                select(EnvironmentModel).where(EnvironmentModel.id == id,
-                                               EnvironmentModel.delete_flag == 0))
+                select(EnvironmentModel).where(EnvironmentModel.id == id, EnvironmentModel.delete_flag == 0))
             if ans is None:
-                raise KeyUndefinedException(detail=f"环境: {id}不存在")
+                raise Exception(f"环境: {id}不存在")
             return ans.scalars().first()
 
     @classmethod
@@ -44,10 +42,9 @@ class EnvironmentDao(PikaWrapper):
         async with async_db_session_generator() as session:
             async with session.begin():
                 query = await session.execute(
-                    select(EnvironmentModel).where(EnvironmentModel.name == data.name,
-                                                   EnvironmentModel.delete_flag == 0))
+                    select(EnvironmentModel).where(EnvironmentModel.name == data.name, EnvironmentModel.delete_flag == 0))
                 if query.scalars().first() is not None:
-                    raise KeyExistException(detail=f"添加失败,环境名称:{data.name}已存在")
+                    raise Exception(f"添加失败,环境名称:{data.name}已存在")
                 env = EnvironmentModel(**data.dict(), operator=emp_no)
                 session.add(env)
 
@@ -57,8 +54,7 @@ class EnvironmentDao(PikaWrapper):
             search = [EnvironmentModel.delete_flag == 0]
             async with async_session() as session:
                 if name:
-                    search.append(EnvironmentModel.name.like(
-                        "%{}%".format(name)))
+                    search.append(EnvironmentModel.name.like("%{}%".format(name)))
                 sql = select(EnvironmentModel).where(
                     *search).order_by(desc(EnvironmentModel.update_date))
                 query = await session.execute(sql)
@@ -74,4 +70,4 @@ class EnvironmentDao(PikaWrapper):
         except Exception as e:
             err = f"获取环境数据失败,失败原因: {str(e)}"
             cls.__log__.error(err)
-            raise SystemException(detail=err)
+            raise Exception(err)

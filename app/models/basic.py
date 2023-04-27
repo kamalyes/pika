@@ -82,7 +82,7 @@ class ApiGBaseModel(LargeBaseModel):
     url = Column(TEXT, comment="请求URL")
     order = Column(INT, server_default="1", comment='排序')
     level = Column(SMALLINT, server_default="1", nullable=False, comment='等级')
-    base_path = Column(String(ByteSizeEnum.LENGTH_1000), comment="请求base_path")
+    base_gateway = Column(String(ByteSizeEnum.LENGTH_1000), comment="请求base_gateway")
     protocol = Column(SMALLINT, server_default="1", comment="请求类型 1: http 2: grpc 3: dubbo")
     request_body_type = Column(SMALLINT, comment="请求类型, 0: none 1: json 2: form 3: x-form 4: binary 5: GraphQL")
     request_method = Column(String(ByteSizeEnum.LENGTH_12), nullable=True, comment="请求方式, 如果非http可为空")
@@ -96,14 +96,14 @@ class ApiGBaseModel(LargeBaseModel):
     priority = Column(String(ByteSizeEnum.LENGTH_03), comment="用例优先级: P0-P3")
     __abstract__ = True
     
-    def __init__(self,url=None, id=None, level=1, base_path=None, protocol=1, operator=None,
+    def __init__(self,url=None, id=None, level=1, base_gateway=None, protocol=1, operator=None,
                  tag=None, priority='P1', order=1, request_body_type=None, request_method=None, 
                  request_headers=None, request_params=None,  request_body=None, response=None, response_headers=None, 
                  delete_flag=0, delete_date=None, cost=0):
         super().__init__(id=id, operator=operator, delete_flag=delete_flag, delete_date=delete_date)
         self.url = url
         self.order = order
-        self.base_path = base_path
+        self.base_gateway = base_gateway
         self.protocol = protocol
         self.request_body_type = request_body_type
         self.tag = tag

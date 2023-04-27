@@ -91,7 +91,7 @@ class CaseGenerator(object):
                 dict(
                     request_body=requests[r].request_body,
                     headers=requests[r].request_headers,
-                    base_path=None,
+                    base_gateway=None,
                     url=requests[r].url,
                     request_method=requests[r].request_method,
                     request_body_type=CaseGenerator.get_request_body_type(requests[r].request_headers),

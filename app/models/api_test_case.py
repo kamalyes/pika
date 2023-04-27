@@ -34,7 +34,7 @@ class ApiTestCaseModel(ApiGBaseModel):
     del ApiGBaseModel.cost
 
     def __init__(self, name, protocol, directory_id, status, priority, operator, tag, 
-                 url=None, request_body_type=1, base_path=None, out_parameters=None,
+                 url=None, request_body_type=1, base_gateway=None, out_parameters=None,
                  request_headers=None, case_type=0, request_body=None, request_method=None, id=None):
         super().__init__(id=id, operator=operator, protocol=protocol, url=url, tag=tag,
                          request_body=request_body, request_body_type=request_body_type)
@@ -46,7 +46,7 @@ class ApiTestCaseModel(ApiGBaseModel):
         self.case_type = case_type
         self.request_headers = request_headers
         self.request_method = request_method
-        self.base_path = base_path        
+        self.base_gateway = base_gateway        
 
     def __str__(self):
         return f"[用例: {self.name}]({self.id}))"

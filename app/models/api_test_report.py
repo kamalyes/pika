@@ -31,7 +31,7 @@ class ApiTestReportModel(Base):
     env = Column(BinaryUUID, ForeignKey(EnvironmentModel.id, ondelete="cascade", onupdate="cascade"), comment="环境id")
     cost = Column(String(ByteSizeEnum.LENGTH_08), server_default="0", comment="花费时间")
     plan_id = Column(BinaryUUID, ForeignKey(ApiTestPlanModel.id, ondelete="cascade", onupdate="cascade"),
-                     nullable=False, index=True, comment="测试集合id,预留字段")
+                     nullable=True, index=True, comment="测试集合id,预留字段")
     start_date = Column(DATETIME, nullable=False, comment="开始时间")
     finished_date = Column(DATETIME, comment="结束时间")
     success_count = Column(INT, nullable=False, server_default="0", comment="成功数量")

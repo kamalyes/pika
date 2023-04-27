@@ -24,10 +24,8 @@ class ApiTestResultModel(ApiGBaseModel):
     __tablename__ = f'{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_test_result'
     __table_args__ = {"comment": "测试结果表"}
     directory_id = None
-    report_id = Column(BinaryUUID,
-                       default=uuid4, index=True, comment="报告id")
-    case_id = Column(BinaryUUID,
-                     default=uuid4, index=True, comment="用例id")
+    report_id = Column(BinaryUUID, default=uuid4, index=True, comment="报告id")
+    case_id = Column(BinaryUUID, default=uuid4, index=True, comment="用例id")
     case_name = Column(String(ByteSizeEnum.LENGTH_50), comment="用例名称")
     status = Column(SMALLINT, comment="对应状态 0: 成功 1: 失败 2: 出错 3: 跳过")
     start_date = Column(DATETIME, nullable=False, default=None, comment="开始时间")
@@ -38,7 +36,7 @@ class ApiTestResultModel(ApiGBaseModel):
     cookies = Column(TEXT, comment="请求参数")
     data_name = Column(String(ByteSizeEnum.LENGTH_50))
     data_id = Column(BinaryUUID, ForeignKey(ApiTestCaseDataModel.id, ondelete="cascade", onupdate="cascade"),
-                     nullable=False, default=None, comment="testcase_data_id")
+                     nullable=True, default=None, comment="testcase_data_id")
     asserts = Column(TEXT, comment="断言")
 
     def __init__(self, report_id: str, case_id: str, case_name: str, status: int,

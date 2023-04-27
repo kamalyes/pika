@@ -36,7 +36,7 @@ class TestCaseSchema(BaseOnlyIdSchema, BaseOnlyDirectoryIdSchema, BaseOnlyProtoc
     url: str = Body("", title="请求url", max_length=ByteSizeEnum.LENGTH_1W)
     name: str = Body("", title="名称", max_length=ByteSizeEnum.LENGTH_32)
     case_type: int = Body(0, title="0: 普通用例 1: 前置用例 2: 数据工厂")
-    base_path: str = Body(None, title="请求base_path")
+    base_gateway: str = Body(None, title="请求base_gateway")
     tag: str = Body(None, title="用例标签", max_length=ByteSizeEnum.LENGTH_64)
     request_body: str = Body(None, title="请求body", max_length=ByteSizeEnum.LENGTH_1W)
     request_body_type: int = Body(0, title="请求类型, 0: none 1: json 2: form 3: x-form 4: binary 5: GraphQL")

@@ -11,11 +11,12 @@
 """
 import asyncio
 import json
+from urllib.parse import urlencode
 import re
 import time
 from collections import defaultdict
 from datetime import datetime
-from typing import List, Any, Union
+from typing import List, Any, Tuple, Union
 from app.core.handler.jsonres import PikaJsonEncoder
 from app.models import async_session
 from app.core.constructor.case_constructor import TestCaseConstructor
@@ -212,8 +213,7 @@ class Executor(object):
                 else:
                     result = result.get(branch)
                 if result is None:
-                    raise KeyUndefinedException(
-                        detail=f"变量路径: {v}不存在, 请检查JSON或路径!")
+                    raise Exception(detail=f"变量路径: {v}不存在, 请检查JSON或路径!")
             if field_name == "request_headers":
                 new_value = PikaJsonEncoder.safe_loads(result)
             elif not isinstance(result, str):
@@ -282,12 +282,14 @@ class Executor(object):
         """
         if len(constructors) == 0:
             self.append("前后置条件为空, 跳出该环节")
+            return False
         current = 0
         for i, c in enumerate(constructors):
             if c.suffix == suffix:
                 await self.execute_constructor(env, current, path, params, req_params, c)
                 self.replace_args(params, case_info, constructors, asserts)
                 current += 1
+        return True
 
     async def execute_constructor(self, env, index, path, params, req_params, constructor: ConstructorModel):
         """
@@ -344,6 +346,37 @@ class Executor(object):
             p = parameters_parser(d.source)
             result[d.name] = p(response_info, d.expression, idx=d.match_index)
         return result
+    
+    
+    @case_log
+    def my_assert(self, asserts: List, json_format: bool) -> Union[dict, bool, Tuple]:
+        """
+        断言验证
+        Args:
+            asserts:
+            json_format:
+
+        Returns:
+
+        """
+        result, status = dict(), True
+        if len(asserts) == 0:
+            self.append("未设置断言, 用例结束")
+            result = json.dumps(result, ensure_ascii=False)
+            return result, status
+        for item in asserts:
+            try:
+                # 解析预期/实际结果
+                expected = self.translate(item.expected)
+                # 判断请求返回是否是json格式,如果不是则不进行loads操作
+                actually = self.translate(item.actually)
+                status, err = self.ops(item.assert_type, expected, actually)
+                result[item.id] = {"status": status, "msg": err}
+            except Exception as e:
+                status = False
+                self.append(f"预期结果: {item.expected}\n实际结果: {item.actually}\n")
+                result[item.id] = {"status": False, "msg": f"断言取值失败, 请检查断言语句: {e}"}
+        return json.dumps(result, ensure_ascii=False), status
 
     async def run(self, env: str, case_id: str, params_pool: dict = None, request_param: dict = None, path: str = "主case"):
         """
@@ -380,7 +413,6 @@ class Executor(object):
 
             # Step1: 替换全局变量
             await self.parse_gconfig(case_info, GConfigTypeEnum.case, env, *Executor.fields)
-
             self.append("解析全局变量", True)
 
             # Step2: 获取构造数据
@@ -392,74 +424,66 @@ class Executor(object):
 
             # Step4: 获取断言
             asserts = await ApiTestCaseAssertsDao.async_list_test_case_asserts(case_id)
-
-            # 获取出参信息
-            out_parameters = await ApiTestCaseOutParametersDao.select_list(case_id=case_id)
-
             for ast in asserts:
                 await self.parse_gconfig(ast, GConfigTypeEnum.asserts, env, "expected", "actually")
+                
+            # Step5: 获取出参信息
+            out_parameters = await ApiTestCaseOutParametersDao.select_list(case_id=case_id)
 
-            # Step5: 替换参数
+            # Step6: 替换参数
             self.replace_args(req_params, case_info, constructors, asserts)
 
-            # Step6: 执行前置条件
+            # Step7: 执行前置条件
             await self.execute_constructors(env, path, case_info, case_params, req_params, constructors, asserts)
 
-            # Step7: 批量改写主方法参数
+            # Step8: 批量改写主方法参数
             await self.parse_params(case_info, case_params)
+            headers = PikaJsonEncoder.safe_loads(case_info.request_headers)
 
-            if case_info.request_headers and case_info.request_headers != "":
-                
-                headers = PikaJsonEncoder.safe_loads(case_info.request_headers)
-            else:
-                headers = dict()
-
-            request_body = case_info.request_body if case_info.request_body != "" else None
-
-            # Step8: 替换请求参数
-            request_body = self.replace_body(request_param, request_body, case_info.request_body_type)
-
-            # Step9: 替换base_path
-            if case_info.base_path:
-                base_path = await GatewayDao.query_gateway(env, case_info.base_path)
-                case_info.url = f"{base_path}{case_info.url}"
-
+            # Step9: 替换请求参数
+            request_body = self.replace_body(request_param, case_info.request_body, case_info.request_body_type)
+            
+            # Step10: 替换base_gateway
+            if case_info.base_gateway:
+                base_gateway = await GatewayDao.query_gateway(env, case_info.base_gateway)
+                case_info.url = urlencode(base_gateway.format(case_info.url))
             response_info["url"] = case_info.url
 
-            # Step9: 完成http请求
+            # Step10: 完成http请求
             request_obj = await AsyncRequest.client(url=case_info.url, request_body_type=case_info.request_body_type, headers=headers, request_body=request_body)
             res = await request_obj.invoke(request_method)
             self.append(
                 f"http请求过程\n\nRequest Method: {request_method}\n\n"
                 f"Request Headers:\n{headers}\n\nUrl: {case_info.url}"
-                f"\n\nRequest Body:\n{request_body}\n\nResponse:\n{res.get('response', '未获取到返回值')}"
+                f"\n\nRequest Body:\n{case_info.request_body}\n\nResponse:\n{res.get('response', '未获取到返回值')}"
             )
             response_info.update(res)
-
-            # 提取出参
-            out_dict = self.extract_out_parameters(
-                response_info, out_parameters)
-
-            # 替换变量
-            case_params.update(out_dict)
+            
+            # Step11: 提取出参
+            if out_parameters:
+                out_dict = self.extract_out_parameters(response_info, out_parameters)
+                case_params.update(out_dict)
+                
+            # Step12: 替换变量
             self.replace_asserts(asserts, req_params, case_params)
             self.replace_constructors(constructors, req_params, case_params)
 
-            # Step10: 执行后置条件
+            # Step13: 执行后置条件
             await self.execute_constructors(env, path, case_info, case_params, req_params, constructors, asserts, True)
 
-            # Step11: 断言
-            asserts, ok = self.my_assert(
-                asserts, response_info.get("json_format"))
-            response_info["status"] = ok
+            # Step14: 执行断言
+            json_format_ = response_info.get("json_format")
+            asserts, status = await self.my_assert(asserts, json_format_)
+            response_info["status"] = status
             response_info["asserts"] = asserts
             # 日志输出, 如果不是主用例则不记录
             if self._main:
                 response_info["case_log"] = self.logger.join()
             return response_info, None
         except Exception as e:
-            Executor.log.exception("执行用例失败: \n")
-            self.append(f"执行用例失败: {str(e)}")
+            msg = f"执行用例失败: {str(e)}"
+            Executor.log.exception(f"{msg} \n")
+            self.append(msg)
             if self._main:
                 response_info["case_log"] = self.logger.join()
             return response_info, f"执行用例失败: {str(e)}"
@@ -590,7 +614,7 @@ class Executor(object):
                 await asyncio.sleep(60 * retry_minutes)
                 continue
             asserts = result.get("asserts")
-            url = result.get("url")
+            path = result.get("path")
             case_log_ = result.get("case_log")
             request_body = result.get("request_data")
             status_code = result.get("status_code")
@@ -602,7 +626,7 @@ class Executor(object):
             cookies = result.get("cookies")
             request_params = json.dumps(request_param, ensure_ascii=False)
             api_testcase_result = ApiTestCaseResultSchema(
-                case_id, report_id, case_name, status,  case_log_, start_date, finished_date,url,
+                case_id, report_id, case_name, status,  case_log_, start_date, finished_date,path,
                 request_body, request_method, request_headers, cost, asserts, response_headers,
                 response, status_code, cookies, retry_times, request_params, data_name)
             if retry_id is not None:
@@ -669,7 +693,7 @@ class Executor(object):
         try:
             if request_body:
                 data = PikaJsonEncoder.safe_loads(request_body)
-                if req_params is not None:
+                if req_params:
                     for k, v in req_params.items():
                         if data.get(k) is not None:
                             data[k] = v
@@ -678,38 +702,6 @@ class Executor(object):
         except Exception as e:
             self.append(f"替换请求request_body失败, {e}")
         return request_body
-
-    @case_log
-    def my_assert(self, asserts: List, json_format: bool) -> Union[str, bool]:
-        """
-        断言验证
-        Args:
-            asserts:
-            json_format:
-
-        Returns:
-
-        """
-        result = dict()
-        ok = True
-        if len(asserts) == 0:
-            self.append("未设置断言, 用例结束")
-            return json.dumps(result, ensure_ascii=False), ok
-        for item in asserts:
-            try:
-                # 解析预期/实际结果
-                expected = self.translate(item.expected)
-                # 判断请求返回是否是json格式,如果不是则不进行loads操作
-                actually = self.translate(item.actually)
-                status, err = self.ops(item.assert_type, expected, actually)
-                result[item.id] = {"status": status, "msg": err}
-            except Exception as e:
-                if ok is True:
-                    ok = False
-                self.append(f"预期结果: {item.expected}\n实际结果: {item.actually}\n")
-                result[item.id] = {"status": False,
-                                   "msg": f"断言取值失败, 请检查断言语句: {e}"}
-        return json.dumps(result, ensure_ascii=False), ok
 
     @case_log
     def ops(self, assert_type: str, exp, act) -> Union[bool, str]:
@@ -856,7 +848,7 @@ class Executor(object):
                 else:
                     result = result.get(branch)
         except Exception as e:
-            raise SystemException(detail=f"获取变量失败: {str(e)}")
+            raise Exception(f"获取变量失败: {str(e)}")
         if string == "${response}":
             return result
         return json.dumps(result, ensure_ascii=False)

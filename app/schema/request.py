@@ -24,8 +24,7 @@ request_body = TypeVar("request_body", bytes, str)
 
 
 class RequestInfoSchema(BaseModel, PikaJsonEncoder):
-    url: Optional[str] = Body(
-        None, name='url', max_length=ByteSizeEnum.LENGTH_256)
+    url: Optional[str] = Body(None, name='url', max_length=ByteSizeEnum.LENGTH_256)
     request_body: Optional[str] = Body(
         None, name='request_body', max_length=ByteSizeEnum.LENGTH_2W)
     request_method: Optional[str] = Body(

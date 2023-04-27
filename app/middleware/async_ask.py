@@ -44,11 +44,8 @@ class AsyncRequest(PikaJsonEncoder):
                 async with session.request(
                     method, self.url, timeout=self.timeout, proxy=self.proxy, ssl=False, **self.kwargs
                 ) as resp:
-                    # if resp.status != 200: # 当http状态码不为200的时候给出提示
-                    #     return await self.collect(False, self.get_data(self.kwargs), resp.status, msg="http状态码不为200")
                     finished_date = Moment.get_now_time("13timestamp")
                     cost = "%.3f"%(int("%.0f" % (finished_date - start_date)) / 1000)
-                    # print("invoke请求耗时", start_date, finished_date)
                     response, json_format = await AsyncRequest.get_resp(resp)
                     cookie = self.get_cookie(session)
                     return await self.collect(
@@ -63,7 +60,7 @@ class AsyncRequest(PikaJsonEncoder):
                         json_format=json_format,
                     )
         except ClientProxyConnectionError as err:
-            raise SystemException(detail=f'invoke失败,{err}')
+            raise Exception(f'代理连接错误,{err}')
 
     async def download(self):
         async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar(unsafe=True)) as session:
@@ -79,18 +76,18 @@ class AsyncRequest(PikaJsonEncoder):
         try:
             urlparse(url)
         except InvalidURL as error:
-             raise SystemException(detail=f"{error}")
+             raise Exception(f"{error}")
 
     @classmethod
     async def client(cls, url: str, request_body_type: ReqBodyTypeEnum = ReqBodyTypeEnum.json, timeout=15, **kwargs):
         request_body = kwargs.get("request_body")
         headers = kwargs.get("headers",None)
         content_type_array = [True if key.lower() == "content-type" else False for key, value in headers.items()]
-        if len(content_type_array)> 1:
+        if content_type_array.count(True)>1:
             raise Exception(f'Content-Type出现{len(content_type_array)}次,请修改后重试,{headers}')
         await cls.probe(url)
         if request_body_type == ReqBodyTypeEnum.json:
-            if len(content_type_array) == 1 and not content_type_array:
+            if content_type_array.count(True) == 1 and not content_type_array:
                 headers["Content-Type"] = "application/json; charset=UTF-8"
             request_body = cls.safe_loads(request_body)
             r = AsyncRequest(url, headers=headers, timeout=timeout, json=request_body)
@@ -116,7 +113,7 @@ class AsyncRequest(PikaJsonEncoder):
             r = AsyncRequest(url, headers=headers, data=request_body, timeout=timeout)
         else:
             # 暂时未支持其他类型
-            r = AsyncRequest(url, headers=headers, timeout=timeout, data=kwargs.get("request_body"))
+            r = AsyncRequest(url, headers=headers, timeout=timeout)
         return r
 
     @staticmethod
