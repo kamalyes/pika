@@ -1,7 +1,5 @@
 import asyncio
-import json
 import random
-import sys
 import uuid
 from json import JSONDecodeError
 from typing import List, Dict
@@ -57,7 +55,7 @@ async def execute_case(env: str, case_id: str, user_info=Depends(Permission())):
             ans["默认数据"] = result
         else:
             for data in test_data:
-                params = PikaJsonEncoder.safe_loads(data.json_data)
+                params = PikaJsonEncoder.safe_json_loads(data.json_data)
                 result, _ = await executor.run(env=env, case_id=case_id, request_param=params)
                 ans[data.name] = result
         return PikaResponse.success(ans)
@@ -74,7 +72,7 @@ async def re_run_case(env:str, case_id:str, data_id:str, retry_id:str, report_id
         params = dict()
         test_data = await ApiTestCaseDataDao.query_record(id=data_id)
         if test_data is not None:
-            params = PikaJsonEncoder.safe_loads(test_data.json_data)
+            params = PikaJsonEncoder.safe_json_loads(test_data.json_data)
         result = await executor.run_with_test_data(env=env, case_id=case_id, report_id=report_id, request_param=params, retry_id=retry_id)
         return PikaResponse.success(result)
     except JSONDecodeError:

@@ -25,11 +25,11 @@ from redis import ConnectionPool, StrictRedis
 from custard.rediscluster import RedisCluster, ClusterConnectionPool
 from app.core.handler.jsonres import PikaJsonEncoder
 from app.enums.SysVarEnum import PikaGlobalVarEnum
-from app.exceptions.thirdparty.RedisException import RedisException
+from app.exceptions import RedisError
 from config import PikaAppConfig
 
 
-class PikaRedisManager(object):
+class PikaRedisManager(PikaJsonEncoder):
     """非线程安全,可能存在问题"""
     _cluster_pool = dict()
     _pool = dict()
@@ -111,7 +111,7 @@ class PikaRedisManager(object):
         if node is not None:
             return node
         if ":" not in address:
-            raise RedisException(detail="redis连接未包含端口号,请检查配置")
+            raise RedisError("redis连接未包含端口号,请检查配置")
         host, port = address.split(":")
         pool = ConnectionPool(host=host, port=port, db=db, password=password,
                               max_connections=PikaAppConfig.REDIS_MAX_CONNECTIONS, 
@@ -157,7 +157,7 @@ class PikaRedisManager(object):
         """
         startup_nodes = cls.get_redis_nodes(address)
         if len(startup_nodes) == 0:
-            raise RedisException(detail="找不到集群节点,请检查配置")
+            raise RedisError("找不到集群节点,请检查配置")
         pool = ClusterConnectionPool(startup_nodes=startup_nodes,
                                      max_connections=PikaAppConfig.REDIS_MAX_CONNECTIONS,
                                      decode_responses=PikaAppConfig.REDIS_DECODE_RESPONSES)
@@ -165,7 +165,7 @@ class PikaRedisManager(object):
         return client
 
 
-class RedisHelper(object):
+class RedisHelper(PikaJsonEncoder):
     prefix = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}"
     cluster_nodes = PikaAppConfig.REDIS_CLUSTER_NODE
     password = PikaAppConfig.REDIS_PASSWORD
@@ -235,13 +235,10 @@ class RedisHelper(object):
 
         """
         # 默认录制1小时
-        value = json.dumps(
-            {"operator": operator, "regex": regex}, ensure_ascii=False)
-        cls.pika_redis_client.set(cls.get_key(f"record:ip:{address}"), value,
-                                          ex=3600)
+        value = json.dumps({"operator": operator, "regex": regex}, ensure_ascii=False)
+        cls.pika_redis_client.set(cls.get_key(f"record:ip:{address}"), value, ex=3600)
         # 清楚上次录制数据
-        cls.pika_redis_client.delete(
-            cls.get_key(f"record:{address}:requests"))
+        cls.pika_redis_client.delete(cls.get_key(f"record:{address}:requests"))
 
     @classmethod
     @awaitable
@@ -285,7 +282,7 @@ class RedisHelper(object):
         """
         key = cls.get_key(f"record:{address}:requests")
         data = cls.pika_redis_client.lrange(key, 0, -1)
-        return [PikaJsonEncoder.safe_loads(x) for x in data]
+        return [cls.safe_json_loads(x) for x in data]
 
     @classmethod
     @awaitable

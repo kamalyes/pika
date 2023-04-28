@@ -10,10 +10,7 @@
 @Desc    :  None
 """
 from datetime import datetime
-
 from sqlalchemy import select, desc
-from app.core.handler.exceres import KeyUndefinedException, SystemException
-
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.itst.api.testresult import ApiTestResultDao
 from app.models import async_session
@@ -38,24 +35,23 @@ class ApiTestReportDao(PikaWrapper):
                     await session.flush()
                     return report.id
         except Exception as e:
-            cls.__log__.error(f"新增报告失败, error: {e}")
-            raise SystemException(detail="新增报告失败")
+            err_detail = f"新增报告失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def update(cls, report_id: str, status) -> None:
         try:
             async with async_session() as session:
                 async with session.begin():
-                    sql = select(ApiTestReportModel).where(
-                        ApiTestReportModel.id == report_id)
+                    sql = select(ApiTestReportModel).where(ApiTestReportModel.id == report_id)
                     data = await session.execute(sql)
                     report = data.scalars().first()
                     if report is None:
-                        raise SystemException(detail="更新报告失败")
+                        raise Exception("更新报告失败")
                     report.status = status
         except Exception as e:
-            cls.__log__.error(f"更新报告失败, error: {e}")
-            raise SystemException(detail="更新报告失败")
+            err_detail = f"更新报告失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def end(cls, report_id: str, success_count: int, failed_count: int,
@@ -81,8 +77,8 @@ class ApiTestReportDao(PikaWrapper):
                     session.expunge(report)
                     return report
         except Exception as e:
-            cls.__log__.error(f"更新报告失败, error: {e}")
-            raise SystemException(detail="更新报告失败")
+            err_detail = f"更新报告失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def query(cls, report_id: str):
@@ -108,8 +104,8 @@ class ApiTestReportDao(PikaWrapper):
                 test_data = await ApiTestResultDao.list(report_id)
                 return report, test_data, plan_name
         except Exception as e:
-            cls.__log__.error(f"查询报告失败: {e}")
-            raise SystemException(detail=f"查询报告失败: {e}")
+            err_detail = f"查询报告失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def list_report(cls, paging, start_date: datetime, finished_date: datetime,
@@ -141,5 +137,5 @@ class ApiTestReportDao(PikaWrapper):
                 data = await session.execute(sql)
                 return data.scalars().all(), total
         except Exception as e:
-            cls.__log__.error(f"查询构建记录失败: {e}")
-            raise SystemException(detail=f"查询构建记录失败: {e}")
+            err_detail = f"查询构建记录失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

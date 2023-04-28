@@ -11,7 +11,6 @@
 """
 
 from sqlalchemy import select
-from app.core.handler.exceres import KeyExistException, SystemException
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.enums.SysVarEnum import ValidTimeEnum
 from app.middleware.xredis import RedisHelper
@@ -39,12 +38,12 @@ class GConfigDao(PikaWrapper):
                     config = GConfigModel(**form.dict(), operator=operator)
                     session.add(config)
         except Exception as e:
-            cls.__log__.error(f"新增变量: {form.key}失败, {e}")
-            raise SystemException(detail=f"新增变量: {form.key}失败")
+            err_detail = f"新增变量: {form.key}失败, {e}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
-    @staticmethod
+    @classmethod
     @RedisHelper.cache("dao", ValidTimeEnum.DAO_TIME.value, True)
-    async def async_get_gconfig_by_key(key: str, env: str) -> GConfigModel:
+    async def async_get_gconfig_by_key(cls, key: str, env: str) -> GConfigModel:
         try:
             filters = [GConfigModel.key == key, GConfigModel.delete_flag == 0,
                        GConfigModel.enabled_flag is True,
@@ -54,4 +53,5 @@ class GConfigDao(PikaWrapper):
                 result = await session.execute(sql)
                 return result.scalars().first()
         except Exception as e:
-            raise SystemException(detail=f"查询全局变量失败: {str(e)}")
+            err_detail = f"查询全局变量失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

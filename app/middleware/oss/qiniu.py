@@ -15,7 +15,6 @@ from io import BytesIO
 import aiohttp
 from awaits.awaitable import awaitable
 from qiniu import Auth, put_stream, BucketManager
-from app.core.handler.exceres import KeyUndefinedException, SystemException
 
 from app.middleware.oss import OssFile
 from config import PikaAppConfig
@@ -43,7 +42,7 @@ class QiniuOssClient(OssFile):
         ret, info = put_stream(token, key, QiniuOssClient._convert_to_stream(content), file_name,
                                len(content))
         if ret['key'] != key:
-            raise SystemException(detail="上传失败")
+            raise Exception("上传失败")
         return QiniuOssClient.get_url(key), len(content)
 
     def get_url(self, key):
@@ -56,7 +55,7 @@ class QiniuOssClient(OssFile):
         key = self.get_real_path(filepath, base_path)
         ret, info = put_stream(token, key, content, file_name, len(content))
         if ret['key'] != key:
-            raise SystemException(detail="更新失败")
+            raise Exception("更新失败")
 
     @awaitable
     def remove_file(self, filepath: str, base_path: str = None):
@@ -67,7 +66,7 @@ class QiniuOssClient(OssFile):
         key = self.get_real_path(filepath, base_path)
         exists, _ = self.bucket_manager.stat(self.bucket, key)
         if exists is None:
-            raise KeyUndefinedException(detail="文件不存在")
+            raise Exception("文件不存在")
         base_url = '%s/%s/%s' % (PikaAppConfig.OSS_QINIU_URL,
                                  self.bucket, filepath)
         url = self.auth.private_download_url(base_url, expires=3600 * 24 * 365)
@@ -78,7 +77,7 @@ class QiniuOssClient(OssFile):
         async with aiohttp.ClientSession() as session:
             async with session.request("GET", url, timeout=timeout, ssl=False) as resp:
                 if resp.status != 200:
-                    raise KeyUndefinedException(detail="download file failed")
+                    raise Exception("download file failed")
                 real_filename = filepath.split("/")[-1]
                 path = rf'./{self.get_random_filename(real_filename)}'
                 with open(path, 'wb') as f:
@@ -90,11 +89,11 @@ class QiniuOssClient(OssFile):
         key = self.get_real_path(filepath, QiniuOssClient._base_path)
         exists, _ = self.bucket_manager.stat(self.bucket, key)
         if exists is None:
-            raise KeyUndefinedException(detail="文件不存在")
+            raise Exception("文件不存在")
         async with aiohttp.ClientSession() as session:
             basic_url = '%s/%s/%s' % (PikaAppConfig.OSS_QINIU_URL,
                                       self.bucket, filepath)
             async with session.request("GET", basic_url, timeout=15, ssl=False) as resp:
                 if resp.status != 200:
-                    raise SystemException(detail="download file failed")
+                    raise Exception("download file failed")
                 return await resp.content.read()

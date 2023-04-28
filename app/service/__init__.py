@@ -12,7 +12,7 @@
 
 from fastapi import Depends
 
-from app.core.handler.exceres import AuthException, PermissionException
+from app.core.handler.exceres import AccessException
 from app.crud.rbac.user import UserDao
 from app.schema.user import OAuth2TokenSchema
 
@@ -25,11 +25,8 @@ class Permission:
         self.escarole = escarole
 
     async def __call__(self, request: OAuth2TokenSchema = Depends()):
-        try:
-            user_info = await UserDao.verify_token(request)
-            if self.identity is None or int(user_info.get('identity', 0)) >= self.identity:
-                return (user_info["emp_no"], user_info["identity"]) if self.escarole else user_info
-            else:
-                raise AuthException(detail=FORBIDDEN)
-        except PermissionException as e:
-            raise e
+        user_info = await UserDao.verify_token(request)
+        if self.identity is None or int(user_info.get('identity', 0)) >= self.identity:
+            return (user_info["emp_no"], user_info["identity"]) if self.escarole else user_info
+        else:
+            raise AccessException(detail=FORBIDDEN)

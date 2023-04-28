@@ -34,57 +34,6 @@
   "cSpell.userWords": ["antlr", "kamalyes"],
   "workbench.iconTheme": "vscode-icons",
   "terminal.integrated.defaultProfile.windows": "Command Prompt",
-  // 以下规则需在user/setting.json配置
-  "sonarlint.rules": {
-    "python:S107": {
-      "level": "off"
-    },
-    "python:S1192": {
-      "level": "off"
-    },
-    "python:S5603": {
-      "level": "off"
-    },
-    "python:S3776": {
-      "level": "off"
-    },
-    "python:S1542": {
-      "level": "off"
-    },
-    "python:S117": {
-      "level": "off"
-    },
-    "python:S1172": {
-      "level": "off"
-    },
-    "python:S116": {
-      "level": "off"
-    },
-    "python:S100": {
-      "level": "off"
-    },
-    "python:S1481": {
-      "level": "off"
-    },
-    "python:S5754": {
-      "level": "off"
-    },
-    "python:S5806": {
-      "level": "off"
-    },
-    "python:S112": {
-      "level": "off"
-    },
-    "python:S2208": {
-      "level": "off"
-    },
-    "python:S930": {
-      "level": "off"
-    },
-    "python:S5890": {
-      "level": "off"
-    }
-  },
   "cSpell.words": [
     "ACCESSLOG",
     "acess",

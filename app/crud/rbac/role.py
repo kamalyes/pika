@@ -10,11 +10,8 @@
 @Desc    :  None
 """
 from typing import Dict, Any, Text
-
 from sqlalchemy import select, delete, update, and_, or_
-
 from app.core.handler.asyncsql import AsyncDbSession
-from app.core.handler.exceres import KeyExistException, SystemException
 from app.crud import PikaMdWrapper
 from app.models import async_db_session_generator
 from app.models.role import RoleModel
@@ -53,16 +50,15 @@ class RoleDao:
                     query_ex_role_result = await session.execute(query_ex_sql)
                     ex_role_info = query_ex_role_result.scalars().first()
                     if ex_role_info:
-                        raise KeyExistException(detail='角色名已存在!')
+                        raise Exception('角色名已存在!')
                     if menus:
                         request.menus = ','.join(list(map(str, menus)))
                     update_role_info_sql = update(RoleModel) \
                         .where(RoleModel.id == id).values(**request.__dict__, operator=operator)
                     await session.execute(update_role_info_sql)
-        except ValueError as err:
-            err_msg = f"更新/写入失败,错误原因:{err}"
-            cls.__log__.error(err_msg)
-            raise SystemException(detail=err_msg)
+        except Exception as err:
+            err_detail = f"更新/写入失败,错误原因:{err}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def delete(cls, id: str):
@@ -78,5 +74,5 @@ class RoleDao:
                     del_role_sql = delete(RoleModel).where(RoleModel.id == id)
                     await session.execute(del_role_sql)
         except Exception as e:
-            cls.__log__.error(f"获取数据库配置失败, error: {e}")
-            raise SystemException(detail="获取数据库配置失败")
+            err_detail = f"获取数据库配置失败, error: {e}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

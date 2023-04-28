@@ -13,7 +13,7 @@ import re
 from typing import Any
 
 from app.core.paramters.parser import Parser
-from app.exceptions.business.CaseException import CaseParametersException
+from app.exceptions import CaseParametersError
 
 
 class RegexParser(Parser):
@@ -26,21 +26,21 @@ class RegexParser(Parser):
         try:
             source = cls.get_source(source)
             if not source or not expression:
-                raise CaseParametersException(
+                raise CaseParametersError(
                     f"parse out parameters failed, source or expression is empty")
             if idx is None:
-                raise CaseParametersException(
+                raise CaseParametersError(
                     "index is empty, you must provide index for regex match results.")
             pattern = re.compile(expression)
             result = re.findall(pattern, source)
             if len(result) == 0:
-                raise CaseParametersException(
+                raise CaseParametersError(
                     f"regex match failed, please check your regex: {expression}")
             return Parser.parse_result(result, idx)
-        except CaseParametersException as e:
+        except CaseParametersError as e:
             raise e
         except Exception as err:
-            raise CaseParametersException(
+            raise CaseParametersError(
                 f"parse regex text error, please check regex or text: {err}")
             
 class BodyRegexParser(RegexParser):

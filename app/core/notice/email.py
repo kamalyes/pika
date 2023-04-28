@@ -18,7 +18,7 @@ from custard.core import RegEx
 from custard.time import Moment
 from jinja2 import Environment, FileSystemLoader
 
-from app.core.handler.exceres import ThirdException, ValidException
+from app.core.handler.exceres import SystemException, ValidException
 from app.enums.SysCodeEnum import ExcCodeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from config import PikaAppConfig
@@ -82,16 +82,13 @@ class EmailManger(object):
         Returns:
 
         """
+        template_ = '系统检测到你的账号<span style="color:red;font-size: 26px">'
         if events_key == 0:
-            event_content = (
-                '系统检测到你的账号<span style="color:red;font-size: 26px">密码泄露</span>我们建议你尽快修改！'
-            )
+            event_content = f'{template_}密码泄露</span>我们建议你尽快修改！'
         elif events_key == 1:
-            event_content = '系统检测到你的账号<span style="color:red;font-size: 26px">正在使用爬虫伪造/Mock数据</span>已强制封禁24小时,也可以联系我们！'
+            event_content = f'{template_}正在使用爬虫伪造/Mock数据</span>已强制封禁24小时,也可以联系我们！'
         elif events_key == 2:
-            event_content = (
-                '系统检测到你的账号<span color:#f60;font-size: 26px">密码即将过期</span>我们建议你尽快修改！'
-            )
+            event_content = f'{template_}密码即将过期</span>我们建议你尽快修改！'
         else:
             raise ValidException(detail="events_key 类型不对")
         target_dict = {
@@ -254,11 +251,8 @@ class EmailManger(object):
                 email_smtp_host, PikaAppConfig.EMAIL_PORT)
             try:
                 email_data = MIMEText(content, send_type, "UTF-8")
-                email_data["Subject"] = Header(
-                    "developer" if subject == "" else subject, "UTF-8"
-                )
-                email_data["From"] = Header(
-                    "%s<%s>" % (title, email_sender), "UTF-8")
+                email_data["Subject"] = Header("developer" if subject == "" else subject, "UTF-8")
+                email_data["From"] = Header("%s<%s>" % (title, email_sender), "UTF-8")
                 email_data["To"] = Header(";".join(addressee), "UTF-8")
                 email_cursor.login(email_sender, email_password)  # 登录服务器
                 email_cursor.sendmail(
@@ -266,18 +260,13 @@ class EmailManger(object):
                 # 开启 DEBUG
                 # email_cursor.set_debuglevel(1)
             except Exception as e:
-                raise ThirdException(
-                    code=ExcCodeEnum.SEND_EMAIL_ERROR, detail=f"发送邮件失败,错误原因:{e}")
+                raise SystemException(code=ExcCodeEnum.SEND_EMAIL_ERROR, detail=f"发送邮件失败,错误原因:{e}")
             else:
                 return True
             finally:
                 try:
                     email_cursor.quit()
                 except Exception as e:
-                    raise ThirdException(
-                        code=ExcCodeEnum.EMAIL_CURSOR_ERROR,
-                        detail=f"关闭邮件游标失败,错误原因{e}",
-                    )
+                    raise SystemException(code=ExcCodeEnum.EMAIL_CURSOR_ERROR,detail=f"关闭邮件游标失败,错误原因{e}",)
         else:
-            raise ValidException(
-                code=ExcCodeEnum.FIELD_TYPE_ERROR, detail="邮箱地址格式不正确")
+            raise ValidException(code=ExcCodeEnum.FIELD_TYPE_ERROR, detail="邮箱地址格式不正确")

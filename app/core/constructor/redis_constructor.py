@@ -9,9 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-import json
 from app.core.constructor.constructor import ConstructorAbstract
-from app.core.handler.exceres import SystemException
 from app.core.handler.jsonres import PikaJsonEncoder
 from app.crud.itstem.rdconfig import PikaRedisConfigDao
 from app.models.constructor import ConstructorModel
@@ -25,7 +23,7 @@ class RedisConstructor(ConstructorAbstract, PikaJsonEncoder):
             constructor_type_ = cls.get_name(constructor)
             executor.append(
                 f"当前路径: {path}, 第{index + 1}条{constructor_type_}")
-            data = cls.safe_loads(constructor.constructor_json)
+            data = cls.safe_json_loads(constructor.constructor_json)
             redis = data.get("redis")
             command = data.get("command")
             executor.append(f"当前{constructor_type_}类型为redis, 名称: {redis}\n命令: {command}\n")
@@ -33,4 +31,4 @@ class RedisConstructor(ConstructorAbstract, PikaJsonEncoder):
             params[constructor.value] = command_result
             executor.append(f"当前{constructor_type_}返回变量: {constructor.value}\n返回值:\n {command_result}\n")
         except Exception as e:
-            raise SystemException(detail=f"{path}->{constructor.name} 第{index + 1}个{constructor_type_}执行失败: {e}")
+            raise Exception(f"{path}->{constructor.name} 第{index + 1}个{constructor_type_}执行失败: {e}")

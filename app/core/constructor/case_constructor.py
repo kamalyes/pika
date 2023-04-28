@@ -9,10 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-import json
-
 from app.core.constructor.constructor import ConstructorAbstract
-from app.core.handler.exceres import KeyUndefinedException, ValidException
 from app.core.handler.jsonres import PikaJsonEncoder
 from app.crud.itst.api.testcase import ApiTestCaseDao
 from app.models.constructor import ConstructorModel
@@ -25,19 +22,19 @@ class TestCaseConstructor(ConstructorAbstract, PikaJsonEncoder):
         try:
             constructor_name = cls.get_name(constructor)
             
-            data = cls.safe_loads(constructor.constructor_json)
+            data = cls.safe_json_loads(constructor.constructor_json)
             case_id = data.get("constructor_case_id")
             if not case_id:
-                raise ValidException(detail="未获取到前/后置条件的用例id, 请检查前置条件")
+                raise Exception("未获取到前/后置条件的用例id, 请检查前置条件")
             testcase, err = await ApiTestCaseDao.query_test_case(case_id)
             if err:
-                raise KeyUndefinedException(detail=f"用例: [{case_id}]不存在:")
+                raise Exception(f"用例: [{case_id}]不存在:")
             executor.append(content=f"当前路径: {path}, 第{index + 1}条{constructor_name}")
             # 说明是case
             executor_class = kwargs.get('executor_class')(executor.logger)
             new_param = data.get("params")
             if new_param:
-                temp = cls.safe_loads(new_param)
+                temp = cls.safe_json_loads(new_param)
                 req_params.update(temp)
             result, err = await executor_class.run(env, case_id, params, req_params, f"{path}->{testcase.name}")
             if err:

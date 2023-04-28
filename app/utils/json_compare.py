@@ -9,7 +9,6 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-import json
 from app.core.handler.jsonres import PikaJsonEncoder
 from app.utils.decorator import SingletonDecorator
 
@@ -18,9 +17,9 @@ from app.utils.decorator import SingletonDecorator
 class JsonCompare(PikaJsonEncoder):
 
     @classmethod
-    def compare(cls, exp, act):
+    def compare(cls, expected, actually):
         ans = []
-        cls._compare(exp, act, ans, '$')
+        cls._compare(expected, actually, ans, '$')
         return ans
     
     @classmethod
@@ -75,7 +74,7 @@ class JsonCompare(PikaJsonEncoder):
         except:
             try:
                 if isinstance(string, str):
-                    return cls.safe_loads(string)
+                    return cls.safe_json_loads(string)
                 return string
             except:
                 return string

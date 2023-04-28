@@ -10,13 +10,12 @@
 @Desc    :  None
 """
 from fastapi import Depends, APIRouter
-from app.core.handler.exceres import DbExecuteException, SystemException
+from app.exceptions import DbExecuteError
 
 from app.core.handler.jsonres import PikaResponse
 from app.crud.itstem.database import DbConfigDao
 from app.enums.RbacEnum import RoleEnum
 from app.models import DatabaseHelper, db_helper
-from app.schema.base import BaseOnlyPagingSchema
 from app.schema.database import DatabaseSchema
 from app.service import Permission
 
@@ -64,11 +63,8 @@ async def list_dbconfig(name: str = None, database: str = None, env: str = None,
 async def connect_test(sql_type: int, host: str, port: int, username: str, password: str,
                        database: str,
                        user_info=Depends(Permission(RoleEnum.MANAGER))):
-    try:
-        data = await db_helper.get_connection(sql_type, host, port, username, password, database)
-        if data is None:
-            raise DbExecuteException(detail="测试连接失败")
-        await DatabaseHelper.test_connection(data.get("session"))
-        return PikaResponse.success(message="连接成功")
-    except Exception as e:
-        return PikaResponse.failed(detail=str(e))
+    data = await db_helper.get_connection(sql_type, host, port, username, password, database)
+    if data is None:
+        raise DbExecuteError("测试连接失败")
+    await DatabaseHelper.test_connection(data.get("session"))
+    return PikaResponse.success(message="连接成功")

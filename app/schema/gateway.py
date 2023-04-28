@@ -11,7 +11,6 @@
 """
 from typing import Optional
 from pydantic import validator
-from app.exceptions.business.ParamsException import VariablesNullError
 from app.schema.base import BaseOnlyEnvIdSchema, BaseOnlyIdSchema, PikaBaseModel
 
 
@@ -28,5 +27,5 @@ class PikaGatewaySchema(BaseOnlyIdSchema, BaseOnlyEnvIdSchema):
     @validator('address', whole=True)
     def prefix_match(cls, v):
         if not v.startswith(("http://", "https://", "ws://", "wss://")):
-            raise VariablesNullError("前缀不为http或ws")
+            raise ValueError("前缀不为http或ws")
         return v

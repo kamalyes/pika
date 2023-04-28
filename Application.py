@@ -32,16 +32,7 @@ from starlette.responses import Response
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
-from app.core.handler.exceres import (
-    KeyExistException,
-    KeyUndefinedException,
-    ValidException,
-    AuthException,
-    AccessException,
-    DbExecuteException,
-    ThirdException,
-    RedisException,
-    SystemException)
+from app.core.handler.exceres import (AuthException, AccessException, SystemException, ValidException)
 from app.core.handler.jsonres import PikaResponse
 from app.core.notice.wss_msg import WebSocketMessage
 from app.crud.system.notification import PikaNotificationDao
@@ -172,47 +163,6 @@ class PikaFastApi:
         Returns:
 
         """
-        @app.exception_handler(KeyExistException)
-        async def key_exist_exc_handler(request: Request, exc: KeyExistException):
-            """
-            键值存在
-            Args:
-                request:
-                exc:
-
-            Returns:
-
-            """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
-                                       detail=exc.detail)
-
-        @app.exception_handler(KeyUndefinedException)
-        async def key_undefined_exc_handler(request: Request, exc: KeyUndefinedException):
-            """
-            键值未找到
-            Args:
-                request:
-                exc:
-
-            Returns:
-
-            """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
-                                       detail=exc.detail)
-
-        @app.exception_handler(ValidException)
-        async def valid_exc_handler(request: Request, exc: ValidException):
-            """
-            参数错误
-            Args:
-                request:
-                exc:
-
-            Returns:
-
-            """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
-                                       detail=exc.detail)
 
         @app.exception_handler(AuthException)
         async def auth_exc_handler(request: Request, exc: AuthException) -> Response:
@@ -225,23 +175,9 @@ class PikaFastApi:
             Returns:
 
             """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
-                                       detail=exc.detail)
+            return PikaResponse.custom(code=exc.code, status_code=exc.status_code, detail=exc.detail)
 
-        @app.exception_handler(SystemException)
-        async def sys_exc_handler(request: Request, exc: SystemException) -> Response:
-            """
-            系统异常
-            Args:
-                request:
-                exc:
-
-            Returns:
-
-            """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
-                                       detail=exc.detail)
-
+        
         @app.exception_handler(AccessException)
         async def access_exc_handler(request: Request, exc: AccessException) -> Response:
             """
@@ -253,51 +189,8 @@ class PikaFastApi:
             Returns:
 
             """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
-                                       detail=exc.detail)
-
-        @app.exception_handler(DbExecuteException)
-        async def db_execute_exc_handler(request: Request, exc: DbExecuteException) -> Response:
-            """
-            数据库操作失败
-            Args:
-                request:
-                exc:
-
-            Returns:
-
-            """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
-                                       detail=exc.detail)
-
-        @app.exception_handler(RedisException)
-        async def redis_execute_exc_handler(request: Request, exc: RedisException) -> Response:
-            """
-            Redis操作失败
-            Args:
-                request:
-                exc:
-
-            Returns:
-
-            """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
-                                       detail=exc.detail)
-
-        @app.exception_handler(ThirdException)
-        async def third_exc_handler(request: Request, exc: ThirdException) -> Response:
-            """
-            第三方异常
-            Args:
-                request:
-                exc:
-
-            Returns:
-
-            """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
-                                       detail=exc.detail)
-
+            return PikaResponse.custom(code=exc.code, status_code=exc.status_code, detail=exc.detail)
+        
         @app.exception_handler(RateLimitException)
         async def rate_limit_exc_handler(request: Request, exc: RateLimitException) -> Response:
             """
@@ -309,9 +202,34 @@ class PikaFastApi:
             Returns:
 
             """
-            return PikaResponse.custom(code=exc.code, status_code=exc.status_code,
-                                       detail=exc.detail)
+            return PikaResponse.custom(code=exc.code, status_code=exc.status_code, detail=exc.detail)
+        
+        @app.exception_handler(SystemException)
+        async def sys_exc_handler(request: Request, exc: SystemException) -> Response:
+            """
+            系统异常
+            Args:
+                request:
+                exc:
 
+            Returns:
+
+            """
+            return PikaResponse.custom(code=exc.code, status_code=exc.status_code, detail=exc.detail)
+
+        @app.exception_handler(ValidException)
+        async def valid_exc_handler(request: Request, exc: ValidException):
+            """
+            参数错误
+            Args:
+                request:
+                exc:
+
+            Returns:
+
+            """
+            return PikaResponse.custom(code=exc.code, status_code=exc.status_code, detail=exc.detail)
+        
         @app.exception_handler(Exception)
         async def all_exc_handler(request: Request, exc: Exception) -> Response:
             """
@@ -327,7 +245,7 @@ class PikaFastApi:
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content=dict(code=ExcCodeEnum.UNKNOWN_ERROR,
-                             detail="unknown error: " + exc_result),
+                             detail=exc_result),
             )
 
     # noinspection PyShadowingNames

@@ -12,11 +12,8 @@
 from collections import defaultdict
 from datetime import datetime
 from typing import Tuple
-
 from custard.time import Moment
 from sqlalchemy import select, asc, or_
-from app.core.handler.exceres import KeyExistException, KeyUndefinedException, SystemException
-
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
 from app.models.api_testcase_directory import ApiTestCaseDirectoryModel
@@ -35,8 +32,8 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                 result = await session.execute(sql)
                 return result.scalars().first()
         except Exception as e:
-            cls.__log__.error(f"获取目录详情失败: {str(e)}")
-            raise SystemException(detail=f"获取目录详情失败: {str(e)}")
+            err_detail = f"获取目录详情失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def list_directory(cls, project_id: str):
@@ -50,8 +47,8 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                 result = await session.execute(sql)
                 return result.scalars().all()
         except Exception as e:
-            cls.__log__.error(f"获取用例目录失败, error: {e}")
-            raise SystemException(detail=f"获取用例目录失败, error: {e}")
+            err_detail = f"获取用例目录失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def insert_directory(cls, form: ApiTestCaseDirectorySchema, operator: str):
@@ -66,11 +63,11 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                     )
                     result = await session.execute(sql)
                     if result.scalars().first() is not None:
-                        raise KeyExistException(detail="目录已存在")
+                        raise Exception("目录已存在")
                     session.add(ApiTestCaseDirectoryModel(form, operator))
         except Exception as e:
-            cls.__log__.error(f"创建目录失败, error: {e}")
-            raise SystemException(detail=f"创建目录失败: {e}")
+            err_detail = f"创建目录失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def update_directory(cls, form: ApiTestCaseDirectorySchema, operator: str):
@@ -92,13 +89,13 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
-                        raise KeyUndefinedException(detail="目录不存在")
+                        raise Exception("目录不存在")
                     query.name = form.name
                     query.update_user = operator
                     query.update_date = datetime.now()
         except Exception as e:
-            cls.__log__.error(f"更新目录失败, error: {e}")
-            raise SystemException(detail=f"更新目录失败: {e}")
+            err_detail = f"更新目录失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def delete_directory(cls, id: str, operator: str):
@@ -120,13 +117,13 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
-                        raise KeyUndefinedException(detail="目录不存在")
+                        raise Exception("目录不存在")
                     query.delete_date = Moment.get_now_time()
                     query.delete_flag = 1
                     query.update_emp_no = operator
         except Exception as e:
-            cls.__log__.error(f"删除目录失败, error: {e}")
-            raise SystemException(detail=f"删除目录失败: {e}")
+            err_detail = f"删除目录失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def get_directory_tree(cls, project_id: str, case_node=None, move: bool = False) -> Tuple[list, dict]:

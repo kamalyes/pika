@@ -21,10 +21,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-
-from app.core.handler.exceres import (
-    DbExecuteException,
-    ValidException)
+from app.exceptions import DbExecuteError
+from app.core.handler.exceres import (ValidException)
 from app.enums.DatabaseEnum import DatabaseTypeEnum
 from app.enums.SysCodeEnum import ExcCodeEnum
 from config import PikaAppConfig
@@ -77,10 +75,7 @@ async def async_db_session_generator() -> AsyncGenerator:
         await session.commit()
     except SQLAlchemyError as sql_exc:
         await session.rollback()
-        raise DbExecuteException(
-            code=ExcCodeEnum.SQL_OPERATION_ERROR,
-            detail=f"数据操作失败,错误原因:{sql_exc}",
-        )
+        raise DbExecuteError(f"数据操作失败,错误原因:{sql_exc}")
     finally:
         await session.close()
 

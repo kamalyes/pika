@@ -9,7 +9,6 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from app.core.handler.exceres import SystemException
 from app.middleware.async_ask import AsyncRequest
 from config import PikaAppConfig
 
@@ -54,4 +53,4 @@ class DingTalk(Notification):
         )
         response = await async_request.invoke("POST")
         if not response.get("status"):
-            raise SystemException(detail="发送钉钉通知失败")
+            raise Exception("发送钉钉通知失败")

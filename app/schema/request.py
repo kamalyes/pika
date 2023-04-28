@@ -12,11 +12,8 @@
 import json
 from fastapi import Body
 from typing import TypeVar, Optional
-
 from loguru import logger
 from pydantic import BaseModel
-
-from app.core.handler.exceres import SystemException
 from app.core.handler.jsonres import PikaJsonEncoder
 from app.enums.ByteSizeEnum import ByteSizeEnum
 
@@ -54,13 +51,13 @@ class RequestInfoSchema(BaseModel, PikaJsonEncoder):
     def from_dict(self, **kwargs):
         for k, v in kwargs:
             if not hasattr(self, k):
-                raise SystemException(detail=f"set RequestInfoSchema error, no field: {k}")
+                raise Exception(f"set RequestInfoSchema error, no field: {k}")
             setattr(self, k, v)
 
     @classmethod
     def translate_json(cls, text):
         try:
-            return json.dumps(cls.safe_loads(text), indent=4, ensure_ascii=False)
+            return json.dumps(cls.safe_json_loads(text), indent=4, ensure_ascii=False)
         except Exception as e:
             logger.bind(name=None).warning(f"解析json格式请求失败: {e}")
             return text

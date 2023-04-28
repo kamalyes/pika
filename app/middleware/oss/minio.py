@@ -2,7 +2,6 @@
 from typing import List
 from minio import Minio
 from minio.error import InvalidResponseError
-from app.core.handler.exceres import SystemException
 from awaits.awaitable import awaitable
 from app.middleware.oss.files import OssFile
 
@@ -29,7 +28,7 @@ class MinioOssClient(OssFile):
             url = self.minioClient.presigned_get_object(self.bucket_name, content)
             return url
         except InvalidResponseError as err:
-            raise SystemException(detail=f"上传文件出错: {err}")
+            raise Exception(f"上传文件出错: {err}")
  
     @awaitable
     def download_file(self, filepath: str, content: bytes, base_path: str = None):
@@ -45,7 +44,7 @@ class MinioOssClient(OssFile):
             key = self.get_real_path(filepath, base_path)
             self.minioClient.fget_object(self.bucket_name, content, key)
         except InvalidResponseError as err:
-            raise SystemException(detail=f"下载文件出错: {err}")
+            raise Exception(f"下载文件出错: {err}")
  
     @awaitable
     def remove_file(self, filepath: str, base_path: str = None):
@@ -60,7 +59,7 @@ class MinioOssClient(OssFile):
             key = self.get_real_path(filepath, base_path)
             self.minioClient.remove_object(self.bucket_name, key)
         except InvalidResponseError as err:
-            raise SystemException(detail=f"删除文件失败: {err}")
+            raise Exception(f"删除文件失败: {err}")
         
     @awaitable
     def list_file(self)-> List:
@@ -78,7 +77,7 @@ class MinioOssClient(OssFile):
                       obj.etag, obj.size, obj.content_type)
             return file_list
         except InvalidResponseError as err:
-            raise SystemException(detail=f"删除文件失败: {err}")
+            raise Exception(f"删除文件失败: {err}")
         
     @awaitable
     def get_preview_url(self, filepath, base_path):
@@ -95,7 +94,7 @@ class MinioOssClient(OssFile):
             url = self.minioClient.presigned_get_object(self.bucket_name, key)
             return url
         except InvalidResponseError as err:
-            raise SystemException(detail=f"删除文件失败: {err}")
+            raise Exception(f"删除文件失败: {err}")
  
  
 if __name__ == '__main__':

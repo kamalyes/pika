@@ -10,7 +10,7 @@
 @Desc    :  None
 """
 import json
-from aiohttp.client_exceptions import ClientProxyConnectionError, InvalidURL
+from aiohttp.client_exceptions import ClientProxyConnectionError
 from urllib.parse import urlparse
 import aiohttp
 from aiohttp import FormData
@@ -19,7 +19,6 @@ from app.core.handler.jsonres import PikaJsonEncoder
 from app.enums.RequestBodyEnum import ReqBodyTypeEnum
 from app.middleware.oss import OssClient
 from config import PikaAppConfig
-from app.core.handler.exceres import SystemException
 
 class AsyncRequest(PikaJsonEncoder):
     def __init__(self, url: str, timeout=15, **kwargs):
@@ -66,7 +65,7 @@ class AsyncRequest(PikaJsonEncoder):
         async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar(unsafe=True)) as session:
             async with session.request("GET", self.url, timeout=self.timeout, proxy=self.proxy, ssl=False, **self.kwargs) as resp:
                 if resp.status != 200:
-                    raise SystemException(detail="download file failed")
+                    raise Exception("download file failed")
                 return await resp.content.read()
     
     @classmethod
@@ -87,14 +86,14 @@ class AsyncRequest(PikaJsonEncoder):
         if request_body_type == ReqBodyTypeEnum.json:
             if content_type_array.count(True) == 1 and not content_type_array:
                 headers["Content-Type"] = "application/json; charset=UTF-8"
-            request_body = cls.safe_loads(request_body)
+            request_body = cls.safe_json_loads(request_body)
             r = AsyncRequest(url, headers=headers, timeout=timeout, json=request_body)
         elif request_body_type == ReqBodyTypeEnum.form:
             try:
                 form_data = None
                 if request_body:
                     form_data = FormData()
-                    items = cls.safe_loads(request_body)
+                    items = cls.safe_json_loads(request_body)
                     for item in items:
                         # 如果是文本类型,直接添加key-value
                         if item.get("type") == "TEXT":
@@ -105,9 +104,9 @@ class AsyncRequest(PikaJsonEncoder):
                             form_data.add_field(item.get("key"), file_object)
                 r = AsyncRequest(url, headers=headers, data=form_data, timeout=timeout)
             except Exception as e:
-                raise Exception(f"解析form-data失败: {str(e)}")
+                raise Exception(f"解析form-data失败, error: {str(e)}")
         elif request_body_type == ReqBodyTypeEnum.x_form:
-            request_body = cls.safe_loads(request_body)
+            request_body = cls.safe_json_loads(request_body)
             r = AsyncRequest(url, headers=headers, data=request_body, timeout=timeout)
         else:
             # 暂时未支持其他类型

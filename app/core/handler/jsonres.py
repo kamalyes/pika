@@ -38,7 +38,7 @@ class PikaJsonEncoder(JSONEncoder):
         return self.default(o)
     
     @classmethod
-    def safe_loads(cls, value):
+    def safe_json_loads(cls, value):
         try:
             value = json.loads(value)
         except Exception as e:

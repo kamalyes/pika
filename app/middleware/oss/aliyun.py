@@ -11,8 +11,6 @@
 """
 import oss2
 from awaits.awaitable import awaitable
-from app.core.handler.exceres import KeyUndefinedException
-
 from app.middleware.oss.files import OssFile
 
 
@@ -39,7 +37,7 @@ class AliyunOssClient(OssFile):
         key = self.get_real_path(filepath, base_path)
         filename = key.split("/")[-1]
         if not self.bucket.object_exists(filepath):
-            raise KeyUndefinedException(detail=f"oss文件: {filepath}不存在")
+            raise Exception(f"oss文件: {filepath}不存在")
         path = rf'./{self.get_random_filename(filename)}'
         self.bucket.get_object_to_file(filepath, path)
         return path, filename
@@ -48,6 +46,6 @@ class AliyunOssClient(OssFile):
     def get_file_object(self, filepath):
         key = self.get_real_path(filepath)
         if not self.bucket.object_exists(key):
-            raise KeyUndefinedException(detail=f"oss文件: {key}不存在")
+            raise Exception(f"oss文件: {key}不存在")
         file_object = self.bucket.get_object(key)
         return file_object.resp.response.content

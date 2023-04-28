@@ -9,9 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-from fastapi import status, HTTPException
-from app.enums.SysCodeEnum import ExcCodeEnum
-
+from fastapi import status
 
 class ValidException(Exception):
     def __init__(
@@ -23,10 +21,6 @@ class ValidException(Exception):
         self.code = code
         self.detail = detail
         self.status_code = status_code
-
-
-class PermissionException(HTTPException):
-    pass
 
 
 class AuthException(Exception):
@@ -52,72 +46,11 @@ class AccessException(Exception):
         self.detail = detail
         self.status_code = status_code
 
-
-class ThirdException(Exception):
-    def __init__(
-            self,
-            code: int = 500,
-            detail: str = "Third Service Exception",
-            status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
-    ):
-        self.code = code
-        self.detail = detail
-        self.status_code = status_code
-
-
-class DbExecuteException(Exception):
-    def __init__(
-            self,
-            code: int = 500,
-            detail: str = "Database operation failed",
-            status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
-    ):
-        self.code = code
-        self.detail = detail
-        self.status_code = status_code
-
-
-class RedisException(Exception):
-    def __init__(
-            self,
-            code: int = ExcCodeEnum.REDIS_OPERATION_ERROR,
-            detail: str = "Redis operation failed",
-            status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
-    ):
-        self.code = code
-        self.detail = detail
-        self.status_code = status_code
-
-
 class SystemException(Exception):
     def __init__(
             self,
             code: int = 500,
             detail: str = "Operation System Exception",
-            status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
-    ):
-        self.code = code
-        self.detail = detail
-        self.status_code = status_code
-
-
-class KeyExistException(Exception):
-    def __init__(
-            self,
-            detail: str = "The primary Key already exists",
-            code: int = ExcCodeEnum.IS_EXISTS_ERROR,
-            status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
-    ):
-        self.code = code
-        self.detail = detail
-        self.status_code = status_code
-
-
-class KeyUndefinedException(Exception):
-    def __init__(
-            self,
-            detail: str = "The primary keyword does not exist",
-            code: int = ExcCodeEnum.IS_NOT_EXISTS_ERROR,
             status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
     ):
         self.code = code

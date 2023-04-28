@@ -10,9 +10,7 @@
 @Desc    :  全局变量解析器,包括JSON/YAML/STRING
 """
 import json
-
 import yaml
-from app.core.handler.exceres import SystemException
 from app.core.handler.jsonres import PikaJsonEncoder
 
 from app.core.handler.logger import PikaLogger
@@ -30,7 +28,7 @@ class GConfigParser(PikaJsonEncoder):
                 if isinstance(result, str):
                     # 说明需要反序列化
                     try:
-                        result = cls.safe_loads(result)
+                        result = cls.safe_json_loads(result)
                     except Exception as e:
                         raise Exception(f"反序列化失败, result: {result}\nERROR: {e}")
                 if isinstance(branch, int):
@@ -90,7 +88,7 @@ class StringGConfigParser(GConfigParser):
 class JSONGConfigParser(GConfigParser):
     @classmethod
     def get_data(cls, value):
-        return cls.safe_loads(value)
+        return cls.safe_json_loads(value)
 
     @classmethod
     def parse(cls, value, jsonpath):

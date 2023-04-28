@@ -12,9 +12,7 @@
 
 from typing import Optional
 from pydantic import BaseModel, validator
-
 from app.enums.RequestBodyEnum import ReqBodyTypeEnum
-from app.exceptions.business.ParamsException import VariablesNullError
 from app.schema.base import PikaBaseModel
 
 

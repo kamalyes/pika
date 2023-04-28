@@ -36,9 +36,9 @@ class AsyncDbSession:
 
         """
         if pending_begin_number < min_begin_number != 0:
-            raise ValidException(detail=f"最低需传{min_begin_number}条数据")
+            raise Exception(f"最低需传{min_begin_number}条数据")
         if pending_begin_number > max_begin_number:
-            raise ValidException(detail=f"批量任务最大仅支持{max_begin_number}条")
+            raise Exception(f"批量任务最大仅支持{max_begin_number}条")
 
     @staticmethod
     async def delete(ids: List, do_sql: Any, message: str = None):

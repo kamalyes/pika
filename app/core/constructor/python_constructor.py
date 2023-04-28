@@ -24,7 +24,7 @@ class PythonConstructor(ConstructorAbstract, PikaJsonEncoder):
         try:
             constructor_type_ = cls.get_name(constructor)
             executor.append(f"当前路径: {path}, 第{index + 1}条{constructor_type_}")
-            script = cls.safe_loads(constructor.constructor_json)
+            script = cls.safe_json_loads(constructor.constructor_json)
             command = script['command']
             executor.append(f"当前{constructor_type_}类型为python脚本\n{command}")
             loc = dict()
@@ -38,5 +38,4 @@ class PythonConstructor(ConstructorAbstract, PikaJsonEncoder):
             params[constructor.value] = py_data
             executor.append(f"当前{constructor_type_}返回变量: {constructor.value}\n返回值:\n {py_data}\n")
         except Exception as e:
-            raise Exception(
-                f"{path}->{constructor.name} 第{index + 1}个{constructor_type_}执行失败: {e}")
+            raise Exception(f"{path}->{constructor.name} 第{index + 1}个{constructor_type_}执行失败: {e}")

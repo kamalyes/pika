@@ -9,13 +9,11 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-import json
 from datetime import datetime, timedelta
 from typing import List, Dict, Union
 from sqlalchemy import desc, func, and_, asc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from app.core.handler.exceres import KeyExistException, KeyUndefinedException, SystemException
 from app.core.handler.jsonres import PikaJsonEncoder
 from app.crud import PikaWrapper, PikaMdWrapper, db_connect
 from app.crud.itst.api.constructor import ConstructorDao
@@ -71,8 +69,8 @@ class ApiTestCaseDao(PikaWrapper):
                 result, total = await cls.pagination(paging.page_index, paging.page_size, session, sql, False)
                 return result, total
         except Exception as e:
-            cls.__log__.error(f"获取测试用例失败: {str(e)}")
-            raise SystemException(detail=f"获取测试用例失败: {str(e)}")
+            err_detail = f"获取测试用例失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def get_test_case_by_directory_id(cls, directory_id: str):
@@ -92,8 +90,8 @@ class ApiTestCaseDao(PikaWrapper):
                     case_map[item.id] = item.name
                 return ans, case_map
         except Exception as e:
-            cls.__log__.error(f"获取测试用例失败: {str(e)}")
-            raise SystemException(detail=f"获取测试用例失败: {str(e)}")
+            err_detail = f"获取测试用例失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def get_case_children(cls, case_id: str):
@@ -139,7 +137,7 @@ class ApiTestCaseDao(PikaWrapper):
             )
         )
         if query.scalars().first() is not None:
-            raise KeyExistException(detail="用例名称已存在")
+            raise Exception("用例名称已存在")
         cs = ApiTestCaseModel(**data.case.dict(), operator=operator)
         # 添加case,之后添加其他数据
         session.add(cs)
@@ -178,15 +176,15 @@ class ApiTestCaseDao(PikaWrapper):
                     )
                     data = query.scalars().first()
                     if data is None:
-                        raise KeyUndefinedException(detail="用例不存在")
+                        raise Exception("用例不存在")
                     cls.update_model(data, test_case, operator)
                     await session.flush()
                     # 释放你的sql数据
                     session.expunge(data)
                     return data
         except Exception as e:
-            cls.__log__.error(f"编辑用例失败: {str(e)}")
-            raise SystemException(detail=f"编辑用例失败: {str(e)}")
+            err_detail = f"编辑用例失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def query_test_case_info(cls, case_id: str) -> dict:
@@ -223,11 +221,11 @@ class ApiTestCaseDao(PikaWrapper):
                     out_parameters=parameters,
                 )
         except Exception as e:
-            ApiTestCaseDao.__log__.error(f"查询用例失败: {str(e)}")
-            raise SystemException(detail=f"查询用例失败: {str(e)}")
+            err_detail = f"查询用例失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
-    @staticmethod
-    async def query_test_case_by_constructors(constructors: List[ConstructorModel]):
+    @classmethod
+    async def query_test_case_by_constructors(cls, constructors: List[ConstructorModel]):
         """
 
         Args:
@@ -238,7 +236,7 @@ class ApiTestCaseDao(PikaWrapper):
         """
         try:
             # 找到所有用例名称为
-            constructors = [PikaJsonEncoder.safe_loads(x.constructor_json).get("case_id") for x in constructors if x.type == 0]
+            constructors = [PikaJsonEncoder.safe_json_loads(x.constructor_json).get("case_id") for x in constructors if x.type == 0]
             async with async_session() as session:
                 sql = select(ApiTestCaseModel).where(ApiTestCaseModel.id.in_(
                     constructors), ApiTestCaseModel.delete_flag == 0)
@@ -246,8 +244,8 @@ class ApiTestCaseDao(PikaWrapper):
                 data = result.scalars().all()
                 return {x.id: x for x in data}
         except Exception as e:
-            ApiTestCaseDao.__log__.error(f"查询用例失败: {str(e)}")
-            raise SystemException(detail=f"查询用例失败: {str(e)}")
+            err_detail = f"查询用例失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @staticmethod
     async def query_test_case_out_parameters(session, case_list: List[ApiTestCaseVariablesSchema], case_set=None, var_list=None):
@@ -285,12 +283,12 @@ class ApiTestCaseDao(PikaWrapper):
                 var_list.append(dict(stepName=s.name, name="${%s}" % s.value))
                 continue
             if s.type == ConstructorTypeEnum.testcase:
-                data = PikaJsonEncoder.safe_loads(s.constructor_json)
+                data = PikaJsonEncoder.safe_json_loads(s.constructor_json)
                 case_id = data.get("constructor_case_id")
                 if not case_id:
                     continue
                 if case_id in case_set:
-                    raise SystemException(detail="场景存在循环依赖")
+                    raise Exception("场景存在循环依赖")
                 step_case.append(ApiTestCaseVariablesSchema(
                     case_id=case_id, step_name=s.name))
         return step_case
@@ -314,8 +312,8 @@ class ApiTestCaseDao(PikaWrapper):
                     return None, "用例不存在"
                 return data, None
         except Exception as e:
-            cls.__log__.error(f"查询用例失败: {str(e)}")
-            return None, f"查询用例失败: {str(e)}"
+            cls.__log__.error(f"查询用例失败, error: {str(e)}")
+            return None, f"查询用例失败, error: {str(e)}"
 
     @classmethod
     async def list_testcase_tree(cls, projects: List[ProjectModel]) -> Union[List, dict]:
@@ -360,8 +358,8 @@ class ApiTestCaseDao(PikaWrapper):
                     )
                 return result
         except Exception as e:
-            cls.__log__.error(f"获取用例列表失败: {str(e)}")
-            raise SystemException(detail="获取用例列表失败")
+            err_detail = f"获取用例列表失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def select_constructor(cls, case_id: str) -> List[ConstructorModel]:
@@ -382,7 +380,8 @@ class ApiTestCaseDao(PikaWrapper):
                 data = await session.execute(sql)
                 return data.scalars().all()
         except Exception as e:
-            cls.__log__.error(f"查询构造数据失败: {str(e)}")
+            err_detail = f"查询构造数据失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def async_select_constructor(cls, case_id: str) -> List[ConstructorModel]:
@@ -404,7 +403,8 @@ class ApiTestCaseDao(PikaWrapper):
                 data = await session.execute(sql)
                 return data.scalars().all()
         except Exception as e:
-            cls.__log__.error(f"查询构造数据失败: {str(e)}")
+            err_detail = f"查询构造数据失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def collect_data(cls, case_id: str, data: List):
@@ -448,7 +448,7 @@ class ApiTestCaseDao(PikaWrapper):
             if c.type == ConstructorTypeEnum.testcase:
                 # 说明是用例,继续递归
                 temp["label"] = "[CASE]: " + temp["label"]
-                json_data = PikaJsonEncoder.safe_loads(c.constructor_json)
+                json_data = PikaJsonEncoder.safe_json_loads(c.constructor_json)
                 await cls.collect_data(json_data.get("case_id"), temp.get("children"))
             elif c.type == ConstructorTypeEnum.sql:
                 temp["label"] = "[SQL]: " + temp["label"]

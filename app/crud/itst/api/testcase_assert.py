@@ -12,8 +12,6 @@
 from typing import List
 
 from sqlalchemy import asc, select
-from app.core.handler.exceres import KeyExistException, KeyUndefinedException, SystemException
-
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
 from app.models.api_testcase_asserts import ApiTestCaseAssertsModel
@@ -41,8 +39,8 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                     asc(ApiTestCaseAssertsModel.name))
                 return query.scalars().all()
         except Exception as e:
-            cls.__log__.error(f"获取用例断言失败: {str(e)}")
-            raise SystemException(detail="获取用例断言失败")
+            err_detail = f"获取用例断言失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def async_list_test_case_asserts(cls, case_id: str):
@@ -55,11 +53,11 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                 case_list = await session.execute(sql)
                 return case_list.scalars().all()
         except Exception as e:
-            cls.__log__.error(f"获取用例断言失败: {str(e)}")
-            raise SystemException(detail=f"获取用例断言失败: {str(e)}")
+            err_detail = f"获取用例断言失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
-    @staticmethod
-    async def insert_test_case_asserts(form: TestCaseAssertsSchema, operator: str):
+    @classmethod
+    async def insert_test_case_asserts(cls, form: TestCaseAssertsSchema, operator: str):
         try:
             ans = None
             async with async_session() as session:
@@ -71,7 +69,7 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                     result = await session.execute(sql)
                     data = result.scalars().first()
                     if data is not None:
-                        raise KeyExistException(detail="断言信息已存在, 请检查")
+                        raise Exception("断言信息已存在, 请检查")
                     new_assert = ApiTestCaseAssertsModel(
                         **form.dict(), operator=operator)
                     session.add(new_assert)
@@ -82,8 +80,8 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                     return new_assert
             return ans
         except Exception as e:
-            ApiTestCaseAssertsDao.__log__.error(f"新增用例断言失败, error: {e}")
-            raise SystemException(detail=f"新增用例断言失败, {e}")
+            err_detail = f"新增用例断言失败, error: {e}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def update_test_case_asserts(cls, form: TestCaseAssertsSchema,
@@ -106,14 +104,14 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                     result = await session.execute(sql)
                     data = result.scalars().first()
                     if data is None:
-                        raise KeyUndefinedException(detail="断言信息不存在, 请检查")
+                        raise Exception("断言信息不存在, 请检查")
                     cls.update_model(data, form, operator)
                     await session.flush()
                     session.expunge(data)
                     return data
         except Exception as e:
-            cls.__log__.error(f"编辑用例断言失败, error: {e}")
-            raise SystemException(detail=f"编辑用例断言失败, {e}")
+            err_detail = f"编辑用例断言失败, error: {e}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def delete_test_case_asserts(cls, id: str, operator: str) -> None:
@@ -125,8 +123,8 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                     result = await session.execute(sql)
                     data = result.scalars().first()
                     if data is None:
-                        raise KeyUndefinedException(detail="断言信息不存在, 请检查")
+                        raise Exception("断言信息不存在, 请检查")
                     cls.delete_model(data, operator)
         except Exception as e:
-            cls.__log__.error(f"删除用例断言失败, error: {e}")
-            raise SystemException(detail=f"删除用例断言失败, {e}")
+            err_detail = f"删除用例断言失败, error: {e}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

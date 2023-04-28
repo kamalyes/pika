@@ -11,8 +11,6 @@
 """
 from fastapi import Depends, APIRouter
 from starlette.background import BackgroundTasks
-from app.core.handler.exceres import KeyExistException
-
 from app.core.handler.jsonres import PikaResponse
 from app.crud.itstem.rdconfig import PikaRedisConfigDao
 from app.enums.RbacEnum import RoleEnum
@@ -31,7 +29,7 @@ async def insert_redis_config(form: RedisConfigSchema,
     try:
         query = await PikaRedisConfigDao.query_record(name=form.name, env=form.env)
         if query is not None:
-            raise KeyExistException(detail="数据已存在, 请勿重复添加")
+            raise Exception("数据已存在, 请勿重复添加")
         model = RedisModel(**form.dict(), operator=user_info['emp_no'])
         result = await PikaRedisConfigDao.insert(model=model, log=True)
         return PikaResponse.success(data=result)

@@ -11,8 +11,6 @@
 """
 
 from sqlalchemy import select, and_
-
-from app.core.handler.exceres import KeyExistException, KeyUndefinedException, SystemException
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.rbac.organization import OrganizationDao
 from app.middleware.xredis import RedisHelper
@@ -36,8 +34,8 @@ class DepartmentDao(PikaWrapper):
                     config = DepartmentModel(**form.dict(), operator=operator)
                     session.add(config)
         except Exception as e:
-            cls.__log__.error(f"新增部门: {form.name}失败, {e}")
-            raise SystemException(detail=f"新增部门: {form.name}失败")
+            err_detail= f"新增部门: {form.name}失败, {e}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def match_dept_id(cls, session, dept_id):
@@ -54,7 +52,7 @@ class DepartmentDao(PikaWrapper):
             select(DepartmentModel).where(DepartmentModel.id == dept_id))
         exists_id = query_exists_parent_id.scalars().first()
         if exists_id is None and dept_id is not None:
-            raise KeyUndefinedException(detail=f"部门id: {dept_id}不存在")
+            raise Exception(f"部门id: {dept_id}不存在")
 
     @classmethod
     async def match_dept_parent_id(cls, session, parent_id):
@@ -72,7 +70,7 @@ class DepartmentDao(PikaWrapper):
                 and_(DepartmentModel.id == parent_id)))
         exists_parent_id = query_exists_parent_id.scalars().first()
         if exists_parent_id is None and parent_id is not None:
-            raise KeyUndefinedException(detail=f"部门父id: {parent_id}不存在")
+            raise Exception(f"部门父id: {parent_id}不存在")
 
     @classmethod
     async def match_dept_name(cls, session, name):
@@ -86,12 +84,12 @@ class DepartmentDao(PikaWrapper):
 
         """
         if name is None or len(name) < 3:
-            raise SystemException(detail="部门名称不能为空,或长度不能<3个字符")
+            raise Exception("部门名称不能为空,或长度不能<3个字符")
         query_exists_name = await session.execute(
             select(DepartmentModel).where(DepartmentModel.name == name))
         exists_name = query_exists_name.scalars().first()
         if exists_name is not None:
-            raise KeyExistException(detail=f"部门名称: {name}已存在")
+            raise Exception(f"部门名称: {name}已存在")
 
     @classmethod
     async def match_dept_id_equal_parent_id(cls, dept_id, parent_id):
@@ -105,7 +103,7 @@ class DepartmentDao(PikaWrapper):
 
         """
         if dept_id == parent_id and dept_id is not None:
-            raise SystemException(detail=f"部门id: {dept_id}与父节点{parent_id}相同")
+            raise Exception(f"部门id: {dept_id}与父节点{parent_id}相同")
 
     @classmethod
     async def parity_field(cls, session, name, organization_id, dept_id, parent_id):

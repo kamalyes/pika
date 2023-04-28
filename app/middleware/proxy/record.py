@@ -10,7 +10,6 @@
 @Desc    :  流量录制->生成case功能
 """
 import asyncio
-import json
 import re
 from app.core.handler.jsonres import PikaJsonEncoder
 
@@ -36,7 +35,7 @@ class PikaRecorder(object):
         record = await RedisHelper.get_address_record(addr)
         if not record:
             return
-        data = PikaJsonEncoder.safe_loads(record)
+        data = PikaJsonEncoder.safe_json_loads(record)
         pattern = re.compile(data.get("regex"))
         if re.findall(pattern, flow.request.url):
             # 说明已开启录制开关,记录状态

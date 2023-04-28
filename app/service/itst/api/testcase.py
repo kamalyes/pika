@@ -3,7 +3,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, Request
 
-from app.core.handler.exceres import AuthException, ValidException
+from app.core.handler.exceres import AccessException, ValidException
 from app.core.handler.jsonres import PikaJsonEncoder, PikaResponse
 from app.core.request import get_convertor
 from app.core.request.generator import CaseGenerator
@@ -229,94 +229,63 @@ async def get_directory_and_case(project_id: str, user_info=Depends(Permission()
     Returns:
 
     """
-    try:
-        directory_tree_map = {"project_id": project_id,
+    directory_tree_map = {"project_id": project_id,
                               "case_node": ApiTestCaseDao.get_test_case_by_directory_id}
-        tree_data, cs_map = await ApiTestCaseDirectoryDao.get_directory_tree(**directory_tree_map)
-        return PikaResponse.success(data=dict(tree=tree_data, case_map=cs_map))
-    except Exception as e:
-        return PikaResponse.failed(detail=str(e))
+    tree_data, cs_map = await ApiTestCaseDirectoryDao.get_directory_tree(**directory_tree_map)
+    return PikaResponse.success(data=dict(tree=tree_data, case_map=cs_map))
 
 
 @router.get("/directory/query", summary="查询测试用例类目")
 async def query_testcase_directory(directory_id: str, escarole=Depends(Permission(escarole=True))):
     operator, operator_identity = escarole
-    try:
-        data = await ApiTestCaseDirectoryDao.query_directory(directory_id)
-        await ProjectRoleDao.read_permission(data.project_id, operator, operator_identity)
-        return PikaResponse.success(data=data)
-    except AuthException:
-        return PikaResponse.forbidden()
-    except Exception as e:
-        return PikaResponse.failed(detail=str(e))
+    data = await ApiTestCaseDirectoryDao.query_directory(directory_id)
+    await ProjectRoleDao.read_permission(data.project_id, operator, operator_identity)
+    return PikaResponse.success(data=data)
 
 
 @router.post("/directory/insert", summary="增加测试用例类目")
 async def insert_testcase_directory(form: ApiTestCaseDirectorySchema, user_info=Depends(Permission())):
-    try:
-        await ApiTestCaseDirectoryDao.insert_directory(form, user_info["emp_no"])
-        return PikaResponse.success()
-    except Exception as e:
-        return PikaResponse.failed(detail=str(e))
+    await ApiTestCaseDirectoryDao.insert_directory(form, user_info["emp_no"])
+    return PikaResponse.success()
 
 
 @router.post("/directory/update", summary="更新测试用例类目")
 async def update_testcase_directory(form: ApiTestCaseDirectorySchema, user_info=Depends(Permission())):
-    try:
-        await ApiTestCaseDirectoryDao.update_directory(form, user_info["emp_no"])
-        return PikaResponse.success()
-    except Exception as e:
-        return PikaResponse.failed(detail=str(e))
+    await ApiTestCaseDirectoryDao.update_directory(form, user_info["emp_no"])
+    return PikaResponse.success()
 
 
 @router.delete("/directory/delete", summary="删除测试用例类目")
 async def insert_testcase_directory(id: str, user_info=Depends(Permission())):
-    try:
-        await ApiTestCaseDirectoryDao.delete_directory(id, user_info["emp_no"])
-        return PikaResponse.success()
-    except Exception as e:
-        return PikaResponse.failed(detail=str(e))
+    await ApiTestCaseDirectoryDao.delete_directory(id, user_info["emp_no"])
+    return PikaResponse.success()
 
 
 @router.post("/data/insert", summary="增加测试用例数据")
 async def insert_testcase_data(form: ApiTestCaseDataSchema, user_info=Depends(Permission())):
-    try:
-        data = await ApiTestCaseDataDao.insert_testcase_data(form, user_info["emp_no"])
-        return PikaResponse.success(data=data)
-    except Exception as e:
-        return PikaResponse.failed(detail=str(e))
+    data = await ApiTestCaseDataDao.insert_testcase_data(form, user_info["emp_no"])
+    return PikaResponse.success(data=data)
 
 
 @router.post("/data/update", summary="更新测试用例数据")
 async def update_testcase_data(form: ApiTestCaseDataSchema, user_info=Depends(Permission())):
-    try:
-        data = await ApiTestCaseDataDao.update_testcase_data(form, user_info["emp_no"])
-        return PikaResponse.success(data=data)
-    except Exception as e:
-        return PikaResponse.failed(detail=str(e))
+    data = await ApiTestCaseDataDao.update_testcase_data(form, user_info["emp_no"])
+    return PikaResponse.success(data=data)
 
 
 @router.get("/data/delete", summary="删除测试用例数据")
 async def delete_testcase_data(id: str, user_info=Depends(Permission())):
-    try:
-        await ApiTestCaseDataDao.delete_testcase_data(id, user_info["emp_no"])
-        return PikaResponse.success()
-    except Exception as e:
-        return PikaResponse.failed(detail=str(e))
+    await ApiTestCaseDataDao.delete_testcase_data(id, user_info["emp_no"])
+    return PikaResponse.success()
 
 
 @router.post("/move", summary="移动case到其他目录")
 async def move_testcase(form: MoveApiTestCaseSchema, escarole=Depends(Permission(escarole=True))):
-    try:
-        # 判断是否有移动case的权限
-        operator, operator_identity = escarole
-        await ProjectRoleDao.read_permission(form.project_id, operator, operator_identity)
-        await ApiTestCaseDao.update_by_map(operator, ApiTestCaseModel.id.in_(form.id_list), directory_id=form.directory_id)
-        return PikaResponse.success()
-    except AuthException:
-        return PikaResponse.forbidden()
-    except Exception as e:
-        return PikaResponse.failed(detail=str(e))
+    # 判断是否有移动case的权限
+    operator, operator_identity = escarole
+    await ProjectRoleDao.read_permission(form.project_id, operator, operator_identity)
+    await ApiTestCaseDao.update_by_map(operator, ApiTestCaseModel.id.in_(form.id_list), directory_id=form.directory_id)
+    return PikaResponse.success()
 
 
 @router.post("/parameters/insert", summary="新增出参数据")
@@ -368,7 +337,7 @@ async def list_record_data(request: Request, user_info=Depends(Permission())):
     status = False
     regex = ""
     if record is not None:
-        record_data = PikaJsonEncoder.safe_loads(record)
+        record_data = PikaJsonEncoder.safe_json_loads(record)
         regex = record_data.get("regex", "")
         status = True
     data = await RedisHelper.list_record_data(request.client.host)

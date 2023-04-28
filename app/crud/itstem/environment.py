@@ -67,7 +67,6 @@ class EnvironmentDao(PikaWrapper):
                 sql = sql.offset((page - 1) * size).limit(size)
                 data = await session.execute(sql)
                 return data.scalars().all(), total
-        except Exception as e:
-            err = f"获取环境数据失败,失败原因: {str(e)}"
-            cls.__log__.error(err)
-            raise Exception(err)
+        except Exception as err:
+            err_detail = f"获取环境数据失败, {err}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

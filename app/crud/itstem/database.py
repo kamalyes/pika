@@ -15,8 +15,6 @@ from datetime import datetime
 from custard.json import JsonEncoder
 from sqlalchemy import select, MetaData, text, and_
 from sqlalchemy.exc import ResourceClosedError
-from app.core.handler.exceres import KeyExistException, KeyUndefinedException, SystemException
-
 from app.core.handler.jsonres import PikaResponse
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.itstem.environment import EnvironmentDao
@@ -52,9 +50,9 @@ class DbConfigDao(PikaWrapper):
                     query.append(DatabaseModel.env == env)
                 result = await session.execute(select(DatabaseModel).where(*query))
                 return result.scalars().all()
-        except Exception as e:
-            cls.__log__.error(f"获取数据库配置失败, error: {e}")
-            raise SystemException(detail="获取数据库配置失败")
+        except Exception as err:
+            err_detail = f"获取数据库配置失败, error: {str(err)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def insert_database(cls, data: DatabaseSchema, operator: str):
@@ -63,17 +61,19 @@ class DbConfigDao(PikaWrapper):
                 async with session.begin():
                     result = await session.execute(
                         select(DatabaseModel).where(
-                            DatabaseModel.name == data.name, DatabaseModel.delete_flag == 0, DatabaseModel.env == data.env
+                            DatabaseModel.name == data.name,
+                            DatabaseModel.delete_flag == 0,
+                            DatabaseModel.env == data.env
                         )
                     )
                     query = result.scalars().first()
                     if query is not None:
-                        raise KeyExistException(detail="数据库配置已存在")
+                        raise Exception("数据库配置已存在")
                     session.add(DatabaseModel(
                         **data.dict(), operator=operator))
-        except Exception as e:
-            cls.__log__.error(f"新增数据库配置: {data.name}失败, {e}")
-            raise SystemException(detail="新增数据库配置失败")
+        except Exception as err:
+            err_detail = f"新增数据库配置, error: {str(err)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def update_database(cls, data: DatabaseSchema, operator: str):
@@ -83,13 +83,13 @@ class DbConfigDao(PikaWrapper):
                     result = await session.execute(select(DatabaseModel).where(data.id == DatabaseModel.id))
                     query = result.scalars().first()
                     if query is None:
-                        raise KeyUndefinedException(detail="数据库配置不存在")
+                        raise Exception("数据库配置不存在")
                     db_helper.remove_connection(
                         query.host, query.port, query.username, query.password, query.database)
                     cls.update_model(query, data, operator)
-        except Exception as e:
-            cls.__log__.error(f"编辑数据库配置: {data.name}失败, {e}")
-            raise SystemException(detail="编辑数据库配置失败")
+        except Exception as err:
+            err_detail = f"编辑数据库配置: {data.name}失败, {err}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def delete_database(cls, id: str, operator: str):
@@ -102,13 +102,13 @@ class DbConfigDao(PikaWrapper):
                     )
                     query = result.scalars().first()
                     if query is None:
-                        raise KeyUndefinedException(detail="数据库配置不存在或已删除")
+                        raise Exception("数据库配置不存在或已删除")
                     query.delete_date = datetime.now()
                     query.delete_flag = 1
                     query.update_emp_no = operator
-        except Exception as e:
-            cls.__log__.error(f"删除数据库配置: {id}失败, {e}")
-            raise SystemException(detail="删除数据库配置失败")
+        except Exception as err:
+            err_detail = f"删除数据库配置: {id}失败, {err}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def query_database(cls, id: str):
@@ -119,9 +119,9 @@ class DbConfigDao(PikaWrapper):
                                                 id, DatabaseModel.delete_flag == 0)
                 )
                 return result.scalars().first()
-        except Exception as e:
-            cls.__log__.error(f"获取数据库配置失败, error: {e}")
-            raise SystemException(detail="获取数据库配置失败")
+        except Exception as err:
+            err_detail = f"删除数据库配置: {id}失败, {err}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def query_database_by_env_and_name(cls, env: str, name: str):
@@ -133,9 +133,9 @@ class DbConfigDao(PikaWrapper):
                     )
                 )
                 return result.scalars().first()
-        except Exception as e:
-            cls.__log__.error(f"获取数据库配置失败, error: {e}")
-            raise SystemException(detail="获取数据库配置失败")
+        except Exception as err:
+            err_detail = f"获取数据库配置失败, {err}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     @RedisHelper.cache("database:cache", expired_time=ValidTimeEnum.QUERY_DATABASE_TREE_TIME.value)
@@ -176,8 +176,8 @@ class DbConfigDao(PikaWrapper):
                     )
                 return result
         except Exception as err:
-            cls.__log__.error(f"获取数据库配置详情失败, error: {err}")
-            raise SystemException(detail=f"获取数据库配置详情失败: {err}")
+            err_detail = f"获取数据库配置详情失败, {err}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @staticmethod
     @RedisHelper.cache("database:table:cache", expired_time=ValidTimeEnum.GET_TABLES_TIME.value)
@@ -225,14 +225,14 @@ class DbConfigDao(PikaWrapper):
         try:
             query = await DbConfigDao.query_database(id)
             if query is None:
-                raise KeyUndefinedException(detail="未找到对应的数据库配置")
+                raise Exception("未找到对应的数据库配置")
             data = await db_helper.get_connection(
                 query.sql_type, query.host, query.port, query.username, query.password, query.database
             )
             return await DbConfigDao.execute(data, sql)
-        except Exception as e:
-            cls.__log__.error(f"查询数据库配置失败, error: {e}")
-            raise SystemException(detail=f"执行SQL失败: {e}")
+        except Exception as err:
+            err_detail = f"执行SQL失败, {err}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def execute(cls, conn, sql):
@@ -250,25 +250,25 @@ class DbConfigDao(PikaWrapper):
                 except ResourceClosedError:
                     # 说明是update或其他语句
                     return [{"rowCount": row_count}]
-                except Exception as e:
-                    cls.__log__.error(f"查询数据库配置失败, error: {e}")
-                    raise SystemException(detail=f"执行sql失败: {e}")
+                except Exception as err:
+                    err_detail = f"执行SQL失败, {err}"
+                    cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def execute_sql(cls, env: str, name: str, sql: str):
         try:
             query = await DbConfigDao.query_database_by_env_and_name(env, name)
             if query is None:
-                raise KeyUndefinedException(detail="未找到对应的数据库配置")
+                raise Exception("未找到对应的数据库配置")
             data = await db_helper.get_connection(
                 query.sql_type, query.host, query.port, query.username, query.password, query.database
             )
             result, _ = await DbConfigDao.execute(data, sql)
             _, result = PikaResponse.parse_sql_result(result)
             return json.dumps(result, cls=JsonEncoder, ensure_ascii=False)
-        except Exception as e:
-            cls.__log__.error(f"查询数据库配置失败, error: {e}")
-            raise SystemException(detail=f"执行SQL失败: {e}")
+        except Exception as err:
+            err_detail = f"执行SQL失败, {err}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
 
 @PikaMdWrapper(SQLHistoryModel)

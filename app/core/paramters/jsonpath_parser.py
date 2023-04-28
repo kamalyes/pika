@@ -17,7 +17,7 @@ import jsonpath
 from app.core.handler.jsonres import PikaJsonEncoder
 
 from app.core.paramters.parser import Parser
-from app.exceptions.business.CaseException import CaseParametersException
+from app.exceptions import CaseParametersError
 
 
 class JSONPathParser(Parser, PikaJsonEncoder):
@@ -29,7 +29,7 @@ class JSONPathParser(Parser, PikaJsonEncoder):
     def parse(cls, source: dict, expression: str = "", **kwargs) -> Any:
         source = cls.get_source(source)
         if not source or not expression:
-            raise CaseParametersException(
+            raise CaseParametersError(
                 f"parse out parameters failed, source or expression is empty")
         try:
             data = JSONPathParser.get_object(source)
@@ -38,19 +38,19 @@ class JSONPathParser(Parser, PikaJsonEncoder):
                 if not data and expression == "$..*":
                     # 说明想要全匹配并且没数据,直接返回data
                     return json.dumps(data, ensure_ascii=False)
-                raise CaseParametersException(
+                raise CaseParametersError(
                     "jsonpath match failed, please check your response or jsonpath.")
             return Parser.parse_result(results, "0")
-        except CaseParametersException as e:
+        except CaseParametersError as e:
             raise e
         except Exception as err:
-            raise CaseParametersException(
+            raise CaseParametersError(
                 f"parse json data error, please check jsonpath or json: {err}")
 
     @classmethod
     @lru_cache()
     def get_object(cls, json_str):
-        return cls.safe_loads(json_str)
+        return cls.safe_json_loads(json_str)
 
 class BodyJSONPathParser(JSONPathParser):
     @classmethod

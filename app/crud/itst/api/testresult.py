@@ -38,8 +38,8 @@ class ApiTestResultDao(PikaWrapper):
                     await session.flush()
                     return request
         except Exception as e:
-            cls.__log__.error(f"新增测试结果失败, error: {e}")
-            raise SystemException(detail="新增测试结果失败")
+            err_detail = f"新增测试结果失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
         
     @classmethod
     async def list(cls, report_id: str) -> List[ApiTestResultModel]:
@@ -58,5 +58,5 @@ class ApiTestResultDao(PikaWrapper):
                     ans.append(res)
                 return ans
         except Exception as e:
-            cls.__log__.error(f"获取测试用例执行记录失败, error: {e}")
-            raise SystemException(detail="获取测试用例执行记录失败")
+            err_detail = f"获取测试用例执行记录失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

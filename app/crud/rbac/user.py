@@ -19,8 +19,8 @@ from custard.time import Moment
 from sqlalchemy import or_, select, func, and_, update, delete, distinct
 
 from app.core.handler.asyncsql import AsyncDbSession
-from app.core.handler.exceres import AuthException, \
-    SystemException, ThirdException, RedisException,  ValidException
+from app.core.handler.exceres import AuthException, SystemException, ValidException
+from app.exceptions import RedisError
 from app.core.handler.jsonres import PikaResponse
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.rbac import regex_register_str, client_ip
@@ -129,14 +129,11 @@ class UserDao(PikaWrapper):
     async def account_status_verify(**kwargs):
         # 状态
         if kwargs["delete_flag"]:
-            raise AuthException(
-                code=ExcCodeEnum.ACCOUNT_HAS_DELETE, detail="账号已被删除！")
+            raise SystemException(code=ExcCodeEnum.ACCOUNT_HAS_DELETE, detail="账号已被删除！")
         if kwargs["enabled_flag"] is False:
-            raise AuthException(
-                code=ExcCodeEnum.ACCOUNT_HAS_DIS_ENABLED, detail="账号已被禁用！")
+            raise SystemException(code=ExcCodeEnum.ACCOUNT_HAS_DIS_ENABLED, detail="账号已被禁用！")
         if kwargs["is_activate"] == 0:
-            raise AuthException(
-                code=ExcCodeEnum.ACCOUNT_HAS_NOT_ACTIVATE, detail="账号未激活！")
+            raise SystemException(code=ExcCodeEnum.ACCOUNT_HAS_NOT_ACTIVATE, detail="账号未激活！")
         try:
             compare_time = Moment.compare_time(kwargs["pwd_valid_date"],
                                                Moment.get_now_time(PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS))
@@ -144,7 +141,7 @@ class UserDao(PikaWrapper):
             raise SystemException(
                 code=ExcCodeEnum.FIELD_TYPE_ERROR, detail=f"密码有效期对比失败！具体错误原因:{e}")
         if compare_time is False:
-            raise AuthException(
+            raise SystemException(
                 code=ExcCodeEnum.PASSWORD_HAS_EXPIRED, detail="密码已过期,请修改后进行登录！")
 
     @staticmethod
@@ -155,15 +152,14 @@ class UserDao(PikaWrapper):
                     select(SysUserAdminModel.err_pwd_count).where(SysUserAdminModel.uid == kwargs["uid"]))
                 err_pwd_count = err_pwd_counts.scalars().first()
                 if err_pwd_count >= ValidTimeEnum.ERR_PWD_COUNT.value:
-                    raise AuthException(code=ExcCodeEnum.PASSWORD_ERROR_COUNT_OUT,
+                    raise SystemException(code=ExcCodeEnum.PASSWORD_ERROR_COUNT_OUT,
                                         detail="错误密码次数超出限制,请联系管理员或稍后重试！")
                 else:
                     sql = update(SysUserAdminModel).where(SysUserAdminModel.uid == kwargs["uid"]).values(
                         {"err_pwd_count": int(err_pwd_count + 1)})
                     await session.execute(sql)
                     await session.commit()
-                    raise AuthException(
-                        code=ExcCodeEnum.PASSWORD_ERROR, detail="登录密码错误！")
+                    raise SystemException(code=ExcCodeEnum.PASSWORD_ERROR, detail="登录密码错误！")
 
     @classmethod
     async def generate_uuid_jwt(cls, **kwargs):
@@ -182,8 +178,8 @@ class UserDao(PikaWrapper):
                                                     seconds=kwargs["valid_time"])
             return f'{jwt_encode_result}.{uuid4_}'.replace("4", str(random.randint(5, 9)))
         except Exception as uuid_jwt_err:
-            raise ThirdException(code=ExcCodeEnum.JWT_ENCODE_ERROR,
-                                 detail=f"加密失败,具体原因{uuid_jwt_err}")
+            raise SystemException(code=ExcCodeEnum.JWT_ENCODE_ERROR,
+                                  detail=f"加密失败,具体原因{uuid_jwt_err}")
 
     @classmethod
     async def uuid_jwt_sync_redis(cls, **kwargs):
@@ -195,8 +191,8 @@ class UserDao(PikaWrapper):
         """
         try:
             await async_redis.set(kwargs["key"], kwargs["value"], int((kwargs["ex"])))
-        except Exception as redis_err:
-            raise RedisException(detail=str(redis_err))
+        except Exception as err:
+            raise RedisError(str(err))
 
     @classmethod
     async def delete_redis_token(cls, **kwargs):
@@ -208,8 +204,8 @@ class UserDao(PikaWrapper):
         """
         try:
             await async_redis.delete(kwargs["key"])
-        except Exception as redis_err:
-            raise RedisException(detail=str(redis_err))
+        except Exception as err:
+            raise RedisError(str(err))
 
     @classmethod
     async def update_last_login_field(cls, **kwargs):
@@ -262,7 +258,7 @@ class UserDao(PikaWrapper):
                 result = {key: val for key, val in user_infos.items()
                           if key not in dislodge}
             else:
-                raise AuthException(detail="用户信息不存在！")
+                raise Exception("用户信息不存在！")
         return result
 
     @classmethod
@@ -315,8 +311,7 @@ class UserDao(PikaWrapper):
                             value=uuid_jwt,
                             ex=valid_time)
                 else:
-                    raise AuthException(code=ExcCodeEnum.ACCOUNT_NOT_EXISTS,
-                                        detail="该用户名不存在,请使用正常的账户登录！")
+                    raise Exception("该用户名不存在,请使用正常的账户登录！")
         await cls.update_last_login_field(uid=user.id, last_login_ip=user_ip)
         user_infos = await cls.query_user_info(uid=user.id)
         return PikaResponse.success(
@@ -372,8 +367,7 @@ class UserDao(PikaWrapper):
                             value=uuid_jwt,
                             ex=valid_time)
                 else:
-                    raise AuthException(code=ExcCodeEnum.EMAIL_NOT_REGISTER,
-                                        detail="该邮箱暂未被注册,请使用正常的账户登录！")
+                    raise SystemException(code=ExcCodeEnum.EMAIL_NOT_REGISTER, detail="该邮箱暂未被注册,请使用正常的账户登录！")
         await cls.update_last_login_field(uid=user.id, last_login_ip=user_ip)
         async with async_db_session_generator as session:
             async with session.begin():
@@ -520,8 +514,8 @@ class UserDao(PikaWrapper):
             await async_redis.set(key_name, str(user_ip),
                                   ValidTimeEnum.DYNAMIC_CODE_VALID_TIME.value)
             return PikaResponse.success(data=dynamic_code)
-        except Exception as redis_err:
-            raise RedisException(detail=str(redis_err))
+        except Exception as err:
+            raise RedisError(str(err))
 
     @staticmethod
     async def has_dynamic_code(dynamic_code):
@@ -590,7 +584,7 @@ class UserDao(PikaWrapper):
                     sel_res = await session.execute(sel_sql)
                     exists_users = sel_res.scalars().first()
                     if not exists_users:
-                        raise AuthException(detail="该邮箱暂未注册使用！")
+                        raise SystemException(detail="该邮箱暂未注册使用！")
             await Email.rand_mail_code(emp_no=exists_users.emp_no, username=exists_users.username,
                                        addressee=exists_users.email, model=2)
         elif request.model == 3:
@@ -626,8 +620,7 @@ class UserDao(PikaWrapper):
                 if user_admin:
                     await cls.update_pwd(new_password=new_password, emp_no=emp_no)
                 else:
-                    raise AuthException(
-                        code=ExcCodeEnum.PASSWORD_ERROR, detail="请检查旧密码是否正确")
+                    raise SystemException(code=ExcCodeEnum.PASSWORD_ERROR, detail="请检查旧密码是否正确")
 
     @staticmethod
     async def add_security(**kwargs):
@@ -737,8 +730,8 @@ class UserDao(PikaWrapper):
                 query_result = query_sql_execute.all()
                 return query_result
         except Exception as e:
-            cls.__log__.error(f"获取用户列表失败: {str(e)}")
-            raise SystemException(detail="获取用户列表失败")
+            err_detail = f"获取用户列表失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     @RedisHelper.cache("user_detail", ValidTimeEnum.USER_DETAIL_TIME.value)
@@ -762,5 +755,5 @@ class UserDao(PikaWrapper):
                 return [{"email": quser.email, "phone": quser.phone} for quser in
                         query_user.scalars().all()]
         except Exception as e:
-            cls.__log__.error(f"获取用户联系方式失败: {str(e)}")
-            raise SystemException(detail=f"获取用户联系方式失败: {e}")
+            err_detail = f"获取用户联系方式失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

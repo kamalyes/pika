@@ -20,13 +20,13 @@ from app.enums.CaseStatusEnum import CaseStatus
 from app.enums.ConstructorEnum import ConstructorTypeEnum
 from app.enums.RequestBodyEnum import ReqBodyTypeEnum
 from app.enums.ProtocolEnum import ProtocolTypeEnum
-from app.exceptions.convert.GenerateException import GenerateException
+from app.exceptions import GenerateError
 from app.schema.api_testcase import TestCaseSchema
 from app.schema.constructor import IndexConstructorSchema
 from app.schema.request import RequestInfoSchema
 
 
-class CaseGenerator(object):
+class CaseGenerator(PikaJsonEncoder):
     # 忽略的字段
     ignored = (
         "Content-Type",
@@ -224,8 +224,8 @@ class CaseGenerator(object):
                     else:
                         ans[request_body].append(path)
 
-    @staticmethod
-    def analysis_body(request: RequestInfoSchema, ans: dict, var_name: str = None):
+    @classmethod
+    def analysis_body(cls, request: RequestInfoSchema, ans: dict, var_name: str = None):
         """
         解析request_body
         Args:
@@ -238,13 +238,13 @@ class CaseGenerator(object):
         """
         if request.request_body:
             try:
-                request_body = PikaJsonEncoder.safe_loads(request.response_content)
+                request_body = cls.safe_json_loads(request.response_content)
                 CaseGenerator.dfs(request_body, var_name, ans)
             except JSONDecodeError:
                 # 可能request_body不是JSON,跳过
                 pass
             except Exception as e:
-                raise GenerateException(detail=f"解析接口request_body变量出错: {e}")
+                raise GenerateError(f"解析接口request_body变量出错: {e}")
 
     @staticmethod
     def analysis_headers(request: RequestInfoSchema, ans: dict, var_name: str = None):
@@ -261,7 +261,7 @@ class CaseGenerator(object):
         try:
             CaseGenerator.dfs(request.response_headers, var_name, ans, True)
         except Exception as e:
-            raise GenerateException(detail=f"解析接口headers变量出错: {e}")
+            raise GenerateError(f"解析接口headers变量出错: {e}")
 
     @staticmethod
     def replace_headers(request: RequestInfoSchema, ans: dict, replaced: list):
@@ -280,8 +280,8 @@ class CaseGenerator(object):
                 request.request_headers[k] = "${%s}" % ans.get(v)[0]
                 replaced.append("%s => ${%s}" % (k, ans.get(v)[0]))
 
-    @staticmethod
-    def replace_body(request: RequestInfoSchema, ans: dict, replaced: list):
+    @classmethod
+    def replace_body(cls, request: RequestInfoSchema, ans: dict, replaced: list):
         """
         替换request_body
         Args:
@@ -294,7 +294,7 @@ class CaseGenerator(object):
         """
         if request.request_body:
             try:
-                data = PikaJsonEncoder.safe_loads(request.request_body)
+                data = cls.safe_json_loads(request.request_body)
                 var_type = list()
                 CaseGenerator.dfs_replace(data, ans, var_type, replaced)
                 result = json.dumps(data, ensure_ascii=False)
@@ -306,8 +306,8 @@ class CaseGenerator(object):
             except Exception as e:
                 logger.error(f"转换body变量失败: {e}")
 
-    @staticmethod
-    def dfs_replace(request_body, ans: dict, var_type: list, replaced: list):
+    @classmethod
+    def dfs_replace(cls, request_body, ans: dict, var_type: list, replaced: list):
         """
 
         Args:
@@ -347,8 +347,8 @@ class CaseGenerator(object):
                 return True, ans.get(body_str)[0]
             return None, None
 
-    @staticmethod
-    def replace_url(request: RequestInfoSchema, ans: dict, replaced: list):
+    @classmethod
+    def replace_url(cls, request: RequestInfoSchema, ans: dict, replaced: list):
         """
         拆解url,将url里面的路由path和query参数
         Args:

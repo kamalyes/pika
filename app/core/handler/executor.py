@@ -11,20 +11,17 @@
 """
 import asyncio
 import json
-from urllib.parse import urlencode, urljoin
 import re
 import time
 from collections import defaultdict
 from datetime import datetime
 from typing import List, Any, Tuple, Union
 from app.core.handler.jsonres import PikaJsonEncoder
-from app.models import async_session
 from app.core.constructor.case_constructor import TestCaseConstructor
 from app.core.constructor.http_constructor import HttpConstructor
 from app.core.constructor.python_constructor import PythonConstructor
 from app.core.constructor.redis_constructor import RedisConstructor
 from app.core.constructor.sql_constructor import SqlConstructor
-from app.core.handler.exceres import KeyUndefinedException, ValidException, SystemException
 from app.core.handler.logger import PikaLogger
 from app.core.notice.dingtalk import DingTalk
 from app.core.notice.email import EmailManger
@@ -131,7 +128,7 @@ class Executor(object):
             return JSONGConfigParser.parse
         if key_type == GConfigParserEnum.yaml:
             return YamlGConfigParser.parse
-        raise ValidException(detail=f"全局变量类型: {key_type}不合法, 请检查!")
+        raise Exception(f"全局变量类型: {key_type}不合法, 请检查!")
 
     # noinspection PyMethodMayBeStatic
     def get_el_expression(self, string: str):
@@ -177,7 +174,7 @@ class Executor(object):
             self.append("获取{}字段: [{}]中的el表达式".format(name, field), True)
         except Exception as e:
             Executor.log.error(f"查询全局变量失败, error: {str(e)}")
-            raise SystemException(detail=f"查询全局变量失败, error: {str(e)}")
+            raise Exception(f"查询全局变量失败, error: {str(e)}")
 
     def replace_params(self, field_name, field_origin, params: dict):
         """
@@ -203,7 +200,7 @@ class Executor(object):
                 if isinstance(result, str):
                     # 说明需要反序列化
                     try:
-                        result = PikaJsonEncoder.safe_loads(result)
+                        result = PikaJsonEncoder.safe_json_loads(result)
                     except Exception as e:
                         self.append(f"反序列化失败, result: {result}\nERROR: {e}")
                         break
@@ -213,9 +210,9 @@ class Executor(object):
                 else:
                     result = result.get(branch)
                 if result is None:
-                    raise Exception(detail=f"变量路径: {v}不存在, 请检查JSON或路径!")
+                    raise Exception(f"变量路径: {v}不存在, 请检查JSON或路径!")
             if field_name == "request_headers":
-                new_value = PikaJsonEncoder.safe_loads(result)
+                new_value = PikaJsonEncoder.safe_json_loads(result)
             elif not isinstance(result, str):
                 new_value = json.dumps(result, ensure_ascii=False)
             else:
@@ -248,7 +245,7 @@ class Executor(object):
                         "替换流程变量成功,字段: [{}]: \n\n[{}] -> [{}]\n".format(c.name, k, v))
         except Exception as e:
             Executor.log.error(f"替换变量失败, error: {str(e)}")
-            raise SystemException(detail=f"替换变量失败, error: {str(e)}")
+            raise Exception(f"替换变量失败, error: {str(e)}")
 
     @case_log
     async def get_constructor(self, case_id):
@@ -438,7 +435,7 @@ class Executor(object):
 
             # Step8: 批量改写主方法参数
             await self.parse_params(case_info, case_params)
-            headers = PikaJsonEncoder.safe_loads(case_info.request_headers)
+            headers = PikaJsonEncoder.safe_json_loads(case_info.request_headers)
 
             # Step9: 替换请求参数
             request_body = await self.replace_body(request_param, case_info.request_body, case_info.request_body_type)
@@ -481,16 +478,16 @@ class Executor(object):
                 response_info["case_log"] = self.logger.join()
             return response_info, None
         except Exception as e:
-            msg = f"执行用例失败: {str(e)}"
-            Executor.log.exception(f"{msg} \n")
-            self.append(msg)
+            detail = f"执行用例失败, error: {str(e)}"
+            Executor.log.exception(f"{detail} \n")
+            self.append(detail)
             if self._main:
                 response_info["case_log"] = self.logger.join()
-            return response_info, f"执行用例失败: {str(e)}"
+            return response_info, f"执行用例失败, error: {str(e)}"
 
     @staticmethod
     def get_dict(json_data: str):
-        return PikaJsonEncoder.safe_loads(json_data)
+        return PikaJsonEncoder.safe_json_loads(json_data)
 
     def replace_cls(self, params: dict, cls, *fields: Any):
         for k, v in params.items():
@@ -692,7 +689,7 @@ class Executor(object):
             return request_body
         try:
             if request_body:
-                data = PikaJsonEncoder.safe_loads(request_body)
+                data = PikaJsonEncoder.safe_json_loads(request_body)
                 if req_params:
                     for k, v in req_params.items():
                         if data.get(k) is not None:
@@ -702,89 +699,100 @@ class Executor(object):
         except Exception as e:
             self.append(f"替换请求request_body失败, {e}")
         return request_body
+    
+    @case_log
+    def tidy_ops_res(self, expected, actually, condition, flag ):
+        symbol = '【✅】' if flag else '【❌】'
+        detail = f"预期结果: {expected} {condition} 实际结果: {actually}{symbol}"
+        return flag, detail
 
     @case_log
-    def ops(self, assert_type: str, exp, act) -> Union[bool, str]:
+    def ops(self, assert_type: str, expected, actually) -> Union[bool, str, tuple]:
         """
         通过断言类型进行校验
         Args:
             assert_type:
-            exp:
-            act:
+            expected:
+            actually:
 
         Returns:
 
         """
         if assert_type == "equal":
-            if exp == act:
-                return True, f"预期结果: {exp} 等于 实际结果: {act}【✔】"
-            return False, f"预期结果: {exp} 不等于 实际结果: {act}【❌】"
+            if expected == actually:
+                return self.tidy_ops_res(expected, actually, '等于', True)
+            return self.tidy_ops_res(expected, actually, '不等于', False)
         if assert_type == "not_equal":
-            if exp != act:
-                return True, f"预期结果: {exp} 不等于 实际结果: {act}【✔】"
-            return False, f"预期结果: {exp} 等于 实际结果: {act}【❌】"
+            # ne: 表示不等于!=, 即not equals
+            if expected != actually:
+                return self.tidy_ops_res(expected, actually, '不等于', True)
+            return self.tidy_ops_res(expected, actually, '等于', False)
         if assert_type == "in":
-            if exp in act:
-                return True, f"预期结果: {exp} 包含于 实际结果: {act}【✔】"
-            return False, f"预期结果: {exp} 不包含于 实际结果: {act}【❌】"
+            if expected in actually:
+                return self.tidy_ops_res(expected, actually, '包含于', True)
+            return self.tidy_ops_res(expected, actually, '不包含于', False)
         if assert_type == "not_in":
-            if exp not in act:
-                return True, f"预期结果: {exp} 不包含于 实际结果: {act}【✔】"
-            return False, f"预期结果: {exp} 包含于 实际结果: {act}【❌】"
+            if expected not in actually:
+                return self.tidy_ops_res(expected, actually, '不包含于', True)
+            return self.tidy_ops_res(expected, actually, '包含于', False)
         if assert_type == "contain":
-            if act in exp:
-                return True, f"预期结果: {exp} 包含 实际结果: {act}【✔】"
-            return False, f"预期结果: {exp} 不包含 实际结果: {act}【❌】"
+            if actually in expected:
+                return self.tidy_ops_res(expected, actually, '包含', True)
+            return self.tidy_ops_res(expected, actually, '不包含', False)
         if assert_type == "not_contain":
-            if act not in exp:
-                return True, f"预期结果: {exp} 不包含 实际结果: {act}【✔】"
-            return False, f"预期结果: {exp} 包含 实际结果: {act}【❌】"
+            if actually not in expected:
+                return self.tidy_ops_res(expected, actually, '不包含', True)
+            return self.tidy_ops_res(expected, actually, '包含', False)
         if assert_type == "length_eq":
-            if exp == len(act):
-                return True, f"预期数量: {exp} 等于 实际数量: {len(act)}【✔】"
-            return False, f"预期数量: {exp} 不等于 实际数量: {len(act)}【❌】"
+            # eq: 表示等于,即equals
+            if expected == len(actually):
+                return self.tidy_ops_res(expected, actually, '等于', True)
+            return self.tidy_ops_res(expected, actually, '不等于', False)
         if assert_type == "length_gt":
-            if exp > len(act):
-                return True, f"预期数量: {exp} 大于 实际数量: {len(act)}【✔】"
-            return False, f"预期数量: {exp} 不大于 实际数量: {len(act)}【❌】"
+            # gt: 表示大于>,即greater than
+            if expected > len(actually):
+                return self.tidy_ops_res(expected, actually, '大于', True)
+            return self.tidy_ops_res(expected, actually, '不大于', False)
         if assert_type == "length_ge":
-            if exp >= len(act):
-                return True, f"预期数量: {exp} 大于等于 实际数量: {len(act)}【✔】"
-            return False, f"预期数量: {exp} 小于 实际数量: {len(act)}【❌】"
+            #  ge: 表示大于等于>=, 即greater than or equals to
+            if expected >= len(actually):
+                return self.tidy_ops_res(expected, actually, '大于等于', True)
+            return self.tidy_ops_res(expected, actually, '小于', False)
         if assert_type == "length_le":
-            if exp <= len(act):
-                return True, f"预期数量: {exp} 小于等于 实际数量: {len(act)}【✔】"
-            return False, f"预期数量: {exp} 大于 实际数量: {len(act)}【❌】"
+            # le: 表示小于等于<=, 即less than or equals to
+            if expected <= len(actually):
+                return self.tidy_ops_res(expected, actually, '小于等于', True)
+            return self.tidy_ops_res(expected, actually, '大于', False)
         if assert_type == "length_lt":
-            if exp < len(act):
-                return True, f"预期数量: {exp} 小于 实际数量: {len(act)}【✔】"
-            return False, f"预期数量: {exp} 不小于 实际数量: {len(act)}【❌】"
+            # lt: 表示小于<, 即less than
+            if expected < len(actually):
+                return self.tidy_ops_res(expected, actually, '小于', True)
+            return self.tidy_ops_res(expected, actually, '不小于', False)
         if assert_type == "json_equal":
-            data = JsonCompare().compare(exp, act)
+            data = JsonCompare().compare(expected, actually)
             if len(data) == 0:
-                return True, "预期JSON 等于 实际JSON【✔】"
+                return self.tidy_ops_res(expected, actually, '等于', True)
             return False, data
         if assert_type == "text_in":
-            if isinstance(act, str):
+            if isinstance(actually, str):
                 # 如果b是string,则不转换
-                if exp in act:
-                    return True, f"预期结果: {exp} 文本包含于 实际结果: {act}【✔】"
-                return False, f"预期结果: {exp} 文本不包含于 实际结果: {act}【❌】"
-            temp = json.dumps(act, ensure_ascii=False)
-            if exp in temp:
-                return True, f"预期结果: {exp} 文本包含于 实际结果: {act}【✔】"
-            return False, f"预期结果: {exp} 文本不包含于 实际结果: {act}【❌】"
+                if expected in actually:
+                    return self.tidy_ops_res(expected, actually, '文本包含于', True)
+                return self.tidy_ops_res(expected, actually, '文本不包含于', False)
+            temp = json.dumps(actually, ensure_ascii=False)
+            if expected in temp:
+                return self.tidy_ops_res(expected, actually, '文本包含于', True)
+            return self.tidy_ops_res(expected, actually, '文本不包含于', False)
         if assert_type == "text_not_in":
-            if isinstance(act, str):
-                if exp in act:
-                    return True, f"预期结果: {exp} 文本包含于 实际结果: {act}【❌】"
-                return False, f"预期结果: {exp} 文本不包含于 实际结果: {act}【✔】"
-            temp = json.dumps(act, ensure_ascii=False)
-            if exp in temp:
-                return True, f"预期结果: {exp} 文本包含于 实际结果: {act}【❌】"
-            return False, f"预期结果: {exp} 文本不包含于 实际结果: {act}【✔】"
+            if isinstance(actually, str):
+                if expected not in actually:
+                    return self.tidy_ops_res(expected, actually, '文本不包含于', True)
+                return self.tidy_ops_res(expected, actually, '文本包含于', False)
+            temp = json.dumps(actually, ensure_ascii=False)
+            if expected not in temp:
+                return self.tidy_ops_res(expected, actually, '文本不包含于', True)
+            return self.tidy_ops_res(expected, actually, '文本不包含于', False)
         return False, "不支持的断言方式💔"
-
     @case_log
     def translate(self, data):
         """
@@ -795,7 +803,7 @@ class Executor(object):
         Returns:
 
         """
-        return PikaJsonEncoder.safe_loads(data)
+        return PikaJsonEncoder.safe_json_loads(data)
 
     # noinspection PyMethodMayBeStatic
     def replace_branch(self, branch: str, params: dict):
@@ -824,10 +832,10 @@ class Executor(object):
         Returns:
 
         """
-        exp = self.get_el_expression(string)
-        if len(exp) == 0:
+        expected = self.get_el_expression(string)
+        if len(expected) == 0:
             return string
-        data = exp[0]
+        data = expected[0]
         el_list = data.split(".")
         # ${response.data.id}
         result = response_info
@@ -837,7 +845,7 @@ class Executor(object):
                 if isinstance(result, str):
                     # 说明需要反序列化
                     try:
-                        result = PikaJsonEncoder.safe_loads(result)
+                        result = PikaJsonEncoder.safe_json_loads(result)
                     except Exception as e:
                         self.append(f"反序列化失败, result: {result}\nERROR: {e}")
                         break
@@ -848,7 +856,7 @@ class Executor(object):
                 else:
                     result = result.get(branch)
         except Exception as e:
-            raise Exception(f"获取变量失败: {str(e)}")
+            raise Exception(f"获取变量失败, error: {str(e)}")
         if string == "${response}":
             return result
         return json.dumps(result, ensure_ascii=False)
@@ -937,8 +945,7 @@ class Executor(object):
             if executor is not None:
                 await ws_manage.notify(executor, title="测试计划执行完毕", content=f"请前往测试报告页面查看细节")
         except Exception as e:
-            Executor.log.exception(detail=f"执行测试计划: 【{plan.name}】失败: {str(e)}")
-            Executor.log.error(f"执行测试计划: 【{plan.name}】失败: {str(e)}")
+            Executor.log.exception(detail=f"执行测试计划: 【{plan.name}】失败, error: {str(e)}")
 
     @staticmethod
     async def run_multiple(

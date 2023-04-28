@@ -9,26 +9,25 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
-import json
 from typing import Any
 
 import jsonpath
 from app.core.handler.jsonres import PikaJsonEncoder
 
 from app.core.paramters.parser import Parser
-from app.exceptions.business.CaseException import CaseParametersException
+from app.exceptions import CaseParametersError
 
 
 class HeaderParser(Parser, PikaJsonEncoder):
 
     @classmethod
     def get_source(cls, data: dict):
-        return cls.safe_loads(data.get("response_headers"))
+        return cls.safe_json_loads(data.get("response_headers"))
 
     @classmethod
     def parse(cls, source: dict, expression: str = None, idx: str = None) -> Any:
         if not source or not expression:
-            raise CaseParametersException(
+            raise CaseParametersError(
                 f"parse out parameters failed, source or expression is empty")
         try:
             source = cls.get_source(source)
@@ -37,22 +36,22 @@ class HeaderParser(Parser, PikaJsonEncoder):
                 if not source and expression == "$..*":
                     # 说明想要全匹配并且没数据,直接返回data
                     return source
-                raise CaseParametersException(
+                raise CaseParametersError(
                     "jsonpath match failed, please check your response or jsonpath.")
             return Parser.parse_result(results, idx)
-        except CaseParametersException as e:
+        except CaseParametersError as e:
             raise e
         except Exception as err:
-            raise CaseParametersException(
+            raise CaseParametersError(
                 f"parse json data error, please check jsonpath or json: {err}")
 
 
 class CookieParser(HeaderParser):
     @classmethod
     def get_source(cls, data: dict):
-        return cls.safe_loads(data.get("cookies"))
+        return cls.safe_json_loads(data.get("cookies"))
 
 class RequestHeaderParser(HeaderParser):
     @classmethod
     def get_source(cls, data: dict):
-        return cls.safe_loads(data.get("request_headers"))
+        return cls.safe_json_loads(data.get("request_headers"))

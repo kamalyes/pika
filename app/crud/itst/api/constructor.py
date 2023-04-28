@@ -11,10 +11,7 @@
 """
 from collections import defaultdict
 from typing import List
-
 from sqlalchemy import select, update
-from app.core.handler.exceres import KeyExistException, KeyUndefinedException, SystemException
-
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.models import async_session
 from app.models.api_test_case import ApiTestCaseModel
@@ -44,8 +41,8 @@ class ConstructorDao(PikaWrapper):
                 result = await session.execute(sql)
                 return result.scalars().all()
         except Exception as e:
-            cls.__log__.error(f"获取初始化数据失败, {e}")
-            raise SystemException(detail=f"获取初始化数据失败, {e}")
+            err_detail = f"获取初始化数据失败, {e}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def insert_constructor(cls, data: ConstructorSchema, operator: str) -> None:
@@ -59,14 +56,14 @@ class ConstructorDao(PikaWrapper):
                     )
                     result = await session.execute(sql)
                     if result.scalars().first() is not None:
-                        raise KeyExistException(detail=f"{data.name}已存在")
+                        raise Exception(f"{data.name}已存在")
                     constructor = ConstructorModel(
                         **data.dict(), operator=operator)
                     constructor.index = await constructor.get_index(session, data.case_id)
                     session.add(constructor)
         except Exception as e:
             cls.__log__.error(f"新增前/后置条件: {data.name}失败, {e}")
-            raise SystemException(detail=f"新增前/后置条件失败, {e}")
+            raise Exception(f"新增前/后置条件失败, {e}")
 
     @classmethod
     async def update_constructor(cls, data: ConstructorSchema, operator: str) -> None:
@@ -87,11 +84,12 @@ class ConstructorDao(PikaWrapper):
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
-                        raise KeyUndefinedException(detail=f"{data.name}不存在")
+                        raise Exception(f"{data.name}不存在")
                     cls.update_model(query, data, operator)
         except Exception as e:
-            cls.__log__.error(f"编辑前后置条件: {data.name}失败, {e}")
-            raise SystemException(detail=f"编辑前后置条件失败, {e}")
+            err_detail = f"编辑前后置条件: {data.name}失败, {e}"
+            cls.__log__.error(err_detail)
+            raise Exception(err_detail)
 
     @classmethod
     async def delete_constructor(cls, id: str, operator: str) -> None:
@@ -112,11 +110,11 @@ class ConstructorDao(PikaWrapper):
                     result = await session.execute(sql)
                     query = result.scalars().first()
                     if query is None:
-                        raise KeyUndefinedException(detail=f"前后置条件{id}不存在")
+                        raise Exception(f"前后置条件{id}不存在")
                     cls.delete_model(query, operator)
         except Exception as e:
             cls.__log__.error(f"删除前后置条件: {id}失败, {e}")
-            raise SystemException(detail=f"删除前后置条件失败, {e}")
+            raise Exception(f"删除前后置条件失败, {e}")
 
     @classmethod
     async def update_constructor_index(cls, data: List[ConstructorIndexSchema]) -> None:
@@ -138,7 +136,7 @@ class ConstructorDao(PikaWrapper):
                         )
         except Exception as e:
             cls.__log__.error(f"更新前后置条件顺序失败, {e}")
-            raise SystemException(detail="更新前后置条件顺序失败")
+            raise Exception("更新前后置条件顺序失败")
 
     @classmethod
     async def get_constructor_tree(cls, name: str, suffix: bool) -> List[dict]:
@@ -176,7 +174,7 @@ class ConstructorDao(PikaWrapper):
                 return result
         except Exception as e:
             cls.__log__.error(f"获取前后置条件树失败, {e}")
-            raise SystemException(detail="获取前后置条件失败")
+            raise Exception("获取前后置条件失败")
 
     @staticmethod
     async def get_constructor_data(id_: int) -> ConstructorModel:
@@ -195,7 +193,7 @@ class ConstructorDao(PikaWrapper):
             )
             data = query.scalars().first()
             if data is None:
-                raise KeyUndefinedException(detail="前后置条件不存在")
+                raise Exception("前后置条件不存在")
             return data
 
     @staticmethod

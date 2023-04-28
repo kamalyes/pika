@@ -12,10 +12,7 @@
 from custard.time import Moment
 from datetime import datetime
 from typing import List
-
 from sqlalchemy import select, update
-from app.core.handler.exceres import SystemException
-
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.middleware.xredis import RedisHelper
 from app.models import async_session
@@ -86,5 +83,5 @@ class ApiTestCaseOutParametersDao(PikaWrapper):
                         )
             return result
         except Exception as e:
-            cls.__log__.error(f"批量更新出参数据失败: {e}")
-            raise SystemException(detail=f"批量更新出参数据失败: {e}")
+            err_detail = f"批量更新出参数据失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
