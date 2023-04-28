@@ -74,8 +74,8 @@ class CaseGenerator(PikaJsonEncoder):
             return ReqBodyTypeEnum.form
         return ReqBodyTypeEnum.none
 
-    @staticmethod
-    def generate_constructors(requests: List[RequestInfoSchema]) -> List[IndexConstructorSchema]:
+    @classmethod
+    def generate_constructors(cls, requests: List[RequestInfoSchema]) -> List[IndexConstructorSchema]:
         """
         生成构建器
         Args:
@@ -87,7 +87,7 @@ class CaseGenerator(PikaJsonEncoder):
         constructors = []
         for r in range(len(requests) - 1):
             name = f"http请求_{r + 1}"
-            constructor_json = json.dumps(
+            constructor_json = cls.safe_json_dumps(
                 dict(
                     request_body=requests[r].request_body,
                     headers=requests[r].request_headers,
@@ -111,8 +111,8 @@ class CaseGenerator(PikaJsonEncoder):
             constructors.append(c)
         return constructors
 
-    @staticmethod
-    def generate_case(directory_id: str, name: str, last: RequestInfoSchema, protocol: int) -> TestCaseSchema:
+    @classmethod
+    def generate_case(cls, directory_id: str, name: str, last: RequestInfoSchema, protocol: int) -> TestCaseSchema:
         """
         生成用例
         Args:
@@ -132,7 +132,7 @@ class CaseGenerator(PikaJsonEncoder):
             request_body=last.request_body,
             request_method=last.request_method,
             request_body_type=CaseGenerator.get_request_body_type(last.request_headers).value,
-            request_headers=json.dumps(last.request_headers, ensure_ascii=False),
+            request_headers=cls.safe_json_dumps(last.request_headers, ensure_ascii=False),
             case_type=0,
             status=CaseStatus.debugging.value,
             priority="P3",
@@ -297,7 +297,7 @@ class CaseGenerator(PikaJsonEncoder):
                 data = cls.safe_json_loads(request.request_body)
                 var_type = list()
                 CaseGenerator.dfs_replace(data, ans, var_type, replaced)
-                result = json.dumps(data, ensure_ascii=False)
+                result = cls.safe_json_loads(data, ensure_ascii=False)
                 for v in var_type:
                     result = result.replace(f'"{v}"', f"{v}")
                 request.request_body = result

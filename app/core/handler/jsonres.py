@@ -38,13 +38,29 @@ class PikaJsonEncoder(JSONEncoder):
         return self.default(o)
     
     @classmethod
-    def safe_json_loads(cls, value):
+    def safe_json_loads(cls, value, object_hook=None, parse_float=None,
+                        parse_int=None, parse_constant=None, object_pairs_hook=None,
+                        err_detail="解析JSON字符串并将其转换为Python字典失败"):
         try:
-            value = json.loads(value)
+            value = json.loads(value, object_hook=object_hook, parse_float=parse_float,
+                               parse_int=parse_int, parse_constant=parse_constant, 
+                               object_pairs_hook=object_pairs_hook)
         except Exception as e:
-            raise Exception(f"解析JSON字符串并将其转换为Python字典失败: {e}")
+            raise Exception(f"{err_detail}: {e}")
         return value
 
+    @classmethod
+    def safe_json_dumps(cls, obj, skipkeys=False, ensure_ascii=True,
+                        check_circular=True, allow_nan=True, indent=None, separators=None,
+                        default=None, sort_keys=False, err_detail="解析obj序列化为JSON格式字符串失败"):
+        try:
+            value = json.dumps(obj, skipkeys=skipkeys, ensure_ascii=ensure_ascii, check_circular=check_circular,
+                               allow_nan=allow_nan, indent=indent, separators=separators,
+                               default=default, sort_keys=sort_keys)
+        except Exception as e:
+            raise Exception(f"{err_detail}: {e}")
+        return value
+    
 class PikaModelEncoder:
     
     @classmethod

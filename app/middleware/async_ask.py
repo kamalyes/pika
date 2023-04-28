@@ -37,29 +37,26 @@ class AsyncRequest(PikaJsonEncoder):
         return kwargs.get("data")
 
     async def invoke(self, method: str):
-        try:
-            async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar(unsafe=True)) as session:
-                start_date = Moment.get_now_time("13timestamp")
-                async with session.request(
-                    method, self.url, timeout=self.timeout, proxy=self.proxy, ssl=False, **self.kwargs
-                ) as resp:
-                    finished_date = Moment.get_now_time("13timestamp")
-                    cost = "%.3f"%(int("%.0f" % (finished_date - start_date)) / 1000)
-                    response, json_format = await AsyncRequest.get_resp(resp)
-                    cookie = self.get_cookie(session)
-                    return await self.collect(
-                        True,
-                        self.get_data(self.kwargs),
-                        resp.status,
-                        response,
-                        resp.headers,
-                        resp.request_info.headers,
-                        elapsed=cost,
-                        cookies=cookie,
-                        json_format=json_format,
-                    )
-        except ClientProxyConnectionError as err:
-            raise Exception(f'代理连接错误,{err}')
+        async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar(unsafe=True)) as session:
+            start_date = Moment.get_now_time("13timestamp")
+            async with session.request(
+                method, self.url, timeout=self.timeout, proxy=self.proxy, ssl=False, **self.kwargs
+            ) as resp:
+                finished_date = Moment.get_now_time("13timestamp")
+                cost = "%.3f"%(int("%.0f" % (finished_date - start_date)) / 1000)
+                response, json_format = await AsyncRequest.get_resp(resp)
+                cookie = self.get_cookie(session)
+                return await self.collect(
+                    True,
+                    self.get_data(self.kwargs),
+                    resp.status,
+                    response,
+                    resp.headers,
+                    resp.request_info.headers,
+                    elapsed=cost,
+                    cookies=cookie,
+                    json_format=json_format,
+                )
 
     async def download(self):
         async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar(unsafe=True)) as session:
@@ -113,29 +110,30 @@ class AsyncRequest(PikaJsonEncoder):
             r = AsyncRequest(url, headers=headers, timeout=timeout)
         return r
 
-    @staticmethod
-    async def get_resp(resp):
+    @classmethod
+    async def get_resp(cls, resp):
         try:
             data = await resp.json(encoding="utf-8")
             # 说明是json格式
-            return json.dumps(data, ensure_ascii=False, indent=4), True
+            return cls.safe_json_dumps(data, ensure_ascii=False, indent=4), True
         except:
             data = await resp.text()
             # 说明不是json格式,我们不做loads操作了
             return data, False
 
-    @staticmethod
-    def get_request_data(request_body):
+    @classmethod
+    def get_request_data(cls, request_body):
         if isinstance(request_body, bytes):
             request_body = request_body.decode()
         if isinstance(request_body, FormData):
             request_body = str(request_body)
         if isinstance(request_body, str) or request_body is None:
             return request_body
-        return json.dumps(request_body, ensure_ascii=False, indent=4)
+        return cls.safe_json_dumps(request_body, ensure_ascii=False, indent=4)
 
-    @staticmethod
+    @classmethod
     async def collect(
+        cls,
         status,
         request_data,
         status_code=200,
@@ -164,14 +162,14 @@ class AsyncRequest(PikaJsonEncoder):
         Returns:
 
         """
-        request_headers = json.dumps(
+        request_headers = cls.safe_json_dumps(
             {k: v for k, v in request_headers.items()} if request_headers is not None else {}, ensure_ascii=False
         )
-        response_headers = json.dumps(
+        response_headers = cls.safe_json_dumps(
             {k: v for k, v in response_headers.items()} if response_headers is not None else {}, ensure_ascii=False
         )
         cookies = {k: v for k, v in cookies.items()} if cookies is not None else {}
-        cookies = json.dumps(cookies, ensure_ascii=False)
+        cookies = cls.safe_json_dumps(cookies, ensure_ascii=False)
         return {
             "status": status,
             "response": response,

@@ -21,7 +21,7 @@ from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.handler.asyncsql import AsyncDbSession
-from app.core.handler.jsonres import PikaResponse
+from app.core.handler.jsonres import PikaJsonEncoder, PikaResponse
 from app.core.handler.logger import PikaLogger
 from app.enums.OperationEnum import SqlOperationTypeEnum
 from app.enums.SysVarEnum import ValidTimeEnum
@@ -525,7 +525,7 @@ class PikaWrapper(object):
                     remove[item[0]] = item[1]
         diff_data = {"change": change, "add": add, "remove": remove}
         try:
-            diff_data = json.dumps(diff_data, ensure_ascii=False)
+            diff_data = PikaJsonEncoder.safe_json_dumps(diff_data, ensure_ascii=False)
         except Exception as e:
             err_detail = f"changed参数转换失败,model={cls.__model__}\tdiff_data={diff_data}, error: {e}"
             cls.opt_exec_err(cls.__log__.warning, err_detail, False)

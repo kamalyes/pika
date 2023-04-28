@@ -57,7 +57,7 @@ class RequestInfoSchema(BaseModel, PikaJsonEncoder):
     @classmethod
     def translate_json(cls, text):
         try:
-            return json.dumps(cls.safe_json_loads(text), indent=4, ensure_ascii=False)
+            return cls.safe_json_dumps(cls.safe_json_loads(text), indent=4, ensure_ascii=False)
         except Exception as e:
             logger.bind(name=None).warning(f"解析json格式请求失败: {e}")
             return text
@@ -81,6 +81,7 @@ class RequestInfoSchema(BaseModel, PikaJsonEncoder):
         if "text" in content_type.lower() or "xml" in content_type.lower():
             return request.text
         return request.data.decode('utf-8')
-
-    def dumps(self):
-        return json.dumps(self.dict(), ensure_ascii=False)
+    
+    @classmethod
+    def dumps(cls):
+        return cls.safe_json_dumps(cls.dict(), ensure_ascii=False)

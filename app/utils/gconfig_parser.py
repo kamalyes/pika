@@ -40,7 +40,7 @@ class GConfigParser(PikaJsonEncoder):
             GConfigParser.log.error(f"解析data: {data} key: {key} 数据失败: {e}")
             return None
         if not isinstance(result, str):
-            return json.dumps(result, ensure_ascii=False)
+            return cls.safe_json_dumps(result, ensure_ascii=False)
         return result
 
 

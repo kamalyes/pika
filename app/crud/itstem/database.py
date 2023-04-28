@@ -15,7 +15,7 @@ from datetime import datetime
 from custard.json import JsonEncoder
 from sqlalchemy import select, MetaData, text, and_
 from sqlalchemy.exc import ResourceClosedError
-from app.core.handler.jsonres import PikaResponse
+from app.core.handler.jsonres import PikaJsonEncoder, PikaResponse
 from app.crud import PikaWrapper, PikaMdWrapper
 from app.crud.itstem.environment import EnvironmentDao
 from app.enums.SysVarEnum import ValidTimeEnum
@@ -27,7 +27,7 @@ from app.schema.database import DatabaseSchema
 
 
 @PikaMdWrapper(DatabaseModel)
-class DbConfigDao(PikaWrapper):
+class DbConfigDao(PikaWrapper, PikaJsonEncoder):
     @classmethod
     async def list_database(cls, name: str = None, database: str = None, env: str = None):
         """
@@ -265,7 +265,7 @@ class DbConfigDao(PikaWrapper):
             )
             result, _ = await DbConfigDao.execute(data, sql)
             _, result = PikaResponse.parse_sql_result(result)
-            return json.dumps(result, cls=JsonEncoder, ensure_ascii=False)
+            return cls.safe_json_dumps(result, cls=JsonEncoder, ensure_ascii=False)
         except Exception as err:
             err_detail = f"执行SQL失败, {err}"
             cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

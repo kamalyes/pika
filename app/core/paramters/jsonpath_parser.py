@@ -37,7 +37,7 @@ class JSONPathParser(Parser, PikaJsonEncoder):
             if results is False:
                 if not data and expression == "$..*":
                     # 说明想要全匹配并且没数据,直接返回data
-                    return json.dumps(data, ensure_ascii=False)
+                    return PikaJsonEncoder.safe_json_dumps(data, ensure_ascii=False)
                 raise CaseParametersError(
                     "jsonpath match failed, please check your response or jsonpath.")
             return Parser.parse_result(results, "0")

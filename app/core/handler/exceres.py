@@ -11,40 +11,6 @@
 """
 from fastapi import status
 
-class ValidException(Exception):
-    def __init__(
-            self,
-            code: int = 422,
-            status_code: int = status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail: str = "Parameter effect error",
-    ):
-        self.code = code
-        self.detail = detail
-        self.status_code = status_code
-
-
-class AuthException(Exception):
-    def __init__(
-            self,
-            code: int = 401,
-            detail: str = "Authentication failed",
-            status_code: int = status.HTTP_401_UNAUTHORIZED,
-    ):
-        self.code = code
-        self.detail = detail
-        self.status_code = status_code
-
-
-class AccessException(Exception):
-    def __init__(
-            self,
-            code: int = 403,
-            detail: str = "Access failed",
-            status_code: int = status.HTTP_403_FORBIDDEN,
-    ):
-        self.code = code
-        self.detail = detail
-        self.status_code = status_code
 
 class SystemException(Exception):
     def __init__(
@@ -56,3 +22,23 @@ class SystemException(Exception):
         self.code = code
         self.detail = detail
         self.status_code = status_code
+
+class AuthException(SystemException):
+    def __init__(self, code: int = 401, 
+                 detail: str = "Authentication failed",
+                 status_code: int = status.HTTP_401_UNAUTHORIZED):
+        super().__init__(code, detail, status_code)
+
+class AccessException(Exception):
+    def __init__(self, code: int = 403, 
+                 detail: str = "Access failed",
+                 status_code: int = status.HTTP_403_FORBIDDEN):
+        super().__init__(code, detail, status_code)
+        
+
+class ValidException(SystemException):
+    def __init__(self, code: int = 422, 
+                 detail: str = "Parameter effect error",
+                 status_code: int = status.HTTP_422_UNPROCESSABLE_ENTITY):
+        super().__init__(code, detail, status_code)
+

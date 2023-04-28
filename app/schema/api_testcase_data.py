@@ -11,7 +11,7 @@
 """
 from typing import Optional
 from pydantic import validator
-from fastapi import Body
+from app.core.handler.jsonres import PikaJsonEncoder
 from app.schema.base import BaseOnlyCaseIdSchema, BaseOnlyEnvIdSchema, BaseOnlyIdSchema, PikaBaseModel
 
 
@@ -20,6 +20,10 @@ class ApiTestCaseDataSchema(BaseOnlyIdSchema, BaseOnlyCaseIdSchema, BaseOnlyEnvI
     json_data: Optional[str]
 
     # noinspection PyMethodParameters
-    @validator("name", "json_data")
+    @validator("name")
     def name_not_empty(cls, v):
         return PikaBaseModel.not_empty(v)
+
+    @validator("json_data")
+    def assert_json_type(cls, v):
+        return PikaJsonEncoder.safe_json_loads(v,err_detail='请检查数据是否为JSON格式')

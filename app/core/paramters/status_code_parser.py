@@ -10,11 +10,11 @@
 @Desc    :  None
 """
 import json
-
+from app.core.handler.jsonres import PikaJsonEncoder
 from app.core.paramters.parser import Parser
 
 
-class StatusCodeParser(Parser):
-    @staticmethod
-    def parse(source: dict, expression: str = None, idx: str = None) -> str:
-        return json.dumps(source.get("status_code"))
+class StatusCodeParser(Parser, PikaJsonEncoder):
+    @classmethod
+    def parse(cls, source: dict, expression: str = None, idx: str = None) -> str:
+        return cls.safe_json_dumps(source.get("status_code"))

@@ -214,7 +214,7 @@ class Executor(object):
             if field_name == "request_headers":
                 new_value = PikaJsonEncoder.safe_json_loads(result)
             elif not isinstance(result, str):
-                new_value = json.dumps(result, ensure_ascii=False)
+                new_value = PikaJsonEncoder.safe_json_dumps(result, ensure_ascii=False)
             else:
                 new_value = result
                 if new_value is None:
@@ -359,7 +359,7 @@ class Executor(object):
         result, status = dict(), True
         if len(asserts) == 0:
             self.append("未设置断言, 用例结束")
-            result = json.dumps(result, ensure_ascii=False)
+            result = PikaJsonEncoder.safe_json_dumps(result, ensure_ascii=False)
             return result, status
         for item in asserts:
             try:
@@ -373,7 +373,7 @@ class Executor(object):
                 status = False
                 self.append(f"预期结果: {item.expected}\n实际结果: {item.actually}\n")
                 result[item.id] = {"status": False, "msg": f"断言取值失败, 请检查断言语句: {e}"}
-        return json.dumps(result, ensure_ascii=False), status
+        return PikaJsonEncoder.safe_json_dumps(result, ensure_ascii=False), status
 
     async def run(self, env: str, case_id: str, params_pool: dict = None, request_param: dict = None, path: str = "主case"):
         """
@@ -621,7 +621,7 @@ class Executor(object):
             case_name = result.get("case_name")
             response_headers = result.get("response_headers")
             cookies = result.get("cookies")
-            request_params = json.dumps(request_param, ensure_ascii=False)
+            request_params = PikaJsonEncoder.safe_json_dumps(request_param, ensure_ascii=False)
             api_testcase_result = ApiTestCaseResultSchema(
                 case_id, report_id, case_name, status,  case_log_, start_date, finished_date,path,
                 request_body, request_method, request_headers, cost, asserts, response_headers,
@@ -694,7 +694,7 @@ class Executor(object):
                     for k, v in req_params.items():
                         if data.get(k) is not None:
                             data[k] = v
-                return json.dumps(data, ensure_ascii=False)
+                return PikaJsonEncoder.safe_json_dumps(data, ensure_ascii=False)
             self.append(f"request_body为空, 不进行替换")
         except Exception as e:
             self.append(f"替换请求request_body失败, {e}")
@@ -779,7 +779,7 @@ class Executor(object):
                 if expected in actually:
                     return self.tidy_ops_res(expected, actually, '文本包含于', True)
                 return self.tidy_ops_res(expected, actually, '文本不包含于', False)
-            temp = json.dumps(actually, ensure_ascii=False)
+            temp = PikaJsonEncoder.safe_json_dumps(actually, ensure_ascii=False)
             if expected in temp:
                 return self.tidy_ops_res(expected, actually, '文本包含于', True)
             return self.tidy_ops_res(expected, actually, '文本不包含于', False)
@@ -788,7 +788,7 @@ class Executor(object):
                 if expected not in actually:
                     return self.tidy_ops_res(expected, actually, '文本不包含于', True)
                 return self.tidy_ops_res(expected, actually, '文本包含于', False)
-            temp = json.dumps(actually, ensure_ascii=False)
+            temp = PikaJsonEncoder.safe_json_dumps(actually, ensure_ascii=False)
             if expected not in temp:
                 return self.tidy_ops_res(expected, actually, '文本不包含于', True)
             return self.tidy_ops_res(expected, actually, '文本不包含于', False)
@@ -859,7 +859,7 @@ class Executor(object):
             raise Exception(f"获取变量失败, error: {str(e)}")
         if string == "${response}":
             return result
-        return json.dumps(result, ensure_ascii=False)
+        return PikaJsonEncoder.safe_json_dumps(result, ensure_ascii=False)
 
     @staticmethod
     async def notice(env: list, plan: ApiTestPlanModel, project: ProjectModel, report_dict: dict, users: list):
