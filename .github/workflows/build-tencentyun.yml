@@ -1,12 +1,9 @@
 name: build-and-push-to-tencentyun
 
 on:
-  release:
-    types:
-      - created
-  # push:
-  #   branches:
-  #     - master
+  push:
+    branches:
+      - latest
   # pull_request:
   #   branches:
   #     - master
