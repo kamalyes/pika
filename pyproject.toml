@@ -1,11 +1,16 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
 name = "pika"
-description = "Pika是一款专注于自动化建设的平台,采用`Python`+`FastApi`+`React`开发,目前还不能作为生产级别的工具,作者正在努力之中。"
-authors = ["kamalyes <501893067@qq.com>"]
+version = "0.0.1"
+description = "pika easy to learn, fast to code, ready for production"
 readme = "README.md"
+license = "Apache"
+authors = ["Kamalyes <mryu168@163.com>",]
 
-[tool.poetry.dependencies]
-python = "^3.9"
+repository = "https://github.com/kamalyes/pika"
 
 classifiers = [
     "Intended Audience :: System Administrators",
@@ -22,81 +27,178 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
 ]
 
-dependencies = [
-    "starlette>=0.19.1",
-    "pydantic >=1.6.2,!=1.7,!=1.7.1,!=1.7.2,!=1.7.3,!=1.8,!=1.8.1,<2.0.0",
-]
+[tool.poetry.dependencies]
+python=">=3.9,<4.0"
+pydantic=">=1.9.1"
+fastapi={version=">=0.78.0, <0.95.1", optional=true}
+gunicorn="^20.1.0"
+custard="^1.1.1"
+pypinyin="^0.48.0"
+cos-python-sdk-v5="^1.9.20"
+dictdiffer="^0.9.0"
+jsonpath="^0.82"
+pyjwt="^2.4.0"
+mysql-connector-python="^8.0.26"
+loguru="^0.6.0"
+requests="^2.27.0"
+sqlalchemy={version=">=1.3.20,<1.4.39", optional=true}
+starlette="^0.26.1"
+aioredis="^2.0.1"
+mitmproxy="^9.0.1"
+uvicorn="^0.21.1"
+supervisor="^4.2.5"
+typing-extensions="^4.4.0"
+PyYAML="^6.0"
+aiohttp="^3.8.1"
+aiomysql="^0.1.1"
+Jinja2="^3.0.3"
+APScheduler="^3.8.0"
+redis="^3.5.3"
+redlock="^1.2.0"
+oss2="^2.16.0"
+awaits="^0.0.1"
+qiniu="^7.6.0"
+pymysql="^1.0.2"
+beautifulsoup4="^4.11.1"
+minio="^7.1.10"
+mkdocs="^1.4.1"
+mkdocs-material="^9.1.8"
+mypy="^1.2.0"
+ruff="^0.0.263"
 
-dev = [
-    "ruff ==0.0.138",
-    "uvicorn[standard] >=0.12.0,<0.19.0",
-    "pre-commit >=2.17.0,<3.0.0",
-]
+[tool.poetry.dev-dependencies]
+pytest="^7.3.1"
+pytest-cov="^4.0.0"
+pytest-asyncio="^0.21.0"
+black="^23.3.0"
+pre-commit="^3.2.2"
 
-dynamic = ["version"]
-
-[project.urls]
-Homepage = "https://github.com/kamalyes/pika"
-
-[project.optional-dependencies]
-test = [
-    "pytest >=7.1.3,<8.0.0",
-    "coverage[toml] >= 6.5.0,<7.0",
-    "mypy ==0.982",
-    "black == 22.10.0",
-    "isort >=5.0.6,<6.0.0",
-]
-doc = [
-    "mkdocs >=1.1.2,<2.0.0",
-    "mkdocs-material >=8.1.5,<9.0.0",
-    "mdx-include >=1.4.1,<2.0.0",
-    "mkdocs-markdownextradata-plugin >=0.1.7,<0.3.0",
-    "typer[all] >=0.6.1,<0.8.0",
-    "pyyaml >=5.3.1,<7.0.0",
-]
+[tool.poetry.extras]
 all = [
-      "gunicorn>=20.1.0",
-      "custard>=1.1.1",
-      "pypinyin>=0.48.0",
-      "cos-python-sdk-v5>=1.9.20",
-      "dictdiffer>=0.9.0",
-      "jsonpath>=0.82",
-      "pyjwt>=2.4.0",
-      "mysql-connector-python==8.0.26",
-      "loguru>=0.6.0",
-      "requests>=2.27.0",
-      "sqlalchemy>=1.4.39",
-      "fastapi",
-      "starlette",
-      "aioredis>=2.0.1",
-      "mitmproxy>=9.0.1",
-      "uvicorn[standard]",
-      "supervisor>=4.2.5",
-      "pydantic>=1.9.0",
-      "typing-extensions",
-      "PyYAML>=6.0",
-      "aiohttp==3.8.1",
-      "aiomysql==0.1.1",
-      "Jinja2==3.0.3",
-      "APScheduler==3.8.0",
-      "redis==3.5.3",
-      "redlock>=1.2.0",
-      "oss2>=2.16.0",
-      "awaits>=0.0.1",
-      "qiniu>=7.6.0",
-      "GitPython>=3.1.30",
-      "pymysql>=1.0.2",
-      "beautifulsoup4>=4.11.1",
-      "dicttoxml>=1.7.16",
-      "python-multipart>=0.0.5",
-      "lxml>=4.9.0",
-      "faker>=17.6.0",
-      "minio>=7.1.10"
-      ]
+    "faker",
+    "pypinyin",
+    "pyjwt",
+    "six",
+    "kafka",
+    "fastapi",
+    "sqlalchemy",
+    "uvicorn",
+    "pydantic",
+    "requests",
+    "starlette",
+    "aioredis",
+    "lxml",
+    "redis",
+    "mkdocs",
+    "certifi",
+    "crypto",
+    "PyYAML",
+    "urllib3",
+    "w3lib"
+]
 
-[tool.hatch.version]
-path = "app/__init__.py"
+[tool.black]
+line-length = 120
+target-version = ['py39']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  # The following are specific to Black, you probably don't want those.
+  | blib2to3
+  | tests/data
+  | profiling
+)/
+'''
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[tool.ruff]
+line-length = 120
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+    "S",  # flake8-bandit
+    "G",  # flake8-logging-format
+    "PIE", # flake8-pie
+    "COM", # flake8-commas
+    "PT", # flake8-pytest-style
+    "Q",  # flake8-quotes
+    "RSE", # flake8-raise
+    "RET", # flake8-return
+    "SIM", # flake8-simplify
+    "TRY", # tryceratops
+    "RUF", # ruff specific rules
+]
+ignore = [
+    "B008",  # do not perform function calls in argument defaults
+    "S101",  # use of assert detected
+    "PT004", # fixture doesn't return anything
+    "PT013", # allow from pytest import thing
+    "SIM114", # allow have multiplie ifs with same body
+    "TRY003", # allow long exc message
+    "RUF100", # allow unused noqa
+]
+
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    ".venv",
+]
+per-file-ignores = {}
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+target-version = "py39"
+
+[tool.ruff.mccabe]
+max-complexity = 10
+
+[tool.mypy]
+python_version = 3.9
+strict = true
+follow_imports = "normal"
+ignore_missing_imports = true
+no_implicit_reexport = false
+show_column_numbers=true
+show_error_codes=true
+
+[tool.coverage.paths]
+source = ["pika"]
+
+[tool.coverage.run]
+source = ["pika"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "@abstractmethod",
+    "@overload",
+    "if TYPE_CHECKING:",
+]

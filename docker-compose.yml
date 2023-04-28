@@ -14,7 +14,7 @@ services:
       # 数据库配置
     volumes:
       - ./logs:/opt/pika/logs
-      - ./.env:/opt/pika/conf/.env
+      - .env:/opt/pika/conf/.env
     networks:
       - pika-network
 

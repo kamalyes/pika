@@ -14,7 +14,6 @@ import gettext
 import os
 
 from app.core.handler.translation import i18n
-__version__ = "1.0.0"
 
 APP_BASE_HOME = os.path.dirname(os.path.abspath(__file__))
 LOCALE_HOME = os.path.join(APP_BASE_HOME, "locale")

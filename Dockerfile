@@ -26,7 +26,8 @@ RUN python -m venv ${DOCKER_WORKSPACES}/venv  \
   && apt install -y --no-install-recommends tzdata \
   && apt upgrade -y --no-install-recommends telnet 
 
-COPY . .
+COPY ./pika/ .
+COPY ./LICENSE/ .
 RUN rm -rf ${DOCKER_WORKSPACES}/{test/,docker-compose.yml,fixcommit.sh,.env.example}
 RUN ln -snf /usr/share/zoneinfo/$TIME_ZONE /etc/localtime && echo $TIME_ZONE > /etc/timezone \
   && chmod 755 -R ${DOCKER_WORKSPACES}/ \
