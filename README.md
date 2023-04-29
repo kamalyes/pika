@@ -1,8 +1,17 @@
-
-![png](https://img.shields.io/badge/Python-3.9.11+-green)
-![png](https://img.shields.io/badge/React-16.7+-blue)
-![png](https://img.shields.io/badge/FastApi-green)
-![png](https://img.shields.io/badge/contributors-3-green)
+<p align="center">
+<a href="#">
+<img src="https://fastly.jsdelivr.net/gh/kamalyes/image-bed@master/col/pika/logo.svg" alt="logo.svg" width="150">
+</a>
+<p align="center">
+<a href="https://img.shields.io/badge/Python-3.9.11+-green" target="__blank"><img src="https://img.shields.io/badge/Python-3.9.11+-green" alt="Python-3.9.11"></a>
+<a href="https://img.shields.io/badge/React-18.0.0+-blue" target="__blank"><img src="https://img.shields.io/badge/React-18.0.0+-blue" alt="React-18.0.0"></a>
+<a href="https://img.shields.io/badge/antd-5.3.2+-blue" target="__blank"><img src="https://img.shields.io/badge/antd-5.3.2+-blue" alt="antd-5.3.2"></a>
+<a href="https://img.shields.io/badge/FastApi-0.78.0+-green" target="__blank"><img src="https://img.shields.io/badge/FastApi-0.78.0+-green" alt="FastApi-0.78.0"></a>
+<a href="https://img.shields.io/badge/umijsmax-4.0.63+-green" target="__blank"><img src="https://img.shields.io/badge/umijsmax-4.0.63+-green" alt="umijsmax"></a>
+<a href="https://pypi.org/project/pika/" target="__blank"><img src="https://img.shields.io/pypi/v/pika" alt="pika"></a>
+<a href="https://img.shields.io/pypi/dm/pika" target="__blank"><img src="https://img.shields.io/pypi/dm/pika"></a>
+<br>
+</p>
 
 ### ☕ 关于平台
 
@@ -47,7 +56,7 @@ export LESSCHARSET=utf-8
 ```bash
 CREATE DATABASE `pika` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci
 docker build -t kamalyes/pika:latest .
-docker-compose --env-file ./conf/.env -f ./test/docker/docker-compose.yml up -d
+docker-compose --env-file .env -f docker-compose.yml up -d
 或者在根目录下执行：
 docker run --name pika -d  -p 7777:7777 -p 7778:7778 -p 9001:9001  --privileged=true -v ./logs:/opt/pika/logs -v ./conf/.env:/opt/pika/conf/.env -e 'TZ=Asia/Shanghai' kamalyes/pika:latest
 ```
