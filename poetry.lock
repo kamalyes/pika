@@ -1002,14 +1002,14 @@ reference = "tsinghua"
 
 [[package]]
 name = "faker"
-version = "13.6.0"
+version = "18.6.0"
 description = "Faker is a Python package that generates fake data for you."
 category = "main"
 optional = true
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 files = [
-    {file = "Faker-13.6.0-py3-none-any.whl", hash = "sha256:7ab2f741ef1c006ed7274a6ed75695ca8b610f78861566b599ce83c4953bf687"},
-    {file = "Faker-13.6.0.tar.gz", hash = "sha256:0d5425894e098410b64aaade38a81074fa30163076251118523adf5bb44f8346"},
+    {file = "Faker-18.6.0-py3-none-any.whl", hash = "sha256:49060d40e6659e116f53353c5771ad2f2cbcd12b15771f49e3000a3a451f13ec"},
+    {file = "Faker-18.6.0.tar.gz", hash = "sha256:ac903ba8cb5adbce2cdd15e5536118d484bbe01126f3c774dd9f6df77b61232d"},
 ]
 
 [package.dependencies]
@@ -4274,4 +4274,4 @@ all = ["Faker", "pypinyin", "cos-python-sdk-v5", "typing-extensions", "dictdiffe
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "380009854825cf503554dd7be1ec9bb83a4b0dcffa8ced9ae2ba49d99c35b13c"
+content-hash = "4857a6dd043d20cab0c094ee110cb191e1f1f77e3c597fab51fd77848e0706d4"
