@@ -30,7 +30,7 @@ classifiers = [
 [tool.poetry.dependencies]
 python=">=3.9,<4.0"
 pydantic=">=1.9.1"
-fastapi={version=">=0.78.0, <0.95.1", optional=true}
+fastapi={version=">=0.78.0,<0.95.2", optional=true}
 gunicorn="^20.1.0"
 custard="^1.1.1"
 pypinyin="^0.48.0"
