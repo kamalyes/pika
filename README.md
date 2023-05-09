@@ -29,8 +29,11 @@ Pika是一款专注于自动化建设的平台,采用`Python`+`FastApi`+`React`�
 - clone项目
 
 ```bash
-后端:git clone git@github.com:kamalyes/pika.git (api_port:7777, proxy_port:7778)
-前端:git clone git@github.com:kamalyes/pikaWeb.git (port:8001)
+mkdir -p /opt && cd /opt
+# 后端 (api_port:7777, proxy_port:7778)
+git clone git@github.com:kamalyes/pika.git 
+# 前端 (port:8001)
+git clone git@github.com:kamalyes/pikaWeb.git 
 ```
 
 - 修改配置文件
@@ -75,6 +78,10 @@ cd Python-3.9.11
 make && make install
 ln -s /usr/local/python3/bin/python3 /usr/bin/python3
 ln -s /usr/local/python3/bin/pip3 /usr/bin/pip3
+
+# launch.json配置修改python.venvPath
+%userprofile%/AppData/Local/pypoetry/Cache/virtualenvs # win
+~/.cache/pypoetry/virtualenvs/ # macos
 ```
 
 - 安装nodejs>=16.9.1
@@ -97,6 +104,8 @@ npm ERR! You can rerun the command with `--loglevel=verbose` to see the logs in 
 - 部署redis [主从复制](<https://yuyanqing.cn/pages/c60ada/>)
 
 ```bash
+# 将pika项目下redis.conf复制到/opt/redis目录下
+mkdir -p /opt/redis/master/conf && cp /opt/pika/pika/conf/redis.conf /opt/redis/master/conf/redis.conf 
 docker run --name redis-master -d  -p 16389:6379 --privileged=true -v /opt/redis/master/conf/redis.conf:/etc/redis/redis.conf -v /opt/redis/master:/data  redis:7.0.8-alpine  redis-server /etc/redis/redis.conf --appendonly yes --protected-mode no --requirepass "M5Pi9YW6u" 
 ```
 
