@@ -275,7 +275,7 @@ class UserDao(PikaWrapper):
                 dislodge = ["open_id", "private_key", "password", "description", "id"]
                 result = {key: val for key, val in user_infos.items() if key not in dislodge}
             else:
-                raise Exception("用户信息不存在!")
+                raise SystemException(f"用户：{emp_no}不存在!")
         return result
 
     @classmethod
@@ -300,43 +300,42 @@ class UserDao(PikaWrapper):
                 )
                 users = await session.execute(sql)
                 user = users.scalars().first()
-                if user:
-                    pwd = Kerberos.md5_encode(oauth2_login.password)
-                    user_admins = await session.execute(
-                        select(SysUserAdminModel).where(
-                            and_(SysUserAdminModel.password == pwd, SysUserAdminModel.uid == user.id),
-                        ),
+                if user is None:
+                    raise SystemException(detail=f"用户名{oauth2_login.username}不存在,请使用正常的账户登录!")
+                pwd = Kerberos.md5_encode(oauth2_login.password)
+                user_admins = await session.execute(
+                    select(SysUserAdminModel).where(
+                        and_(SysUserAdminModel.password == pwd, SysUserAdminModel.uid == user.id),
+                    ),
+                )
+                user_admin = user_admins.scalars().first()
+                if user_admin:
+                    await cls.account_status_verify(
+                        uid=user_admin.uid,
+                        is_activate=user_admin.is_activate,
+                        delete_flag=user_admin.delete_flag,
+                        enabled_flag=user_admin.enabled_flag,
+                        pwd_valid_date=str(user_admin.pwd_valid_date),
+                        err_pwd_count=int(user_admin.err_pwd_count),
                     )
-                    user_admin = user_admins.scalars().first()
-                    if user_admin:
-                        await cls.account_status_verify(
-                            uid=user_admin.uid,
-                            is_activate=user_admin.is_activate,
-                            delete_flag=user_admin.delete_flag,
-                            enabled_flag=user_admin.enabled_flag,
-                            pwd_valid_date=str(user_admin.pwd_valid_date),
-                            err_pwd_count=int(user_admin.err_pwd_count),
-                        )
-                    else:
-                        await cls.pwd_mistake_limit(uid=user.id)
-                    old_token = await async_redis.get(f"{RedisKeyEnum.AUTH_TOKEN}:{user_admin.emp_no}")
-                    if old_token and PikaAppConfig.JWT_MPOP:
-                        uuid_jwt = old_token
-                    else:
-                        # 生成uuid_jwt并同步至redis
-                        valid_time = ValidTimeEnum.AUTH_VALID_TIME
-                        uuid_jwt = await cls.generate_uuid_jwt(
-                            emp_no=user.emp_no,
-                            valid_time=valid_time,
-                            password=user_admin.password,
-                        )
-                        await cls.uuid_jwt_sync_redis(
-                            key=f"{RedisKeyEnum.AUTH_TOKEN}:{user.emp_no}",
-                            value=uuid_jwt,
-                            ex=valid_time,
-                        )
                 else:
-                    raise Exception("该用户名不存在,请使用正常的账户登录!")
+                    await cls.pwd_mistake_limit(uid=user.id)
+                old_token = await async_redis.get(f"{RedisKeyEnum.AUTH_TOKEN}:{user_admin.emp_no}")
+                if old_token and PikaAppConfig.JWT_MPOP:
+                    uuid_jwt = old_token
+                else:
+                    # 生成uuid_jwt并同步至redis
+                    valid_time = ValidTimeEnum.AUTH_VALID_TIME
+                    uuid_jwt = await cls.generate_uuid_jwt(
+                        emp_no=user.emp_no,
+                        valid_time=valid_time,
+                        password=user_admin.password,
+                    )
+                    await cls.uuid_jwt_sync_redis(
+                        key=f"{RedisKeyEnum.AUTH_TOKEN}:{user.emp_no}",
+                        value=uuid_jwt,
+                        ex=valid_time,
+                    )
         await cls.update_last_login_field(uid=user.id, last_login_ip=user_ip)
         user_infos = await cls.query_user_info(uid=user.id)
         return PikaResponse.success(

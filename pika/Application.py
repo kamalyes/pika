@@ -223,11 +223,10 @@ class PikaFastApi:
             Returns:
 
             """
-            exc_result = str(exc) if PikaAppConfig.PIKA_ENVIRONMENT == "production" else traceback.format_exc()
-            return JSONResponse(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"code": ExcCodeEnum.UNKNOWN_ERROR, "detail": exc_result},
-            )
+            exc_result = exc if PikaAppConfig.PIKA_ENVIRONMENT == "production" else traceback.format_exc()
+            return PikaResponse.custom(code=ExcCodeEnum.UNKNOWN_ERROR, 
+                                       status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                       detail=exc_result)
 
     # noinspection PyShadowingNames
 
