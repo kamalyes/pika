@@ -4276,4 +4276,4 @@ all = ["Faker", "pypinyin", "cos-python-sdk-v5", "typing-extensions", "dictdiffe
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "d132e1b78cb47057a52de29e0e4f9c6f1b577a80f83aab2f0dc01eb1d425b0f7"
+content-hash = "4b33beecf52e1cfb4d031e7f43555abb000d6731088586b5750299737be17878"
