@@ -224,9 +224,9 @@ class PikaFastApi:
 
             """
             exc_result = exc if PikaAppConfig.PIKA_ENVIRONMENT == "production" else traceback.format_exc()
-            return PikaResponse.custom(code=ExcCodeEnum.UNKNOWN_ERROR, 
-                                       status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                                       detail=exc_result)
+            return PikaResponse.custom(
+                code=ExcCodeEnum.UNKNOWN_ERROR, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=exc_result
+            )
 
     # noinspection PyShadowingNames
 
@@ -533,7 +533,7 @@ class PikaFastApi:
 pika = PikaFastApi.create_app()
 
 pika.mount("/statics", StaticFiles(directory=PikaAppConfig.STATICS_PATH), name="statics")
-templates = Jinja2Templates(directory="statics")
+templates = Jinja2Templates(directory=PikaAppConfig.STATICS_PATH)
 
 
 @pika.get("/", summary="index")
@@ -543,28 +543,11 @@ async def serve_spa(request: Request):
 
 @pika.get("/{filename}", summary="statics")
 async def get_site(filename):
-    filename = PikaAppConfig.STATICS_PATH + filename
-
+    filename = os.path.join(PikaAppConfig.STATICS_PATH, filename).replace("\\", "/")
     if not isfile(filename):
         return Response(status_code=404)
-
     with open(filename, mode="rb") as f:
         content = f.read()
-
-    content_type, _ = guess_type(filename)
-    return Response(content, media_type=content_type)
-
-
-@pika.get("/static/{filename}")
-async def get_site_static(filename):
-    filename = "./dist/static/" + filename
-
-    if not isfile(filename):
-        return Response(status_code=404)
-
-    with open(filename, mode="rb") as f:
-        content = f.read()
-
     content_type, _ = guess_type(filename)
     return Response(content, media_type=content_type)
 
