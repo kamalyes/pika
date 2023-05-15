@@ -19,10 +19,9 @@ from typing import Any, Tuple
 
 from awaits.awaitable import awaitable
 from config import PikaAppConfig
-
-from aredis import StrictRedisCluster, ClusterConnectionPool, ConnectionPool, StrictRedis
 from loguru import logger
-
+from redis import ConnectionPool, StrictRedis
+from redis.asyncio.cluster import RedisCluster, ClusterNode
 from app.core.handler.jsonres import PikaJsonEncoder
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.exceptions import RedisError
@@ -48,7 +47,7 @@ class PikaRedisManager(PikaJsonEncoder):
         return StrictRedis(connection_pool=pool, decode_responses=PikaAppConfig.REDIS_DECODE_RESPONSES)
 
     @classmethod
-    def get_redis_nodes(cls, nodes_str: str):
+    def get_redis_nodes(cls, nodes_str: str, password=""):
         startup_nodes = []
         nodes = nodes_str.split(",") if "," in nodes_str else [nodes_str]
         if len(nodes) > 0:
@@ -58,7 +57,7 @@ class PikaRedisManager(PikaJsonEncoder):
                     port = port if isinstance(port, int) else int(port)
                 except ValueError as ve:
                     raise Exception(f"redis端口强转失败{ve}")
-                startup_nodes.append({"host": host, "port": port})
+                startup_nodes.append({"host": host, "port": port, "password": password})
         return startup_nodes
 
     @classmethod
@@ -157,7 +156,7 @@ class PikaRedisManager(PikaJsonEncoder):
         cls._cluster_pool[redis_id] = cls.get_cluster(addr, password)
 
     @classmethod
-    def get_cluster(cls, address: str, password: str):
+    async def get_cluster(cls, address: str, password: str):
         """
         获取集群连接池
         Args:
@@ -168,11 +167,15 @@ class PikaRedisManager(PikaJsonEncoder):
 
         """
         try:
-            startup_nodes = cls.get_redis_nodes(address)
+            startup_nodes = cls.get_redis_nodes(address, password=password)
             if len(startup_nodes) == 0:
                 raise RedisError("找不到集群节点,请检查配置")
-            pool = ClusterConnectionPool(startup_nodes=startup_nodes, max_connections=100, decode_responses=True)
-            client = StrictRedisCluster(connection_pool=pool, decode_responses=True)
+            cluster_nodes = ClusterNode(startup_nodes=startup_nodes)
+            client = await RedisCluster(
+                startup_nodes=cluster_nodes,
+                encoding=PikaAppConfig.REDIS_ENCODING,
+                decode_responses=PikaAppConfig.REDIS_DECODE_RESPONSES,
+            )
             return client
         except Exception as e:
             raise Exception(f"获取Redis连接失败, {e}")
