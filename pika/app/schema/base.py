@@ -123,8 +123,8 @@ class BaseOnlyQueryDateSchema(BaseModel):
 
 
 class BaseOnlyPointDateSchema(BaseModel):
-    start_date: Optional[datetime] = Query(Moment.skew_date(days=-3), title="开始日期")
-    finished_date: Optional[datetime] = Query(Moment.skew_date(minutes=15), title="完成日期")
+    start_date: Optional[datetime] = Query(Moment.skew_date(days=-3), title="开始时间")
+    finished_date: Optional[datetime] = Query(Moment.skew_date(minutes=15), title="开始时间")
 
 
 class BaseOnlyPagingSchema(BaseModel):

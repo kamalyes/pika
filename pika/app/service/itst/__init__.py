@@ -10,6 +10,7 @@
 @Desc    :  None
 """
 # noinspection PyPep8Naming
-from app.service.itst.api.testplan import router as testplan_router
-from app.service.itst.api.functest import router as functest_router
-from app.service.itst.api.testcase import router as testcase_router
+from app.service.itst.api.testplan import router as api_testplan_router
+from app.service.itst.functest.functest import router as functest_router
+from app.service.itst.api.testcase import router as api_testcase_router
+from app.service.itst.api.jmeter import router as jmeter_router

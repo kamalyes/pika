@@ -29,7 +29,7 @@ from app.middleware.xredis import RedisHelper
 from app.models import async_create_table, async_redis
 from app.service.ask import http_router, mock_router
 from app.service.board import workspace_router
-from app.service.itst import testcase_router, testplan_router
+from app.service.itst import api_testcase_router, api_testplan_router, jmeter_router
 from app.service.itstem import dbconfig_router, environment_router, gateway_router, gconfig_router, redis_config_router
 from app.service.online import redis_router, script_router, sql_router
 from app.service.pmp import project_role_router, project_router
@@ -404,16 +404,7 @@ class PikaFastApi:
             ],
         )
         pika.include_router(
-            project_role_router,
-            prefix="/project",
-            tags=["项目"],
-            dependencies=[
-                Depends(PikaFastApi.request_info),
-                Depends(RateLimiter(times=PikaAppConfig.PIKA_RATELIMITER, minutes=1)),
-            ],
-        )
-        pika.include_router(
-            testplan_router,
+            api_testplan_router,
             prefix="/testplan",
             tags=["测试计划"],
             dependencies=[
@@ -422,7 +413,7 @@ class PikaFastApi:
             ],
         )
         pika.include_router(
-            testcase_router,
+            api_testcase_router,
             prefix="/testcase",
             tags=["接口测试"],
             dependencies=[
@@ -430,7 +421,16 @@ class PikaFastApi:
                 Depends(RateLimiter(times=PikaAppConfig.PIKA_RATELIMITER, minutes=1)),
             ],
         )
-        # pika.include_router(functest_router, prefix="/test", tags=["功能测试"],
+        pika.include_router(
+            jmeter_router,
+            prefix="/jmeter",
+            tags=["jmeter"],
+            dependencies=[
+                Depends(PikaFastApi.request_info),
+                Depends(RateLimiter(times=PikaAppConfig.PIKA_RATELIMITER, minutes=1)),
+            ],
+        )
+        # pika.include_router(functest_router, prefix="/functest", tags=["功能测试"],
         #                     dependencies=[Depends(PikaFastApi.request_info),
         #                                   Depends(RateLimiter(times=PikaAppConfig.PIKA_RATELIMITER, minutes=1))])
         pika.include_router(
