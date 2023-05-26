@@ -22,7 +22,7 @@ PyYAML~=6.0
 aiohttp==3.8.1
 aiomysql==0.1.1
 Jinja2>=3.0.3
-APScheduler==3.8.0
+APScheduler==3.10.1
 redis==4.5.5
 redlock~=1.2.0
 oss2~=2.16.0
