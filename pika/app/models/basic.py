@@ -11,7 +11,7 @@
 """
 from uuid import uuid4
 
-from sqlalchemy import BOOLEAN, DATETIME, INT, SMALLINT, TEXT, Column, String, text
+from sqlalchemy import BOOLEAN, DATETIME, INT, SMALLINT, TEXT, Column, String, text, BigInteger
 
 from app.core.handler.sqlbin_uuid import BinaryUUID
 from app.enums.ByteSizeEnum import ByteSizeEnum
@@ -20,7 +20,7 @@ from app.models import Base
 
 class OnlyPrimaryKeyAndDesc(Base):
     id = Column(BinaryUUID, primary_key=True, default=uuid4, comment="id")
-    description = Column(String(ByteSizeEnum.LENGTH_600), default=None, comment="备注信息")
+    description = Column(String(ByteSizeEnum.LENGTH_600), nullable=True, default=None, comment="备注信息")
     __abstract__ = True
 
     def __init__(self, id=None, description=None):
@@ -144,3 +144,14 @@ class ApiGBaseModel(LargeBaseModel):
         self.response = response
         self.response_headers = response_headers
         self.cost = cost
+
+
+class AlongTimeStampBaseModel(OnlyPrimaryKeyAndDesc):
+    start_time = Column(BigInteger, nullable=True, server_default="0", comment="开始时间")
+    end_time = Column(BigInteger, nullable=True, server_default="0", comment="结束时间")
+    __abstract__ = True
+
+    def __init__(self, id=None, description=None, start_time=0, end_time=0):
+        self.start_time = start_time
+        self.end_time = end_time
+        super().__init__(id=id, description=description)

@@ -19,9 +19,18 @@ from app.schema.jmeter import (
     JmeterLatestBuildSchema,
     JmeterChartDataSchema,
     JmeterSummarySchema,
+    JmeterUploadResultSchema,
 )
+from app.crud.itst.api.jmeter import JmeterDao
 
 router = APIRouter()
+
+
+@router.post("/upload_result", summary="上传报告")
+async def upload_result(request: JmeterUploadResultSchema):
+    # TODO document why this method is empty
+    await JmeterDao.upload_result(request)
+    return PikaResponse.success()
 
 
 @router.get("/latest_build", summary="最新构建")
@@ -39,7 +48,7 @@ async def query_chart_data(
     request: JmeterChartDataSchema = Depends(),
     user_info=Depends(Permission()),
     session=Depends(async_db_session_iterator),
-):  
+):
     # TODO document why this method is empty
     pass
 
@@ -65,6 +74,6 @@ async def query_case_detail(
 
 
 @router.get("/base_info", summary="查询基础信息")
-async def query_base_info(user_info=Depends(Permission()), session=Depends(async_db_session_iterator)):   
+async def query_base_info(user_info=Depends(Permission()), session=Depends(async_db_session_iterator)):
     # TODO document why this method is empty
     pass

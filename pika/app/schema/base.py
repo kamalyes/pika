@@ -127,6 +127,11 @@ class BaseOnlyPointDateSchema(BaseModel):
     finished_date: Optional[datetime] = Query(Moment.skew_date(minutes=15), title="开始时间")
 
 
+class BaseOnlyPointTimeStampSchema(BaseModel):
+    start_time: Optional[int] = Body(0, title="开始时间")
+    end_time: Optional[int] = Body(0, title="结束时间")
+
+
 class BaseOnlyPagingSchema(BaseModel):
     page_index: Optional[int] = Body(1, title="分页下标")
     page_size: Optional[int] = Body(10, title="分页数量")

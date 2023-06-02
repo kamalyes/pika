@@ -74,7 +74,11 @@ class PikaFastApi:
         url, method = request.url, request.method
         common_ = f"{url}\t {method}\n"
         try:
-            common_ += str(await request.json())
+            common_ += str(  # The above code is using the `await` keyword to asynchronously wait for a
+                # JSON payload to be received from an HTTP request. It is likely part of an
+                # asynchronous web application or API built using Python.
+                await request.json()
+            )
         except Exception:
             try:
                 common_ += str(await request._get_form())
