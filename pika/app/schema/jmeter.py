@@ -19,22 +19,26 @@ class JmeterLatestBuildSchema(BaseModel):
 
 
 class JmeterSummarySchema(JmeterLatestBuildSchema, BaseOnlyPointTimeStampSchema, JmeterBatchNoSchema):
-    pass_rate: Optional[int] = Body(0, title="通过率")
+    pass_rate: Optional[str] = Body(None, title="通过率")
     duration: Optional[int] = Body(0, title="持续时间")
+    failure: Optional[int] = Body(0, title="失败数")
+    success: Optional[int] = Body(0, title="成功数")
+    total: Optional[int] = Body(0, title="用例总数")
+    result: Optional[int] = Body(0, title="测试结果")
 
 
 class TestCaseInfoSchema(BaseOnlyPointTimeStampSchema):
     module_name: Optional[str] = Body(..., title="模块名称", max_length=ByteSizeEnum.LENGTH_200)
     case_name: Optional[str] = Body(..., title="用例名称", max_length=ByteSizeEnum.LENGTH_200)
-    request_url: Optional[str] = Body(..., title="请求地址", max_length=ByteSizeEnum.LENGTH_1W)
+    request_url: Optional[str] = Body(..., title="请求地址")
     request_method: Optional[str] = Body(..., title="请求方法", max_length=ByteSizeEnum.LENGTH_200)
-    request_header: Optional[str] = Body(None, title="请求头", max_length=ByteSizeEnum.LENGTH_1W)
-    request_body: Optional[str] = Body(None, title="请求体", max_length=ByteSizeEnum.LENGTH_1W)
+    request_header: Optional[str] = Body(None, title="请求头")
+    request_body: Optional[str] = Body(None, title="请求体")
     response_code: Optional[str] = Body(None, title="响状态码", max_length=ByteSizeEnum.LENGTH_200)
-    response_header: Optional[str] = Body(None, title="响应头", max_length=ByteSizeEnum.LENGTH_1W)
-    response_body: Optional[str] = Body(None, title="响应体", max_length=ByteSizeEnum.LENGTH_1W)
+    response_header: Optional[str] = Body(None, title="响应头")
+    response_body: Optional[str] = Body(None, title="响应体")
     test_result: Optional[bool] = Body(False, title="测试结果")
-    fail_message: Optional[str] = Body(None, title="错误信息", max_length=ByteSizeEnum.LENGTH_1W)
+    fail_message: Optional[str] = Body(None, title="错误信息")
 
 
 class JmeterUploadResultSchema(BaseModel):

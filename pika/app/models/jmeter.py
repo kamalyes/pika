@@ -43,7 +43,7 @@ class JmeterTestSummaryModel(JmeterMinBaseModel):
     total = Column(BigInteger, comment="用例总数")
     success = Column(BigInteger, comment="成功数")
     failure = Column(BigInteger, comment="失败数")
-    pass_rate = Column(SMALLINT, server_default="0", comment="通过率")
+    pass_rate = Column(String(ByteSizeEnum.LENGTH_06), server_default="0", comment="通过率")
     duration = Column(BigInteger, server_default="0", comment="持续时间")
     result = Column(BOOLEAN, server_default="0", comment="测试结果")
 
