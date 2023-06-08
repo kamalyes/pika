@@ -1888,14 +1888,14 @@ reference = "tsinghua"
 
 [[package]]
 name = "mkdocs-material"
-version = "9.1.14"
+version = "9.1.15"
 description = "Documentation that simply works"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mkdocs_material-9.1.14-py3-none-any.whl", hash = "sha256:b56a9f955ed32d38333715cbbf68ce38f683bf38610c65094fa4ef2db9f08bcd"},
-    {file = "mkdocs_material-9.1.14.tar.gz", hash = "sha256:1ae74cc5464ef2f64574d4884512efed7f4db386fb9bc6af20fd427d7a702f49"},
+    {file = "mkdocs_material-9.1.15-py3-none-any.whl", hash = "sha256:b49e12869ab464558e2dd3c5792da5b748a7e0c48ee83b4d05715f98125a7a39"},
+    {file = "mkdocs_material-9.1.15.tar.gz", hash = "sha256:8513ab847c9a541ed3d11a3a7eed556caf72991ee786c31c5aac6691a121088a"},
 ]
 
 [package.dependencies]
@@ -1908,6 +1908,11 @@ pygments = ">=2.14"
 pymdown-extensions = ">=9.9.1"
 regex = ">=2022.4.24"
 requests = ">=2.26"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+reference = "tsinghua"
 
 [[package]]
 name = "mkdocs-material-extensions"
@@ -2947,6 +2952,11 @@ files = [
     {file = "pypinyin-0.49.0-py2.py3-none-any.whl", hash = "sha256:3791f5b647e446866e6b5d3a63942ecbaeb29b49fed268a9d9a4982241c35fe0"},
     {file = "pypinyin-0.49.0.tar.gz", hash = "sha256:a5d61a79c5f48f6b4a422f010c20d48fcd53c705784df4aa80e329493219a4be"},
 ]
+
+[package.source]
+type = "legacy"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+reference = "tsinghua"
 
 [[package]]
 name = "pytest"
@@ -4266,4 +4276,4 @@ all = ["Faker", "pypinyin", "cos-python-sdk-v5", "typing-extensions", "dictdiffe
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "d1fea078a5ee76561478cc456c55446a114c367c12efac7a8fd0a4aca9f36a75"
+content-hash = "5e74c029df9bcbf4485cf393a8133602f913ce55768804a3eab215d7be3f16f6"
