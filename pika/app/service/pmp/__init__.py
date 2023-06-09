@@ -11,4 +11,3 @@
 """
 # noinspection PyPep8Naming
 from app.service.pmp.project import router as project_router
-from app.service.pmp.project_role import router as project_role_router

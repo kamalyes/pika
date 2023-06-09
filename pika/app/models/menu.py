@@ -13,6 +13,7 @@
 from uuid import uuid4
 
 from sqlalchemy import INT, SMALLINT, Column, String
+from sqlalchemy.orm import relationship
 
 from app.core.handler.sqlbin_uuid import BinaryUUID
 from app.enums.ByteSizeEnum import ByteSizeEnum
@@ -43,6 +44,7 @@ class MenuModel(LargeBaseModel):
     sort = Column(INT, server_default="0", nullable=True, comment="排序")
     menu_type = Column(SMALLINT, nullable=True, comment="菜单类型")
     active_menu = Column(String(ByteSizeEnum.LENGTH_255), nullable=True, comment="显示页签")
+    children = relationship("MenuModel")
 
     def __init__(
         self,
@@ -83,3 +85,29 @@ class MenuModel(LargeBaseModel):
         self.sort = sort
         self.menu_type = menu_type
         self.active_menu = active_menu
+
+    def to_dict(self):
+        menu_dict = {
+            "id": self.id,
+            "path": self.path,
+            "name": self.name,
+            "component": self.component,
+            "title": self.title,
+            "is_link": self.is_link,
+            "is_hide": self.is_hide,
+            "is_keepalive": self.is_keepalive,
+            "is_affix": self.is_affix,
+            "is_iframe": self.is_iframe,
+            "roles": self.roles,
+            "icon": self.icon,
+            "parent_id": self.parent_id,
+            "redirect": self.redirect,
+            "sort": self.sort,
+            "menu_type": self.menu_type,
+            "active_menu": self.active_menu,
+            "enabled_flag": self.enabled_flag,
+            "children": [],
+        }
+        for child in self.children:
+            menu_dict["children"].append(child.to_dict())
+        return menu_dict

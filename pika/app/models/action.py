@@ -11,7 +11,7 @@
 """
 
 from sqlalchemy import Column, ForeignKey, String
-
+from app.models import sync_session
 from app.core.handler.sqlbin_uuid import BinaryUUID
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
@@ -23,12 +23,12 @@ from app.models.user import UserModel
 class ActionControlModel(NormBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_sys_action"
     __table_args__ = {"comment": "权限控制配置表"}
-    action_name = Column(String(ByteSizeEnum.LENGTH_128), nullable=False, comment="权限名称")
+    name = Column(String(ByteSizeEnum.LENGTH_128), nullable=False, comment="权限名称")
 
 
 class RoleAction(NormBaseModel):
-    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_user_action_relation"
-    __table_args__ = {"comment": "角色活动表"}
+    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_role_action"
+    __table_args__ = {"comment": "角色活动权限表"}
     emp_no = Column(
         String(ByteSizeEnum.LENGTH_20),
         ForeignKey(UserModel.emp_no, ondelete="cascade", onupdate="cascade"),
@@ -46,3 +46,23 @@ class RoleAction(NormBaseModel):
         nullable=False,
         comment="权限控制id",
     )
+
+
+def create_initial_actions():
+    actions = [
+        {"name": "admin"},
+        {"name": "user"},
+        # 可根据需要添加更多的权限记录
+    ]
+
+    db = sync_session()
+    try:
+        for action_data in actions:
+            action_data = ActionControlModel(**action_data)
+            db.add(action_data)
+        db.commit()
+    except:
+        db.rollback()
+        raise
+    finally:
+        db.close()

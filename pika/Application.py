@@ -32,7 +32,7 @@ from app.service.board import workspace_router
 from app.service.itst import api_testcase_router, api_testplan_router, jmeter_router
 from app.service.itstem import dbconfig_router, environment_router, gateway_router, gconfig_router, redis_config_router
 from app.service.online import redis_router, script_router, sql_router
-from app.service.pmp import project_role_router, project_router
+from app.service.pmp import project_router
 from app.service.rbac import (
     access_router,
     department_router,
