@@ -40,7 +40,6 @@ class EditRoleSchema(BaseQuerySchema):
     role_type: Optional[int] = Body(10, name="权限类型,10菜单权限,20用户组权限")
     status: Optional[int] = Body(10, name="状态 10 启用 20 禁用")
     description: Optional[str] = Body(None, name="描述", max_length=ByteSizeEnum.LENGTH_255)
-    pass
 
     class Config:
         orm_mode = True

@@ -39,6 +39,7 @@ class RoleAction(NormBaseModel):
         BinaryUUID,
         ForeignKey(MenuModel.id, ondelete="cascade", onupdate="cascade"),
         comment="对应menu_config表中的id",
+        nullable=False,
     )
     control_id = Column(
         BinaryUUID,

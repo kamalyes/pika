@@ -47,7 +47,6 @@ class SysUserAdminModel(LargeBaseModel):
     last_login_location = Column(String(ByteSizeEnum.LENGTH_30), comment="最后一次登录所在城市")
     last_login_date = Column(DATETIME, server_default=None, comment="最后一次登录时间")
     last_logout_date = Column(DATETIME, server_default=None, comment="最后一次退出登录时间")
-    relationship(UserModel, backref=backref("children", cascade="all, delete"))
 
     def __init__(
         self,

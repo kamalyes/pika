@@ -52,7 +52,6 @@ from custard.core import SystemHand
 from custard.limiter import Limiter, RateLimitException
 from custard.limiter.depends import RateLimiter
 from fastapi import Depends, FastAPI, Request, WebSocket, WebSocketDisconnect, status
-from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
@@ -618,6 +617,7 @@ def init_scheduler():
     engine_options = {"pool_recycle": PikaAppConfig.MYSQL_POOL_RECYCLE}
     job_store = {
         "default": SQLAlchemyJobStore(
+            tablename=f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_apscheduler_jobs",
             url=PikaAppConfig.SYNC_SQLALCHEMY_URI,
             engine_options=engine_options,
             pickle_protocol=PikaAppConfig.SQLALCHEMY_PICKLE_PROTOCOL,

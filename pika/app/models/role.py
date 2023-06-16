@@ -17,7 +17,7 @@ from app.models.basic import NormBaseModel
 
 
 class RoleModel(NormBaseModel):
-    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_role"
+    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_sys_role"
     __table_args__ = {"comment": "角色表"}
     name = Column(String(ByteSizeEnum.LENGTH_64), nullable=True, comment="菜单名称", index=True)
     role_type = Column(SMALLINT, server_default="10", nullable=False, comment="权限类型,10菜单权限,20用户组权限", index=True)

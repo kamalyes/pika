@@ -8,6 +8,49 @@ repos:
         language_version: python3.9
         entry: poetry run black pika
 
+  # - repo: https://github.com/pre-commit/pre-commit-hooks
+  #   rev: v3.9.0
+  #   hooks:
+  #     - id: check-added-large-files
+  #     - id: check-case-conflict
+  #     - id: check-merge-conflict
+  #     - id: check-symlinks
+  #     - id: check-toml
+  #     - id: check-yaml
+  #     - id: debug-statements
+  #     - id: end-of-file-fixer
+  #     - id: mixed-line-ending
+  #       args: [ "--fix=lf" ]
+  #     - id: trailing-whitespace
+
+  # - repo: https://github.com/asottile/pyupgrade
+  #   rev: v3.3.0
+  #   hooks:
+  #     - id: pyupgrade
+  #       args: [ "--py39-plus" ]
+
+  # - repo: https://github.com/pycqa/isort
+  #   rev: 5.12.0
+  #   hooks:
+  #     - id: isort
+  #       args: [ "-a", "from __future__ import annotations" ]
+
+  # - repo: https://github.com/codespell-project/codespell
+  #   rev: v2.2.1
+  #   hooks:
+  #     - id: codespell
+
+  # - repo: https://github.com/pre-commit/pygrep-hooks
+  #   rev: v1.10.0
+  #   hooks:
+  #     - id: python-check-blanket-noqa
+  #     - id: python-check-blanket-type-ignore
+  #     - id: python-no-eval
+  #     - id: python-use-type-annotations
+  #     - id: rst-backticks
+  #     - id: rst-directive-colons
+  #     - id: rst-inline-touching-normal
+
   # - repo: local
   #   hooks:
   #     - id: ruff

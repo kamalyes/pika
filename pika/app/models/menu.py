@@ -10,19 +10,16 @@
 @Desc    :  None
 """
 
-from uuid import uuid4
-
-from sqlalchemy import INT, SMALLINT, Column, String
-from sqlalchemy.orm import relationship
-
+from sqlalchemy import INT, SMALLINT, Column, String, ForeignKey
 from app.core.handler.sqlbin_uuid import BinaryUUID
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
+from app.models.role import RoleModel
 
 
 class MenuModel(LargeBaseModel):
-    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_menu"
+    __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_sys_menu"
     __table_args__ = {"comment": "菜单表"}
     path = Column(String(ByteSizeEnum.LENGTH_255), nullable=True, comment="菜单路径")
     name = Column(String(ByteSizeEnum.LENGTH_255), nullable=True, comment="菜单名称", index=True)
@@ -37,14 +34,23 @@ class MenuModel(LargeBaseModel):
     is_keepalive = Column(SMALLINT, nullable=True, default=True, comment="菜单是否缓存")
     is_affix = Column(SMALLINT, nullable=True, default=False, comment="固定标签")
     is_iframe = Column(SMALLINT, nullable=True, default=False, comment="是否内嵌")
-    roles = Column(String(ByteSizeEnum.LENGTH_64), nullable=True, default=False, comment="权限")
+    role_id = Column(
+        BinaryUUID,
+        ForeignKey(RoleModel.id, ondelete="cascade", onupdate="cascade"),
+        comment="角色id",
+        nullable=False,
+    )
     icon = Column(String(ByteSizeEnum.LENGTH_64), nullable=True, comment="icon", index=True)
-    parent_id = Column(BinaryUUID, default=uuid4, nullable=True, comment="父级菜单id")
+    parent_id = Column(
+        BinaryUUID,
+        ForeignKey(f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_sys_menu.id", ondelete="cascade", onupdate="cascade"),
+        comment="父菜单id",
+        nullable=False,
+    )
     redirect = Column(String(ByteSizeEnum.LENGTH_255), nullable=True, comment="重定向路由")
     sort = Column(INT, server_default="0", nullable=True, comment="排序")
     menu_type = Column(SMALLINT, nullable=True, comment="菜单类型")
     active_menu = Column(String(ByteSizeEnum.LENGTH_255), nullable=True, comment="显示页签")
-    children = relationship("MenuModel")
 
     def __init__(
         self,
@@ -58,7 +64,7 @@ class MenuModel(LargeBaseModel):
         is_keepalive,
         is_affix,
         is_iframe,
-        roles,
+        role_id,
         icon,
         parent_id,
         redirect,
@@ -78,7 +84,7 @@ class MenuModel(LargeBaseModel):
         self.is_keepalive = is_keepalive
         self.is_affix = is_affix
         self.is_iframe = is_iframe
-        self.roles = roles
+        self.role_id = role_id
         self.icon = icon
         self.parent_id = parent_id
         self.redirect = redirect
@@ -98,7 +104,7 @@ class MenuModel(LargeBaseModel):
             "is_keepalive": self.is_keepalive,
             "is_affix": self.is_affix,
             "is_iframe": self.is_iframe,
-            "roles": self.roles,
+            "role_id": self.role_id,
             "icon": self.icon,
             "parent_id": self.parent_id,
             "redirect": self.redirect,
