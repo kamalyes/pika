@@ -38,7 +38,7 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                         ApiTestCaseAssertsModel.case_id == case_id,
                         ApiTestCaseAssertsModel.delete_flag == 0,
                     ),
-                ).order_by(asc(ApiTestCaseAssertsModel.name))
+                ).order_by(asc(ApiTestCaseAssertsModel.id))
                 return query.scalars().all()
         except Exception as e:
             err_detail = f"获取用例断言失败, error: {str(e)}"
@@ -51,7 +51,7 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                 sql = (
                     select(ApiTestCaseAssertsModel)
                     .where(ApiTestCaseAssertsModel.case_id == case_id, ApiTestCaseAssertsModel.delete_flag == 0)
-                    .order_by(ApiTestCaseAssertsModel.name)
+                    .order_by(asc(ApiTestCaseAssertsModel.id))
                 )
                 case_list = await session.execute(sql)
                 return case_list.scalars().all()

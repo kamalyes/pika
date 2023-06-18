@@ -28,9 +28,15 @@ router = APIRouter()
 
 @router.post("/upload_result", summary="上传报告")
 async def upload_result(request: JmeterUploadResultSchema):
-    # TODO document why this method is empty
     await JmeterDao.upload_result(request)
     return PikaResponse.success()
+
+
+
+@router.get("/base_info", summary="查询基础信息")
+async def query_base_info(user_info=Depends(Permission()), session=Depends(async_db_session_iterator)):
+    data = await JmeterDao.query_base_info()
+    return PikaResponse.success(data=data)
 
 
 @router.get("/latest_build", summary="最新构建")
@@ -69,11 +75,5 @@ async def query_case_detail(
     user_info=Depends(Permission()),
     session=Depends(async_db_session_iterator),
 ):
-    # TODO document why this method is empty
-    pass
-
-
-@router.get("/base_info", summary="查询基础信息")
-async def query_base_info(user_info=Depends(Permission()), session=Depends(async_db_session_iterator)):
     # TODO document why this method is empty
     pass

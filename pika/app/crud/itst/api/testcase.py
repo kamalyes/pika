@@ -64,7 +64,7 @@ class ApiTestCaseDao(PikaWrapper):
                 if operator:
                     filters.append(ApiTestCaseModel.create_emp_no == operator)
             async with async_session() as session:
-                sql = select(ApiTestCaseModel).where(*filters).order_by(ApiTestCaseModel.name.asc())
+                sql = select(ApiTestCaseModel).where(*filters).order_by(ApiTestCaseModel.id.asc())
                 result, total = await cls.pagination(paging.page_index, paging.page_size, session, sql, False)
                 return result, total
         except Exception as e:
