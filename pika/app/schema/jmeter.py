@@ -6,7 +6,7 @@ from app.schema.base import BaseOnlyDescSchema, BaseOnlyIdSchema, BaseOnlyNameSc
 
 
 class JmeterBatchNoSchema(BaseModel):
-    batch_no: Optional[str] = Body(..., title="用例批次编号", max_length=ByteSizeEnum.LENGTH_200)
+    batch_no: Optional[str] = Body(None, title="用例批次编号", max_length=ByteSizeEnum.LENGTH_200)
 
 
 class JmeterRunTypeSchema(BaseModel):
@@ -14,8 +14,8 @@ class JmeterRunTypeSchema(BaseModel):
 
 
 class JmeterLatestBuildSchema(BaseModel):
-    project: Optional[str] = Body(..., title="项目名称", max_length=ByteSizeEnum.LENGTH_200)
-    env: Optional[str] = Body(..., title="环境", max_length=ByteSizeEnum.LENGTH_200)
+    project: Optional[str] = Body(None, title="项目名称", max_length=ByteSizeEnum.LENGTH_200)
+    env: Optional[str] = Body(None, title="环境", max_length=ByteSizeEnum.LENGTH_200)
 
 
 class JmeterSummarySchema(JmeterLatestBuildSchema, BaseOnlyPointTimeStampSchema, JmeterBatchNoSchema):

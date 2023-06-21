@@ -32,7 +32,6 @@ async def upload_result(request: JmeterUploadResultSchema):
     return PikaResponse.success()
 
 
-
 @router.get("/base_info", summary="查询基础信息")
 async def query_base_info(user_info=Depends(Permission()), session=Depends(async_db_session_iterator)):
     data = await JmeterDao.query_base_info()

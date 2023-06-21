@@ -101,7 +101,7 @@ npm ERR! the command again as root/Administrator.
 npm ERR! You can rerun the command with `--loglevel=verbose` to see the logs in your terminal
 ```
 
-- 部署redis [主从复制](<https://yuyanqing.cn/pages/c60ada/>)
+- 部署redis [主从复制](<https://www.yuyanqing.cn/pages/c60ada/>)
 
 ```bash
 # 将pika项目下redis.conf复制到/opt/redis目录下
@@ -109,7 +109,7 @@ mkdir -p /opt/redis/master/conf && cp /opt/pika/pika/conf/redis.conf /opt/redis/
 docker run --name redis-master -d  -p 16389:6379 --privileged=true -v /opt/redis/master/conf/redis.conf:/etc/redis/redis.conf -v /opt/redis/master:/data  redis:7.0.8-alpine  redis-server /etc/redis/redis.conf --appendonly yes --protected-mode no --requirepass "M5Pi9YW6u" 
 ```
 
-- 部署mysql [pxc主从同步](<https://yuyanqing.cn/pages/c905ada/>)
+- 部署mysql [pxc主从同步](<https://www.yuyanqing.cn/pages/c905ada/>)
 
 ```bash
 # 执行完后需等待2min初始化数据

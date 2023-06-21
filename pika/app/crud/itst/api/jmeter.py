@@ -47,16 +47,13 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
             cls.__log__.error(err_detail)
             raise Exception(err_detail)
 
-
     @classmethod
-    async def query_base_info(cls) ->JmeterLatestBuildSchema:
+    async def query_base_info(cls) -> JmeterLatestBuildSchema:
         try:
             async with async_db_session_generator() as session:
                 async with session.begin():
-                    env_sql = (select(JmeterTestSummaryModel.env)
-                           .distinct(JmeterTestSummaryModel.env))
-                    project_sql = (select(JmeterTestSummaryModel.project)
-                           .distinct(JmeterTestSummaryModel.project))
+                    env_sql = select(JmeterTestSummaryModel.env).distinct(JmeterTestSummaryModel.env)
+                    project_sql = select(JmeterTestSummaryModel.project).distinct(JmeterTestSummaryModel.project)
                     query_env = await session.execute(env_sql)
                     query_project = await session.execute(project_sql)
                     env_data = query_env.scalars().all()

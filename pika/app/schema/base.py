@@ -69,7 +69,7 @@ class BaseOnlyDirectoryIdSchema(BaseModel):
 
 
 class BaseOnlyNameSchema(BaseModel):
-    name: Optional[str] = Body(..., title="名称", min_length=2, max_length=ByteSizeEnum.LENGTH_255)
+    name: Optional[str] = Body(None, title="名称", min_length=2, max_length=ByteSizeEnum.LENGTH_255)
 
 
 class BaseOnlyProtocolSchema(BaseModel):
