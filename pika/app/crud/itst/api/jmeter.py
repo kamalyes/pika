@@ -13,10 +13,15 @@
 from uuid import uuid4
 from app.core.handler.logger import PikaLogger
 from app.crud import PikaWrapper
-from app.schema.jmeter import JmeterUploadResultSchema, JmeterLatestBuildSchema
+from app.schema.jmeter import (
+    JmeterUploadResultSchema,
+    JmeterLatestBuildSchema,
+    JmeterChartDataSchema,
+    JmeterSummarySchema,
+)
 from app.crud import PikaMdWrapper
 from app.models.jmeter import JmeterTestCaseModel, JmeterTestSummaryModel
-from sqlalchemy import select
+from sqlalchemy import or_, and_, select, desc
 from app.models import async_session, async_db_session_generator
 from app.core.handler.jsonres import PikaModelEncoder
 
@@ -43,7 +48,7 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
                         JmeterTestCaseModel.__table__.insert(), [test_case for test_case in test_cases_]
                     )
         except Exception as e:
-            err_detail = f"新增前/后置条件: {test_summary.batch_no}失败, {e}"
+            err_detail = f"Jmeter测试报告上传失败, {e}"
             cls.__log__.error(err_detail)
             raise Exception(err_detail)
 
@@ -66,20 +71,93 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
 
     @classmethod
     async def query_latest_build(cls):
-        # TODO document why this method is empty
-        pass
+        try:
+            async with async_db_session_generator() as session:
+                async with session.begin():
+                    _sql = select(JmeterTestSummaryModel).order_by(desc(JmeterTestSummaryModel.operator_date))
+                    query_data = await session.execute(_sql)
+                    result = query_data.scalars().first()
+            return result
+        except Exception as e:
+            err_detail = f"查询JmeterTestSummaryLatestBuild失败, {e}"
+            cls.__log__.error(err_detail)
+            raise Exception(err_detail)
 
     @classmethod
-    async def query_chart_data(cls):
-        # TODO document why this method is empty
-        pass
+    async def query_chart_data(cls, request: JmeterChartDataSchema) -> JmeterTestSummaryModel:
+        try:
+            async with async_db_session_generator() as session:
+                async with session.begin():
+                    os_type_ = [1, 2] if request.os_type == 0 else [request.os_type]
+                    conditions = [JmeterTestSummaryModel.os_type.in_(os_type_)]
+                    _sql = (
+                        select(
+                            JmeterTestSummaryModel.id,
+                            JmeterTestSummaryModel.batch_no,
+                            JmeterTestSummaryModel.os_type,
+                            JmeterTestSummaryModel.success,
+                            JmeterTestSummaryModel.failure,
+                            JmeterTestSummaryModel.total,
+                        )
+                        .where(
+                            and_(
+                                JmeterTestSummaryModel.env == request.env,
+                                JmeterTestSummaryModel.project == request.project,
+                                *conditions,
+                            )
+                            if request.env and request.project
+                            else or_(
+                                JmeterTestSummaryModel.start_time >= request.start_time,
+                                JmeterTestSummaryModel.end_time <= request.end_time,
+                                *conditions,
+                            )
+                        )
+                        .order_by(desc(JmeterTestSummaryModel.operator_date))
+                        .offset(0)
+                        .limit(20)
+                    )
+                    query_data = await session.execute(_sql)
+            return query_data.all()
+        except Exception as e:
+            err_detail = f"查询JmeterChartData失败, {e}"
+            cls.__log__.error(err_detail)
+            raise Exception(err_detail)
 
     @classmethod
-    async def query_summary_list(cls):
-        # TODO document why this method is empty
-        pass
+    async def query_summary_list(cls, request: JmeterSummarySchema):
+        try:
+            os_type_ = [1, 2] if request.os_type == 0 else [request.os_type]
+            filters = [JmeterTestSummaryModel.os_type.in_(os_type_)]
+            if request.env and request.project:
+                filters.append(
+                    JmeterTestSummaryModel.env == request.env, JmeterTestSummaryModel.project == request.project
+                )
+            async with async_session() as session:
+                sql = (
+                    select(JmeterTestSummaryModel).where(*filters).order_by(JmeterTestSummaryModel.operator_date.asc())
+                )
+                result, total = await cls.pagination(request.page_index, request.page_size, session, sql, True)
+                return result, total
+        except Exception as e:
+            err_detail = f"获取JmeterSummary失败, error: {str(e)}"
+            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            raise Exception(err_detail)
 
     @classmethod
-    async def query_case_detail(cls):
-        # TODO document why this method is empty
-        pass
+    async def query_case_detail(cls, request):
+        try:
+            async with async_db_session_generator() as session:
+                async with session.begin():
+                    jts_sql = select(JmeterTestSummaryModel).where(JmeterTestSummaryModel.id == request.id)
+                    jts_exec = await session.execute(jts_sql)
+                    summary_info = jts_exec.scalars().first()
+                    if summary_info is None:
+                        raise Exception("数据不存在")
+                    jtc_sql = select(JmeterTestCaseModel).where(JmeterTestCaseModel.batch_no == summary_info.batch_no)
+                    jtc_exec = await session.execute(jtc_sql)
+                    case_info = jtc_exec.scalars().all()
+            return {"summary_info": summary_info, "case_info": case_info}
+        except Exception as e:
+            err_detail = f"查询JmeterTestCaseDetail失败, {e}"
+            cls.__log__.error(err_detail)
+            raise Exception(err_detail)

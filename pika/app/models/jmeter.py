@@ -39,7 +39,7 @@ class JmeterTestSummaryModel(JmeterMinBaseModel):
     batch_no = Column(String(ByteSizeEnum.LENGTH_128), comment="用例批次编号", nullable=False)
     project = Column(String(ByteSizeEnum.LENGTH_200), server_default=None, comment="项目名称")
     env = Column(String(ByteSizeEnum.LENGTH_200), comment="环境名称")
-    os_type = Column(SMALLINT, comment="机器类型")
+    os_type = Column(SMALLINT, comment="机器类型(1:手动构建/2:自动化)")
     total = Column(BigInteger, comment="用例总数")
     success = Column(BigInteger, comment="成功数")
     failure = Column(BigInteger, comment="失败数")

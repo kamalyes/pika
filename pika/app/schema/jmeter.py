@@ -2,11 +2,21 @@ from typing import List, MutableSequence, Optional
 from fastapi import Body
 from pydantic import BaseModel
 from app.enums.ByteSizeEnum import ByteSizeEnum
-from app.schema.base import BaseOnlyDescSchema, BaseOnlyIdSchema, BaseOnlyNameSchema, BaseOnlyPointTimeStampSchema
+from app.schema.base import (
+    BaseOnlyDescSchema,
+    BaseOnlyIdSchema,
+    BaseOnlyNameSchema,
+    BaseOnlyPointTimeStampSchema,
+    BaseOnlyPagingSchema,
+)
 
 
 class JmeterBatchNoSchema(BaseModel):
     batch_no: Optional[str] = Body(None, title="用例批次编号", max_length=ByteSizeEnum.LENGTH_200)
+
+
+class JmeterRunIdSchema(BaseOnlyIdSchema):
+    ...
 
 
 class JmeterRunTypeSchema(BaseModel):
@@ -18,7 +28,13 @@ class JmeterLatestBuildSchema(BaseModel):
     env: Optional[str] = Body(None, title="环境", max_length=ByteSizeEnum.LENGTH_200)
 
 
-class JmeterSummarySchema(JmeterLatestBuildSchema, BaseOnlyPointTimeStampSchema, JmeterBatchNoSchema):
+class JmeterSummarySchema(
+    JmeterRunTypeSchema,
+    BaseOnlyPagingSchema,
+    JmeterLatestBuildSchema,
+    BaseOnlyPointTimeStampSchema,
+    JmeterBatchNoSchema,
+):
     pass_rate: Optional[str] = Body(None, title="通过率")
     duration: Optional[int] = Body(0, title="持续时间")
     failure: Optional[int] = Body(0, title="失败数")

@@ -209,6 +209,7 @@ default-time_zone ： mysql的时区
 - <https://github.com/wuranxu/pity>
 - <https://github.com/wuranxu/pityWeb>
 - <https://github.com/hui-huo/jmeter_report_server>
+- <https://github.com/hui-huo/jmeter-report-web>
 - <https://github.com/hui-huo/JMeter-Backend-Listener>
 
 ### Git提交规范

@@ -15,7 +15,7 @@ from app.models import async_db_session_iterator
 from app.service import Permission
 from app.utils.ws_manager import ws_manage
 from app.schema.jmeter import (
-    JmeterBatchNoSchema,
+    JmeterRunIdSchema,
     JmeterLatestBuildSchema,
     JmeterChartDataSchema,
     JmeterSummarySchema,
@@ -44,8 +44,8 @@ async def query_latest_build(
     user_info=Depends(Permission()),
     session=Depends(async_db_session_iterator),
 ):
-    # TODO document why this method is empty
-    pass
+    data = await JmeterDao.query_latest_build()
+    return PikaResponse.success(data=data)
 
 
 @router.get("/chart_data", summary="查询图表数据")
@@ -54,8 +54,8 @@ async def query_chart_data(
     user_info=Depends(Permission()),
     session=Depends(async_db_session_iterator),
 ):
-    # TODO document why this method is empty
-    pass
+    data = await JmeterDao.query_chart_data(request)
+    return PikaResponse.success(data=data)
 
 
 @router.get("/summary_list", summary="查询构建信息列表")
@@ -64,15 +64,15 @@ async def query_summary_list(
     user_info=Depends(Permission()),
     session=Depends(async_db_session_iterator),
 ):
-    # TODO document why this method is empty
-    pass
+    data, total = await JmeterDao.query_summary_list(request)
+    return PikaResponse.success_with_size(data=data, total=total)
 
 
 @router.get("/case_detail", summary="查询测试详情")
 async def query_case_detail(
-    request: JmeterBatchNoSchema = Depends(),
+    request: JmeterRunIdSchema = Depends(),
     user_info=Depends(Permission()),
     session=Depends(async_db_session_iterator),
 ):
-    # TODO document why this method is empty
-    pass
+    data = await JmeterDao.query_case_detail(request)
+    return PikaResponse.success(data=data)
