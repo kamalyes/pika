@@ -30,6 +30,8 @@ class BaseConfig(BaseSettings):
     # MySQL config
     MYSQL_ECHO: Optional[bool] = False
     MYSQL_POOL_RECYCLE: Optional[int] = 1500
+    MYSQL_MAX_OVERFLOW: Optional[int] = 0
+    MYSQL_POOL_SIZE: Optional[int] = 20
     TABLE_TAG = "__table_args__"
     SQLALCHEMY_PICKLE_PROTOCOL: Optional[int] = 3  # pickle.HIGHEST_PROTOCOL
     CONNECT_SQLALCHEMY_URI: Optional[str] = None
