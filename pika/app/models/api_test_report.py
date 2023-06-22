@@ -65,6 +65,7 @@ class ApiTestReportModel(Base):
         plan_id: str = None,
         finished_date: datetime = None,
         cost=0,
+        delete_flag=False,
     ):
         self.executor = executor
         self.env = env
@@ -79,4 +80,4 @@ class ApiTestReportModel(Base):
         self.status = status
         self.plan_id = plan_id
         self.finished_date = finished_date
-        self.delete_flag = 0
+        self.delete_flag = delete_flag

@@ -17,7 +17,8 @@ from app.schema.jmeter import (
     JmeterUploadResultSchema,
     JmeterLatestBuildSchema,
     JmeterChartDataSchema,
-    JmeterSummarySchema,
+    JmeterSummaryListSchema,
+    JmeterCaseDetailSchema,
 )
 from app.crud import PikaMdWrapper
 from app.models.jmeter import JmeterTestCaseModel, JmeterTestSummaryModel
@@ -44,9 +45,10 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
                         )
                         for tc in test_cases
                     ]
-                    await session.execute(
-                        JmeterTestCaseModel.__table__.insert(), [test_case for test_case in test_cases_]
-                    )
+                    if test_cases_:
+                        await session.execute(
+                            JmeterTestCaseModel.__table__.insert(), [test_case for test_case in test_cases_]
+                        )
         except Exception as e:
             err_detail = f"Jmeter测试报告上传失败, {e}"
             cls.__log__.error(err_detail)
@@ -88,28 +90,34 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
         try:
             async with async_db_session_generator() as session:
                 async with session.begin():
-                    os_type_ = [1, 2] if request.os_type == 0 else [request.os_type]
-                    conditions = [JmeterTestSummaryModel.os_type.in_(os_type_)]
+                    chart_type = 1 if request.chart_type not in (1, 2) else request.chart_type
+                    conditions = [JmeterTestSummaryModel.pass_rate]
                     _sql = (
                         select(
-                            JmeterTestSummaryModel.id,
-                            JmeterTestSummaryModel.batch_no,
-                            JmeterTestSummaryModel.os_type,
-                            JmeterTestSummaryModel.success,
-                            JmeterTestSummaryModel.failure,
-                            JmeterTestSummaryModel.total,
+                            (
+                                JmeterTestSummaryModel.id,
+                                JmeterTestSummaryModel.batch_no,
+                                JmeterTestSummaryModel.os_type,
+                                JmeterTestSummaryModel.success,
+                                JmeterTestSummaryModel.failure,
+                                JmeterTestSummaryModel.total,
+                            )
+                            if chart_type == 1
+                            else (
+                                JmeterTestSummaryModel.id,
+                                JmeterTestSummaryModel.batch_no,
+                                JmeterTestSummaryModel.pass_rate,
+                            )
                         )
                         .where(
                             and_(
                                 JmeterTestSummaryModel.env == request.env,
                                 JmeterTestSummaryModel.project == request.project,
-                                *conditions,
                             )
                             if request.env and request.project
                             else or_(
                                 JmeterTestSummaryModel.start_time >= request.start_time,
                                 JmeterTestSummaryModel.end_time <= request.end_time,
-                                *conditions,
                             )
                         )
                         .order_by(desc(JmeterTestSummaryModel.operator_date))
@@ -124,7 +132,7 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
             raise Exception(err_detail)
 
     @classmethod
-    async def query_summary_list(cls, request: JmeterSummarySchema):
+    async def query_summary_list(cls, request: JmeterSummaryListSchema):
         try:
             os_type_ = [1, 2] if request.os_type == 0 else [request.os_type]
             filters = [JmeterTestSummaryModel.os_type.in_(os_type_)]
@@ -133,9 +141,7 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
                     JmeterTestSummaryModel.env == request.env, JmeterTestSummaryModel.project == request.project
                 )
             async with async_session() as session:
-                sql = (
-                    select(JmeterTestSummaryModel).where(*filters).order_by(JmeterTestSummaryModel.operator_date.asc())
-                )
+                sql = select(JmeterTestSummaryModel).where(*filters).order_by(JmeterTestSummaryModel.end_time.desc())
                 result, total = await cls.pagination(request.page_index, request.page_size, session, sql, True)
                 return result, total
         except Exception as e:
@@ -144,7 +150,7 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
             raise Exception(err_detail)
 
     @classmethod
-    async def query_case_detail(cls, request):
+    async def query_case_detail(cls, request: JmeterCaseDetailSchema):
         try:
             async with async_db_session_generator() as session:
                 async with session.begin():
@@ -153,7 +159,11 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
                     summary_info = jts_exec.scalars().first()
                     if summary_info is None:
                         raise Exception("数据不存在")
-                    jtc_sql = select(JmeterTestCaseModel).where(JmeterTestCaseModel.batch_no == summary_info.batch_no)
+                    jtc_sql = (
+                        select(JmeterTestCaseModel)
+                        .where(JmeterTestCaseModel.batch_no == summary_info.batch_no)
+                        .order_by(JmeterTestCaseModel.error_count.desc(), JmeterTestCaseModel.end_time.desc())
+                    )
                     jtc_exec = await session.execute(jtc_sql)
                     case_info = jtc_exec.scalars().all()
             return {"summary_info": summary_info, "case_info": case_info}

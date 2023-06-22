@@ -15,7 +15,7 @@ class JmeterBatchNoSchema(BaseModel):
     batch_no: Optional[str] = Body(None, title="用例批次编号", max_length=ByteSizeEnum.LENGTH_200)
 
 
-class JmeterRunIdSchema(BaseOnlyIdSchema):
+class JmeterCaseDetailSchema(BaseOnlyIdSchema, BaseOnlyPagingSchema):
     ...
 
 
@@ -30,7 +30,6 @@ class JmeterLatestBuildSchema(BaseModel):
 
 class JmeterSummarySchema(
     JmeterRunTypeSchema,
-    BaseOnlyPagingSchema,
     JmeterLatestBuildSchema,
     BaseOnlyPointTimeStampSchema,
     JmeterBatchNoSchema,
@@ -43,6 +42,10 @@ class JmeterSummarySchema(
     result: Optional[int] = Body(0, title="测试结果")
 
 
+class JmeterSummaryListSchema(BaseOnlyPagingSchema, JmeterSummarySchema):
+    ...
+
+
 class TestCaseInfoSchema(BaseOnlyPointTimeStampSchema):
     module_name: Optional[str] = Body(..., title="模块名称", max_length=ByteSizeEnum.LENGTH_200)
     case_name: Optional[str] = Body(..., title="用例名称", max_length=ByteSizeEnum.LENGTH_200)
@@ -53,8 +56,20 @@ class TestCaseInfoSchema(BaseOnlyPointTimeStampSchema):
     response_code: Optional[str] = Body(None, title="响状态码", max_length=ByteSizeEnum.LENGTH_200)
     response_header: Optional[str] = Body(None, title="响应头")
     response_body: Optional[str] = Body(None, title="响应体")
-    test_result: Optional[bool] = Body(False, title="测试结果")
     fail_message: Optional[str] = Body(None, title="错误信息")
+    cookies: Optional[str] = Body(None, title="cookies")
+    request_size: Optional[int] = Body(0, title="请求数据大小")
+    error_count: Optional[int] = Body(0, title="失败数量")
+    successful: Optional[bool] = Body(False, title="是否通过、成功（符合预期断言）")
+    connect_time: Optional[int] = Body(0, title="连接时间")
+    latency: Optional[int] = Body(0, title="延迟")
+    group_threads: Optional[int] = Body(0, title="线程组数")
+    all_threads: Optional[int] = Body(0, title="所有线程数")
+    data_encoding: Optional[str] = Body(None, title="数据编码类型")
+    ignore: Optional[bool] = Body(False, title="是否忽略")
+    total_assertions: Optional[int] = Body(0, title="断言点总数")
+    pass_assertions: Optional[int] = Body(0, title="断言成功数量")
+    assertions: Optional[list] = Body([], title="断言详情")
 
 
 class JmeterUploadResultSchema(BaseModel):
@@ -68,6 +83,5 @@ class JmeterChartDataSchema(
     BaseOnlyNameSchema,
     BaseOnlyPointTimeStampSchema,
     JmeterLatestBuildSchema,
-    JmeterRunTypeSchema,
 ):
-    ...
+    chart_type: Optional[int] = Body(0, title="os类型")

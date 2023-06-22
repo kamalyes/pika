@@ -15,10 +15,10 @@ from app.models import async_db_session_iterator
 from app.service import Permission
 from app.utils.ws_manager import ws_manage
 from app.schema.jmeter import (
-    JmeterRunIdSchema,
+    JmeterCaseDetailSchema,
     JmeterLatestBuildSchema,
     JmeterChartDataSchema,
-    JmeterSummarySchema,
+    JmeterSummaryListSchema,
     JmeterUploadResultSchema,
 )
 from app.crud.itst.api.jmeter import JmeterDao
@@ -60,7 +60,7 @@ async def query_chart_data(
 
 @router.get("/summary_list", summary="查询构建信息列表")
 async def query_summary_list(
-    request: JmeterSummarySchema = Depends(),
+    request: JmeterSummaryListSchema = Depends(),
     user_info=Depends(Permission()),
     session=Depends(async_db_session_iterator),
 ):
@@ -70,7 +70,7 @@ async def query_summary_list(
 
 @router.get("/case_detail", summary="查询测试详情")
 async def query_case_detail(
-    request: JmeterRunIdSchema = Depends(),
+    request: JmeterCaseDetailSchema = Depends(),
     user_info=Depends(Permission()),
     session=Depends(async_db_session_iterator),
 ):

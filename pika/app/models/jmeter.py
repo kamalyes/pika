@@ -10,7 +10,6 @@
 @Desc    :  jmeter
 """
 
-from uuid import uuid4
 from app.models.basic import AlongTimeStampBaseModel
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.enums.ByteSizeEnum import ByteSizeEnum
@@ -39,10 +38,10 @@ class JmeterTestSummaryModel(JmeterMinBaseModel):
     batch_no = Column(String(ByteSizeEnum.LENGTH_128), comment="用例批次编号", nullable=False)
     project = Column(String(ByteSizeEnum.LENGTH_200), server_default=None, comment="项目名称")
     env = Column(String(ByteSizeEnum.LENGTH_200), comment="环境名称")
-    os_type = Column(SMALLINT, comment="机器类型(1:手动构建/2:自动化)")
-    total = Column(BigInteger, comment="用例总数")
-    success = Column(BigInteger, comment="成功数")
-    failure = Column(BigInteger, comment="失败数")
+    os_type = Column(SMALLINT, server_default="0", comment="机器类型(1:手动构建/2:自动化)")
+    total = Column(BigInteger, server_default="0", comment="用例总数")
+    success = Column(BigInteger, server_default="0", comment="成功数")
+    failure = Column(BigInteger, server_default="0", comment="失败数")
     pass_rate = Column(String(ByteSizeEnum.LENGTH_06), server_default="0", comment="通过率")
     duration = Column(BigInteger, server_default="0", comment="持续时间")
     result = Column(BOOLEAN, server_default="0", comment="测试结果")
@@ -90,24 +89,48 @@ class JmeterTestCaseModel(JmeterMinBaseModel):
     request_body = Column(TEXT, nullable=True, comment="请求体")
     response_header = Column(TEXT, nullable=True, comment="响应头")
     response_body = Column(TEXT, nullable=True, comment="响应体")
-    response_code = Column(String(ByteSizeEnum.LENGTH_200), nullable=True, comment="响应状态码")
-    test_result = Column(BOOLEAN, comment="测试结果")
-    fail_message = Column(TEXT, nullable=True, comment="模块名称")
+    response_code = Column(String(ByteSizeEnum.LENGTH_200), server_default="200", comment="响应状态码")
+    fail_message = Column(TEXT, nullable=True, comment="失败明细")
+    cookies = Column(TEXT, nullable=True, comment="cookies")
+    request_size = Column(BigInteger, server_default="0", comment="请求数据大小")
+    error_count = Column(BigInteger, server_default="0", comment="失败数量")
+    successful = Column(BOOLEAN, server_default="0", comment="是否通过、成功（符合预期断言）")
+    connect_time = Column(BigInteger, server_default="0", comment="连接时间")
+    latency = Column(BigInteger, server_default="0", comment="延迟")
+    group_threads = Column(BigInteger, server_default="0", comment="线程组数")
+    all_threads = Column(BigInteger, server_default="0", comment="所有线程数")
+    data_encoding = Column(TEXT, nullable=True, comment="数据编码类型")
+    ignore = Column(BOOLEAN, server_default="0", comment="是否忽略")
+    total_assertions = Column(BigInteger, server_default="0", comment="断言点总数")
+    pass_assertions = Column(BigInteger, server_default="0", comment="断言成功数量")
+    assertions = Column(TEXT, nullable=True, comment="断言详情")
 
     def __init__(
         self,
-        batch_no,
+        batch_no=None,
         module_name=None,
         case_name=None,
         request_url=None,
         request_method=None,
-        request_header=0,
+        request_header=None,
         request_body=None,
         response_header=None,
         response_body=None,
         response_code=None,
-        test_result=False,
         fail_message=None,
+        cookies=None,
+        request_size=None,
+        error_count=None,
+        successful=False,
+        connect_time=None,
+        latency=None,
+        group_threads=None,
+        all_threads=None,
+        data_encoding=None,
+        ignore=False,
+        total_assertions=None,
+        pass_assertions=None,
+        assertions=None,
         id=None,
         operator=None,
         description=None,
@@ -125,5 +148,17 @@ class JmeterTestCaseModel(JmeterMinBaseModel):
         self.response_header = response_header
         self.response_body = response_body
         self.response_code = response_code
-        self.test_result = test_result
         self.fail_message = fail_message
+        self.cookies = cookies
+        self.request_size = request_size
+        self.error_count = error_count
+        self.successful = successful
+        self.connect_time = connect_time
+        self.latency = latency
+        self.group_threads = group_threads
+        self.all_threads = all_threads
+        self.data_encoding = data_encoding
+        self.ignore = ignore
+        self.total_assertions = total_assertions
+        self.pass_assertions = pass_assertions
+        self.assertions = str(assertions)
