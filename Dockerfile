@@ -10,10 +10,10 @@ RUN mkdir -p ${DOCKER_WORKSPACES}
 WORKDIR ${DOCKER_WORKSPACES}
 ENV PYPI_SIMPLE_URL  https://pypi.mirrors.ustc.edu.cn/simple
 
-RUN sed -i s@/deb.debian.org/@/mirrors.aliyun.com/@g /etc/apt/sources.list \
-  && cat /etc/apt/sources.list \
-  && apt clean \
-  && apt update -y \
+# sed -i s@/deb.debian.org/@/mirrors.aliyun.com/@g /etc/apt/sources.list \
+#   && cat /etc/apt/sources.list \
+#   && apt clean \
+RUN apt update -y \
   && apt upgrade -y \
   && apt install -y  --no-install-recommends curl supervisor \
   && curl -sSL 'https://install.python-poetry.org' | python - && poetry --version && poetry config --list \
