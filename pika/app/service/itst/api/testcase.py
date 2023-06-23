@@ -94,20 +94,20 @@ async def delete_testcase(
     operator = user_info["emp_no"]
     try:
         async with session.begin():
-            await ApiTestCaseDao.delete_records(session, user_info["emp_no"], id_list, title="删除case")
+            await ApiTestCaseDao.delete_records(session, user_info["emp_no"], id_list, description="删除case")
             await ApiTestCaseAssertsDao.delete_records(
                 session=session,
                 operator=operator,
                 id_list=id_list,
                 column="case_id",
-                title="删除断言",
+                description="删除断言",
             )
             await ApiTestCaseDataDao.delete_records(
                 session=session,
                 operator=operator,
                 id_list=id_list,
                 column="case_id",
-                title="删除测试数据",
+                description="删除测试数据",
             )
             return PikaResponse.success()
     except Exception as e:
