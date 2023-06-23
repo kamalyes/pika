@@ -87,7 +87,7 @@ class TestCaseGeneratorSchema(BaseOnlyDirectoryIdSchema, BaseOnlyProtocolSchema)
 
 
 class TestCaseImportSchema(BaseModel):
-    import_type: CaseConvertorTypeEnum = Body(0, title="导入类型")
+    import_type: CaseConvertorTypeEnum = Body(1, title="导入类型")
     file: UploadFile = File(None)
     api_docs_url: str = Body(None, title="在线接口文档地址")
     is_cover: int = Body(0, title="是否叠加")

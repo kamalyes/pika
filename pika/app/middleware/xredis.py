@@ -253,7 +253,7 @@ class RedisHelper(PikaJsonEncoder):
         # 默认录制1小时
         value = cls.safe_json_dumps({"operator": operator, "regex": regex}, ensure_ascii=False)
         cls.pika_redis_client.set(cls.get_key(f"record:ip:{address}"), value, ex=3600)
-        # 清楚上次录制数据
+        # 清除上次录制数据
         cls.pika_redis_client.delete(cls.get_key(f"record:{address}:requests"))
 
     @classmethod

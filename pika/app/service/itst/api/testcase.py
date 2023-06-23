@@ -409,16 +409,16 @@ async def generate_case(
 
 
 @router.post("/import", summary="导入har或其他用例数据文件")
-async def convert_case(form: TestCaseImportSchema, user_info=Depends(Permission())):
+async def convert_case(form: TestCaseImportSchema=Depends(), user_info=Depends(Permission())):
     import_type, file_, api_docs_url = form.import_type, form.file, form.api_docs_url
-    if import_type == CaseConvertorTypeEnum.har.name and import_type:
+    if import_type == CaseConvertorTypeEnum.har:
         convert, file_ext = get_convertor(import_type)
         if convert is None:
             return PikaResponse.failed(detail="不支持导入的数据类型")
         if not file_.filename.endswith(f".{file_ext}"):
             return PikaResponse.failed(detail=f"请传入{file_ext}后缀文件")
         requests = convert(file_.file)
-    elif import_type == CaseConvertorTypeEnum.swagger.name:
+    elif import_type == CaseConvertorTypeEnum.swagger:
         requests = ApiTestCaseDao.swagger_import(api_docs_url, file_)
     else:
         raise ValidException(detail="请检查入参是否正确!")

@@ -159,6 +159,9 @@ default-time_zone ： mysql的时区
 - [x] 📰 漂亮的邮件通知
 - [x] 😹 定时构建测试用例
 - [x] 🐧 精美的测试报告展示页面
+- [x] 😹 Jmeter测试数据可视化
+- [x] 🌼 推送功能,支持钉钉/企信推送
+
 
 ## 🙋 待开发的功能
 
@@ -170,7 +173,6 @@ default-time_zone ： mysql的时区
 - [ ] 🐄 数据工厂,强大的造数功能
 - [ ] 🐸 用例支持har,jmx等格式导入
 - [ ] 👍 CI/CD,类pipeline功能
-- [ ] 🌼 推送功能,支持钉钉/企信推送
 - [ ] 🌛 支持dubbo/grpc
 - [ ] 🐛 打通yapi
 - [ ] 🌽 等等等等
@@ -183,6 +185,12 @@ default-time_zone ： mysql的时区
 #### ⛱ 测试计划
 
 #### 💒 测试报告
+
+#### Jmeter报告可视化
+![](https://www.yuyanqing.cn/oss/image-bed/col/jmeter/20230622220215.png)
+![](https://www.yuyanqing.cn/oss/image-bed/col/jmeter/20230622182606.png)
+![](https://www.yuyanqing.cn/oss/image-bed/col/jmeter/20230622182627.png)
+![](https://www.yuyanqing.cn/oss/image-bed/col/jmeter/20230622215855.png)
 
 #### 测试用例
 
