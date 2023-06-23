@@ -12,12 +12,13 @@
 
 from uuid import uuid4
 
-from sqlalchemy import SMALLINT, Column, String
+from sqlalchemy import SMALLINT, Column, ForeignKey, String
 
 from app.core.handler.sqlbin_uuid import BinaryUUID
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel, NormBaseModel
+from app.models.user import UserModel
 
 
 class IterateModel(LargeBaseModel):
@@ -32,5 +33,10 @@ class PikaIterateRel(NormBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_iterate_relation"
     __table_args__ = {"comment": "用户迭代关联表"}
     iterate_id = Column(BinaryUUID, default=uuid4, comment="迭代id")
-    emp_no = Column(String(ByteSizeEnum.LENGTH_20), comment="员工编号", nullable=False)
+    emp_no = Column(
+        String(ByteSizeEnum.LENGTH_20),
+        ForeignKey(UserModel.emp_no, ondelete="cascade", onupdate="cascade"),
+        comment="员工编号",
+        nullable=False,
+    )
     description = Column(String(ByteSizeEnum.LENGTH_255), comment="描述", nullable=False)

@@ -11,19 +11,31 @@
 """
 from uuid import uuid4
 
-from sqlalchemy import Column, String, UniqueConstraint
+from sqlalchemy import Column, ForeignKey, String, UniqueConstraint
 
 from app.core.handler.sqlbin_uuid import BinaryUUID
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import LargeBaseModel
+from app.models.user import UserModel
+from app.models.api_testplan import ApiTestPlanModel
 
 
 class ApiTestPlanFollowUserRelModel(LargeBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_testplan_follow_user_rel"
     __table_args__ = (UniqueConstraint("emp_no", "plan_id"), {"comment": "测试计划关注用户表"})
-    emp_no = Column(String(ByteSizeEnum.LENGTH_20), nullable=False, comment="员工编号")
-    plan_id = Column(BinaryUUID, default=uuid4, nullable=False, comment="计划id")
+    emp_no = Column(
+        String(ByteSizeEnum.LENGTH_20),
+        ForeignKey(UserModel.emp_no, ondelete="cascade", onupdate="cascade"),
+        comment="员工编号",
+        nullable=False,
+    )
+    plan_id = Column(
+        String(ByteSizeEnum.LENGTH_20),
+        ForeignKey(ApiTestPlanModel.id, ondelete="cascade", onupdate="cascade"),
+        comment="计划id",
+        nullable=False,
+    )
 
     def __init__(self, plan_id, emp_no):
         super().__init__(operator=emp_no)

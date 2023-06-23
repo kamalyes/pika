@@ -409,7 +409,7 @@ async def generate_case(
 
 
 @router.post("/import", summary="导入har或其他用例数据文件")
-async def convert_case(form: TestCaseImportSchema=Depends(), user_info=Depends(Permission())):
+async def convert_case(form: TestCaseImportSchema = Depends(), user_info=Depends(Permission())):
     import_type, file_, api_docs_url = form.import_type, form.file, form.api_docs_url
     if import_type == CaseConvertorTypeEnum.har:
         convert, file_ext = get_convertor(import_type)

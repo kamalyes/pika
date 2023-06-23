@@ -11,12 +11,13 @@
 """
 from uuid import uuid4
 
-from sqlalchemy import INT, Column, String, UniqueConstraint
+from sqlalchemy import INT, Column, ForeignKey, String, UniqueConstraint
 
 from app.core.handler.sqlbin_uuid import BinaryUUID
 from app.enums.ByteSizeEnum import ByteSizeEnum
 from app.enums.SysVarEnum import PikaGlobalVarEnum
 from app.models.basic import NormBaseModel
+from app.models.user import UserModel
 
 
 class DepartmentModel(NormBaseModel):
@@ -39,7 +40,12 @@ class DepartmentRelModel(NormBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_department_relation"
     __table_args__ = {"comment": "部门应用表"}
     department_id = Column(BinaryUUID, default=uuid4, nullable=False, comment="部门id")
-    emp_no = Column(String(ByteSizeEnum.LENGTH_20), comment="员工编号", nullable=False)
+    emp_no = Column(
+        String(ByteSizeEnum.LENGTH_20),
+        ForeignKey(UserModel.emp_no, ondelete="cascade", onupdate="cascade"),
+        comment="员工编号",
+        nullable=False,
+    )
 
     def __init__(self, name, department_id, operator, emp_no, id=None):
         super().__init__(id=id, operator=operator)

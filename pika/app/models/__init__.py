@@ -38,7 +38,7 @@ async_engine = create_async_engine(
     echo=PikaAppConfig.MYSQL_ECHO,
     max_overflow=PikaAppConfig.MYSQL_MAX_OVERFLOW,
     pool_size=PikaAppConfig.MYSQL_POOL_SIZE,
-    pool_recycle=PikaAppConfig.MYSQL_POOL_RECYCLE
+    pool_recycle=PikaAppConfig.MYSQL_POOL_RECYCLE,
 )
 async_session = sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession)
 
