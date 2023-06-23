@@ -458,7 +458,6 @@ class Executor(object):
             # Step8: 批量改写主方法参数
             await self.parse_params(case_info, case_params)
             headers = PikaJsonEncoder.safe_json_loads(case_info.request_headers)
-
             # Step9: 替换请求参数
             request_body = await self.replace_body(request_param, case_info.request_body, case_info.request_body_type)
 

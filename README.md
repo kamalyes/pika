@@ -128,14 +128,14 @@ default-time_zone ： mysql的时区
 ### 🎉 技术栈
 
 - [x] 🎨 FastApi
-- [x] 🎶 SQLAlchemy(你可以看到很多sqlalchemy的用法)
-- [x] 🎉 Apscheduler(定时任务框架)
-- [x] 🎃 mitmproxy(用例录制生成)
-- [x] 🌙 mockjs(mock服务)
+- [x] 🎶 SQLAlchemy (你可以看到很多sqlalchemy的用法)
+- [x] 🎉 Apscheduler (定时任务框架)
+- [x] 🎃 mitmproxy (用例录制生成)
+- [x] 🌙 MockJs (mock服务)
 - [x] 🔒 Redis
 - [x] 🏐 Gunicorn(内含uvicorn,部署服务)
 - [x] 🎲 Nginx(反向代理,https配置等)
-- [x] 💎 七牛云oss(用于文件上传时接口测试文件存储)
+- [x] 💎 七牛云/Minio/腾讯云等oss(用于文件上传时接口测试文件存储)
 - [x] 👟 asyncio(几乎全异步写法,值得参考)
 - [ ] ⛏ Grpc(支持Grpc请求,即将支持)
 - [x] ⚡ [custard](https://github.com/kamalyes/custard) 万能百宝箱(必须依赖)
@@ -162,14 +162,11 @@ default-time_zone ： mysql的时区
 - [x] 😹 Jmeter测试数据可视化
 - [x] 🌼 推送功能,支持钉钉/企信推送
 
-
 ## 🙋 待开发的功能
 
 - [ ] 💀 app管理功能,支持app的导入和导出
-
 - [ ] 😼 代码覆盖率增量/全量统计功能
-
-- [ ] 🐘 微服务化
+- [ ] 🐘 微服务化（Node执行机节点）
 - [ ] 🐄 数据工厂,强大的造数功能
 - [ ] 🐸 用例支持har,jmx等格式导入
 - [ ] 👍 CI/CD,类pipeline功能
@@ -177,28 +174,40 @@ default-time_zone ： mysql的时区
 - [ ] 🐛 打通yapi
 - [ ] 🌽 等等等等
 
-<details>
-<summary>平台预览(点击可展开)</summary>
+<!-- <details>
+<summary>平台预览(点击可展开)</summary> -->
 
 #### 🍦 工作台
 
+![](https://www.yuyanqing.cn/oss/image-bed/col/pika/dashboard.png)
+![](https://www.yuyanqing.cn/oss/image-bed/col/pika/workspaces.png)
+
+#### 项目管理
+
+![](https://www.yuyanqing.cn/oss/image-bed/col/pika/project.png)
+
 #### ⛱ 测试计划
 
-#### 💒 测试报告
+![](https://www.yuyanqing.cn/oss/image-bed/col/pika/record.png)
+
+#### 💒 接口测试
+
+![](https://www.yuyanqing.cn/oss/image-bed/col/pika/apitest_list.png)
+
+![](https://www.yuyanqing.cn/oss/image-bed/col/pika/edit_api_test.png)
+
+![](https://www.yuyanqing.cn/oss/image-bed/col/pika/api_test_run_detail.png)
 
 #### Jmeter报告可视化
+
 ![](https://www.yuyanqing.cn/oss/image-bed/col/jmeter/20230622220215.png)
 ![](https://www.yuyanqing.cn/oss/image-bed/col/jmeter/20230622182606.png)
 ![](https://www.yuyanqing.cn/oss/image-bed/col/jmeter/20230622182627.png)
 ![](https://www.yuyanqing.cn/oss/image-bed/col/jmeter/20230622215855.png)
 
-#### 测试用例
-
 #### SQL客户端
 
-#### 项目管理
-
-</details>
+<!-- </details> -->
 
 ### ✉ 使用文档
 
