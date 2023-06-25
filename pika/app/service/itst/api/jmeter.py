@@ -44,7 +44,7 @@ async def query_latest_build(
     user_info=Depends(Permission()),
     session=Depends(async_db_session_iterator),
 ):
-    data = await JmeterDao.query_latest_build()
+    data = await JmeterDao.query_latest_build(request)
     return PikaResponse.success(data=data)
 
 

@@ -72,11 +72,16 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
             raise Exception(err_detail)
 
     @classmethod
-    async def query_latest_build(cls):
+    async def query_latest_build(cls, request: JmeterLatestBuildSchema):
         try:
+            filters = []
+            if request.env and request.project:
+                filters = [JmeterTestSummaryModel.env == request.env, JmeterTestSummaryModel.project == request.project]
             async with async_db_session_generator() as session:
                 async with session.begin():
-                    _sql = select(JmeterTestSummaryModel).order_by(desc(JmeterTestSummaryModel.operator_date))
+                    _sql = (
+                        select(JmeterTestSummaryModel).where(*filters).order_by(desc(JmeterTestSummaryModel.end_time))
+                    )
                     query_data = await session.execute(_sql)
                     result = query_data.scalars().first()
             return result
@@ -120,7 +125,7 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
                                 JmeterTestSummaryModel.end_time <= request.end_time,
                             )
                         )
-                        .order_by(desc(JmeterTestSummaryModel.operator_date))
+                        .order_by(desc(JmeterTestSummaryModel.end_time))
                         .offset(0)
                         .limit(20)
                     )
@@ -137,9 +142,10 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
             os_type_ = [1, 2] if request.os_type == 0 else [request.os_type]
             filters = [JmeterTestSummaryModel.os_type.in_(os_type_)]
             if request.env and request.project:
-                filters.append(
-                    JmeterTestSummaryModel.env == request.env, JmeterTestSummaryModel.project == request.project
-                )
+                filters += [
+                    JmeterTestSummaryModel.env == request.env,
+                    JmeterTestSummaryModel.project == request.project,
+                ]
             async with async_session() as session:
                 sql = select(JmeterTestSummaryModel).where(*filters).order_by(JmeterTestSummaryModel.end_time.desc())
                 result, total = await cls.pagination(request.page_index, request.page_size, session, sql, True)
