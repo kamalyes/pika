@@ -84,4 +84,4 @@ class JmeterChartDataSchema(
     BaseOnlyPointTimeStampSchema,
     JmeterLatestBuildSchema,
 ):
-    chart_type: Optional[int] = Body(0, title="os类型")
+    chart_type: Optional[int] = Body(0, title="chart类型")

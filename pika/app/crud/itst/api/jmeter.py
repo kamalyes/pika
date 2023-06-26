@@ -96,7 +96,6 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
             async with async_db_session_generator() as session:
                 async with session.begin():
                     chart_type = 1 if request.chart_type not in (1, 2) else request.chart_type
-                    conditions = [JmeterTestSummaryModel.pass_rate]
                     _sql = (
                         select(
                             (
