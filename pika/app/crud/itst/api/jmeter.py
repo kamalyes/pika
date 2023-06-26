@@ -129,7 +129,7 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
                         .limit(20)
                     )
                     query_data = await session.execute(_sql)
-            return query_data.all()
+            return query_data.scalars().all()
         except Exception as e:
             err_detail = f"查询JmeterChartData失败, {e}"
             cls.__log__.error(err_detail)

@@ -86,13 +86,18 @@ class JmeterTestCaseModel(JmeterMinBaseModel):
     request_url = Column(TEXT, nullable=True, comment="请求地址")
     request_method = Column(TEXT, nullable=True, comment="请求方法")
     request_header = Column(TEXT, nullable=True, comment="请求头")
-    request_body = Column(TEXT, nullable=True, comment="请求体")
-    response_header = Column(TEXT, nullable=True, comment="响应头")
+    request_query = Column(TEXT, nullable=True, comment="请求体(Query、一般是get请求)")
+    request_body = Column(TEXT, nullable=True, comment="请求体(Body、一般是post请求)")
     response_body = Column(TEXT, nullable=True, comment="响应体")
-    response_code = Column(String(ByteSizeEnum.LENGTH_200), server_default="200", comment="响应状态码")
+    response_code = Column(BigInteger, server_default="200", comment="响应状态码")
+    response_time = Column(BigInteger, server_default="0", comment="响应时间")
+    response_size = Column(BigInteger, server_default="0", comment="响应包体大小")
+    response_header = Column(TEXT, nullable=True, comment="响应头")
     fail_message = Column(TEXT, nullable=True, comment="失败明细")
     cookies = Column(TEXT, nullable=True, comment="cookies")
+    body_size = Column(BigInteger, server_default="0", comment="body大小")
     request_size = Column(BigInteger, server_default="0", comment="请求数据大小")
+    headers_size = Column(BigInteger, server_default="0", comment="headers大小")
     error_count = Column(BigInteger, server_default="0", comment="失败数量")
     successful = Column(BOOLEAN, server_default="0", comment="是否通过、成功（符合预期断言）")
     connect_time = Column(BigInteger, server_default="0", comment="连接时间")
@@ -113,13 +118,18 @@ class JmeterTestCaseModel(JmeterMinBaseModel):
         request_url=None,
         request_method=None,
         request_header=None,
+        request_query=None,
         request_body=None,
         response_header=None,
         response_body=None,
+        response_time=None,
+        response_size=None,
         response_code=None,
         fail_message=None,
         cookies=None,
+        body_size=None,
         request_size=None,
+        headers_size=None,
         error_count=None,
         successful=False,
         connect_time=None,
@@ -144,13 +154,18 @@ class JmeterTestCaseModel(JmeterMinBaseModel):
         self.request_url = request_url
         self.request_method = request_method
         self.request_header = request_header
+        self.request_query = request_query
         self.request_body = request_body
         self.response_header = response_header
         self.response_body = response_body
         self.response_code = response_code
+        self.response_time = response_time
+        self.response_size = response_size
         self.fail_message = fail_message
         self.cookies = cookies
+        self.body_size = body_size
         self.request_size = request_size
+        self.headers_size = headers_size
         self.error_count = error_count
         self.successful = successful
         self.connect_time = connect_time
