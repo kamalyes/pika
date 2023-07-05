@@ -141,7 +141,7 @@ async def update_testcase_asserts(data: TestCaseAssertsSchema, user_info=Depends
         return PikaResponse.failed(detail=str(e))
 
 
-@router.get("/asserts/delete", summary="删除用例断言")
+@router.delete("/asserts/delete", summary="删除用例断言")
 async def delete_test_case_asserts(id: str, user_info=Depends(Permission())):
     await ApiTestCaseAssertsDao.delete_test_case_asserts(id, operator=user_info["emp_no"])
     return PikaResponse.success()
@@ -159,7 +159,7 @@ async def update_constructor(data: ConstructorSchema, user_info=Depends(Permissi
     return PikaResponse.success()
 
 
-@router.get("/constructor/delete", summary="删除前置条件")
+@router.delete("/constructor/delete", summary="删除前置条件")
 async def delete_constructor(id: str, user_info=Depends(Permission())):
     await ConstructorDao.delete_constructor(id, operator=user_info["emp_no"])
     return PikaResponse.success()
@@ -304,7 +304,7 @@ async def update_testcase_data(form: ApiTestCaseDataSchema, user_info=Depends(Pe
     return PikaResponse.success(data=data)
 
 
-@router.get("/data/delete", summary="删除测试用例数据")
+@router.delete("/data/delete", summary="删除测试用例数据")
 async def delete_testcase_data(id: str, user_info=Depends(Permission())):
     await ApiTestCaseDataDao.delete_testcase_data(id, user_info["emp_no"])
     return PikaResponse.success()
@@ -345,7 +345,7 @@ async def update_testcase_out_parameters(form: ApiTestCaseOutParametersSchema, u
     return PikaResponse.success(data=data)
 
 
-@router.get("/parameters/delete", summary="删除出参数据")
+@router.delete("/parameters/delete", summary="删除出参数据")
 async def delete_testcase_out_parameters(
     id: str,
     user_info=Depends(Permission()),
@@ -385,7 +385,7 @@ async def list_record_data(request: Request, user_info=Depends(Permission())):
     return PikaResponse.success(data={"data": data, "regex": regex, "status": status})
 
 
-@router.get("/record/remove", summary="删除录制接口")
+@router.delete("/record/remove", summary="删除录制接口")
 async def remove_record(index: int, request: Request, user_info=Depends(Permission())):
     await RedisHelper.remove_record_data(request.client.host, index)
     return PikaResponse.success()
