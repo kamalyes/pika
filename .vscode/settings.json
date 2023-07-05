@@ -41,10 +41,10 @@
     "aiomysql",
     "aioredis",
     "aliyun",
+    "alluser",
     "Antd",
     "appendonly",
     "apscheduler",
-    "aredis",
     "asyncpg",
     "asyncsql",
     "authcode",
@@ -156,4 +156,7 @@
     "zcard",
     "zremrangebyrank"
   ],
+  "yaml.schemas": {
+    "https://gitlab.com/appsemble/appsemble/-/raw/HEAD/packages/cli/assets/appsemblerc.schema.json": "file:///e%3A/WorkSpaces/PythonProjects/pika/Dockerfile"
+  },
 }
