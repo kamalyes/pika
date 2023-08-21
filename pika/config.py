@@ -28,17 +28,20 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 
 class BaseConfig(BaseSettings):
     # MySQL config
+    MYSQL_VERSION: Optional[str] = None
     MYSQL_ECHO: Optional[bool] = False
     MYSQL_POOL_RECYCLE: Optional[int] = 1500
     MYSQL_MAX_OVERFLOW: Optional[int] = 0
     MYSQL_POOL_SIZE: Optional[int] = 20
-    TABLE_TAG = "__table_args__"
+    MYSQL_ASYNC_POOL_RECYCLE: Optional[int] = 1500
+    TABLE_TAG: Optional[str] = "__table_args__"
     SQLALCHEMY_PICKLE_PROTOCOL: Optional[int] = 3  # pickle.HIGHEST_PROTOCOL
     CONNECT_SQLALCHEMY_URI: Optional[str] = None
     SYNC_SQLALCHEMY_URI: Optional[str] = None
     ASYNC_SQLALCHEMY_URI: Optional[str] = None
 
     # Redis config
+    REDIS_VERSION: Optional[str] = None
     REDIS_ENABLE_FLAG: Optional[bool] = True
     REDIS_CLUSTER_NODE: Optional[str] = None
     REDIS_HOST: Optional[str] = "pika_redis"
@@ -96,7 +99,7 @@ class BaseConfig(BaseSettings):
     SUPERVISOR_MINPROCS: Optional[int] = 200
     SUPERVISOR_STOPWAITSECS: Optional[int] = 1000
     SUPERVISOR_STARTSECS: Optional[int] = 10
-    CPU_COUNT = int(multiprocessing.cpu_count())
+    CPU_COUNT: Optional[int] = int(multiprocessing.cpu_count())
     SUPERVISOR_THREAD_NUM: Optional[int] = CPU_COUNT
     SUPERVISOR_WORKERS: Optional[int] = (CPU_COUNT * 2) + 1
     SUPERVISOR_WORKER_CLASS: Optional[str] = "uvicorn.workers.UvicornWorker"
@@ -113,6 +116,7 @@ class BaseConfig(BaseSettings):
     SUPERVISOR_ERRORLOG: Optional[str] = "/var/log/supervisord_error.log"
 
     # SystemHand
+    PIKA_LOG_SWITCH: Optional[bool] = False
     PIKA_ENVIRONMENT: Optional[str] = "dev"
     PIKA_RATELIMITER: Optional[int] = 1000
     PIKA_BACKEND_HOST: Optional[str] = "0.0.0.0"
@@ -129,20 +133,20 @@ class BaseConfig(BaseSettings):
     REQUIREMENTS: Optional[str] = SystemHand.get_depend_libs(file_path=f"{WORKSPACES_PATH}/requirements.txt")
 
     # 日志相关
-    LOCAL_DATE = time.strftime("%Y-%m-%d", time.localtime(time.time()))
-    LOGS_DIR_NAME = time.strftime("%Y-%m-%d", time.localtime(time.time()))
-    LOG_GENERAL_DIR = os.path.join(LOGS_PATH, LOGS_DIR_NAME)
-    INFO_LOG_FILE = os.path.join(LOG_GENERAL_DIR, f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-info.log")
-    ERROR_LOG_FILE = os.path.join(LOG_GENERAL_DIR, f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-error.log")
+    LOCAL_DATE: Optional[str] = time.strftime("%Y-%m-%d", time.localtime(time.time()))
+    LOGS_DIR_NAME: Optional[str]  = time.strftime("%Y-%m-%d", time.localtime(time.time()))
+    LOG_GENERAL_DIR: Optional[str]  = os.path.join(LOGS_PATH, LOGS_DIR_NAME)
+    INFO_LOG_FILE: Optional[str]  = os.path.join(LOG_GENERAL_DIR, f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-info.log")
+    ERROR_LOG_FILE: Optional[str]  = os.path.join(LOG_GENERAL_DIR, f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-error.log")
     # 配置日志格式
-    INFO_FORMAT = (
+    INFO_FORMAT: Optional[str]  = (
         "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> "
         "| <level>{level: <8}</level> | <cyan>文件: {extra[filename]}</cyan> \n"
         "| 模块: <cyan>{extra[business]}</cyan> | 方法: <cyan>{extra[func]}</cyan> "
         "| <cyan>行数: {extra[line]}</cyan> | - <level>{message}</level>"
     )
 
-    ERROR_FORMAT = (
+    ERROR_FORMAT: Optional[str] = (
         "<red>{time:YYYY-MM-DD HH:mm:ss.SSS}</red> "
         "| <level>{level: <8}</level> | <cyan>文件: {extra[filename]}</cyan> \n"
         "| 模块: <cyan>{extra[business]}</cyan> | 方法: <cyan>{extra[func]}</cyan> "
