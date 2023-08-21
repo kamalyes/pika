@@ -134,12 +134,12 @@ class BaseConfig(BaseSettings):
 
     # 日志相关
     LOCAL_DATE: Optional[str] = time.strftime("%Y-%m-%d", time.localtime(time.time()))
-    LOGS_DIR_NAME: Optional[str]  = time.strftime("%Y-%m-%d", time.localtime(time.time()))
-    LOG_GENERAL_DIR: Optional[str]  = os.path.join(LOGS_PATH, LOGS_DIR_NAME)
-    INFO_LOG_FILE: Optional[str]  = os.path.join(LOG_GENERAL_DIR, f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-info.log")
-    ERROR_LOG_FILE: Optional[str]  = os.path.join(LOG_GENERAL_DIR, f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-error.log")
+    LOGS_DIR_NAME: Optional[str] = time.strftime("%Y-%m-%d", time.localtime(time.time()))
+    LOG_GENERAL_DIR: Optional[str] = os.path.join(LOGS_PATH, LOGS_DIR_NAME)
+    INFO_LOG_FILE: Optional[str] = os.path.join(LOG_GENERAL_DIR, f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-info.log")
+    ERROR_LOG_FILE: Optional[str] = os.path.join(LOG_GENERAL_DIR, f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}-error.log")
     # 配置日志格式
-    INFO_FORMAT: Optional[str]  = (
+    INFO_FORMAT: Optional[str] = (
         "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> "
         "| <level>{level: <8}</level> | <cyan>文件: {extra[filename]}</cyan> \n"
         "| 模块: <cyan>{extra[business]}</cyan> | 方法: <cyan>{extra[func]}</cyan> "
