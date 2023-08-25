@@ -1639,12 +1639,12 @@ reference = "tsinghua"
 
 [[package]]
 name = "jsonpath"
-version = "0.82"
+version = "0.82.2"
 description = "An XPath for JSON"
 optional = false
 python-versions = "*"
 files = [
-    {file = "jsonpath-0.82.tar.gz", hash = "sha256:46d3fd2016cd5b842283d547877a02c418a0fe9aa7a6b0ae344115a2c990fef4"},
+    {file = "jsonpath-0.82.2.tar.gz", hash = "sha256:d87ef2bcbcded68ee96bc34c1809b69457ecec9b0c4dd471658a12bd391002d1"},
 ]
 
 [package.source]
