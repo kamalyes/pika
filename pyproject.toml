@@ -125,7 +125,7 @@ url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 
 
 [tool.poetry.group.dev.dependencies]
-autopep8 = "^2.0.2"
+autopep8 = "^2.0.4"
 
 [tool.black]
 line-length = 120
