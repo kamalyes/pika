@@ -3243,17 +3243,20 @@ reference = "tsinghua"
 
 [[package]]
 name = "qiniu"
-version = "7.11.1"
+version = "7.12.0"
 description = "Qiniu Resource Storage SDK"
 optional = false
 python-versions = "*"
 files = [
-    {file = "qiniu-7.11.1-py3-none-any.whl", hash = "sha256:272fb3e9c8ba9c6b99cd81383ba30109e0625db28e76b43bfa78fe5999e3ed64"},
-    {file = "qiniu-7.11.1.tar.gz", hash = "sha256:be3a071cf0f4468461212ef018d3553e594e136081418430470ccc68708820b4"},
+    {file = "qiniu-7.12.0-py3-none-any.whl", hash = "sha256:c845b50bc035053fccbf4e3e43afcec951faea054c717e81906672d69b686a87"},
+    {file = "qiniu-7.12.0.tar.gz", hash = "sha256:3080d42095006a33fb1b6e4115b198077823f98ecabcfd2367a3f96b1690d1f9"},
 ]
 
 [package.dependencies]
-requests = "*"
+requests = {version = "*", markers = "python_version >= \"3.7\""}
+
+[package.extras]
+dev = ["codecov", "coverage (<7.2)", "flake8", "freezegun", "pytest", "pytest-cov", "scrutinizer-ocular"]
 
 [package.source]
 type = "legacy"
@@ -4482,4 +4485,4 @@ all = ["APScheduler", "Faker", "Jinja2", "PyYAML", "aiohttp", "aiomysql", "aiore
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "4e6c240348008103b2c6c567017690d71f58f609b6f70470446819cd21d5a430"
+content-hash = "7b8836de8988e84f912d531c36d0318862aaff874db5fda531d6174d6ca9749b"
