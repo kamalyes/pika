@@ -65,7 +65,7 @@ pymysql="^1.1.0"
 minio="^7.1.17"
 mkdocs="^1.5.3"
 mkdocs-material="^9.4.6"
-mypy="^1.6.0"
+mypy="^1.6.1"
 ruff="^0.0.272"
 
 [tool.poetry.dev-dependencies]
