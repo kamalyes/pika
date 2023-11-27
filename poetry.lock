@@ -2000,13 +2000,13 @@ reference = "tsinghua"
 
 [[package]]
 name = "mkdocs-material"
-version = "9.4.10"
+version = "9.4.14"
 description = "Documentation that simply works"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mkdocs_material-9.4.10-py3-none-any.whl", hash = "sha256:207c4ebc07faebb220437d2c626edb0c9760c82ccfc484500bd3eb30dfce988c"},
-    {file = "mkdocs_material-9.4.10.tar.gz", hash = "sha256:421adedaeaa461dcaf55b8d406673934ade3d4f05ed9819e4cc7b4ee1d646a62"},
+    {file = "mkdocs_material-9.4.14-py3-none-any.whl", hash = "sha256:dbc78a4fea97b74319a6aa9a2f0be575a6028be6958f813ba367188f7b8428f6"},
+    {file = "mkdocs_material-9.4.14.tar.gz", hash = "sha256:a511d3ff48fa8718b033e7e37d17abd9cc1de0fdf0244a625ca2ae2387e2416d"},
 ]
 
 [package.dependencies]
@@ -4545,4 +4545,4 @@ all = ["APScheduler", "Faker", "Jinja2", "PyYAML", "aiohttp", "aiomysql", "aiore
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "7f54a2ddbf34a0bb4afb3c7a0cafc8d16a689b524fbb57afdec3a84c13abdb3c"
+content-hash = "efb5818dedf37696f5b258310f60af842cebdfe4966b118ae3e5df3066964f1e"
