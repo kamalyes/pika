@@ -86,4 +86,4 @@ class ApiTestCaseOutParametersDao(PikaWrapper):
             return result
         except Exception as e:
             err_detail = f"批量更新出参数据失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

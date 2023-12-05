@@ -69,7 +69,7 @@ class ApiTestCaseDao(PikaWrapper):
                 return result, total
         except Exception as e:
             err_detail = f"获取测试用例失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def get_test_case_by_directory_id(cls, directory_id: str):
@@ -89,7 +89,7 @@ class ApiTestCaseDao(PikaWrapper):
                 return ans, case_map
         except Exception as e:
             err_detail = f"获取测试用例失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def get_case_children(cls, case_id: str):
@@ -182,7 +182,7 @@ class ApiTestCaseDao(PikaWrapper):
                     return data
         except Exception as e:
             err_detail = f"编辑用例失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def query_test_case_info(cls, case_id: str) -> dict:
@@ -221,7 +221,7 @@ class ApiTestCaseDao(PikaWrapper):
                 }
         except Exception as e:
             err_detail = f"查询用例失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def query_test_case_by_constructors(cls, constructors: List[ConstructorModel]):
@@ -248,7 +248,7 @@ class ApiTestCaseDao(PikaWrapper):
                 return {x.id: x for x in data}
         except Exception as e:
             err_detail = f"查询用例失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @staticmethod
     async def query_test_case_out_parameters(
@@ -317,8 +317,9 @@ class ApiTestCaseDao(PikaWrapper):
                     return None, "用例不存在"
                 return data, None
         except Exception as e:
-            cls.__log__.error(f"查询用例失败, error: {str(e)}")
-            return None, f"查询用例失败, error: {str(e)}"
+            err_detail = f"查询用例失败, error: {str(e)}"
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            return None, err_detail
 
     @classmethod
     async def list_testcase_tree(cls, projects: List[ProjectModel]) -> Union[List, dict]:
@@ -364,7 +365,7 @@ class ApiTestCaseDao(PikaWrapper):
                 return result
         except Exception as e:
             err_detail = f"获取用例列表失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def select_constructor(cls, case_id: str) -> List[ConstructorModel]:
@@ -387,7 +388,7 @@ class ApiTestCaseDao(PikaWrapper):
                 return data.scalars().all()
         except Exception as e:
             err_detail = f"查询构造数据失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def async_select_constructor(cls, case_id: str) -> List[ConstructorModel]:
@@ -410,7 +411,7 @@ class ApiTestCaseDao(PikaWrapper):
                 return data.scalars().all()
         except Exception as e:
             err_detail = f"查询构造数据失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def collect_data(cls, case_id: str, data: List):

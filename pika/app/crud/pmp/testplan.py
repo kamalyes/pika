@@ -101,7 +101,7 @@ class ApiTestPlanDao(PikaWrapper):
                 return result, total
         except Exception as e:
             err_detail = f"获取测试计划失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def insert_test_plan(cls, plan: ApiTestPlanSchema, operator: str) -> ApiTestPlanModel:
@@ -125,7 +125,7 @@ class ApiTestPlanDao(PikaWrapper):
                     return test_plan
         except Exception as e:
             err_detail = f"新增测试计划失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def update_test_plan(cls, plan: ApiTestPlanSchema, operator: str, log=True):
@@ -163,7 +163,7 @@ class ApiTestPlanDao(PikaWrapper):
                         )
         except Exception as e:
             err_detail = f"编辑测试计划失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def update_test_plan_state(cls, id: str, state: int):
@@ -182,7 +182,7 @@ class ApiTestPlanDao(PikaWrapper):
                     return data
         except Exception as e:
             err_detail = f"编辑测试计划失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def query_test_plan(cls, id: str) -> ApiTestPlanModel:
@@ -193,7 +193,7 @@ class ApiTestPlanDao(PikaWrapper):
                 return data.scalars().first()
         except Exception as e:
             err_detail = f"获取测试计划失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def delete_test_plan(cls, id: str, operator: str):
@@ -209,7 +209,7 @@ class ApiTestPlanDao(PikaWrapper):
                     cls.delete_model(data, operator)
         except Exception as e:
             err_detail = f"删除测试计划失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @staticmethod
     async def follow_test_plan(plan_id: str, operator: str):

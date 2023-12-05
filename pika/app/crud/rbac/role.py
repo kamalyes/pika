@@ -60,7 +60,7 @@ class RoleDao:
                     await session.execute(update_role_info_sql)
         except Exception as err:
             err_detail = f"更新/写入失败,错误原因:{err}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def delete(cls, id: str):
@@ -76,4 +76,4 @@ class RoleDao:
                     await session.execute(del_role_sql)
         except Exception as e:
             err_detail = f"获取数据库配置失败, error: {e}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

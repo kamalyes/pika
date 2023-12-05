@@ -18,6 +18,7 @@ from app.crud import PikaMdWrapper, PikaWrapper
 from app.models import async_session
 from app.models.api_testcase_data import ApiTestCaseDataModel
 from app.schema.api_testcase_data import ApiTestCaseDataSchema
+from pika.app.exceptions.thirdparty import DbException
 
 
 @PikaMdWrapper(ApiTestCaseDataModel)
@@ -45,7 +46,7 @@ class ApiTestCaseDataDao(PikaWrapper):
                     return data
         except Exception as e:
             err_detail = f"新增测试数据失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def update_testcase_data(cls, form: ApiTestCaseDataSchema, operator: str):
@@ -66,7 +67,7 @@ class ApiTestCaseDataDao(PikaWrapper):
                     return query
         except Exception as e:
             err_detail = f"编辑测试数据失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def delete_testcase_data(cls, id: str, operator: str):
@@ -84,7 +85,7 @@ class ApiTestCaseDataDao(PikaWrapper):
                     cls.delete_model(query, operator)
         except Exception as e:
             err_detail = f"删除测试数据失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def list_testcase_data(cls, case_id: str):
@@ -102,7 +103,7 @@ class ApiTestCaseDataDao(PikaWrapper):
                 return ans
         except Exception as e:
             err_detail = f"查询测试数据失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, DbException)
 
     @classmethod
     async def list_testcase_data_by_env(cls, env: str, case_id: str) -> List[ApiTestCaseDataModel]:
@@ -117,4 +118,4 @@ class ApiTestCaseDataDao(PikaWrapper):
                 return result.scalars().all()
         except Exception as e:
             err_detail = f"查询测试数据失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, DbException)

@@ -52,7 +52,7 @@ class DbConfigDao(PikaWrapper, PikaJsonEncoder):
                 return result.scalars().all()
         except Exception as err:
             err_detail = f"获取数据库配置失败, error: {str(err)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def insert_database(cls, data: DatabaseSchema, operator: str):
@@ -72,7 +72,7 @@ class DbConfigDao(PikaWrapper, PikaJsonEncoder):
                     session.add(DatabaseModel(**data.dict(), operator=operator))
         except Exception as err:
             err_detail = f"新增数据库配置, error: {str(err)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def update_database(cls, data: DatabaseSchema, operator: str):
@@ -87,7 +87,7 @@ class DbConfigDao(PikaWrapper, PikaJsonEncoder):
                     cls.update_model(query, data, operator)
         except Exception as err:
             err_detail = f"编辑数据库配置: {data.name}失败, {err}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def delete_database(cls, id: str, operator: str):
@@ -105,7 +105,7 @@ class DbConfigDao(PikaWrapper, PikaJsonEncoder):
                     query.update_emp_no = operator
         except Exception as err:
             err_detail = f"删除数据库配置: {id}失败, {err}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def query_database(cls, id: str):
@@ -117,7 +117,7 @@ class DbConfigDao(PikaWrapper, PikaJsonEncoder):
                 return result.scalars().first()
         except Exception as err:
             err_detail = f"删除数据库配置: {id}失败, {err}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def query_database_by_env_and_name(cls, env: str, name: str):
@@ -133,7 +133,7 @@ class DbConfigDao(PikaWrapper, PikaJsonEncoder):
                 return result.scalars().first()
         except Exception as err:
             err_detail = f"获取数据库配置失败, {err}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     @RedisHelper.cache("database:cache", expired_time=ValidTimeEnum.QUERY_DATABASE_TREE_TIME.value)
@@ -173,7 +173,7 @@ class DbConfigDao(PikaWrapper, PikaJsonEncoder):
                 return result
         except Exception as err:
             err_detail = f"获取数据库配置详情失败, {err}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @staticmethod
     @RedisHelper.cache("database:table:cache", expired_time=ValidTimeEnum.GET_TABLES_TIME.value)
@@ -239,7 +239,7 @@ class DbConfigDao(PikaWrapper, PikaJsonEncoder):
             return await DbConfigDao.execute(data, sql)
         except Exception as err:
             err_detail = f"执行SQL失败, {err}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def execute(cls, conn, sql):
@@ -259,7 +259,7 @@ class DbConfigDao(PikaWrapper, PikaJsonEncoder):
                     return [{"rowCount": row_count}]
                 except Exception as err:
                     err_detail = f"执行SQL失败, {err}"
-                    cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+                    await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def execute_sql(cls, env: str, name: str, sql: str):
@@ -280,7 +280,7 @@ class DbConfigDao(PikaWrapper, PikaJsonEncoder):
             return cls.safe_json_dumps(result, cls=JSONDecoder, ensure_ascii=False)
         except Exception as err:
             err_detail = f"执行SQL失败, {err}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
 
 @PikaMdWrapper(SQLHistoryModel)

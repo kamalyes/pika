@@ -69,7 +69,7 @@ class ProjectDao(PikaWrapper):
                 return data.scalars().all(), total
         except Exception as e:
             err_detail = f"获取用户: {operator}项目列表失败, {e}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def list_project_id_by_user(cls, session, operator, role):
@@ -109,7 +109,7 @@ class ProjectDao(PikaWrapper):
                 )
                 if data.scalars().first() is not None:
                     err_detail = f"新增项目: {name}失败, 失败原因:项目已存在"
-                    cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+                    await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
                 pr = ProjectModel(name, app, owner, operator, description, private, dingtalk_url, qy_wx_url)
                 session.add(pr)
 
@@ -132,7 +132,7 @@ class ProjectDao(PikaWrapper):
                     data.update_user = operator
         except Exception as e:
             err_detail = f"修改项目头像失败, 项目: {project_id}, error: {e}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def update_project(
@@ -188,7 +188,7 @@ class ProjectDao(PikaWrapper):
                     data.qy_wx_url = qy_wx_url
         except Exception as e:
             err_detail = f"编辑项目: {name}失败, {e}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def query_project(cls, project_id: str) -> (List[ProjectModel], List[ProjectRoleModel]):
@@ -204,7 +204,7 @@ class ProjectDao(PikaWrapper):
                 return data, roles
         except Exception as e:
             err_detail = f"查询项目: {project_id}失败, {e}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @staticmethod
     async def query_user_project(emp_no: str) -> int:
@@ -263,7 +263,7 @@ class ProjectRoleDao(PikaWrapper):
                 return data.scalars().all()
         except Exception as e:
             err_detail = f"查询用户: {emp_no}项目失败, {e}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def list_role(cls, project_id: str) -> List[ProjectRoleModel]:
@@ -278,7 +278,7 @@ class ProjectRoleDao(PikaWrapper):
                 return query.scalars().all()
         except Exception as e:
             err_detail = f"查询项目: {project_id}角色列表失败, {e}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def judge_permission(
@@ -436,7 +436,7 @@ class ProjectRoleDao(PikaWrapper):
                     )
         except Exception as e:
             err_detail = f"更新用户角色失败: {e}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def delete_project_role(cls, prole_id: str, operator: str, operator_identity: int) -> None:
@@ -472,4 +472,4 @@ class ProjectRoleDao(PikaWrapper):
                     )
         except Exception as e:
             err_detail = f"删除用户角色失败: {e}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

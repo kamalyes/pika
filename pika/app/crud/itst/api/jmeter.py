@@ -51,8 +51,7 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
                         )
         except Exception as e:
             err_detail = f"Jmeter测试报告上传失败, {e}"
-            cls.__log__.error(err_detail)
-            raise Exception(err_detail)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def query_base_info(cls) -> JmeterLatestBuildSchema:
@@ -68,8 +67,7 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
             return {"env": cls.model_to_list(env_data), "project": cls.model_to_list(project_data)}
         except Exception as e:
             err_detail = f"查询JmeterTestSummaryBaseInfo失败, {e}"
-            cls.__log__.error(err_detail)
-            raise Exception(err_detail)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def query_latest_build(cls, request: JmeterLatestBuildSchema):
@@ -87,8 +85,7 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
             return result
         except Exception as e:
             err_detail = f"查询JmeterTestSummaryLatestBuild失败, {e}"
-            cls.__log__.error(err_detail)
-            raise Exception(err_detail)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def query_chart_data(cls, request: JmeterChartDataSchema) -> JmeterTestSummaryModel:
@@ -132,8 +129,7 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
             return query_data.scalars().all()
         except Exception as e:
             err_detail = f"查询JmeterChartData失败, {e}"
-            cls.__log__.error(err_detail)
-            raise Exception(err_detail)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def query_summary_list(cls, request: JmeterSummaryListSchema):
@@ -151,8 +147,7 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
                 return result, total
         except Exception as e:
             err_detail = f"获取JmeterSummary失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
-            raise Exception(err_detail)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def query_case_detail(cls, request: JmeterCaseDetailSchema):
@@ -174,5 +169,4 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
             return {"summary_info": summary_info, "case_info": case_info}
         except Exception as e:
             err_detail = f"查询JmeterTestCaseDetail失败, {e}"
-            cls.__log__.error(err_detail)
-            raise Exception(err_detail)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

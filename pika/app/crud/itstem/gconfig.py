@@ -41,7 +41,7 @@ class GConfigDao(PikaWrapper):
                     session.add(config)
         except Exception as e:
             err_detail = f"新增变量: {form.key}失败, {e}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     @RedisHelper.cache("dao", ValidTimeEnum.DAO_TIME.value, True)
@@ -59,4 +59,4 @@ class GConfigDao(PikaWrapper):
                 return result.scalars().first()
         except Exception as e:
             err_detail = f"查询全局变量失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

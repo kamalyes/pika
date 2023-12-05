@@ -18,7 +18,7 @@ from config import PikaAppConfig
 from custard.core import Kerberos, MockHelper, DataKitHelper
 from custard.pagination.async_sqlalchemy import paginate
 from custard.time import Moment
-from sqlalchemy import and_, delete, distinct, func, or_, select, update
+from sqlalchemy import and_, delete, desc, distinct, func, or_, select, update
 
 from app.core.handler.asyncsql import AsyncDbSession
 from app.core.handler.exceres import AuthException, SystemException, ValidException
@@ -775,42 +775,12 @@ class UserDao(PikaWrapper):
     async def query_all_users(cls):
         try:
             async with async_session() as session:
-                # TODO 需要解构,简化下字段
-                query_sql = select(
-                    UserModel.id,
-                    UserModel.username,
-                    UserModel.email,
-                    UserModel.emp_no,
-                    UserModel.create_emp_no,
-                    UserModel.user_alias,
-                    UserModel.update_date,
-                    UserModel.roles,
-                    UserModel.avatar,
-                    UserModel.gender,
-                    UserModel.identity,
-                    UserModel.location,
-                    UserModel.update_emp_no,
-                    UserModel.mobile,
-                    UserModel.plane,
-                    SysUserAdminModel.delete_flag,
-                    SysUserAdminModel.enabled_flag,
-                    SysUserAdminModel.is_activate,
-                    SysUserAdminModel.err_pwd_count,
-                    SysUserAdminModel.last_login_date,
-                    SysUserAdminModel.last_login_ip,
-                    SysUserAdminModel.last_login_location,
-                    SysUserAdminModel.last_logout_date,
-                    SysUserAdminModel.last_logout_ip,
-                    SysUserAdminModel.registration_date,
-                    SysUserAdminModel.registration_ip,
-                    SysUserAdminModel.create_date,
-                ).join(SysUserAdminModel, UserModel.id == SysUserAdminModel.uid)
+                query_sql = select(UserModel).order_by(desc(UserModel.update_date))
                 query_sql_execute = await session.execute(query_sql)
-                query_result = query_sql_execute.all()
-                return query_result
+                return query_sql_execute.scalars().all()
         except Exception as e:
             err_detail = f"获取用户列表失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     @RedisHelper.cache("user_detail", ValidTimeEnum.USER_DETAIL_TIME.value)
@@ -835,4 +805,4 @@ class UserDao(PikaWrapper):
                 return [{"email": quser.email, "phone": quser.phone} for quser in query_user.scalars().all()]
         except Exception as e:
             err_detail = f"获取用户联系方式失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

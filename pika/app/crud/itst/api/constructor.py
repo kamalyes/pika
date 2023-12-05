@@ -44,7 +44,7 @@ class ConstructorDao(PikaWrapper):
                 return result.scalars().all()
         except Exception as e:
             err_detail = f"获取初始化数据失败, {e}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def insert_constructor(cls, data: ConstructorSchema, operator: str) -> None:
@@ -63,8 +63,9 @@ class ConstructorDao(PikaWrapper):
                     constructor.index = await constructor.get_index(session, data.case_id)
                     session.add(constructor)
         except Exception as e:
-            cls.__log__.error(f"新增前/后置条件: {data.name}失败, {e}")
-            raise Exception(f"新增前/后置条件失败, {e}")
+            err_detail = f"新增前/后置条件: {data.name}失败, {e}"
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+
 
     @classmethod
     async def update_constructor(cls, data: ConstructorSchema, operator: str) -> None:
@@ -88,8 +89,7 @@ class ConstructorDao(PikaWrapper):
                     cls.update_model(query, data, operator)
         except Exception as e:
             err_detail = f"编辑前后置条件: {data.name}失败, {e}"
-            cls.__log__.error(err_detail)
-            raise Exception(err_detail)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def delete_constructor(cls, id: str, operator: str) -> None:
@@ -112,8 +112,8 @@ class ConstructorDao(PikaWrapper):
                         raise Exception(f"前后置条件{id}不存在")
                     cls.delete_model(query, operator)
         except Exception as e:
-            cls.__log__.error(f"删除前后置条件: {id}失败, {e}")
-            raise Exception(f"删除前后置条件失败, {e}")
+            err_detail = f"删除前后置条件: {id}失败, {e}"
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def update_constructor_index(cls, data: List[ConstructorIndexSchema]) -> None:
@@ -133,8 +133,8 @@ class ConstructorDao(PikaWrapper):
                             update(ConstructorModel).where(ConstructorModel.id == item.id).values(index=item.index),
                         )
         except Exception as e:
-            cls.__log__.error(f"更新前后置条件顺序失败, {e}")
-            raise Exception("更新前后置条件顺序失败")
+            err_detail = f"更新前后置条件顺序失败, {e}"
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def get_constructor_tree(cls, name: str, suffix: bool) -> List[dict]:
@@ -174,8 +174,8 @@ class ConstructorDao(PikaWrapper):
                     )
                 return result
         except Exception as e:
-            cls.__log__.error(f"获取前后置条件树失败, {e}")
-            raise Exception("获取前后置条件失败")
+            err_detail = f"获取前后置条件树失败, {e}"
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @staticmethod
     async def get_constructor_data(id_: int) -> ConstructorModel:

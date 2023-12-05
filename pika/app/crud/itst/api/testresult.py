@@ -42,7 +42,7 @@ class ApiTestResultDao(PikaWrapper):
                     return request
         except Exception as e:
             err_detail = f"新增测试结果失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def list(cls, report_id: str) -> List[ApiTestResultModel]:
@@ -62,4 +62,4 @@ class ApiTestResultDao(PikaWrapper):
                 return ans
         except Exception as e:
             err_detail = f"获取测试用例执行记录失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

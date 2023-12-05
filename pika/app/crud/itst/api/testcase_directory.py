@@ -36,7 +36,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                 return result.scalars().first()
         except Exception as e:
             err_detail = f"获取目录详情失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def list_directory(cls, project_id: str):
@@ -54,7 +54,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                 return result.scalars().all()
         except Exception as e:
             err_detail = f"获取用例目录失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def insert_directory(cls, form: ApiTestCaseDirectorySchema, operator: str):
@@ -73,7 +73,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                     session.add(ApiTestCaseDirectoryModel(form, operator))
         except Exception as e:
             err_detail = f"创建目录失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def update_directory(cls, form: ApiTestCaseDirectorySchema, operator: str):
@@ -102,7 +102,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                     query.update_date = datetime.now()
         except Exception as e:
             err_detail = f"更新目录失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def delete_directory(cls, id: str, operator: str):
@@ -131,7 +131,7 @@ class ApiTestCaseDirectoryDao(PikaWrapper):
                     query.update_emp_no = operator
         except Exception as e:
             err_detail = f"删除目录失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def get_directory_tree(cls, project_id: str, case_node=None, move: bool = False) -> Tuple[list, dict]:

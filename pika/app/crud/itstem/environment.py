@@ -72,4 +72,4 @@ class EnvironmentDao(PikaWrapper):
                 return data.scalars().all(), total
         except Exception as err:
             err_detail = f"获取环境数据失败, {err}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

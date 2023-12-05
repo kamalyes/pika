@@ -42,7 +42,7 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                 return query.scalars().all()
         except Exception as e:
             err_detail = f"获取用例断言失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def async_list_test_case_asserts(cls, case_id: str):
@@ -57,7 +57,7 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                 return case_list.scalars().all()
         except Exception as e:
             err_detail = f"获取用例断言失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def insert_test_case_asserts(cls, form: TestCaseAssertsSchema, operator: str):
@@ -84,7 +84,7 @@ class ApiTestCaseAssertsDao(PikaWrapper):
             return ans
         except Exception as e:
             err_detail = f"新增用例断言失败, error: {e}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def update_test_case_asserts(cls, form: TestCaseAssertsSchema, operator: str) -> ApiTestCaseAssertsModel:
@@ -114,7 +114,7 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                     return data
         except Exception as e:
             err_detail = f"编辑用例断言失败, error: {e}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def delete_test_case_asserts(cls, id: str, operator: str) -> None:
@@ -132,4 +132,4 @@ class ApiTestCaseAssertsDao(PikaWrapper):
                     cls.delete_model(data, operator)
         except Exception as e:
             err_detail = f"删除用例断言失败, error: {e}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

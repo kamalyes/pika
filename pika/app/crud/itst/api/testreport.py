@@ -37,7 +37,7 @@ class ApiTestReportDao(PikaWrapper):
                     return report.id
         except Exception as e:
             err_detail = f"新增报告失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def update(cls, report_id: str, status) -> None:
@@ -52,7 +52,7 @@ class ApiTestReportDao(PikaWrapper):
                     report.status = status
         except Exception as e:
             err_detail = f"更新报告失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def end(
@@ -85,7 +85,7 @@ class ApiTestReportDao(PikaWrapper):
                     return report
         except Exception as e:
             err_detail = f"更新报告失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def query(cls, report_id: str):
@@ -112,7 +112,7 @@ class ApiTestReportDao(PikaWrapper):
                 return report, test_data, plan_name
         except Exception as e:
             err_detail = f"查询报告失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
     async def list_report(cls, paging, start_date: datetime, finished_date: datetime, executor: str = None):
@@ -145,4 +145,4 @@ class ApiTestReportDao(PikaWrapper):
                 return data.scalars().all(), total
         except Exception as e:
             err_detail = f"查询构建记录失败, error: {str(e)}"
-            cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
