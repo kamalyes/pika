@@ -3057,13 +3057,13 @@ reference = "tsinghua"
 
 [[package]]
 name = "pypinyin"
-version = "0.49.0"
+version = "0.50.0"
 description = "汉字拼音转换模块/工具."
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*, <4"
 files = [
-    {file = "pypinyin-0.49.0-py2.py3-none-any.whl", hash = "sha256:3791f5b647e446866e6b5d3a63942ecbaeb29b49fed268a9d9a4982241c35fe0"},
-    {file = "pypinyin-0.49.0.tar.gz", hash = "sha256:a5d61a79c5f48f6b4a422f010c20d48fcd53c705784df4aa80e329493219a4be"},
+    {file = "pypinyin-0.50.0-py2.py3-none-any.whl", hash = "sha256:a6ff9a58b8c3ba4599e5ebccf7fab7850257114be70c05a7baab435d1208358f"},
+    {file = "pypinyin-0.50.0.tar.gz", hash = "sha256:72e77c4b9b78bad102aca5fefccebdb23439b02717c626039be14a78643980fb"},
 ]
 
 [package.source]
@@ -4545,4 +4545,4 @@ all = ["APScheduler", "Faker", "Jinja2", "PyYAML", "aiohttp", "aiomysql", "aiore
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "1b54fb3da47907032ff4f07c204ee36bc3de402f6e2f2beba2d8e3dd94cfdb5b"
+content-hash = "6787e001e0e07233b1b313680ab3e7b0534ad1d86b2d6be714034f79ce55e6bd"
