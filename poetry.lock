@@ -1880,19 +1880,20 @@ reference = "tsinghua"
 
 [[package]]
 name = "minio"
-version = "7.2.0"
+version = "7.2.1"
 description = "MinIO Python SDK for Amazon S3 Compatible Cloud Storage"
 optional = false
 python-versions = "*"
 files = [
-    {file = "minio-7.2.0-py3-none-any.whl", hash = "sha256:10656272c16156fa08436ce2b27e25e4134ef5142a8c259513ee26fb514531a6"},
-    {file = "minio-7.2.0.tar.gz", hash = "sha256:4b015b018d10c1505f7c3e724fa7c2267760ac7bee6463a624cbf22cd272877b"},
+    {file = "minio-7.2.1-py3-none-any.whl", hash = "sha256:65fb962f7f8dad68da197d118cb0e1039a420f6b858f7960cbc5ed816935c05f"},
+    {file = "minio-7.2.1.tar.gz", hash = "sha256:d195fd6cc09a403635534215aaf231f0e2b82ac072444a39a7bc3f0ea6a4ba91"},
 ]
 
 [package.dependencies]
 argon2-cffi = "*"
 certifi = "*"
 pycryptodome = "*"
+typing-extensions = "*"
 urllib3 = "*"
 
 [package.source]
@@ -4549,4 +4550,4 @@ all = ["APScheduler", "Faker", "Jinja2", "PyYAML", "aiohttp", "aiomysql", "aiore
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "9665753629f4eacef4640f77b84b8c15ab6cff46cb1166f9b00d3e5a6f9cb272"
+content-hash = "69b55422ac22992c547a2e37ebb15f2dc065d89a3759ad2d2644d1a6f9803b7a"
