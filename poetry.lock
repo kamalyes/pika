@@ -2356,12 +2356,12 @@ reference = "tsinghua"
 
 [[package]]
 name = "oss2"
-version = "2.18.3"
+version = "2.18.4"
 description = "Aliyun OSS (Object Storage Service) SDK"
 optional = false
 python-versions = "*"
 files = [
-    {file = "oss2-2.18.3.tar.gz", hash = "sha256:4e61f546a17cc5c4a2efc0baee83e4b12a64fba87f13ff51166d269ab4629bea"},
+    {file = "oss2-2.18.4.tar.gz", hash = "sha256:be1e7a871a8cc267726367333017d78333ee8fae88c727ad61396f59c1c0e4d0"},
 ]
 
 [package.dependencies]
@@ -4550,4 +4550,4 @@ all = ["APScheduler", "Faker", "Jinja2", "PyYAML", "aiohttp", "aiomysql", "aiore
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "ec31f775a2156169d4903d8e801b063bd642a6729824c7ddf10fb99795796e9a"
+content-hash = "083f22760da96c3ec4ac16a3dc82e0272b7867680fe02094b0b0d13a796059b3"
