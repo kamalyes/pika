@@ -429,13 +429,13 @@ reference = "tsinghua"
 
 [[package]]
 name = "awaits"
-version = "0.0.8"
+version = "0.0.11"
 description = "async + threads + decorators = ?"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "awaits-0.0.8-py3-none-any.whl", hash = "sha256:0770f0ed63c6700c1d59e760949af0e8646266ed4f64601b7bbcab26c140f512"},
-    {file = "awaits-0.0.8.tar.gz", hash = "sha256:d04423b55fe9d9eb70c97baa2dd4e8e12f12e6848e84b05f595de1010e2169c5"},
+    {file = "awaits-0.0.11-py3-none-any.whl", hash = "sha256:c94296f135b1ae4bd92bfc9ada359248aca6d21dc7903e57a1a55eb89cf25993"},
+    {file = "awaits-0.0.11.tar.gz", hash = "sha256:37e5948dc9062b05da29c842c911fd220c3389d2386aba8690f741e1b3ac9734"},
 ]
 
 [package.source]
@@ -4550,4 +4550,4 @@ all = ["APScheduler", "Faker", "Jinja2", "PyYAML", "aiohttp", "aiomysql", "aiore
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "8015707573299278392d4d4414f4c0c9f660f9bacc1bbb1d399145014d525781"
+content-hash = "bd82b2f5960b5cd9920ffa5d651a1f30876456c189031974bd5ad56008b3d52e"
