@@ -802,7 +802,7 @@ class UserDao(PikaWrapper):
                 return []
             async with async_session() as session:
                 query_user = await session.execute(select(UserModel).where(UserModel.id.in_(user)))
-                return [{"email": quser.email, "phone": quser.phone} for quser in query_user.scalars().all()]
+                return [{"email": quser.email, "mobile": quser.mobile} for quser in query_user.scalars().all()]
         except Exception as e:
             err_detail = f"获取用户联系方式失败, error: {str(e)}"
             await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

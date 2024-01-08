@@ -955,8 +955,8 @@ class Executor(object):
                             "#67C23A" if report_dict[e]["plan_result"] == "通过" else "#E6A23C"
                         )
                         # 批量获取用户手机号
-                        users = [r.get("phone") for r in users]
-                        report_dict[e]["notification_user"] = " ".join((f"@{x}" for x in users))
+                        ding_users = [r.get("mobile") for r in users]
+                        report_dict[e]["notification_user"] = " ".join((f"@{x}" for x in ding_users))
                         render_markdown = DingTalk.render_markdown(**report_dict[e], plan_name=plan.name)
                         if not project.dingtalk_url:
                             Executor.log.debug("项目未配置钉钉通知机器人")
@@ -966,7 +966,7 @@ class Executor(object):
                             f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}测试报告",
                             render_markdown,
                             None,
-                            users,
+                            ding_users,
                         )
         return None
 

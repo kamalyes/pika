@@ -14,10 +14,11 @@ from typing import AsyncGenerator, AsyncIterator
 from urllib import parse
 
 import aioredis
+from asyncio import current_task
 from config import PikaAppConfig
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_scoped_session
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -40,7 +41,10 @@ async_engine = create_async_engine(
     pool_size=PikaAppConfig.MYSQL_POOL_SIZE,
     pool_recycle=PikaAppConfig.MYSQL_POOL_RECYCLE,
 )
-async_session = sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession)
+async_session = async_scoped_session(
+    sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession),
+    scopefunc=current_task
+    )
 
 Base = declarative_base()
 

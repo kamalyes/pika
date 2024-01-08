@@ -116,6 +116,7 @@
     "redlock",
     "requirepass",
     "rpush",
+    "scopefunc",
     "searchpath",
     "seealso",
     "sessionmaker",
