@@ -537,6 +537,45 @@ class UserDao(PikaWrapper):
                 await session.execute(sql)
         return PikaResponse.success()
 
+    @classmethod
+    async def update_user_status(cls, request, operator):
+        """
+        更新用户状态
+        Args:
+            request:
+            operator:
+        Returns:
+        """
+        async with async_db_session_generator() as session:
+            async with session.begin():
+                update_info = {"enabled_flag": request.enable_flag}
+                if request.enable_flag == True:
+                    update_info.update({"delete_flag": False, "delete_date": None})
+                sql = update(SysUserAdminModel).where(SysUserAdminModel.id == request.id).values(update_info)
+                await session.execute(sql)
+        return PikaResponse.success()
+
+    @classmethod
+    async def delete_user(cls, request, operator):
+        """
+        删除用户
+        Args:
+            request:
+            operator:
+        Returns:
+        """
+        async with async_db_session_generator() as session:
+            async with session.begin():
+                update_info = {"enabled_flag": False, "delete_flag": True, "delete_date": Moment.get_now_time()}
+                sql = (
+                    update(SysUserAdminModel)
+                    .where(and_(SysUserAdminModel.id == request.id, SysUserAdminModel.emp_no != operator))
+                    .values(update_info)
+                )
+                await session.execute(sql)
+        await async_redis.delete("pika:UserDao:user_list")
+        return PikaResponse.success()
+
     @staticmethod
     async def query_user_info_list(db, request):
         if str(request.query_type) == "0":

@@ -100,6 +100,10 @@ class ModifyUserInfoSchema(RegisterUserSchema):
     pass
 
 
+class ModifyUserStatusSchema(BaseOnlyIdSchema):
+    enable_flag: Optional[bool] = Body(True, title="启用状态")
+
+
 class QueryUserInSchema(BaseOnlyUserNameSchema, BaseOnlyEmpNoSchema, BaseQuerySchema, BaseQueryTypeSchema):
     user_alias: Optional[str] = Query(None, title="用户花名")
     email: Optional[str] = Query(None, title="邮箱地址")

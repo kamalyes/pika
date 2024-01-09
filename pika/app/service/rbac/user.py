@@ -30,6 +30,7 @@ from app.schema.user import (
     GetVerifyCodeSchema,
     ModifySecretSchema,
     ModifyUserInfoSchema,
+    ModifyUserStatusSchema,
     OAuth2LoginSchema,
     OAuth2TokenSchema,
     QuerySecuritySchema,
@@ -38,6 +39,7 @@ from app.schema.user import (
     RegisterUserSchema,
 )
 from app.service import Permission
+from pika.app.schema.base import BaseOnlyIdSchema
 
 router = APIRouter()
 
@@ -76,10 +78,22 @@ async def create_user(request: AddUserSchema, escarole=Depends(Permission(RoleEn
     return await UserDao.add_user(request, operator=emp_no)
 
 
-@router.post("/info/update", summary="更新用户资料")
+@router.delete("/delete", summary="删除用户 (管理员操作)")
+async def delete_user(request: BaseOnlyIdSchema = Depends(), escarole=Depends(Permission(escarole=True))):
+    emp_no, role = escarole
+    return await UserDao.delete_user(request, operator=emp_no)
+
+
+@router.post("/info/update", summary="更新用户资料 (管理员操作)")
 async def update_user_info(modify_user_info: ModifyUserInfoSchema, escarole=Depends(Permission(escarole=True))):
     emp_no, role = escarole
     return await UserDao.update_user_info(modify_user_info, operator=emp_no)
+
+
+@router.post("/status/update", summary="更新用户状态")
+async def update_user_status(request: ModifyUserStatusSchema, escarole=Depends(Permission(escarole=True))):
+    emp_no, role = escarole
+    return await UserDao.update_user_status(request, operator=emp_no)
 
 
 @router.get("/alluser", summary="查询所有用户信息")
