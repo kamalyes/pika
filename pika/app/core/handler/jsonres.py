@@ -190,11 +190,11 @@ class PikaModelEncoder:
 
 class PikaResponse(PikaModelEncoder):
     @classmethod
-    def records(cls, data: list, code=status.HTTP_200_OK, message="操作成功"):
+    def records(cls, data: list, code=status.HTTP_200_OK, message="Success"):
         return {"code": code, "message": message, "data": cls.model_to_list(data)}
 
     @classmethod
-    def success(cls, data=None, code=status.HTTP_200_OK, message="操作成功", exclude=()):
+    def success(cls, data=None, code=status.HTTP_200_OK, message="Success", exclude=()):
         return cls.encode_json({"code": code, "message": message, "data": data}, *exclude)
 
     @classmethod

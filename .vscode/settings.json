@@ -66,6 +66,7 @@
     "getpid",
     "GITEE",
     "gunicorn",
+    "ifnull",
     "Iframe",
     "includetail",
     "itst",

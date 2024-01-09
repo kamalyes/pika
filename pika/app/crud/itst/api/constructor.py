@@ -66,7 +66,6 @@ class ConstructorDao(PikaWrapper):
             err_detail = f"新增前/后置条件: {data.name}失败, {e}"
             await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
-
     @classmethod
     async def update_constructor(cls, data: ConstructorSchema, operator: str) -> None:
         """

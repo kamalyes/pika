@@ -42,9 +42,8 @@ async_engine = create_async_engine(
     pool_recycle=PikaAppConfig.MYSQL_POOL_RECYCLE,
 )
 async_session = async_scoped_session(
-    sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession),
-    scopefunc=current_task
-    )
+    sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession), scopefunc=current_task
+)
 
 Base = declarative_base()
 

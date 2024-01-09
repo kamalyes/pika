@@ -93,30 +93,30 @@ class JmeterDao(PikaWrapper, PikaModelEncoder):
             async with async_db_session_generator() as session:
                 async with session.begin():
                     chart_type = 1 if request.chart_type not in (1, 2) else request.chart_type
-                    _sql = (
-                        select(
-                            (
-                                JmeterTestSummaryModel.id,
-                                JmeterTestSummaryModel.batch_no,
-                                JmeterTestSummaryModel.os_type,
-                                JmeterTestSummaryModel.success,
-                                JmeterTestSummaryModel.failure,
-                                JmeterTestSummaryModel.total,
-                            )
-                            if chart_type == 1
-                            else (
-                                JmeterTestSummaryModel.id,
-                                JmeterTestSummaryModel.batch_no,
-                                JmeterTestSummaryModel.pass_rate,
-                            )
+                    if chart_type == 1:
+                        select_field = (
+                            JmeterTestSummaryModel.id,
+                            JmeterTestSummaryModel.batch_no,
+                            JmeterTestSummaryModel.os_type,
+                            JmeterTestSummaryModel.success,
+                            JmeterTestSummaryModel.failure,
+                            JmeterTestSummaryModel.total,
                         )
+                    else:
+                        select_field = (
+                            JmeterTestSummaryModel.id,
+                            JmeterTestSummaryModel.batch_no,
+                            JmeterTestSummaryModel.pass_rate,
+                        )
+                    _sql = (
+                        select(*select_field)
                         .where(
                             and_(
                                 JmeterTestSummaryModel.env == request.env,
                                 JmeterTestSummaryModel.project == request.project,
                             )
                             if request.env and request.project
-                            else or_(
+                            else and_(
                                 JmeterTestSummaryModel.start_time >= request.start_time,
                                 JmeterTestSummaryModel.end_time <= request.end_time,
                             )
