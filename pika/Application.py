@@ -681,4 +681,5 @@ if __name__ == "__main__":
         host=PikaAppConfig.PIKA_BACKEND_HOST,
         port=PikaAppConfig.PIKA_BACKEND_PORT,
         reload=True,
+        forwarded_allow_ips="*",
     )

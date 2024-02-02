@@ -274,7 +274,6 @@ class DbConfigDao(PikaWrapper, PikaJsonEncoder):
             result, _ = await DbConfigDao.execute(data, sql)
             _, result = PikaResponse.parse_sql_result(result)
             return result
-            # return cls.safe_json_dumps(result, cls=JSONDecoder, ensure_ascii=False)
         except Exception as err:
             err_detail = f"执行SQL失败, {err}"
             await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

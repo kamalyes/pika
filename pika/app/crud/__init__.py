@@ -183,9 +183,7 @@ class PikaWrapper(object):
             return [], 0
         sql = sql.offset((page_index - 1) * page_size).limit(page_size)
         data = await session.execute(sql)
-        if scalars and kwargs.get("_join") is None:
-            return data.scalars().all(), total
-        return data.all(), total
+        return data.scalars().all(), total
 
     @staticmethod
     def update_model(dist, source, operator=None, not_null=False):

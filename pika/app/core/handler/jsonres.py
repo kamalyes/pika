@@ -171,7 +171,7 @@ class PikaModelEncoder:
             exclude=exclude,
             custom_encoder={datetime: lambda x: x.strftime(PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS)},
         )
-
+    
     @classmethod
     def json_required(cls, func):
         """
@@ -202,7 +202,6 @@ class PikaResponse(PikaModelEncoder):
         cls,
         *,
         code: Union[int, str] = status.HTTP_200_OK,
-        status_code: Union[int, str] = status.HTTP_200_OK,
         data: Union[list, dict, str] = None,
         total: Union[list, dict, str] = None,
         message: str = "Success",
@@ -211,7 +210,6 @@ class PikaResponse(PikaModelEncoder):
         响应成功 应用列表
         Args:
             code:
-            status_code:
             data:
             total:
             message:
@@ -219,17 +217,9 @@ class PikaResponse(PikaModelEncoder):
         Returns:
 
         """
-        return JSONResponse(
-            status_code=status_code,
-            content=jsonable_encoder(
-                {
-                    "code": code,
-                    "message": message,
-                    "data": data,
-                    "total": total,
-                },
-            ),
-        )
+        if data is None:
+            return PikaResponse.encode_json(dict(code=code, message=message, data=list(), total=0))
+        return PikaResponse.encode_json(dict(code=code, message=message, data=data, total=total))
 
     @classmethod
     def failed(
