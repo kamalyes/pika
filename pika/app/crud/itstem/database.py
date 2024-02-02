@@ -224,22 +224,18 @@ class DbConfigDao(PikaWrapper, PikaJsonEncoder):
 
     @classmethod
     async def online_sql(cls, id: str, sql: str):
-        try:
-            query = await DbConfigDao.query_database(id)
-            if query is None:
-                raise Exception("未找到对应的数据库配置")
-            data = await db_helper.get_connection(
-                query.sql_type,
-                query.host,
-                query.port,
-                query.username,
-                query.password,
-                query.database,
-            )
-            return await DbConfigDao.execute(data, sql)
-        except Exception as err:
-            err_detail = f"执行SQL失败, {err}"
-            await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+        query = await DbConfigDao.query_database(id)
+        if query is None:
+            raise Exception("未找到对应的数据库配置")
+        data = await db_helper.get_connection(
+            query.sql_type,
+            query.host,
+            query.port,
+            query.username,
+            query.password,
+            query.database,
+        )
+        return await DbConfigDao.execute(data, sql)
 
     @classmethod
     async def execute(cls, conn, sql):
@@ -277,7 +273,8 @@ class DbConfigDao(PikaWrapper, PikaJsonEncoder):
             )
             result, _ = await DbConfigDao.execute(data, sql)
             _, result = PikaResponse.parse_sql_result(result)
-            return cls.safe_json_dumps(result, cls=JSONDecoder, ensure_ascii=False)
+            return result
+            # return cls.safe_json_dumps(result, cls=JSONDecoder, ensure_ascii=False)
         except Exception as err:
             err_detail = f"执行SQL失败, {err}"
             await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)

@@ -10,6 +10,7 @@
 @Desc    :  None
 """
 
+from typing import List
 from app.crud import PikaMdWrapper, PikaWrapper
 from app.enums.SysVarEnum import ValidTimeEnum
 from app.middleware.xredis import RedisHelper
@@ -45,7 +46,7 @@ class GConfigDao(PikaWrapper):
 
     @classmethod
     @RedisHelper.cache("dao", ValidTimeEnum.DAO_TIME.value, True)
-    async def async_get_gconfig_by_key(cls, key: str, env: str) -> GConfigModel:
+    async def async_get_gconfig_by_key(cls, key: str, env: str) -> List[GConfigModel]:
         try:
             filters = [
                 GConfigModel.key == key,
@@ -60,3 +61,17 @@ class GConfigDao(PikaWrapper):
         except Exception as e:
             err_detail = f"查询全局变量失败, error: {str(e)}"
             await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
+
+    @staticmethod
+    async def list_gconfig(env: int) -> List[GConfigModel]:
+        """
+        get available gconfig
+        """
+        try:
+            filters = [GConfigModel.delete_flag == 0, GConfigModel.enabled_flag == True, GConfigModel.env == env]
+            async with async_session() as session:
+                sql = select(GConfigModel).where(*filters)
+                result = await session.execute(sql)
+                return result.scalars().all()
+        except Exception as e:
+            raise Exception(f"查询全局变量失败: {str(e)}")

@@ -87,6 +87,7 @@ class UserDao(PikaWrapper):
         Args:
             request:
             register_model:
+
         Returns:
         """
         user_ip = await client_ip(request)
@@ -177,6 +178,7 @@ class UserDao(PikaWrapper):
         生成jwt+uuid形态的token
         Args:
             **kwargs:
+
         Returns:
         """
         target_value = {"emp_no": kwargs["emp_no"], "password": kwargs["password"]}
@@ -197,6 +199,7 @@ class UserDao(PikaWrapper):
         uuid_jwt同步至redis
         Args:
             **kwargs:
+
         Returns:
         """
         try:
@@ -210,6 +213,7 @@ class UserDao(PikaWrapper):
         删除 redis中Token
         Args:
             **kwargs:
+
         Returns:
         """
         try:
@@ -285,6 +289,7 @@ class UserDao(PikaWrapper):
         Args:
             request:
             oauth2_login:
+
         Returns:
         """
         user_ip = await client_ip(request)
@@ -350,6 +355,7 @@ class UserDao(PikaWrapper):
         Args:
             request:
             oauth2_login:
+
         Returns:
         """
         user_ip = await client_ip(request)
@@ -425,6 +431,7 @@ class UserDao(PikaWrapper):
         验证token
         Args:
             request:
+
         Returns:
         """
         key_t = f"{RedisKeyEnum.AUTH_TOKEN}:{request.emp_no}"
@@ -455,6 +462,7 @@ class UserDao(PikaWrapper):
         Args:
             request:
             operator:
+
         Returns:
         """
         await regex_register_str(email=request.email)
@@ -493,6 +501,7 @@ class UserDao(PikaWrapper):
         Args:
             modify_user_info:
             operator:
+
         Returns:
         """
         await regex_register_str(
@@ -544,6 +553,7 @@ class UserDao(PikaWrapper):
         Args:
             request:
             operator:
+
         Returns:
         """
         async with async_db_session_generator() as session:
@@ -562,6 +572,7 @@ class UserDao(PikaWrapper):
         Args:
             request:
             operator:
+
         Returns:
         """
         async with async_db_session_generator() as session:
@@ -637,6 +648,7 @@ class UserDao(PikaWrapper):
             verify_code:
             model:
             emp_no:
+
         Returns:
         Example::
             >>> UserDao.has_mail_verify_code(8888)

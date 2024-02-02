@@ -30,11 +30,17 @@ async def list_user_activities(request: OperationSchema = Depends(), escarole=De
     try:
         operator, operator_role = escarole
         records = await PikaOperationDao.count_user_activities(operator, request.start_date, request.finished_date)
-        ans = []
+        ans = list()
+        date_index = dict()
         for r in records:
             # 解包日期和数量
             date, count = r
-            ans.append({"date": date.strftime("%Y-%m-%d"), "count": count})
+            date_str = date.strftime("%Y-%m-%d")
+            if date_index.get(date_str) is None:
+                ans.append(dict(date=date_str, count=count))
+                date_index[date_str] = len(ans) - 1
+            else:
+                ans[date_index[date_str]]["count"] += 1
         return PikaResponse.success(data=ans)
     except Exception as e:
         return PikaResponse.failed(detail=str(e))

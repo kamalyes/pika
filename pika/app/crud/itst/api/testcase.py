@@ -9,6 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  None
 """
+from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Dict, List, Union
 
@@ -53,7 +54,7 @@ class ApiTestCaseDao(PikaWrapper):
         )
 
     @classmethod
-    async def list_testcase(cls, paging, directory_id: str = None, name: str = None, operator: str = None):
+    async def list_testcase(cls, paging, directory_id: str = None, name: str = None, create_emp_no: str = None):
         try:
             filters = [ApiTestCaseModel.delete_flag == 0]
             if directory_id:
@@ -61,8 +62,8 @@ class ApiTestCaseDao(PikaWrapper):
                 filters = [ApiTestCaseModel.delete_flag == 0, ApiTestCaseModel.directory_id.in_(parents)]
                 if name:
                     filters.append(ApiTestCaseModel.name.like(f"%{name}%"))
-                if operator:
-                    filters.append(ApiTestCaseModel.create_emp_no == operator)
+                if create_emp_no:
+                    filters.append(ApiTestCaseModel.create_emp_no == create_emp_no)
             async with async_session() as session:
                 sql = select(ApiTestCaseModel).where(*filters).order_by(ApiTestCaseModel.id.asc())
                 result, total = await cls.pagination(paging.page_index, paging.page_size, session, sql, False)
@@ -185,7 +186,7 @@ class ApiTestCaseDao(PikaWrapper):
             await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
-    async def query_test_case_info(cls, case_id: str) -> dict:
+    async def async_query_test_case_info(cls, case_id: str) -> dict:
         """
 
         Args:
@@ -205,7 +206,7 @@ class ApiTestCaseDao(PikaWrapper):
                 asserts = await ApiTestCaseAssertsDao.async_list_test_case_asserts(data.id)
                 # 获取数据构造器
                 constructors = await ConstructorDao.list_constructor(case_id)
-                constructors_case = await ApiTestCaseDao.query_test_case_by_constructors(constructors)
+                constructors_case = await ApiTestCaseDao.async_query_test_case_by_constructors(constructors)
                 test_data = await ApiTestCaseDataDao.list_testcase_data(case_id)
                 parameters = await ApiTestCaseOutParametersDao.select_list(
                     case_id=case_id,
@@ -224,7 +225,7 @@ class ApiTestCaseDao(PikaWrapper):
             await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @classmethod
-    async def query_test_case_by_constructors(cls, constructors: List[ConstructorModel]):
+    async def async_query_test_case_by_constructors(cls, constructors: List[ConstructorModel]):
         """
 
         Args:
@@ -251,7 +252,7 @@ class ApiTestCaseDao(PikaWrapper):
             await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
 
     @staticmethod
-    async def query_test_case_out_parameters(
+    async def async_query_test_case_out_parameters(
         session,
         case_list: List[ApiTestCaseVariablesSchema],
         case_set=None,
@@ -299,7 +300,7 @@ class ApiTestCaseDao(PikaWrapper):
         return step_case
 
     @classmethod
-    async def query_test_case(cls, case_id) -> Union[ApiTestCaseModel, str]:
+    async def async_query_test_case(cls, case_id) -> Union[ApiTestCaseModel, str]:
         """
 
         Args:
@@ -314,12 +315,10 @@ class ApiTestCaseDao(PikaWrapper):
                 result = await session.execute(sql)
                 data = result.scalars().first()
                 if data is None:
-                    return None, "用例不存在"
-                return data, None
+                    raise Exception(f"用例id: {case_id}不存在, 可能已经被删除")
         except Exception as e:
             err_detail = f"查询用例失败, error: {str(e)}"
             await cls.opt_exec_err(cls.__log__.exception, err_detail, Exception)
-            return None, err_detail
 
     @classmethod
     async def list_testcase_tree(cls, projects: List[ProjectModel]) -> Union[List, dict]:
@@ -496,7 +495,7 @@ class ApiTestCaseDao(PikaWrapper):
         Returns:
 
         """
-        data = await cls.query_test_case_info(case_id)
+        data = await cls.async_query_test_case_info(case_id)
         cs = data.get("case")
         # 开始解析测试数据
         result = {"id": f"case_{case_id}", "label": f"{cs.name}({cs.id})"}
@@ -535,7 +534,7 @@ class ApiTestCaseDao(PikaWrapper):
 
     @classmethod
     async def query_weekly_user_case(cls, operator: str, start_date: datetime, finished_date: datetime) -> List:
-        ans = {}
+        ans = defaultdict(int)
         async with async_session() as session:
             async with session.begin():
                 sql = (
@@ -555,7 +554,7 @@ class ApiTestCaseDao(PikaWrapper):
                     now_date = date.strftime("%Y-%m-%d")
                     temp_count += count
                     if last_date != now_date:
-                        ans[date.strftime("%Y-%m-%d")] = temp_count
+                        ans[date.strftime("%Y-%m-%d")] += temp_count
         return await cls.fill_data(start_date, finished_date, ans)
 
     @classmethod

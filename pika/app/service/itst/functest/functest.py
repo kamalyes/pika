@@ -24,20 +24,20 @@ router = APIRouter()
 
 @router.post("/funccase/add", summary="增加功能测试用例")
 async def add_funccase(request: EditFuncCaseSchema, escarole=Depends(Permission(escarole=True))):
-    emp_no, role = escarole
-    return await FuncCaseDao.add_funccase(request=request, emp_no=emp_no)
+    operator, operator_identity = escarole
+    return await FuncCaseDao.add_funccase(request=request, operator=operator)
 
 
 @router.delete("/funccase/delete", summary="删除功能测试用例(软删)")
 async def delete_funccase(request: DelFuncCaseSchema = Depends(), escarole=Depends(Permission(escarole=True))):
-    emp_no, role = escarole
-    return await FuncCaseDao.delete_funccase(request=request, emp_no=emp_no)
+    operator, operator_identity = escarole
+    return await FuncCaseDao.delete_funccase(request=request, operator=operator)
 
 
 @router.post("/funccase/update", summary="编辑功能测试用例")
 async def update_funccase(request: EditFuncCaseSchema, escarole=Depends(Permission(escarole=True))):
-    emp_no, role = escarole
-    return await FuncCaseDao.update_funccase(request=request, emp_no=emp_no)
+    operator, operator_identity = escarole
+    return await FuncCaseDao.update_funccase(request=request, operator=operator)
 
 
 @router.get("/funccase/list", summary="分页获取功能测试用例", response_model=LimitOffsetPage[QueryFuncCaseOutSchema])

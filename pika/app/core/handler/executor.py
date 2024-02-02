@@ -14,8 +14,7 @@ import re
 import time
 from collections import defaultdict
 from datetime import datetime
-from typing import Any, List, Tuple, Union
-
+from typing import Any, List, Tuple, Union, Callable
 from config import PikaAppConfig
 
 from app.core.constructor.case_constructor import TestCaseConstructor
@@ -58,16 +57,33 @@ from app.utils.decorator import case_log, lock
 from app.utils.gconfig_parser import JSONGConfigParser, StringGConfigParser, YamlGConfigParser
 from app.utils.json_compare import JsonCompare
 from app.utils.ws_manager import ws_manage
+from app.core.handler.render import Render
+
+# construct method mapping
+construct_type = {
+    ConstructorTypeEnum.testcase: TestCaseConstructor,
+    ConstructorTypeEnum.sql: SqlConstructor,
+    ConstructorTypeEnum.redis: RedisConstructor,
+    ConstructorTypeEnum.py_script: PythonConstructor,
+    ConstructorTypeEnum.http: HttpConstructor,
+}
+
+# gconfig parser mapping
+gconfig_parser = {
+    GConfigParserEnum.string: StringGConfigParser.get_data,
+    GConfigParserEnum.json: JSONGConfigParser.get_data,
+    GConfigParserEnum.yaml: YamlGConfigParser.get_data,
+}
 
 
 class Executor(object):
     log = PikaLogger("Executor")
-    el_exp = r"\$\{(.+?)\}"
-    pattern = re.compile(el_exp)
     # 需要替换全局变量的字段
     fields = ["request_body", "url", "request_headers"]
 
     def __init__(self, log: CaseLog = None):
+        # 这里是一个彩蛋, 奔驰大G LB（括弧1.3T）
+        self.glb = None
         if log is None:
             self._logger = CaseLog()
             self._main = True
@@ -81,36 +97,32 @@ class Executor(object):
 
     @staticmethod
     def get_constructor_type(c: ConstructorModel):
-        if c.type == ConstructorTypeEnum.testcase:
-            return TestCaseConstructor
-        if c.type == ConstructorTypeEnum.sql:
-            return SqlConstructor
-        if c.type == ConstructorTypeEnum.redis:
-            return RedisConstructor
-        if c.type == ConstructorTypeEnum.py_script:
-            return PythonConstructor
-        if c.type == ConstructorTypeEnum.http:
-            return HttpConstructor
-        return None
+        return construct_type.get(c.type)
 
     def append(self, content, end=False):
         self.logger.append(content=content, end=end)
 
-    @case_log
-    async def parse_gconfig(self, data, type_, env, *fields):
-        """
-        解析全局变量
-        Args:
-            data:
-            type_:
-            env:
-            *fields:
-
-        Returns:
-
-        """
+    async def load_variables(self, data, type_, params, *fields):
+        """upgrade for replacing variables"""
         for f in fields:
-            await self.parse_field(data, f, GConfigTypeEnum.text(type_), env)
+            self.append("解析{}: [{}]中的变量".format(GConfigTypeEnum.text(type_), data, f))
+            origin_field = getattr(data, f)
+            # if not None or ""
+            if origin_field:
+                rendered = Render.render(params, origin_field)
+                if rendered != origin_field:
+                    self.append("替换变量成功, [{}]:\n\n[{}] -> [{}]\n".format(f, origin_field, rendered))
+                    setattr(data, f, rendered)
+
+    @case_log
+    async def query_gconfig(self, env: int):
+        """加载全局变量"""
+        gconfig_list = await GConfigDao.list_gconfig(env)
+        gconfig_map = dict()
+        for g in gconfig_list:
+            parser = Executor.get_parser(g.key_type)
+            gconfig_map[g.key] = parser(g.value)
+        self.glb = gconfig_map
 
     @case_log
     def get_parser(self, key_type):
@@ -122,59 +134,12 @@ class Executor(object):
         Returns:
 
         """
-        if key_type == GConfigParserEnum.string:
-            return StringGConfigParser.parse
-        if key_type == GConfigParserEnum.json:
-            return JSONGConfigParser.parse
-        if key_type == GConfigParserEnum.yaml:
-            return YamlGConfigParser.parse
-        raise Exception(f"全局变量类型: {key_type}不合法, 请检查!")
-
-    # noinspection PyMethodMayBeStatic
-    def get_el_expression(self, string: str):
+        """获取变量解析器
         """
-        获取字符串中的el表达式
-        Args:
-            string:
-
-        Returns:
-
-        """
-        if string is None:
-            return []
-        return re.findall(Executor.pattern, string)
-
-    async def parse_field(self, data, field, name, env):
-        """
-        解析字段
-        Args:
-            data:
-            field:
-            name:
-            env:
-
-        Returns:
-
-        """
-        try:
-            self.append("获取{}: [{}]字段: [{}]中的el表达式".format(name, data, field))
-            field_origin = getattr(data, field)
-            variables = self.get_el_expression(field_origin)
-            for v in variables:
-                key = v.split(".")[0]
-                cf = await GConfigDao.async_get_gconfig_by_key(key, env)
-                if cf is not None:
-                    # 解析变量
-                    parse = self.get_parser(cf.key_type)
-                    new_value = parse(cf.value, v)
-                    new_field = field_origin.replace("${%s}" % v, new_value)
-                    setattr(data, field, new_field)
-                    self.append("替换全局变量成功, 字段: [{}]:\n\n[{}] -> [{}]\n".format(field, "${%s}" % v, new_value))
-                    field_origin = new_field
-            self.append("获取{}字段: [{}]中的el表达式".format(name, field), True)
-        except Exception as e:
-            Executor.log.error(f"查询全局变量失败, error: {str(e)}")
-            raise Exception(f"查询全局变量失败, error: {str(e)}")
+        parser = gconfig_parser.get(key_type)
+        if parser is None:
+            raise Exception(f"全局变量类型: {key_type}不合法, 请检查!")
+        return parser
 
     def replace_params(self, field_name, field_origin, params: dict):
         """
@@ -262,11 +227,8 @@ class Executor(object):
         self,
         env: str,
         path,
-        case_info,
         params,
-        req_params,
         constructors: List[ConstructorModel],
-        asserts,
         suffix=False,
     ):
         """
@@ -274,11 +236,8 @@ class Executor(object):
         Args:
             env:
             path:
-            case_info:
             params:
-            req_params:
             constructors:
-            asserts:
             suffix:
 
         Returns:
@@ -286,16 +245,15 @@ class Executor(object):
         """
         if len(constructors) == 0:
             self.append("前后置条件为空, 跳出该环节")
-            return False
+            return
         current = 0
         for _i, c in enumerate(constructors):
             if c.suffix == suffix:
-                await self.execute_constructor(env, current, path, params, req_params, c)
-                self.replace_args(params, case_info, constructors, asserts)
+                await self.execute_constructor(env, current, path, params, c)
                 current += 1
         return True
 
-    async def execute_constructor(self, env, index, path, params, req_params, constructor: ConstructorModel):
+    async def execute_constructor(self, env, index, path, params, constructor: ConstructorModel):
         """
         执行构造方法
         Args:
@@ -303,7 +261,6 @@ class Executor(object):
             index:
             path:
             params:
-            req_params:
             constructor:
 
         Returns:
@@ -315,18 +272,20 @@ class Executor(object):
         construct = Executor.get_constructor_type(constructor)
         if construct is None:
             self.append(f"构造方法类型: {constructor.type} 不合法, 请检查")
-            return None
-        await construct.run(
+            return
+        # 加载变量
+        constructor.constructor_json = Render.render(params, constructor.constructor_json)
+        resp = await construct.run(
             self,
             env=env,
             index=index,
             path=path,
             params=params,
-            req_params=req_params,
             constructor=constructor,
             executor_class=Executor,
         )
-        return None
+        if constructor.value and resp:
+            params[constructor.value] = resp
 
     def add_header(self, case_info, headers):
         """
@@ -361,12 +320,12 @@ class Executor(object):
         return result
 
     @case_log
-    def my_assert(self, asserts: List, json_format: bool) -> Union[dict, bool, Tuple]:
+    def my_assert(self, params, asserts: List) -> [str, bool]:
         """
         断言验证
         Args:
+            params:
             asserts:
-            json_format:
 
         Returns:
 
@@ -379,9 +338,11 @@ class Executor(object):
         for item in asserts:
             try:
                 # 解析预期/实际结果
-                expected = self.translate(item.expected)
+                exp = Render.render(params, item.expected)
+                act = Render.render(params, item.actually)
+                expected = self.translate(exp)
                 # 判断请求返回是否是json格式,如果不是则不进行loads操作
-                actually = self.translate(item.actually)
+                actually = self.translate(act)
                 status, err = self.ops(item.assert_type, expected, actually)
                 result[item.id] = {"status": status, "msg": err}
             except Exception as e:
@@ -410,64 +371,57 @@ class Executor(object):
         Returns:
 
         """
-        response_info = {}
+        response_info = dict()
 
         # 初始化case全局变量, 只存在于case生命周期 注意 它与全局变量不是一套逻辑
-        case_params = params_pool
-        if case_params is None:
-            case_params = {}
+        case_params = params_pool or dict()
+        req_params = request_param or dict()
 
-        req_params = request_param
-        if req_params is None:
-            req_params = {}
+        # 加载全局变量
+        await self.query_gconfig(env)
+
+        # 挂载全局变量, 合并请求变量
+        case_params.update(self.glb)
+        case_params.update(req_params)
 
         try:
-            case_info, err = await ApiTestCaseDao.query_test_case(case_id)
-            if err:
-                return response_info, err
+            case_info = await ApiTestCaseDao.async_query_test_case(case_id)
             response_info["case_id"] = case_info.id
             response_info["case_name"] = case_info.name
             request_method = case_info.request_method.upper()
             response_info["request_method"] = request_method
 
-            # Step1: 替换全局变量
-            await self.parse_gconfig(case_info, GConfigTypeEnum.case, env, *Executor.fields)
-            self.append("解析全局变量", True)
-
-            # Step2: 获取构造数据
+            # Step1: 获取构造数据
             constructors = await self.get_constructor(case_id)
 
-            #  Step3: 解析前后置条件的全局变量
-            for c in constructors:
-                await self.parse_gconfig(c, GConfigTypeEnum.constructor, env, "constructor_json")
-
-            # Step4: 获取断言
+            # Step2: 获取断言
             asserts = await ApiTestCaseAssertsDao.async_list_test_case_asserts(case_id)
             for ast in asserts:
                 await self.parse_gconfig(ast, GConfigTypeEnum.asserts, env, "expected", "actually")
 
-            # Step5: 获取出参信息
+            # Step3: 获取出参信息
             out_parameters = await ApiTestCaseOutParametersDao.select_list(case_id=case_id)
 
-            # Step6: 替换参数
-            self.replace_args(req_params, case_info, constructors, asserts)
+            # Step4: 执行前置条件
+            await self.execute_constructors(env, path, case_params, constructors)
 
-            # Step7: 执行前置条件
-            await self.execute_constructors(env, path, case_info, case_params, req_params, constructors, asserts)
+            # Step5: 获取全局变量更新request_body url headers
+            await self.load_variables(case_info, GConfigTypeEnum.case, case_params, *Executor.fields)
 
-            # Step8: 批量改写主方法参数
-            await self.parse_params(case_info, case_params)
-            headers = PikaJsonEncoder.safe_json_loads(case_info.request_headers)
-            # Step9: 替换请求参数
-            request_body = await self.replace_body(request_param, case_info.request_body, case_info.request_body_type)
+            if case_info.request_headers and case_info.request_headers != "":
+                headers = PikaJsonEncoder.safe_json_loads(case_info.request_headers)
+            else:
+                headers = dict()
+            request_body = case_info.request_body if case_info.request_body != "" else None
 
-            # Step10: 替换base_gateway
+            # Step6: 替换base_gateway
             if case_info.base_gateway:
                 base_gateway = await GatewayDao.query_gateway(env, id=case_info.base_gateway)
                 case_info.url = f"{base_gateway if base_gateway else ''}{case_info.url}"
             response_info["url"] = case_info.url
+            response_info["request_data"] = request_body
 
-            # Step10: 完成http请求
+            # Step7: 完成http请求
             request_obj = await AsyncRequest.client(
                 url=case_info.url,
                 request_body_type=case_info.request_body_type,
@@ -482,21 +436,16 @@ class Executor(object):
             )
             response_info.update(res)
 
-            # Step11: 提取出参
+            # Step8: 提取出参
             if out_parameters:
                 out_dict = self.extract_out_parameters(response_info, out_parameters)
                 case_params.update(out_dict)
 
-            # Step12: 替换变量
-            self.replace_asserts(asserts, req_params, case_params)
-            self.replace_constructors(constructors, req_params, case_params)
+            # Step9: 执行后置条件
+            await self.execute_constructors(env, path, case_params, constructors, True)
 
-            # Step13: 执行后置条件
-            await self.execute_constructors(env, path, case_info, case_params, req_params, constructors, asserts, True)
-
-            # Step14: 执行断言
-            json_format_ = response_info.get("json_format")
-            asserts, status = await self.my_assert(asserts, json_format_)
+            # Step10: 执行断言
+            asserts, status = await self.my_assert(case_params, asserts)
             response_info["status"] = status
             response_info["asserts"] = asserts
             # 日志输出, 如果不是主用例则不记录
@@ -514,80 +463,6 @@ class Executor(object):
     @staticmethod
     def get_dict(json_data: str):
         return PikaJsonEncoder.safe_json_loads(json_data)
-
-    def replace_cls(self, params: dict, cls, *fields: Any):
-        for k, _v in params.items():
-            for f in fields:
-                fd = getattr(cls, f, "")
-                if fd is None:
-                    continue
-                if k in fd:
-                    data = self.replace_params(f, fd, params)
-                    for a, b in data.items():
-                        fd = fd.replace(a, b)
-                        setattr(cls, f, fd)
-
-    def replace_args(
-        self,
-        params,
-        data: ApiTestCaseModel,
-        constructors: List[ConstructorModel],
-        asserts: List[ApiTestCaseAssertsModel],
-    ):
-        """
-        替换参数
-        Args:
-            params:
-            data:
-            constructors:
-            asserts:
-
-        Returns:
-
-        """
-        self.replace_testcase(params, data)
-        self.replace_constructors(constructors, params)
-        self.replace_asserts(asserts, params)
-
-    def replace_testcase(self, params: dict, data: ApiTestCaseModel):
-        """
-        替换测试用例中的参数
-        Args:
-            params:
-            data:
-
-        Returns:
-
-        """
-        self.replace_cls(params, data, "request_headers", "request_body", "url")
-
-    def replace_constructors(self, constructors: List[ConstructorModel], *params: dict):
-        """
-        替换数据构造器中的参数
-        Args:
-            params:
-            constructors:
-
-        Returns:
-
-        """
-        for c in constructors:
-            for par in params:
-                self.replace_cls(par, c, "constructor_json")
-
-    def replace_asserts(self, asserts: List[ApiTestCaseAssertsModel], *params):
-        """
-        替换断言中的参数
-        Args:
-            params:
-            asserts:
-
-        Returns:
-
-        """
-        for a in asserts:
-            for p in params:
-                self.replace_cls(p, a, "expected", "actually")
 
     @staticmethod
     async def run_with_test_data(
@@ -733,34 +608,6 @@ class Executor(object):
             )
 
     @case_log
-    def replace_body(self, req_params, request_body, request_body_type=1):
-        """
-        根据传入的构造参数进行参数替换
-        Args:
-            req_params:
-            request_body:
-            request_body_type:
-
-        Returns:
-
-        """
-        if request_body_type != ReqBodyTypeEnum.json:
-            self.append("当前请求数据不为json, 跳过替换")
-            return request_body
-        try:
-            if request_body:
-                data = PikaJsonEncoder.safe_json_loads(request_body)
-                if req_params:
-                    for k, v in req_params.items():
-                        if data.get(k) is not None:
-                            data[k] = v
-                return PikaJsonEncoder.safe_json_dumps(data, ensure_ascii=False)
-            self.append("request_body为空, 不进行替换")
-        except Exception as e:
-            self.append(f"替换请求request_body失败, {e}")
-        return request_body
-
-    @case_log
     def tidy_ops_res(self, expected, actually, condition, flag):
         symbol = "【✅】" if flag else "【❌】"
         detail = f"预期结果: {expected} {condition} 实际结果: {actually}{symbol}"
@@ -855,72 +702,32 @@ class Executor(object):
         return False, "不支持的断言方式💔"
 
     @case_log
-    def translate(self, data):
+    def translate(self, result):
         """
-        反序列化为Python对象
+        尝试反序列化为Python对象
         Args:
-            data:
+            result:
 
         Returns:
 
         """
-        return PikaJsonEncoder.safe_json_loads(data)
-
-    # noinspection PyMethodMayBeStatic
-    def replace_branch(self, branch: str, params: dict):
-        if not params:
-            return branch
-        if branch.startswith("#"):
-            # 说明branch也是个子变量
-            data = branch[1:]
-            if len(data) == 0:
-                return branch
-            dist = params.get(data)
-            if dist is None:
-                return branch
-            return params.get(data)
-        return branch
-
-    @case_log
-    def parse_variable(self, response_info, string: str, params=None):
-        """
-        解析返回response中的变量
-        Args:
-            response_info:
-            string:
-            params:
-
-        Returns:
-
-        """
-        expected = self.get_el_expression(string)
-        if len(expected) == 0:
-            return string
-        data = expected[0]
-        el_list = data.split(".")
-        # ${response.data.id}
-        result = response_info
+        if isinstance(result, bytes):
+            return result.decode()
+        # 优先判断是否是时间
         try:
-            for branch in el_list:
-                branch = self.replace_branch(branch, params)
-                if isinstance(result, str):
-                    # 说明需要反序列化
-                    try:
-                        result = PikaJsonEncoder.safe_json_loads(result)
-                    except Exception as e:
-                        self.append(f"反序列化失败, result: {result}\nERROR: {e}")
-                        break
-                # 2022-02-27 修复数组变量替换的bug
-                if isinstance(branch, int) or branch.isdigit():
-                    # 说明路径里面的是数组
-                    result = result[int(branch)]
-                else:
-                    result = result.get(branch)
-        except Exception as e:
-            raise Exception(f"获取变量失败, error: {str(e)}")
-        if string == "${response}":
+            return datetime.strptime(result, "%Y-%m-%d %H:%M:%S")
+        except:
+            pass
+        try:
+            return datetime.strptime(result, "%Y-%m-%d %H:%M:%S.%f")
+        except:
+            pass
+        if result == "":
+            return None
+        try:
+            return PikaJsonEncoder.safe_json_loads(result)
+        except:
             return result
-        return PikaJsonEncoder.safe_json_dumps(result, ensure_ascii=False)
 
     @staticmethod
     async def notice(env: list, plan: ApiTestPlanModel, project: ProjectModel, report_dict: dict, users: list):

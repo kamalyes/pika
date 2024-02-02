@@ -9,6 +9,7 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  全局变量解析器,包括JSON/YAML/STRING
 """
+import json
 import yaml
 from app.core.handler.jsonres import PikaJsonEncoder
 from app.core.handler.logger import PikaLogger
@@ -17,8 +18,16 @@ from app.core.handler.logger import PikaLogger
 class GConfigParser(PikaJsonEncoder):
     log = PikaLogger("GConfigParser")
 
-    @classmethod
-    def get(cls, data, key):
+    @staticmethod
+    def parse(value, jsonpath):
+        raise NotImplementedError
+
+    @staticmethod
+    def get_data(value):
+        raise NotImplementedError
+
+    @staticmethod
+    def get(data, key):
         el_list = key.split(".")
         result = data
         try:
@@ -67,6 +76,10 @@ class YamlGConfigParser(GConfigParser):
 
 
 class StringGConfigParser(GConfigParser):
+    @staticmethod
+    def get_data(value):
+        return value
+
     @staticmethod
     def parse(value, jsonpath):
         """

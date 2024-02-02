@@ -36,8 +36,7 @@ class HttpConstructor(ConstructorAbstract, PikaJsonEncoder):
             )
             resp = await client.invoke(data.get("request_method"))
             executor.append(f"当前{constructor_type_}类型为http, url: {url}")
-            if constructor.value:
-                params[constructor.value] = resp
             executor.append(f"当前{constructor_type_}返回变量: {constructor.value}\n返回值:\n {resp}\n")
+            return resp
         except Exception as e:
             raise Exception(f"{path}->{constructor.name} 第{index + 1}个{constructor_type_}执行失败: {e}")

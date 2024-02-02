@@ -31,9 +31,8 @@ class PythonConstructor(ConstructorAbstract, PikaJsonEncoder):
             if py_data is None:
                 executor.append(f"当前{constructor_type_}未返回任何值")
                 return
-            if not isinstance(py_data, str):
-                py_data = cls.safe_json_dumps(py_data, ensure_ascii=False)
             params[constructor.value] = py_data
             executor.append(f"当前{constructor_type_}返回变量: {constructor.value}\n返回值:\n {py_data}\n")
+            return py_data
         except Exception as e:
             raise Exception(f"{path}->{constructor.name} 第{index + 1}个{constructor_type_}执行失败: {e}")

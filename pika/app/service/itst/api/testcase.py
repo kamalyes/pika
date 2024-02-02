@@ -45,9 +45,9 @@ async def list_testcase(
     paging: BaseOnlyPagingSchema = Depends(),
     directory_id: str = None,
     name: str = None,
-    operator: str = None,
+    create_emp_no: str = None,
 ):
-    data, total = await ApiTestCaseDao.list_testcase(paging, directory_id, name, operator)
+    data, total = await ApiTestCaseDao.list_testcase(paging, directory_id, name, create_emp_no)
     return PikaResponse.success_with_size(data=data, total=total)
 
 
@@ -117,7 +117,7 @@ async def delete_testcase(
 @router.get("/query", summary="查询测试用例")
 async def query_testcase(case_id: str, user_info=Depends(Permission())):
     try:
-        data = await ApiTestCaseDao.query_test_case_info(case_id)
+        data = await ApiTestCaseDao.async_query_test_case_info(case_id)
         return PikaResponse.success(data=PikaResponse.dict_model_to_dict(data))
     except Exception as e:
         return PikaResponse.failed(detail=str(e))
@@ -432,5 +432,5 @@ async def query_variables(
     session=Depends(async_db_session_iterator),
 ):
     var_list = []
-    await ApiTestCaseDao.query_test_case_out_parameters(session, steps, var_list=var_list)
+    await ApiTestCaseDao.async_query_test_case_out_parameters(session, steps, var_list=var_list)
     return PikaResponse.success(var_list)

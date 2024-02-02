@@ -17,7 +17,7 @@ from app.models.constructor import ConstructorModel
 
 class TestCaseConstructor(ConstructorAbstract, PikaJsonEncoder):
     @classmethod
-    async def run(cls, executor, env, index, path, params, req_params, constructor: ConstructorModel, **kwargs):
+    async def run(cls, executor, env, index, path, params, constructor: ConstructorModel, **kwargs):
         try:
             constructor_name = cls.get_name(constructor)
 
@@ -25,21 +25,19 @@ class TestCaseConstructor(ConstructorAbstract, PikaJsonEncoder):
             case_id = data.get("constructor_case_id")
             if not case_id:
                 raise Exception("未获取到前/后置条件的用例id, 请检查前置条件")
-            testcase, err = await ApiTestCaseDao.query_test_case(case_id)
-            if err:
-                raise Exception(f"用例: [{case_id}]不存在:")
+            testcase = await ApiTestCaseDao.async_query_test_case(case_id)
             executor.append(content=f"当前路径: {path}, 第{index + 1}条{constructor_name}")
             # 说明是case
             executor_class = kwargs.get("executor_class")(executor.logger)
             new_param = data.get("params")
             if new_param:
                 temp = cls.safe_json_loads(new_param)
-                req_params.update(temp)
-            result, err = await executor_class.run(env, case_id, params, req_params, f"{path}->{testcase.name}")
+                params.update(temp)
+            result, err = await executor_class.run(env, case_id, params, None, f"{path}->{testcase.name}")
             if err:
                 raise Exception(err)
             if not result["status"]:
                 raise Exception(f"断言失败, 断言数据: {result.get('asserts', 'unknown')}")
-            params[constructor.value] = result
+            return result
         except Exception as e:
             raise Exception(f"{path}->{constructor.name} 第{index + 1}个{constructor_name}执行失败: {e}")

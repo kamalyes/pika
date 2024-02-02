@@ -24,7 +24,7 @@ class Parser(PikaJsonEncoder):
     @classmethod
     def parse_result(cls, data: list, match_index: str = None):
         if len(data) == 0:
-            return "null"
+            return None
         # 如果是数字
         length = len(data)
         if match_index is not None:
@@ -32,11 +32,11 @@ class Parser(PikaJsonEncoder):
                 idx = int(match_index)
                 if idx >= length or idx < -length:
                     raise CaseParametersError(f"results length is {length}, index is not in [{-length}, {length})")
-                return cls.safe_json_dumps(data[idx], ensure_ascii=False)
+                return data[idx]
             if match_index.lower() == "random":
                 # 随机选取
-                return cls.safe_json_dumps(random.choice(data), ensure_ascii=False)
+                return random.choice(data)
             if match_index.lower() == "all":
-                return cls.safe_json_dumps(data, ensure_ascii=False)
+                return data[0]
             raise CaseParametersError(f"invalid match index: {match_index}, not number or random")
-        return cls.safe_json_dumps(data, ensure_ascii=False)
+        return data

@@ -26,7 +26,7 @@ class SqlConstructor(ConstructorAbstract, PikaJsonEncoder):
             sql = data.get("sql")
             executor.append(f"当前{constructor_type_}类型为sql, 数据库名: {database}\nsql: {sql}\n")
             sql_data = await DbConfigDao.execute_sql(env, database, sql)
-            params[constructor.value] = sql_data
             executor.append(f"当前{constructor_type_}返回变量: {constructor.value}\n返回值:\n {sql_data}\n")
+            return sql_data
         except Exception as e:
             raise Exception(f"{path}->{constructor.name} 第{index + 1}个{constructor_type_}执行失败: {e}")

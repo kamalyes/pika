@@ -16,4 +16,4 @@ from app.core.paramters.parser import Parser
 class StatusCodeParser(Parser, PikaJsonEncoder):
     @classmethod
     def parse(cls, source: dict, expression: str = None, idx: str = None) -> str:
-        return cls.safe_json_dumps(source.get("status_code"))
+        return source.get("status_code")

@@ -122,9 +122,10 @@ class PikaWrapper(object):
     __model__ = LargeBaseModel
 
     @classmethod
-    async def opt_exec_err(cls, __log__, detail, exc=Exception):
-        await __log__(detail)
-        raise exc if exc else True
+    async def opt_exec_err(cls, __log__, detail, exc=False):
+        __log__(detail)
+        if exc:
+            raise exc
 
     @classmethod
     @RedisHelper.cache("dao", expired_time=ValidTimeEnum.GLOBAL_SELECT_LIST_TIME.value)
@@ -513,6 +514,7 @@ class PikaWrapper(object):
             changed:
             key:
             description:
+
         Returns:
 
         """

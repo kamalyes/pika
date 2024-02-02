@@ -240,6 +240,7 @@ class EmailManger(object):
         """
         测试报告邮件模板
         Args:
+
         Returns:
 
         """

@@ -22,15 +22,15 @@ class MockDao(PikaWrapper):
         pass
 
     @staticmethod
-    async def delete_mock_deploy(request, emp_no, **kwargs):
+    async def delete_mock_deploy(request, operator, **kwargs):
         pass
 
     @staticmethod
-    async def update_mock_deploy(request, emp_no, **kwargs):
+    async def update_mock_deploy(request, operator, **kwargs):
         pass
 
     @staticmethod
-    async def list_mock_deploy(request, emp_no, **kwargs):
+    async def list_mock_deploy(request, operator, **kwargs):
         pass
 
     @staticmethod

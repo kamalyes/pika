@@ -26,27 +26,21 @@ class JSONPathParser(Parser, PikaJsonEncoder):
 
     @classmethod
     def parse(cls, source: dict, expression: str = "", **kwargs) -> Any:
-        source = cls.get_source(source)
+        data = cls.get_source(source)
         if not source or not expression:
             raise CaseParametersError("parse out parameters failed, source or expression is empty")
         try:
-            data = JSONPathParser.get_object(source)
             results = jsonpath.jsonpath(data, expression)
             if results is False:
                 if not data and expression == "$..*":
                     # 说明想要全匹配并且没数据,直接返回data
-                    return PikaJsonEncoder.safe_json_dumps(data, ensure_ascii=False)
+                    return data
                 raise CaseParametersError("jsonpath match failed, please check your response or jsonpath.")
             return Parser.parse_result(results, "0")
         except CaseParametersError as e:
             raise e
         except Exception as err:
             raise CaseParametersError(f"parse json data error, please check jsonpath or json: {err}")
-
-    @classmethod
-    @lru_cache()
-    def get_object(cls, json_str):
-        return cls.safe_json_loads(json_str)
 
 
 class BodyJSONPathParser(JSONPathParser):

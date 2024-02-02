@@ -32,14 +32,14 @@ async def add_mock_deploy(request: EditMockSchema):
 
 @router.delete("/mock/delete", summary="删除mock配置(软删)")
 async def delete_mock_deploy(request: DelMockSchema = Depends(), escarole=Depends(Permission(escarole=True))):
-    emp_no, role = escarole
-    return await MockDao.delete_mock_deploy(request=request, emp_no=emp_no)
+    operator, operator_identity = escarole
+    return await MockDao.delete_mock_deploy(request=request, operator=operator)
 
 
 @router.post("/mock/update", summary="编辑mock配置")
 async def update_mock_deploy(request: EditMockSchema, escarole=Depends(Permission(escarole=True))):
-    emp_no, role = escarole
-    return await MockDao.update_mock_deploy(request=request, emp_no=emp_no)
+    operator, operator_identity = escarole
+    return await MockDao.update_mock_deploy(request=request, operator=operator)
 
 
 @router.get("/mock/list", summary="分页获取mock配置", response_model=LimitOffsetPage[QueryMockOutSchema])

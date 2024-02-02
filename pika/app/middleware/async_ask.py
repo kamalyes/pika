@@ -50,7 +50,7 @@ class AsyncRequest(PikaJsonEncoder):
             ) as resp:
                 finished_date = Moment.get_now_time("13timestamp")
                 cost = "%.3f" % (int("%.0f" % (finished_date - start_date)) / 1000)
-                response, json_format = await AsyncRequest.get_resp(resp)
+                response = await AsyncRequest.get_resp(resp)
                 cookie = self.get_cookie(session)
                 return await self.collect(
                     True,
@@ -61,7 +61,6 @@ class AsyncRequest(PikaJsonEncoder):
                     resp.request_info.headers,
                     elapsed=cost,
                     cookies=cookie,
-                    json_format=json_format,
                 )
 
     async def download(self):
@@ -128,11 +127,11 @@ class AsyncRequest(PikaJsonEncoder):
         try:
             data = await resp.json(encoding="utf-8")
             # 说明是json格式
-            return cls.safe_json_dumps(data, ensure_ascii=False, indent=4), True
+            # return cls.safe_json_dumps(data, ensure_ascii=False, indent=4), True
         except:
             data = await resp.text()
             # 说明不是json格式,我们不做loads操作了
-            return data, False
+        return data
 
     @classmethod
     def get_request_data(cls, request_body):

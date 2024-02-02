@@ -308,6 +308,7 @@ class RedisHelper(PikaJsonEncoder):
         Args:
             key:
             traverse_del_num:
+
         Returns:
         """
         while cls.pika_redis_client.zcard(key) > 0:
