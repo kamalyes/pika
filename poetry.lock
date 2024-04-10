@@ -1076,13 +1076,13 @@ reference = "tsinghua"
 
 [[package]]
 name = "faker"
-version = "24.7.1"
+version = "24.8.0"
 description = "Faker is a Python package that generates fake data for you."
 optional = true
 python-versions = ">=3.8"
 files = [
-    {file = "Faker-24.7.1-py3-none-any.whl", hash = "sha256:73f2bd886e8ce751e660c7d37a6c0a128aab5e1551359335bb79cfea0f4fabfc"},
-    {file = "Faker-24.7.1.tar.gz", hash = "sha256:39d34c63f0d62ed574161e23fe32008917b923d18098ce94c2650fe16463b7d5"},
+    {file = "Faker-24.8.0-py3-none-any.whl", hash = "sha256:2f70a7817b4147d67c544192e169c5653060fce8aef758db0ea8823d89caac94"},
+    {file = "Faker-24.8.0.tar.gz", hash = "sha256:1a46466b22c6bf5925448f725f90c6e0d8bf085819906520ddaa15aec58a6df5"},
 ]
 
 [package.dependencies]
@@ -4548,4 +4548,4 @@ all = ["APScheduler", "Faker", "Jinja2", "PyYAML", "aiohttp", "aiomysql", "aiore
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "39137989f03b4ec893847e1705fa50d1a917a849dc16403338bc467d9543ce40"
+content-hash = "7ffc6a61f18c6760a4b8c92e14570127e452c4d45f3f410152c420830ba06df7"
