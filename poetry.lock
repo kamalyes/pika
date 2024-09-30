@@ -3344,13 +3344,13 @@ reference = "tsinghua"
 
 [[package]]
 name = "qiniu"
-version = "7.13.2"
+version = "7.14.0"
 description = "Qiniu Resource Storage SDK"
 optional = false
 python-versions = "*"
 files = [
-    {file = "qiniu-7.13.2-py3-none-any.whl", hash = "sha256:342fda592a17c704bbd5302ec96b0cd212fb9e85cb10dc11d52417cf1d7e4815"},
-    {file = "qiniu-7.13.2.tar.gz", hash = "sha256:d0380f4880ff8fa48fb1b62deb83d56d1da6b163981933dfaa0ec8985a368853"},
+    {file = "qiniu-7.14.0-py3-none-any.whl", hash = "sha256:68253c6180d993a07ae6478682bacc927966d539c5b8350c339b5e6133d2344a"},
+    {file = "qiniu-7.14.0.tar.gz", hash = "sha256:3905408534bfa39adb90d6cbfc17666c827bd6c2ba5c267b985937a825b2bf6d"},
 ]
 
 [package.dependencies]
@@ -4605,4 +4605,4 @@ all = ["APScheduler", "Faker", "Jinja2", "PyYAML", "aiohttp", "aiomysql", "aiore
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "3b2963e6d5795dbb77e60ab81db5cf395ecd828bbbd3f8c029971e88cb81c1c0"
+content-hash = "96ff3c132e6202e4a488dc29570e2c70c425a962f5d668f209c88646cd3385f7"
