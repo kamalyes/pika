@@ -793,12 +793,12 @@ reference = "tsinghua"
 
 [[package]]
 name = "cos-python-sdk-v5"
-version = "1.9.32"
+version = "1.9.33"
 description = "cos-python-sdk-v5"
 optional = false
 python-versions = "*"
 files = [
-    {file = "cos-python-sdk-v5-1.9.32.tar.gz", hash = "sha256:fd19baaee765efcb52c271119df55963261e39b4b688bbc4fb37a7044f3e2472"},
+    {file = "cos-python-sdk-v5-1.9.33.tar.gz", hash = "sha256:013a9aa7df97cc52f0be1e5e81fafdef316d40a7b206c9067dd678df34c88e75"},
 ]
 
 [package.dependencies]
@@ -4698,4 +4698,4 @@ all = ["APScheduler", "Faker", "Jinja2", "PyYAML", "aiohttp", "aiomysql", "aiore
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "1ec9ca4fd7b7dae8fd31bb8a4fa8db180f3d01ae522c2f08b07578f441ae5751"
+content-hash = "8a8ce957a2251b08c76c2f63ef5d69815d67d250f82d40630de6213543926913"
