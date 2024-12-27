@@ -39,7 +39,7 @@ from app.schema.user import (
     RegisterUserSchema,
 )
 from app.service import Permission
-from pika.app.schema.base import BaseOnlyIdSchema
+from app.schema.base import BaseOnlyIdSchema
 
 router = APIRouter()
 
@@ -172,7 +172,9 @@ async def update_security(request: EditSecuritySchema = Depends(), user_info=Dep
     return await UserDao.update_security(request=request, user_info=user_info)
 
 
-@router.get("/security/info", summary="查询用户自己设置过的密保信息", response_model=LimitOffsetPage[QuerySecuritySchema])
+@router.get(
+    "/security/info", summary="查询用户自己设置过的密保信息", response_model=LimitOffsetPage[QuerySecuritySchema]
+)
 async def query_security(user_info=Depends(Permission()), db: AsyncSession = Depends(async_db_session_iterator)) -> Any:
     return await UserDao.query_security(db=db, emp_no=user_info["emp_no"])
 

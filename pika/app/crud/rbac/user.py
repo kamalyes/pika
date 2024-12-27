@@ -161,7 +161,9 @@ class UserDao(PikaWrapper):
                 )
                 err_pwd_count = err_pwd_counts.scalars().first()
                 if err_pwd_count >= ValidTimeEnum.ERR_PWD_COUNT.value:
-                    raise SystemException(code=ExcCodeEnum.PASSWORD_ERROR_COUNT_OUT, detail="错误密码次数超出限制,请联系管理员或稍后重试!")
+                    raise SystemException(
+                        code=ExcCodeEnum.PASSWORD_ERROR_COUNT_OUT, detail="错误密码次数超出限制,请联系管理员或稍后重试!"
+                    )
                 else:
                     sql = (
                         update(SysUserAdminModel)
@@ -399,7 +401,9 @@ class UserDao(PikaWrapper):
                             ex=valid_time,
                         )
                 else:
-                    raise SystemException(code=ExcCodeEnum.EMAIL_NOT_REGISTER, detail="该邮箱暂未被注册,请使用正常的账户登录!")
+                    raise SystemException(
+                        code=ExcCodeEnum.EMAIL_NOT_REGISTER, detail="该邮箱暂未被注册,请使用正常的账户登录!"
+                    )
         await cls.update_last_login_field(uid=user.id, last_login_ip=user_ip)
         async with async_db_session_generator as session:
             async with session.begin():
@@ -608,7 +612,9 @@ class UserDao(PikaWrapper):
                 ),
             )
         else:
-            return PikaResponse.failed(code=ExcCodeEnum.VAR_ERROR, detail="query_type值不对,仅可传0:全部数据,1:条件查询")
+            return PikaResponse.failed(
+                code=ExcCodeEnum.VAR_ERROR, detail="query_type值不对,仅可传0:全部数据,1:条件查询"
+            )
 
     @staticmethod
     async def rand_dynamic_code(request):

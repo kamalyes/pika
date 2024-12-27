@@ -320,7 +320,7 @@ class Executor(object):
         return result
 
     @case_log
-    def my_assert(self, params, asserts: List) -> [str, bool]:
+    def my_assert(self, params, asserts: List) -> [str, bool]:  # type: ignore
         """
         断言验证
         Args:
@@ -386,6 +386,10 @@ class Executor(object):
 
         try:
             case_info = await ApiTestCaseDao.async_query_test_case(case_id)
+            if case_info is None:
+                # 说明没有case,不需要后续操作
+                self.append(f"case_info is : {case_info}\n\n")
+                return response_info, None
             response_info["case_id"] = case_info.id
             response_info["case_name"] = case_info.name
             request_method = case_info.request_method.upper()
@@ -749,9 +753,7 @@ class Executor(object):
                 for m in msg_types:
                     if int(m) == NoticeTypeEnum.EMAIL:
                         content = EmailManger.test_report_template(plan_name=plan.name, **report_dict[e])
-                        subject = (
-                            f"【{report_dict[e].get('env')}】测试计划【{plan.name}】执行完毕({report_dict[e].get('plan_result')})"
-                        )
+                        subject = f"【{report_dict[e].get('env')}】测试计划【{plan.name}】执行完毕({report_dict[e].get('plan_result')})"
                         return EmailManger.send_email(
                             content=content,
                             subject=subject,

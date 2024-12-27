@@ -37,7 +37,9 @@ async def delete_gateway(
     session=Depends(async_db_session_iterator),
 ):
     await GatewayDao.delete_record_by_id(session=session, operator=user_info["emp_no"], value=id, log=True)
-    return PikaResponse.success(message=f"删除成功,因redis缓存结果需等待{ValidTimeEnum.GLOBAL_SELECT_LIST_TIME.value}s后查询")
+    return PikaResponse.success(
+        message=f"删除成功,因redis缓存结果需等待{ValidTimeEnum.GLOBAL_SELECT_LIST_TIME.value}s后查询"
+    )
 
 
 @router.post("/gateway/update", summary="编辑请求地址")

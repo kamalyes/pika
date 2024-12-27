@@ -234,11 +234,10 @@ class PikaFastApi:
     # noinspection PyShadowingNames
 
     @staticmethod
-    def create_app(app_name=None, origins=None, title=f"{PikaGlobalVarEnum.BIG_HUMP_APP_NAME}测试平台", requirements=None):
+    def create_app(origins=None, title=f"{PikaGlobalVarEnum.BIG_HUMP_APP_NAME}测试平台", requirements=None):
         """
         初始化app、配置路由及swagger
         Args:
-            app_name:
             origins:
             title:
             requirements:
@@ -589,7 +588,9 @@ async def init_database():
         await async_create_table()
         logger.bind(name=None).success("table created success.        ✔")
     except Exception as e:
-        logger.bind(name=None).error(f"table created failed, Please check AppConfig for database config.        ❌\n{e}")
+        logger.bind(name=None).error(
+            f"table created failed, Please check AppConfig for database config.        ❌\n{e}"
+        )
         raise e
 
 

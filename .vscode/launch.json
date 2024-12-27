@@ -1,10 +1,11 @@
 {
   "version": "0.2.0",
-  "python.venvPath":"%userprofile%/AppData/Local/pypoetry/Cache/virtualenvs",
+  "python.pythonPath": ".venv/Scripts/python",
+  // "python.venvPath":"%userprofile%/AppData/Local/pypoetry/Cache/virtualenvs",
   "configurations": [
     {
       "name": "Python: Current File",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "program": "${file}",
       "console": "integratedTerminal",

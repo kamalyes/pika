@@ -13,8 +13,8 @@ services:
       - TZ=Asia/Shanghai
       # 数据库配置
     volumes:
-      - ./logs:/opt/pika/logs
-      - ./pika/conf/.env:/opt/pika/conf/.env
+      - /opt/pika/logs:/opt/pika/logs
+      - /opt/pika/conf/.env:/opt/pika/conf/.env
     networks:
       - pika-network
 

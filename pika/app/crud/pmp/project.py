@@ -34,7 +34,7 @@ class ProjectDao(PikaWrapper):
         operator_identity: int,
         paging,
         name: str = None,
-    ) -> (List[ProjectModel]):
+    ) -> List[ProjectModel]:
         """
         查询/获取项目列表
         Args:

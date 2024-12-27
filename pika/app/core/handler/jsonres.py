@@ -171,7 +171,7 @@ class PikaModelEncoder:
             exclude=exclude,
             custom_encoder={datetime: lambda x: x.strftime(PikaGlobalVarEnum.TIME_FORMATTING_YTDHMS)},
         )
-    
+
     @classmethod
     def json_required(cls, func):
         """

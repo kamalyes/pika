@@ -18,7 +18,7 @@ from app.crud import PikaMdWrapper, PikaWrapper
 from app.models import async_session
 from app.models.api_testcase_data import ApiTestCaseDataModel
 from app.schema.api_testcase_data import ApiTestCaseDataSchema
-from pika.app.exceptions.thirdparty import DbException
+from app.exceptions.thirdparty import DbException
 
 
 @PikaMdWrapper(ApiTestCaseDataModel)

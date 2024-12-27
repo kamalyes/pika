@@ -22,7 +22,10 @@ from app.models.environment import EnvironmentModel
 
 class ApiTestCaseDataModel(LargeBaseModel):
     __tablename__ = f"{PikaGlobalVarEnum.LOWER_HUMP_APP_NAME}_testcase_data"
-    __table_args__ = (UniqueConstraint("env", "case_id", "name"), {"comment": "测试数据表, 用来存储各个环境下的测试数据,用于数据驱动"})
+    __table_args__ = (
+        UniqueConstraint("env", "case_id", "name"),
+        {"comment": "测试数据表, 用来存储各个环境下的测试数据,用于数据驱动"},
+    )
     env = Column(BinaryUUID, ForeignKey(EnvironmentModel.id, ondelete="cascade", onupdate="cascade"), comment="环境id")
     case_id = Column(BinaryUUID, default=uuid4, nullable=False, comment="用例id")
     name = Column(String(ByteSizeEnum.LENGTH_50), nullable=False, comment="名称")

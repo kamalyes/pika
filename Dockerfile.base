@@ -1,0 +1,57 @@
+# Dockerfile.base
+# Uses multi-stage builds requiring Docker 17.05 or higher
+FROM python:3.9-slim AS python-base
+
+# Create a user named poetry and toggle it
+# RUN groupadd -g 1500 poetry && \
+#     useradd -m -u 1500 -g poetry poetry
+# USER poetry
+
+# Define build arguments for environment variables
+ARG PYTHONUNBUFFERED=1
+ARG PYTHONDONTWRITEBYTECODE=1
+ARG PIP_NO_CACHE_DIR=off
+ARG PIP_DISABLE_PIP_VERSION_CHECK=on
+ARG PIP_DEFAULT_TIMEOUT=100
+ARG POETRY_HOME="/opt/poetry"
+ARG POETRY_VIRTUALENVS_IN_PROJECT=true
+ARG POETRY_NO_INTERACTION=1
+ARG POETRY_HTTP_LOG_LEVEL=debug
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=${PYTHONUNBUFFERED} \
+    PYTHONDONTWRITEBYTECODE=${PYTHONDONTWRITEBYTECODE} \
+    PIP_NO_CACHE_DIR=${PIP_NO_CACHE_DIR} \
+    PIP_DISABLE_PIP_VERSION_CHECK=${PIP_DISABLE_PIP_VERSION_CHECK} \
+    PIP_DEFAULT_TIMEOUT=${PIP_DEFAULT_TIMEOUT} \
+    POETRY_HOME=${POETRY_HOME} \
+    POETRY_VIRTUALENVS_IN_PROJECT=${POETRY_VIRTUALENVS_IN_PROJECT} \
+    POETRY_NO_INTERACTION=${POETRY_NO_INTERACTION} \
+    POETRY_HTTP_LOG_LEVEL=${POETRY_HTTP_LOG_LEVEL}
+ENV PATH="$POETRY_HOME/bin:$PATH"
+LABEL maintainer="kamalyes <mryu168@163.com>"
+
+# Modify mirror source
+ENV PYPI_SIMPLE_URL  https://pypi.mirrors.ustc.edu.cn/simple
+RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list && \
+    sed -i 's|security.debian.org/debian-security|mirrors.ustc.edu.cn/debian-security|g' /etc/apt/sources.list
+
+# Install dependencies
+RUN apt-get update -y && \
+    apt-get upgrade -y && \
+    apt-get install --no-install-recommends -y \
+        curl \
+        supervisor \
+        telnet
+
+# Install Poetry
+ENV POETRY_VERSION=1.7.1
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=${POETRY_HOME} python3 - --version ${POETRY_VERSION} && \
+    chmod a+x /opt/poetry/bin/poetry && \
+    poetry config --list && \
+    apt-get remove -y curl && \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false && \
+    apt-get clean -y && rm -rf /var/lib/apt/lists/*
+
+WORKDIR ${POETRY_HOME}

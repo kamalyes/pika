@@ -59,7 +59,9 @@ class JsonCompare(PikaJsonEncoder):
                 j += 1
         else:
             if a != b:
-                ans.append(f"{path} 数据不一致: {a} 【❌】" f"!= {b}" if path != "" else f"数据不一致: {a} != {b}【❌】")
+                ans.append(
+                    f"{path} 数据不一致: {a} 【❌】" f"!= {b}" if path != "" else f"数据不一致: {a} != {b}【❌】"
+                )
 
     # noinspection PyMethodMayBeStatic
     @classmethod

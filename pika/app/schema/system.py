@@ -31,7 +31,9 @@ class RedisSchema(BaseModel):
     host: Optional[str] = Body(..., title="主机地址", max_length=ByteSizeEnum.LENGTH_70)
     port: Optional[str] = Body(..., title="端口", max_length=ByteSizeEnum.LENGTH_56)
     auth: Optional[str] = Body(None, title="密码", max_length=ByteSizeEnum.LENGTH_56)
-    encoding: Optional[str] = Body(PikaAppConfig.REDIS_ENCODING, title="链接的数据库名称", max_length=ByteSizeEnum.LENGTH_56)
+    encoding: Optional[str] = Body(
+        PikaAppConfig.REDIS_ENCODING, title="链接的数据库名称", max_length=ByteSizeEnum.LENGTH_56
+    )
     enable_flag: Optional[bool] = Body(PikaAppConfig.REDIS_ENABLE_FLAG, title="启用状态")
     index: Optional[str] = Body(0, title="时区", max_length=ByteSizeEnum.LENGTH_36)
     decode_responses: Optional[bool] = Body(PikaAppConfig.REDIS_DECODE_RESPONSES, title="时区")

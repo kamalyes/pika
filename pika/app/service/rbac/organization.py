@@ -58,7 +58,9 @@ async def update_organization(
     return PikaResponse.success()
 
 
-@router.get("/organization/list", summary="查询组织机构列表", response_model=LimitOffsetPage[QueryOrganizationOutSchema])
+@router.get(
+    "/organization/list", summary="查询组织机构列表", response_model=LimitOffsetPage[QueryOrganizationOutSchema]
+)
 async def list_organization(
     form: QueryOrganizationInSchema = Depends(),
     db: AsyncSession = Depends(async_db_session_iterator),

@@ -53,7 +53,9 @@ async def update_sensitive_word(request: SensitiveWordGlobalSchema, escarole=Dep
     return await SensitiveWordDao.update_sensitive_word(request=request, emp_no=emp_no)
 
 
-@router.get("/sensitive_word/list", summary="分页获取敏感词", response_model=LimitOffsetPage[QuerySensitiveWordOutSchema])
+@router.get(
+    "/sensitive_word/list", summary="分页获取敏感词", response_model=LimitOffsetPage[QuerySensitiveWordOutSchema]
+)
 async def query_sensitive_word(
     request: QuerySensitiveWordInSchema = Depends(),
     escarole=Depends(Permission(escarole=True)),

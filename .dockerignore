@@ -140,3 +140,7 @@ cython_debug/
 
 # Text Editor
 .vscode
+
+# Customer
+script/fixcommit.sh
+docker-compose.yml

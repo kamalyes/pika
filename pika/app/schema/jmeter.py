@@ -15,8 +15,7 @@ class JmeterBatchNoSchema(BaseModel):
     batch_no: Optional[str] = Body(None, title="用例批次编号", max_length=ByteSizeEnum.LENGTH_200)
 
 
-class JmeterCaseDetailSchema(BaseOnlyIdSchema, BaseOnlyPagingSchema):
-    ...
+class JmeterCaseDetailSchema(BaseOnlyIdSchema, BaseOnlyPagingSchema): ...
 
 
 class JmeterRunTypeSchema(BaseModel):
@@ -42,8 +41,7 @@ class JmeterSummarySchema(
     result: Optional[int] = Body(0, title="测试结果")
 
 
-class JmeterSummaryListSchema(BaseOnlyPagingSchema, JmeterSummarySchema):
-    ...
+class JmeterSummaryListSchema(BaseOnlyPagingSchema, JmeterSummarySchema): ...
 
 
 class TestCaseInfoSchema(BaseOnlyPointTimeStampSchema):
