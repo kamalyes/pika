@@ -26,23 +26,44 @@ from app.core.handler.exceres import ValidException
 from app.enums.DatabaseEnum import DatabaseTypeEnum
 from app.exceptions import DbExecuteError
 
+
+def get_engine():
+    database_type = PikaAppConfig.DATABASE_TYPE
+    if database_type == "sqlite":
+        # 对于 SQLite，使用默认的连接设置
+        return create_engine(PikaAppConfig.ASYNC_SQLALCHEMY_URI)
+    # 对于 MySQL 和 PostgreSQL，可以使用连接池参数
+    return create_engine(
+        PikaAppConfig.SYNC_SQLALCHEMY_URI,
+        echo=PikaAppConfig.SQLALCHEMY_ECHO,
+    )
+
+
 # 同步engine
-engine = create_engine(
-    PikaAppConfig.SYNC_SQLALCHEMY_URI,
-    echo=PikaAppConfig.MYSQL_ECHO,
-)
-sync_session = sessionmaker(engine, autocommit=False)
+sync_session = sessionmaker(get_engine(), autocommit=False)
+
+
+def get_async_engine():
+    database_type = PikaAppConfig.DATABASE_TYPE
+    if database_type == "sqlite":
+        # 对于 SQLite，使用默认的连接设置
+        return create_async_engine(
+            PikaAppConfig.ASYNC_SQLALCHEMY_URI,
+            echo=PikaAppConfig.SQLALCHEMY_ECHO,
+        )
+    # 对于 MySQL 和 PostgreSQL，可以使用连接池参数
+    return create_async_engine(
+        PikaAppConfig.ASYNC_SQLALCHEMY_URI,
+        echo=PikaAppConfig.SQLALCHEMY_ECHO,
+        max_overflow=PikaAppConfig.SQLALCHEMY_MAX_OVERFLOW,
+        pool_size=PikaAppConfig.SQLALCHEMY_POOL_SIZE,
+        pool_recycle=PikaAppConfig.SQLALCHEMY_POOL_RECYCLE,
+    )
+
 
 # 异步engine
-async_engine = create_async_engine(
-    PikaAppConfig.ASYNC_SQLALCHEMY_URI,
-    echo=PikaAppConfig.MYSQL_ECHO,
-    max_overflow=PikaAppConfig.MYSQL_MAX_OVERFLOW,
-    pool_size=PikaAppConfig.MYSQL_POOL_SIZE,
-    pool_recycle=PikaAppConfig.MYSQL_POOL_RECYCLE,
-)
 async_session = async_scoped_session(
-    sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession), scopefunc=current_task
+    sessionmaker(get_async_engine(), expire_on_commit=False, class_=AsyncSession), scopefunc=current_task
 )
 
 Base = declarative_base()
@@ -62,7 +83,7 @@ async def async_create_table():
     初始化创建表结构
     Returns:
     """
-    async with async_engine.begin() as conn:
+    async with get_async_engine().begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
 
@@ -104,7 +125,7 @@ class DatabaseHelper(object):
         # 获取sqlalchemy需要的jdbc url
         jdbc_url = DatabaseHelper.get_jdbc_url(sql_type, host, port, username, password, database)
         # 创建异步引擎
-        eg = create_async_engine(jdbc_url, pool_recycle=PikaAppConfig.MYSQL_POOL_RECYCLE)
+        eg = create_async_engine(jdbc_url, pool_recycle=PikaAppConfig.SQLALCHEMY_POOL_RECYCLE)
         ss = sessionmaker(bind=eg, class_=AsyncSession)
         # 将数据缓存起来
         data = {"engine": eg, "session": ss}

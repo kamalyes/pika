@@ -9,8 +9,10 @@
 @License :  (C)Copyright 2022-2026
 @Desc    :  公共基础字段
 """
+import datetime
 from uuid import uuid4
 
+import pytz
 from sqlalchemy import BOOLEAN, DATETIME, INT, SMALLINT, TEXT, Column, String, text, BigInteger
 
 from app.core.handler.sqlbin_uuid import BinaryUUID
@@ -55,7 +57,7 @@ class NormBaseModel(OnlyPrimaryKeyAndDesc):
     update_date = Column(
         DATETIME,
         nullable=True,
-        server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
+        server_default=text("CURRENT_TIMESTAMP"),
         comment="修改时间",
     )
     __abstract__ = True
@@ -64,6 +66,7 @@ class NormBaseModel(OnlyPrimaryKeyAndDesc):
         super().__init__(id=id, description=description)
         self.create_emp_no = operator
         self.update_emp_no = operator
+        self.update_date = datetime.now(pytz.timezone("Asia/Shanghai"))
 
 
 class LargeBaseModel(NormBaseModel):

@@ -21,7 +21,7 @@ from app.enums.SysVarEnum import PikaGlobalVarEnum
 from custard.core import SystemHand
 from loguru import logger
 from loguru._defaults import LOGURU_FORMAT
-from pydantic import BaseSettings
+from pydantic import BaseSettings, root_validator
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -36,9 +36,17 @@ class BaseConfig(BaseSettings):
     MYSQL_ASYNC_POOL_RECYCLE: Optional[int] = 1500
     TABLE_TAG: Optional[str] = "__table_args__"
     SQLALCHEMY_PICKLE_PROTOCOL: Optional[int] = 3  # pickle.HIGHEST_PROTOCOL
-    CONNECT_SQLALCHEMY_URI: Optional[str] = None
-    SYNC_SQLALCHEMY_URI: Optional[str] = None
-    ASYNC_SQLALCHEMY_URI: Optional[str] = None
+    MYSQL_SYNC_SQLALCHEMY_URI: Optional[str] = None
+    MYSQL_ASYNC_SQLALCHEMY_URI: Optional[str] = None
+
+    DATABASE_TYPE: Optional[str] = "sqlite"
+    SYNC_SQLALCHEMY_URI: Optional[str] = "sqlite:///pika.db"
+    ASYNC_SQLALCHEMY_URI: Optional[str] = "sqlite+aiosqlite:///pika.db"
+    SQLALCHEMY_ECHO: Optional[bool] = False
+    SQLALCHEMY_POOL_RECYCLE: Optional[int] = -1
+    SQLALCHEMY_MAX_OVERFLOW: Optional[int] = -1
+    SQLALCHEMY_POOL_SIZE: Optional[int] = 50
+    SQLALCHEMY_ASYNC_POOL_RECYCLE: Optional[int] = -1
 
     # Redis config
     REDIS_VERSION: Optional[str] = None
@@ -153,6 +161,27 @@ class BaseConfig(BaseSettings):
         "| <cyan>行数: {extra[line]}</cyan> | - <level>{message}</level>"
     )
 
+    @root_validator(pre=True)
+    def set_database_uris(cls, values):
+        database_type = values.get("DATABASE_TYPE", "sqlite")
+        if database_type == "sqlite":
+            # 设置 SQLite 的 DbName
+            sqliteDbName = values.get("SQLITE_DB_NAME", "pika")
+            if sqliteDbName:
+                values["SYNC_SQLALCHEMY_URI"] = f"sqlite:///{sqliteDbName}"
+                values["ASYNC_SQLALCHEMY_URI"] = f"sqlite+aiosqlite:///{sqliteDbName}"
+        elif database_type == "mysql":
+            # 这里可以根据您的具体需求设置 MySQL URI
+            values["SYNC_SQLALCHEMY_URI"] = values.get("MYSQL_SYNC_SQLALCHEMY_URI")
+            values["ASYNC_SQLALCHEMY_URI"] = values.get("MYSQL_ASYNC_SQLALCHEMY_URI")
+            values["SQLALCHEMY_ECHO"] = values.get("MYSQL_ECHO")
+            values["SQLALCHEMY_POOL_RECYCLE"] = values.get("MYSQL_POOL_RECYCLE")
+            values["SQLALCHEMY_MAX_OVERFLOW"] = values.get("MYSQL_MAX_OVERFLOW")
+            values["SQLALCHEMY_POOL_SIZE"] = values.get("MYSQL_POOL_RECYCLE")
+            values["SQLALCHEMY_ASYNC_POOL_RECYCLE"] = values.get("MYSQL_ASYNC_POOL_RECYCLE")
+
+        return values
+
 
 class EnvConfig(BaseConfig):
     class Config:
@@ -160,12 +189,6 @@ class EnvConfig(BaseConfig):
 
 
 PikaAppConfig = EnvConfig()
-
-# init sqlalchemy (used by apscheduler)
-PikaAppConfig.SYNC_SQLALCHEMY_URI = f"mysql+pymysql://{PikaAppConfig.CONNECT_SQLALCHEMY_URI}"
-
-# init async sqlalchemy
-PikaAppConfig.ASYNC_SQLALCHEMY_URI = f"mysql+aiomysql://{PikaAppConfig.CONNECT_SQLALCHEMY_URI}"
 
 # init redis
 PikaAppConfig.REDIS_NODES = [
