@@ -32,7 +32,7 @@ python=">=3.9,<4.0"
 python-multipart="~0.0.6"
 pydantic = {extras = ["dotenv"], version = "~1.10.19"}
 dicttoxml={version="~1.7.16"}
-Faker={version="~13.6.0"}
+Faker={version="~33.3.0"}
 fastapi={version="~0.95.1"}
 gunicorn="~23.0.0"
 custard={version=">=1.1.7"}
