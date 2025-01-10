@@ -29,7 +29,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python=">=3.9,<4.0"
-python-multipart="~0.0.6"
+python-multipart="~0.0.20"
 pydantic = {extras = ["dotenv"], version = "~1.10.20"}
 dicttoxml={version="~1.7.16"}
 Faker={version="~33.3.0"}
