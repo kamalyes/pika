@@ -4,7 +4,7 @@ dicttoxml==1.7.16
 Faker==13.6.0
 fastapi==0.98.0
 gunicorn==23.0.0
-pypinyin==0.50.0
+pypinyin==0.53.0
 custard==1.1.7
 cos_python_sdk_v5==1.9.25
 dictdiffer==0.9.0
