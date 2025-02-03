@@ -17,7 +17,7 @@ sqlalchemy==2.0.24
 starlette==0.27.0
 aioredis==2.0.1
 mitmproxy==9.0.1
-uvicorn==0.27.0
+uvicorn==0.34.0
 supervisor==4.2.5
 typing-extensions
 PyYAML==6.0.2
