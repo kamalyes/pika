@@ -10,7 +10,7 @@ cos_python_sdk_v5==1.9.25
 dictdiffer==0.9.0
 jsonpath==0.82.2
 pyjwt==2.8.0
-mysql-connector-python==8.3.0
+mysql-connector-python==9.2.0
 loguru==0.7.3
 requests==2.32.3
 sqlalchemy==2.0.24
