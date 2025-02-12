@@ -1,7 +1,7 @@
 python-multipart==0.0.20
 pydantic[dotenv]==2.10.6
 dicttoxml==1.7.16
-Faker==35.2.0
+Faker==36.1.0
 fastapi==0.98.0
 gunicorn==23.0.0
 pypinyin==0.53.0
