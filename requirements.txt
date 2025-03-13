@@ -23,7 +23,7 @@ typing-extensions
 PyYAML==6.0.2
 aiohttp==3.11.13
 aiomysql==0.2.0
-Jinja2==3.1.5
+Jinja2==3.1.6
 APScheduler==3.11.0
 redis==5.2.1
 redlock==1.2.0
