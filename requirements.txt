@@ -29,7 +29,7 @@ redis==5.2.1
 redlock==1.2.0
 oss2==2.19.1
 awaits==0.0.12
-qiniu==7.15.0
+qiniu==7.16.0
 pymysql==1.1.1
 minio==7.2.15
 mkdocs==1.5.3
