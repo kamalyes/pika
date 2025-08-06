@@ -57,7 +57,7 @@ aiohttp={version="~3.12.15"}
 aiomysql="~0.2.0"
 Jinja2="~3.1.6"
 APScheduler="3.11.0"
-redis="~6.2.0"
+redis="~6.3.0"
 redlock="~1.2.0"
 oss2="~2.19.1"
 awaits="~0.0.12"
