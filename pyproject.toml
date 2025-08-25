@@ -50,7 +50,7 @@ aioredis="~2.0.1"
 aiosqlite="~0.21.0"
 mitmproxy="~9.0.1"
 uvicorn="~0.35.0"
-supervisor="~4.2.5"
+supervisor="~4.3.0"
 typing-extensions="~4.4.0"
 PyYAML="~6.0"
 aiohttp={version="~3.12.15"}
