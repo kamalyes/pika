@@ -18,7 +18,7 @@ starlette==0.27.0
 aioredis==2.0.1
 mitmproxy==9.0.1
 uvicorn==0.35.0
-supervisor==4.2.5
+supervisor==4.3.0
 typing-extensions
 PyYAML==6.0.2
 aiohttp==3.12.15
