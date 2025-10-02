@@ -31,7 +31,7 @@ oss2==2.19.1
 awaits==0.0.12
 qiniu==7.17.0
 pymysql==1.1.2
-minio==7.2.16
+minio==7.2.18
 mkdocs==1.5.3
 mkdocs-material==9.5.18
 mypy==1.10.1
