@@ -53,7 +53,7 @@ uvicorn="~0.37.0"
 supervisor="~4.3.0"
 typing-extensions="~4.4.0"
 PyYAML="~6.0"
-aiohttp={version="~3.13.0"}
+aiohttp={version="~3.13.1"}
 aiomysql="~0.2.0"
 Jinja2="~3.1.6"
 APScheduler="3.11.0"
