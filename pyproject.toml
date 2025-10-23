@@ -54,7 +54,7 @@ supervisor="~4.3.0"
 typing-extensions="~4.4.0"
 PyYAML="~6.0"
 aiohttp={version="~3.13.1"}
-aiomysql="~0.3.0"
+aiomysql="~0.3.2"
 Jinja2="~3.1.6"
 APScheduler="3.11.0"
 redis="~6.4.0"
