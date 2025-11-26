@@ -546,15 +546,15 @@ reference = "tsinghua"
 
 [[package]]
 name = "awaits"
-version = "0.0.12"
+version = "0.0.13"
 description = "async + threads + decorators = ?"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 markers = "extra == \"all\""
 files = [
-    {file = "awaits-0.0.12-py3-none-any.whl", hash = "sha256:0cbea4a6af7d782439f607ea74281aac34a5235251ed3a443b3092dbb4859878"},
-    {file = "awaits-0.0.12.tar.gz", hash = "sha256:759e506f826d2386b81e4e71a6ea83114ec8c86c41f7cc2500dd5d3a4ddb7779"},
+    {file = "awaits-0.0.13-py3-none-any.whl", hash = "sha256:65ef8c731b781bf368487cb7af7ffa83251e3e12ed8d282da086f08764139627"},
+    {file = "awaits-0.0.13.tar.gz", hash = "sha256:0d0d9822cf711ea3545eb9bac413ece2241ebca8a14be086b4871333dda5f058"},
 ]
 
 [package.source]
@@ -5094,4 +5094,4 @@ all = ["APScheduler", "Faker", "Jinja2", "PyYAML", "aiohttp", "aiomysql", "aiore
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0"
-content-hash = "74860a7114472611a10f35f7a6a06480c287cd761915a05ac0b4ad47d35a2861"
+content-hash = "cc91320b088beff260c8017d22e15cbe4ad0c6174d6803b8a0ee9185471ee524"
