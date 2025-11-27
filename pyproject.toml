@@ -37,7 +37,7 @@ fastapi={version="~0.95.1"}
 gunicorn="~23.0.0"
 custard={version=">=1.1.7"}
 pypinyin="~0.55.0"
-cos-python-sdk-v5="~1.9.38"
+cos-python-sdk-v5="~1.9.39"
 dictdiffer="~0.9.0"
 jsonpath="~0.82"
 pyjwt="~2.10.1"
