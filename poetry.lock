@@ -908,21 +908,22 @@ reference = "tsinghua"
 
 [[package]]
 name = "cos-python-sdk-v5"
-version = "1.9.39"
+version = "1.9.40"
 description = "cos-python-sdk-v5"
 optional = false
 python-versions = "*"
 groups = ["main"]
 markers = "extra == \"all\""
 files = [
-    {file = "cos_python_sdk_v5-1.9.39-py3-none-any.whl", hash = "sha256:4e36ec257abd3de7a718996d02e2a4465f18dd47c0aa8237096a5b027048aee8"},
-    {file = "cos_python_sdk_v5-1.9.39.tar.gz", hash = "sha256:6cb1b3464f39209c18942ffcabc8dcfde12e9a02f06cbaaf2d928a072d9995e3"},
+    {file = "cos_python_sdk_v5-1.9.40-py2-none-any.whl", hash = "sha256:95afdd1b8afcd997cbec3ac6826a8437cb4cec7fa5e0af88ed53c5282687e8e6"},
+    {file = "cos_python_sdk_v5-1.9.40-py3-none-any.whl", hash = "sha256:0715924d02013305aa46c64ec726fda7e9b5760db61d5cea12d60eae4a226670"},
+    {file = "cos_python_sdk_v5-1.9.40.tar.gz", hash = "sha256:7221a56ef38d180776b48165f765f0e1df7c06b434fadfeb77a1341817f27c1a"},
 ]
 
 [package.dependencies]
 crcmod = "*"
 pycryptodome = "*"
-requests = ">=2.8"
+requests = {version = ">=2.8", markers = "python_version >= \"3\""}
 six = "*"
 xmltodict = "*"
 
@@ -5091,4 +5092,4 @@ all = ["APScheduler", "Faker", "Jinja2", "PyYAML", "aiohttp", "aiomysql", "aiore
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0"
-content-hash = "7624d17910c4a0deedef14534f337a508b21d351cec4440b7861effbb9b18c0d"
+content-hash = "5c367c44dd8da86ad1feccc87c48f600c753477687472b5d23938bb1426a6078"
