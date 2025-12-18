@@ -28,7 +28,7 @@ APScheduler==3.11.1
 redis==7.0.1
 redlock==1.2.0
 oss2==2.19.1
-awaits==0.0.13
+awaits==0.0.14
 qiniu==7.17.0
 pymysql==1.1.2
 minio==7.2.20
