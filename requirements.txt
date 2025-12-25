@@ -36,4 +36,4 @@ mkdocs==1.5.3
 mkdocs-material==9.5.18
 mypy==1.10.1
 ruff==0.0.272
-aiosqlite==0.22.0
+aiosqlite==0.22.1
