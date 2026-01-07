@@ -912,16 +912,16 @@ reference = "tsinghua"
 
 [[package]]
 name = "cos-python-sdk-v5"
-version = "1.9.40"
+version = "1.9.41"
 description = "cos-python-sdk-v5"
 optional = false
 python-versions = "*"
 groups = ["main"]
 markers = "extra == \"all\""
 files = [
-    {file = "cos_python_sdk_v5-1.9.40-py2-none-any.whl", hash = "sha256:95afdd1b8afcd997cbec3ac6826a8437cb4cec7fa5e0af88ed53c5282687e8e6"},
-    {file = "cos_python_sdk_v5-1.9.40-py3-none-any.whl", hash = "sha256:0715924d02013305aa46c64ec726fda7e9b5760db61d5cea12d60eae4a226670"},
-    {file = "cos_python_sdk_v5-1.9.40.tar.gz", hash = "sha256:7221a56ef38d180776b48165f765f0e1df7c06b434fadfeb77a1341817f27c1a"},
+    {file = "cos_python_sdk_v5-1.9.41-py2-none-any.whl", hash = "sha256:33e326945e2577da8b8ddf446cc8975d6a6ac7c8eb04e06665c92537a0c7bb07"},
+    {file = "cos_python_sdk_v5-1.9.41-py3-none-any.whl", hash = "sha256:f465aae43a4ba3f1caa8caeaca838d0395932f6848e89d6dde2807725e3c88a0"},
+    {file = "cos_python_sdk_v5-1.9.41.tar.gz", hash = "sha256:68f4be7d8fe27a1d186b3159b93c622816e398effdc236eddd442b86db592b82"},
 ]
 
 [package.dependencies]
@@ -5206,4 +5206,4 @@ all = ["APScheduler", "Faker", "Jinja2", "PyYAML", "aiohttp", "aiomysql", "aiore
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0"
-content-hash = "585ffc3179fff7530a67537ee4b2fdba372d6469076a7221093fcc64a807c76b"
+content-hash = "df2468daedf5d909cc315e142b07a66734c607facd961b46dcf78dec7efd09a9"
