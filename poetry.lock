@@ -3343,15 +3343,15 @@ reference = "tsinghua"
 
 [[package]]
 name = "pyjwt"
-version = "2.13.0"
+version = "2.14.0"
 description = "JSON Web Token implementation in Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 markers = "extra == \"all\""
 files = [
-    {file = "pyjwt-2.13.0-py3-none-any.whl", hash = "sha256:66adcc2aff09b3f1bbd95fc1e1577df8ac8723c978552fd43304c8a290ac5728"},
-    {file = "pyjwt-2.13.0.tar.gz", hash = "sha256:41571c89ca91598c79e8ef18a2d07367d4810fbbd6f637794879baf1b7703423"},
+    {file = "pyjwt-2.14.0-py3-none-any.whl", hash = "sha256:ad0cef71c756a56e74863c2919cf0985f72decbcfcb550ee2f422e7c62b5eedc"},
+    {file = "pyjwt-2.14.0.tar.gz", hash = "sha256:77283c83fb56ecf566a886c757a714bc83668e38156de2cce8263302f42e0b86"},
 ]
 
 [package.dependencies]
@@ -5205,4 +5205,4 @@ all = ["APScheduler", "Faker", "Jinja2", "PyYAML", "aiohttp", "aiomysql", "aiore
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0"
-content-hash = "368764ba2e00f05f91e6aaaf3fac037cc3fc335f23fc7ee56ef9b53f9939a2bc"
+content-hash = "c9698dcbe22f1ce5540ab20d5f84208ac6d19cdd5265bf70a133a7c40aba3c2a"
