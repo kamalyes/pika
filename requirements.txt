@@ -9,7 +9,7 @@ custard==1.1.7
 cos_python_sdk_v5==1.9.44
 dictdiffer==0.10.0
 jsonpath==0.82.2
-pyjwt==2.13.0
+pyjwt==2.14.0
 mysql-connector-python==9.4.0
 loguru==0.7.3
 requests==2.32.5
