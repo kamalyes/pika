@@ -3409,15 +3409,15 @@ reference = "tsinghua"
 
 [[package]]
 name = "pymysql"
-version = "1.2.0"
+version = "1.2.3"
 description = "Pure Python MySQL Driver"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 markers = "extra == \"all\""
 files = [
-    {file = "pymysql-1.2.0-py3-none-any.whl", hash = "sha256:62169ce6d5510f08e140c5e7990ee884a9764024e4a9a27b2cc11f1099322ae0"},
-    {file = "pymysql-1.2.0.tar.gz", hash = "sha256:6c7b17ca686988104d7426c27895b455cdeea3e9d3ceb1270f0c3704fead8c33"},
+    {file = "pymysql-1.2.3-py3-none-any.whl", hash = "sha256:14f1c68e2ed859243ae5ca41ffbe677027fc46bc136a9f0be8a4e928e5e7415a"},
+    {file = "pymysql-1.2.3.tar.gz", hash = "sha256:d5b288529782e536ae171866df3ca9dc4f6cbfb3cc2f18e6f837fbb90dbc262b"},
 ]
 
 [package.extras]
@@ -5205,4 +5205,4 @@ all = ["APScheduler", "Faker", "Jinja2", "PyYAML", "aiohttp", "aiomysql", "aiore
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0"
-content-hash = "c9698dcbe22f1ce5540ab20d5f84208ac6d19cdd5265bf70a133a7c40aba3c2a"
+content-hash = "cdf843b74e2a45b2d42151b8ba44d15a2d85895e40c07090c43e5cfa47ee1b32"
