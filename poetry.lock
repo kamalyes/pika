@@ -912,21 +912,22 @@ reference = "tsinghua"
 
 [[package]]
 name = "cos-python-sdk-v5"
-version = "1.9.44"
+version = "1.9.45"
 description = "cos-python-sdk-v5"
 optional = false
 python-versions = "*"
 groups = ["main"]
 markers = "extra == \"all\""
 files = [
-    {file = "cos_python_sdk_v5-1.9.44-py2-none-any.whl", hash = "sha256:c4dba5b61583b55c29dd0268805a21590bd144d719d2de3b2d7ecd3ec67091ac"},
-    {file = "cos_python_sdk_v5-1.9.44-py3-none-any.whl", hash = "sha256:584a97ecd5e9b15b04a1e511e6dd0ea4eca00ee87fe50aa9a3c91ce716149bcb"},
-    {file = "cos_python_sdk_v5-1.9.44.tar.gz", hash = "sha256:2ab403f3b64efdbb9a1984ad3e4381bd7f0755d1064148aeb25269bd757b49ab"},
+    {file = "cos_python_sdk_v5-1.9.45-py2-none-any.whl", hash = "sha256:4f396d8175dc65f3791b742e5f899cee40244efbf59d3aa37577a01cb5feb420"},
+    {file = "cos_python_sdk_v5-1.9.45-py3-none-any.whl", hash = "sha256:8f55ec2d7785a47bc3aac8ec590cedd49b7d14a82626a52b70a3ca51b304c4d5"},
+    {file = "cos_python_sdk_v5-1.9.45.tar.gz", hash = "sha256:067c87848a012751c29feb02af11ade5d4a5f5cd431e98120f4cd853fe48b34d"},
 ]
 
 [package.dependencies]
 crcmod = "*"
 pycryptodome = "*"
+qcloud-python-sts = "*"
 requests = {version = ">=2.8", markers = "python_version >= \"3\""}
 six = "*"
 xmltodict = "*"
@@ -3776,6 +3777,26 @@ url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 reference = "tsinghua"
 
 [[package]]
+name = "qcloud-python-sts"
+version = "3.1.6"
+description = "this is sts for python on v3"
+optional = false
+python-versions = "*"
+groups = ["main"]
+markers = "extra == \"all\""
+files = [
+    {file = "qcloud-python-sts-3.1.6.tar.gz", hash = "sha256:7fdbd9d4d45587714e731e7de5812ed44e77d70a139f3400fe5e4b5b3ddc32d3"},
+]
+
+[package.dependencies]
+requests = "*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+reference = "tsinghua"
+
+[[package]]
 name = "qiniu"
 version = "7.18.0"
 description = "Qiniu Resource Storage SDK"
@@ -5205,4 +5226,4 @@ all = ["APScheduler", "Faker", "Jinja2", "PyYAML", "aiohttp", "aiomysql", "aiore
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0"
-content-hash = "bf3eee13c60e63853698ccb3240d2f20e752aed83ea1645ab9f45bf4ad46f8b4"
+content-hash = "db509a6f37c53b8dd8b688d38c3668c6b1e4f518d356a2999528bc781218d3c5"
